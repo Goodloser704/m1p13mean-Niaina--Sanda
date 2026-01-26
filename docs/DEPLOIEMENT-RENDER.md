@@ -28,11 +28,11 @@ Ce guide vous explique comment déployer l'application Centre Commercial sur Ren
 #### Commandes de Build et Start
 - **Build Command** : 
   ```bash
-  cd backend && npm install
+  npm run build
   ```
 - **Start Command** : 
   ```bash
-  cd backend && npm start
+  npm start
   ```
 
 ### 3. Variables d'Environnement
@@ -121,15 +121,20 @@ export const environment = {
 
 ### Erreurs Communes
 
-1. **Build Failed**
+1. **Cannot find module '/opt/render/project/src/backend/src/server.js'**
+   - **Solution** : Utilisez `npm start` au lieu de `cd backend && npm start`
+   - **Build Command** : `npm run build`
+   - **Start Command** : `npm start`
+
+2. **Build Failed**
    - Vérifiez que `package.json` est dans le bon répertoire
    - Vérifiez les dépendances
 
-2. **Application Crash**
+3. **Application Crash**
    - Consultez les logs Render
    - Vérifiez les variables d'environnement
 
-3. **Base de Données**
+4. **Base de Données**
    - Vérifiez la chaîne de connexion MongoDB
    - Vérifiez les permissions réseau MongoDB Atlas
 
