@@ -1,121 +1,67 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="auth-container">
-      <mat-card class="auth-card">
-        <mat-card-header>
-          <mat-card-title>Connexion</mat-card-title>
-        </mat-card-header>
+    <div style="display: flex; justify-content: center; align-items: center; min-height: 80vh; padding: 20px;">
+      <div style="background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px;">
+        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Connexion</h2>
         
-        <mat-card-content>
-          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Email</mat-label>
-              <input matInput type="email" formControlName="email" required>
-              <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
-                Email requis
-              </mat-error>
-              <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
-                Email invalide
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Mot de passe</mat-label>
-              <input matInput [type]="hidePassword ? 'password' : 'text'" 
-                     formControlName="password" required>
-              <button mat-icon-button matSuffix type="button"
-                      (click)="hidePassword = !hidePassword">
-                <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
-              </button>
-              <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-                Mot de passe requis
-              </mat-error>
-            </mat-form-field>
-
-            <div *ngIf="error" class="error-message">
-              {{ error }}
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; color: #555;">Email</label>
+            <input 
+              type="email" 
+              formControlName="email" 
+              style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;"
+              placeholder="votre@email.com"
+            >
+            <div *ngIf="loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched" 
+                 style="color: #f44336; font-size: 14px; margin-top: 5px;">
+              Email requis
             </div>
+          </div>
 
-            <button mat-raised-button color="primary" type="submit" 
-                    class="full-width" [disabled]="loginForm.invalid || loading">
-              <span *ngIf="loading">Connexion...</span>
-              <span *ngIf="!loading">Se connecter</span>
-            </button>
-          </form>
-        </mat-card-content>
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; color: #555;">Mot de passe</label>
+            <input 
+              [type]="hidePassword ? 'password' : 'text'" 
+              formControlName="password" 
+              style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;"
+              placeholder="Votre mot de passe"
+            >
+            <div *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched" 
+                 style="color: #f44336; font-size: 14px; margin-top: 5px;">
+              Mot de passe requis
+            </div>
+          </div>
+
+          <div *ngIf="error" style="color: #f44336; margin-bottom: 20px; padding: 10px; background-color: #ffebee; border-radius: 4px;">
+            {{ error }}
+          </div>
+
+          <button 
+            type="submit" 
+            [disabled]="loginForm.invalid || loading"
+            style="width: 100%; padding: 12px; background: #3f51b5; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;"
+          >
+            <span *ngIf="loading">Connexion...</span>
+            <span *ngIf="!loading">Se connecter</span>
+          </button>
+        </form>
         
-        <mat-card-actions>
-          <p class="text-center">
-            Pas encore de compte ? 
-            <a href="#" (click)="$event.preventDefault()">S'inscrire</a>
-          </p>
-        </mat-card-actions>
-      </mat-card>
+        <p style="text-align: center; margin-top: 20px; color: #666;">
+          Comptes de test :<br>
+          <small>admin&#64;mall.com / admin123</small><br>
+          <small>fashion&#64;mall.com / boutique123</small>
+        </p>
+      </div>
     </div>
-  `,
-  styles: [`
-    .auth-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 80vh;
-      padding: 20px;
-    }
-    
-    .auth-card {
-      width: 100%;
-      max-width: 400px;
-    }
-    
-    .full-width {
-      width: 100%;
-      margin-bottom: 16px;
-    }
-    
-    .error-message {
-      color: #f44336;
-      margin-bottom: 16px;
-      padding: 8px;
-      background-color: #ffebee;
-      border-radius: 4px;
-    }
-    
-    .text-center {
-      text-align: center;
-      margin: 0;
-    }
-    
-    a {
-      color: #3f51b5;
-      text-decoration: none;
-    }
-    
-    a:hover {
-      text-decoration: underline;
-    }
-  `]
+  `
 })
 export class LoginComponent {
   loginForm: FormGroup;
@@ -139,7 +85,7 @@ export class LoginComponent {
       setTimeout(() => {
         this.loading = false;
         console.log('Tentative de connexion:', this.loginForm.value);
-        // TODO: Implémenter la vraie connexion
+        alert('Connexion simulée - Backend: https://m1p13mean-niaina-1.onrender.com');
       }, 1000);
     }
   }
