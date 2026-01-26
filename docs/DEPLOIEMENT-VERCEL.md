@@ -30,7 +30,7 @@ Le repository est déjà configuré avec :
 
 **Framework Preset :** `Angular`
 
-**Root Directory :** `frontend`
+**Root Directory :** `frontend` ⭐ **IMPORTANT**
 
 **Build Command :**
 ```bash
@@ -46,6 +46,18 @@ dist/mall-frontend
 ```bash
 npm install
 ```
+
+**Node.js Version :** `18.x`
+
+#### ⚠️ Configuration Critique
+
+**IMPORTANT** : Dans les paramètres Vercel, vous DEVEZ configurer :
+
+1. **Root Directory** : `frontend`
+2. **Build Command** : `npm run build` (PAS `cd frontend && ...`)
+3. **Output Directory** : `dist/mall-frontend`
+
+Si vous voyez l'erreur "cd: frontend: No such file or directory", c'est que le Root Directory n'est pas configuré correctement.
 
 #### Variables d'Environnement (Optionnel)
 
@@ -126,22 +138,28 @@ Une fois déployé, testez avec :
 
 #### Erreurs Communes
 
-1. **Build Failed**
+1. **"cd: frontend: No such file or directory"**
+   ```
+   Solution : Configurez Root Directory = "frontend" dans Vercel
+   Ne pas utiliser "cd frontend" dans les commandes
+   ```
+
+2. **Build Failed**
    ```
    Solution : Vérifiez les dépendances dans frontend/package.json
    ```
 
-2. **API Connection Error**
+3. **API Connection Error**
    ```
    Solution : Vérifiez l'URL API dans environment.prod.ts
    ```
 
-3. **Routing Issues**
+4. **Routing Issues**
    ```
-   Solution : Vérifiez la configuration des routes dans vercel.json
+   Solution : Vercel détecte automatiquement Angular SPA
    ```
 
-4. **CORS Errors**
+5. **CORS Errors**
    ```
    Solution : Le backend Render doit autoriser votre domaine Vercel
    ```
