@@ -5,7 +5,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -28,26 +27,10 @@ import { AuthService } from './services/auth.service';
       
       <span class="spacer"></span>
       
-      <div *ngIf="!authService.isAuthenticated(); else userMenu">
+      <div>
         <button mat-button routerLink="/login">Connexion</button>
-        <button mat-button routerLink="/register">Inscription</button>
+        <button mat-button>Inscription</button>
       </div>
-      
-      <ng-template #userMenu>
-        <button mat-icon-button [matMenuTriggerFor]="menu">
-          <mat-icon>account_circle</mat-icon>
-        </button>
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item routerLink="/dashboard">
-            <mat-icon>dashboard</mat-icon>
-            Dashboard
-          </button>
-          <button mat-menu-item (click)="logout()">
-            <mat-icon>logout</mat-icon>
-            Déconnexion
-          </button>
-        </mat-menu>
-      </ng-template>
     </mat-toolbar>
     
     <main>
@@ -72,9 +55,5 @@ import { AuthService } from './services/auth.service';
   `]
 })
 export class AppComponent {
-  constructor(public authService: AuthService) {}
-  
-  logout() {
-    this.authService.logout();
-  }
+  title = 'Centre Commercial';
 }

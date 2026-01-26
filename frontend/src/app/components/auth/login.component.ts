@@ -7,7 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -70,7 +69,7 @@ import { AuthService } from '../../services/auth.service';
         <mat-card-actions>
           <p class="text-center">
             Pas encore de compte ? 
-            <a routerLink="/register">S'inscrire</a>
+            <a href="#" (click)="$event.preventDefault()">S'inscrire</a>
           </p>
         </mat-card-actions>
       </mat-card>
@@ -124,10 +123,7 @@ export class LoginComponent {
   loading = false;
   error = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService
-  ) {
+  constructor(private fb: FormBuilder) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -139,16 +135,12 @@ export class LoginComponent {
       this.loading = true;
       this.error = '';
       
-      this.authService.login(this.loginForm.value).subscribe({
-        next: (response) => {
-          this.loading = false;
-          // Redirection gérée dans le service
-        },
-        error: (error) => {
-          this.loading = false;
-          this.error = error.error?.message || 'Erreur de connexion';
-        }
-      });
+      // Simulation de connexion
+      setTimeout(() => {
+        this.loading = false;
+        console.log('Tentative de connexion:', this.loginForm.value);
+        // TODO: Implémenter la vraie connexion
+      }, 1000);
     }
   }
 }
