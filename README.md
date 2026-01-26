@@ -49,8 +49,8 @@ npm run dev
 ```
 
 ### Accès à l'application
-- **Frontend** : http://localhost:4200
-- **API Backend** : http://localhost:3000
+- **Frontend** : À déployer sur Vercel
+- **API Backend** : https://m1p13mean-niaina-1.onrender.com
 
 ## 🔑 Comptes de Test
 
@@ -173,6 +173,8 @@ npm start               # Démarrer en production
 
 - [Guide d'installation détaillé](docs/INSTALLATION.md)
 - [Fonctionnalités complètes](docs/FONCTIONNALITES.md)
+- [Déploiement Backend sur Render](docs/DEPLOIEMENT-RENDER.md)
+- [Déploiement Frontend sur Vercel](docs/DEPLOIEMENT-VERCEL.md)
 
 ## 👨‍💻 Développement
 
