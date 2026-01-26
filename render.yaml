@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: mall-app-backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        fromDatabase:
+          name: mall_db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+    healthCheckPath: /
+    
+databases:
+  - name: mall_db
+    databaseName: mall_db
+    user: faustresilient_db_user
