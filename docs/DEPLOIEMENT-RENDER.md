@@ -28,7 +28,7 @@ Ce guide vous explique comment déployer l'application Centre Commercial sur Ren
 #### Commandes de Build et Start
 - **Build Command** : 
   ```bash
-  npm run build
+  npm install
   ```
 - **Start Command** : 
   ```bash
