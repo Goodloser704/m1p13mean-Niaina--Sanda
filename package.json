@@ -11,7 +11,7 @@
     "build": "echo 'Build completed'",
     "start": "node server.js",
     "deploy:render": "cd backend && npm install && npm start",
-    "init-db": "cd backend && npm run init-db"
+    "init-db": "node scripts/init-db.js"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -90,3 +90,6 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
+
+# Note: Les dossiers models/, routes/, middleware/, scripts/ à la racine
+# sont des copies pour le déploiement Render - ne pas ignorer
