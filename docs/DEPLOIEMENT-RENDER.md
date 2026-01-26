@@ -22,7 +22,7 @@ Ce guide vous explique comment déployer l'application Centre Commercial sur Ren
 - **Name** : `mall-app-backend`
 - **Region** : `Frankfurt (EU Central)` ou `Oregon (US West)`
 - **Branch** : `main`
-- **Root Directory** : Laissez vide
+- **Root Directory** : `backend`
 - **Runtime** : `Node`
 
 #### Commandes de Build et Start
