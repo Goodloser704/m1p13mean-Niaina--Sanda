@@ -48,6 +48,7 @@ app.use(cors({
       'http://localhost:4200',
       'https://localhost:4200',
       'https://m1p13mean-niaina-1.onrender.com',
+      'https://m1p13mean-niaina-xjl4.vercel.app', // Frontend Vercel
       process.env.FRONTEND_URL
     ].filter(Boolean);
     
