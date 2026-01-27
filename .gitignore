@@ -93,3 +93,10 @@ jspm_packages/
 
 # Note: Les dossiers models/, routes/, middleware/, scripts/ à la racine
 # sont des copies pour le déploiement Render - ne pas ignorer
+
+# Documentation privée (visible seulement en local)
+docs/
+README.md
+
+# Dossier de notes privées (non versionné)
+docs-private/
