@@ -56,8 +56,23 @@
         <h2>Bienvenue dans votre Centre Commercial</h2>
         <p>Découvrez nos boutiques et produits</p>
         <div class="api-info">
-          <p><strong>API Backend:</strong> https://m1p13mean-niaina-1.onrender.com</p>
-          <p><strong>Status:</strong> ✅ Connecté</p>
+          <p><strong>API Backend:</strong> {{ backendUrl }}</p>
+          <p><strong>Status:</strong> {{ backendStatus }}</p>
+          <div class="monitoring-buttons">
+            <button class="btn-small" (click)="testApi()">🧪 Test API</button>
+            <button class="btn-small" (click)="refreshConnection()">🔄 Refresh</button>
+            <button class="btn-small" (click)="clearLogs()">🗑️ Clear Logs</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Monitoring Section -->
+      <section class="monitoring" *ngIf="connectionLogs.length > 0">
+        <h2>📊 Logs de Connexion</h2>
+        <div class="logs-container">
+          <div class="log-entry" *ngFor="let log of connectionLogs">
+            {{ log }}
+          </div>
         </div>
       </section>
 

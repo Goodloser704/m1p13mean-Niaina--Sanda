@@ -1,20 +1,26 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, FormsModule],
+  imports: [RouterOutlet, CommonModule, FormsModule, HttpClientModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnInit {
   protected readonly title = signal('Centre Commercial');
   
   showLogin = false;
   email = '';
   password = '';
+  
+  // 📊 Variables pour monitoring
+  backendStatus = 'Vérification...';
+  backendUrl = 'https://m1p13mean-niaina-1.onrender.com';
+  connectionLogs: string[] = [];
   
   categories = [
     { name: 'Mode', icon: '👗', count: 15 },
@@ -25,12 +31,110 @@ export class App {
     { name: 'Maison', icon: '🏠', count: 10 }
   ];
 
-  login() {
-    if (this.email && this.password) {
-      alert(`Connexion simulée pour: ${this.email}\nBackend: https://m1p13mean-niaina-1.onrender.com/api/auth/login`);
-      console.log('Login attempt:', { email: this.email, password: this.password });
-    } else {
-      alert('Veuillez remplir tous les champs');
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.logMessage('🚀 Frontend Angular démarré');
+    this.logMessage(`🌐 URL Backend configurée: ${this.backendUrl}`);
+    this.checkBackendConnection();
+  }
+
+  // 📊 Fonction de logging
+  logMessage(message: string) {
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] ${message}`;
+    console.log(logEntry);
+    this.connectionLogs.unshift(logEntry);
+    
+    // Garder seulement les 10 derniers logs
+    if (this.connectionLogs.length > 10) {
+      this.connectionLogs = this.connectionLogs.slice(0, 10);
     }
+  }
+
+  // 🔍 Vérifier la connexion backend
+  async checkBackendConnection() {
+    this.logMessage('🔍 Test de connexion au backend...');
+    
+    try {
+      const response = await this.http.get(`${this.backendUrl}/`).toPromise() as any;
+      this.backendStatus = '✅ Connecté';
+      this.logMessage('✅ Backend accessible');
+      this.logMessage(`📊 Réponse: ${response.message}`);
+      
+      if (response.mongodb?.connected) {
+        this.logMessage('✅ Base de données connectée');
+      } else {
+        this.logMessage('⚠️ Base de données non connectée');
+      }
+      
+    } catch (error: any) {
+      this.backendStatus = '❌ Erreur';
+      this.logMessage('❌ Erreur connexion backend');
+      this.logMessage(`🔍 Détail erreur: ${error.message || error.status}`);
+      console.error('Backend connection error:', error);
+    }
+  }
+
+  // 🔐 Test de connexion avec logs détaillés
+  async login() {
+    if (!this.email || !this.password) {
+      this.logMessage('⚠️ Champs manquants pour la connexion');
+      alert('Veuillez remplir tous les champs');
+      return;
+    }
+
+    this.logMessage(`🔐 Tentative de connexion: ${this.email}`);
+    
+    try {
+      const loginData = { email: this.email, password: this.password };
+      this.logMessage('📤 Envoi requête de connexion...');
+      
+      const response = await this.http.post(`${this.backendUrl}/api/auth/login`, loginData).toPromise() as any;
+      
+      this.logMessage('✅ Connexion réussie');
+      this.logMessage(`👤 Utilisateur: ${response.user.nom} ${response.user.prenom}`);
+      this.logMessage(`🎭 Rôle: ${response.user.role}`);
+      this.logMessage('🎫 Token reçu et sauvegardé');
+      
+      // Sauvegarder le token (simulation)
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      alert(`Connexion réussie !\nUtilisateur: ${response.user.nom} ${response.user.prenom}\nRôle: ${response.user.role}`);
+      
+    } catch (error: any) {
+      this.logMessage('❌ Échec de la connexion');
+      this.logMessage(`🔍 Erreur: ${error.error?.message || error.message}`);
+      console.error('Login error:', error);
+      
+      alert(`Erreur de connexion:\n${error.error?.message || 'Erreur serveur'}`);
+    }
+  }
+
+  // 🧪 Test de l'API
+  async testApi() {
+    this.logMessage('🧪 Test des endpoints API...');
+    
+    // Test endpoint de santé
+    try {
+      const health = await this.http.get(`${this.backendUrl}/health`).toPromise() as any;
+      this.logMessage(`💚 Health check: ${health.status}`);
+      this.logMessage(`🗄️ Base de données: ${health.checks.database}`);
+    } catch (error) {
+      this.logMessage('❌ Health check échoué');
+    }
+  }
+
+  // 🔄 Rafraîchir la connexion
+  refreshConnection() {
+    this.logMessage('🔄 Rafraîchissement de la connexion...');
+    this.checkBackendConnection();
+  }
+
+  // 🗑️ Vider les logs
+  clearLogs() {
+    this.connectionLogs = [];
+    this.logMessage('🗑️ Logs vidés');
   }
 }
