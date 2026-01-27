@@ -3,6 +3,8 @@
 ## Vue d'ensemble
 Ce guide explique comment déployer le frontend Angular sur Vercel.
 
+> ✅ **PROBLÈME RÉSOLU** : Le problème de page blanche a été corrigé en remplaçant le template Angular par défaut par l'interface complète de l'application mall.
+
 ## Prérequis
 - Compte Vercel (gratuit)
 - Repository GitHub avec le code
