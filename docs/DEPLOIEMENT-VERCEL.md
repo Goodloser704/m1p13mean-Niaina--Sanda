@@ -41,7 +41,7 @@ npm run build
 
 **Output Directory :**
 ```bash
-dist/mall-frontend
+dist/frontend
 ```
 
 **Install Command :**
@@ -75,7 +75,7 @@ Si vous voyez l'erreur "cd: frontend: No such file or directory", c'est que le R
 - **Node.js Version** : 18.x
 - **Root Directory** : `frontend`
 - **Build Command** : `npm run build`
-- **Output Directory** : `dist/mall-frontend`
+- **Output Directory** : `dist/frontend`
 
 #### Option B : Via Vercel CLI
 
@@ -97,7 +97,7 @@ vercel
 # - Directory? frontend
 # - Override settings? Yes
 # - Build Command? npm run build
-# - Output Directory? dist/mall-frontend
+# - Output Directory? dist/frontend
 ```
 
 ### 4. Configuration Post-Déploiement
