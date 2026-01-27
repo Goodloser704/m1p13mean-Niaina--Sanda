@@ -60,25 +60,22 @@ npm run dev
 | **Boutique** | fashion@mall.com | boutique123 | Gestion produits, commandes |
 | **Client** | client1@test.com | client123 | Navigation, achats |
 
-## 📋 Fonctionnalités Principales
+## 📋 Fonctionnalités de Base
 
 ### 👨‍💼 Interface Admin
-- ✅ Dashboard avec statistiques globales
-- ✅ Validation/suspension des boutiques
-- ✅ Gestion des utilisateurs
-- ✅ Rapports et analytics
+- 🔧 Dashboard avec statistiques de base
+- 🔧 Gestion des boutiques (en développement)
+- 🔧 Gestion des utilisateurs (en développement)
 
 ### 🏪 Interface Boutique  
-- ✅ Création et gestion de boutique
-- ✅ CRUD complet des produits
-- ✅ Suivi des commandes
-- ✅ Dashboard avec statistiques de vente
+- 🔧 Création et gestion de boutique (en développement)
+- 🔧 Gestion des produits (en développement)
+- 🔧 Suivi des commandes (en développement)
 
 ### 🛍️ Interface Client
-- ✅ Catalogue des boutiques et produits
-- ✅ Recherche avancée avec filtres
-- ✅ Système de panier et commandes
-- ✅ Profil utilisateur
+- 🔧 Catalogue des boutiques et produits (en développement)
+- 🔧 Recherche de base (en développement)
+- 🔧 Profil utilisateur (en développement)
 
 ## 🏗️ Architecture
 
@@ -98,27 +95,17 @@ m1p13mean-Niaina--/
 └── README.md          # Ce fichier
 ```
 
-## 🔌 API Endpoints
+## 🔌 API Endpoints (En Développement)
 
 ### Authentification
 - `POST /api/auth/register` - Inscription
 - `POST /api/auth/login` - Connexion
 - `GET /api/auth/me` - Profil utilisateur
 
-### Admin
-- `GET /api/admin/dashboard` - Statistiques globales
-- `GET /api/admin/boutiques` - Gestion boutiques
-- `PUT /api/admin/boutiques/:id/statut` - Valider/suspendre
-
-### Boutiques
-- `POST /api/boutique/create` - Créer boutique
-- `GET /api/boutique/dashboard` - Dashboard boutique
-- `GET /api/boutique/products` - Mes produits
-
-### Produits & Commandes
-- `GET /api/products` - Catalogue public
-- `POST /api/products` - Créer produit (boutique)
-- `POST /api/orders` - Passer commande (client)
+### Endpoints à Développer
+- Admin : Gestion boutiques et utilisateurs
+- Boutiques : CRUD produits et commandes
+- Clients : Catalogue et panier
 
 ## 📊 Base de Données
 
@@ -129,10 +116,9 @@ m1p13mean-Niaina--/
 - **orders** : Commandes et transactions
 
 ### Données de Test Incluses
-- 3 boutiques approuvées (Mode, Électronique, Alimentation)
-- 6 produits répartis dans les boutiques
-- Utilisateurs de tous les rôles
-- Données réalistes pour les tests
+- Structure de base pour boutiques et produits
+- Utilisateurs de test pour chaque rôle
+- Données minimales pour les tests
 
 ## 🛡️ Sécurité
 
@@ -171,8 +157,10 @@ npm start               # Démarrer en production
 
 ## 📚 Documentation
 
-- [Guide d'installation détaillé](docs/INSTALLATION.md)
-- [Fonctionnalités complètes](docs/FONCTIONNALITES.md)
+- [Architecture Backend](docs/ARCHITECTURE-BACKEND.md)
+- [Architecture Frontend](docs/ARCHITECTURE-FRONTEND.md)
+- [Communication Frontend-Backend](docs/COMMUNICATION-FRONTEND-BACKEND.md)
+- [Guide de Modification](docs/GUIDE-MODIFICATION.md)
 - [Déploiement Backend sur Render](docs/DEPLOIEMENT-RENDER.md)
 - [Déploiement Frontend sur Vercel](docs/DEPLOIEMENT-VERCEL.md)
 
