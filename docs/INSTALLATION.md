@@ -93,51 +93,7 @@ mall-app/
 └── docs/            # Documentation
 ```
 
-## Fonctionnalités
 
-### Admin Centre Commercial
-- Dashboard avec statistiques
-- Gestion des boutiques (validation/suspension)
-- Gestion des utilisateurs
-- Rapports et analytics
-
-### Boutique
-- Création et gestion de boutique
-- Gestion des produits
-- Suivi des commandes
-- Statistiques de vente
-
-### Client/Acheteur
-- Navigation des boutiques
-- Recherche de produits
-- Panier et commandes
-- Profil utilisateur
-
-## API Endpoints
-
-### Authentification
-- POST `/api/auth/register` - Inscription
-- POST `/api/auth/login` - Connexion
-- GET `/api/auth/me` - Profil utilisateur
-
-### Admin
-- GET `/api/admin/dashboard` - Statistiques
-- GET `/api/admin/boutiques` - Liste boutiques
-- PUT `/api/admin/boutiques/:id/statut` - Modifier statut
-
-### Boutiques
-- POST `/api/boutique/create` - Créer boutique
-- GET `/api/boutique/me` - Ma boutique
-- GET `/api/boutique/dashboard` - Dashboard boutique
-
-### Produits
-- GET `/api/products` - Liste produits
-- POST `/api/products` - Créer produit
-- GET `/api/products/:id` - Détail produit
-
-### Commandes
-- POST `/api/orders` - Créer commande
-- GET `/api/orders/me` - Mes commandes
 
 ## Dépannage
 
