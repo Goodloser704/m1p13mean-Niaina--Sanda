@@ -1,7 +1,7 @@
 {
   "framework": "angular",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/frontend/browser",
+  "outputDirectory": "dist/frontend",
   "rewrites": [
     {
       "source": "/(.*)",
