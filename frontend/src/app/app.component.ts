@@ -2,15 +2,16 @@ import { Component, signal, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, FormsModule, HttpClientModule],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  imports: [RouterOutlet, CommonModule, FormsModule], // ✅ HttpClientModule retiré (fourni par app.config.ts)
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss'
 })
-export class App implements OnInit {
+export class AppComponent implements OnInit {
   protected readonly title = signal('Centre Commercial');
   
   showLogin = false;
@@ -34,7 +35,7 @@ export class App implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.logMessage('🚀 Frontend Angular démarré');
+    this.logMessage('🚀 Frontend Angular SPA démarré');
     this.logMessage(`🌐 URL Backend configurée: ${this.backendUrl}`);
     this.checkBackendConnection();
   }
@@ -57,7 +58,7 @@ export class App implements OnInit {
     this.logMessage('🔍 Test de connexion au backend...');
     
     try {
-      const response = await this.http.get(`${this.backendUrl}/`).toPromise() as any;
+      const response = await firstValueFrom(this.http.get(`${this.backendUrl}/`)) as any;
       this.backendStatus = '✅ Connecté';
       this.logMessage('✅ Backend accessible');
       this.logMessage(`📊 Réponse: ${response.message}`);
@@ -90,14 +91,14 @@ export class App implements OnInit {
       const loginData = { email: this.email, password: this.password };
       this.logMessage('📤 Envoi requête de connexion...');
       
-      const response = await this.http.post(`${this.backendUrl}/api/auth/login`, loginData).toPromise() as any;
+      const response = await firstValueFrom(this.http.post(`${this.backendUrl}/api/auth/login`, loginData)) as any;
       
       this.logMessage('✅ Connexion réussie');
       this.logMessage(`👤 Utilisateur: ${response.user.nom} ${response.user.prenom}`);
       this.logMessage(`🎭 Rôle: ${response.user.role}`);
       this.logMessage('🎫 Token reçu et sauvegardé');
       
-      // Sauvegarder le token (simulation)
+      // Sauvegarder le token
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
       
@@ -116,9 +117,8 @@ export class App implements OnInit {
   async testApi() {
     this.logMessage('🧪 Test des endpoints API...');
     
-    // Test endpoint de santé
     try {
-      const health = await this.http.get(`${this.backendUrl}/health`).toPromise() as any;
+      const health = await firstValueFrom(this.http.get(`${this.backendUrl}/health`)) as any;
       this.logMessage(`💚 Health check: ${health.status}`);
       this.logMessage(`🗄️ Base de données: ${health.checks.database}`);
     } catch (error) {

@@ -89,7 +89,10 @@ console.log('✅ Routes initialisées avec succès');
 console.log('🔌 Tentative de connexion à MongoDB...');
 console.log(`📍 URI: ${process.env.MONGODB_URI ? 'MongoDB Atlas (URI configurée)' : 'mongodb://localhost:27017/mall_db'}`);
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mall_db')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mall_db', {
+  serverSelectionTimeoutMS: 5000, // Timeout plus court
+  socketTimeoutMS: 45000,
+})
   .then(() => {
     console.log('✅ Connexion MongoDB réussie');
     console.log(`📊 Base de données: ${mongoose.connection.name}`);
@@ -104,7 +107,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mall_db')
   .catch(err => {
     console.error('❌ Erreur connexion MongoDB:', err.message);
     console.warn('⚠️  MongoDB non disponible, serveur démarré sans base de données');
-    console.warn('💡 Pour utiliser toutes les fonctionnalités, vérifiez votre connexion MongoDB');
+    console.warn('💡 Solutions possibles:');
+    console.warn('   1. Vérifier MongoDB Atlas Network Access (IP Whitelist)');
+    console.warn('   2. Vérifier la chaîne de connexion MONGODB_URI');
+    console.warn('   3. Autoriser 0.0.0.0/0 temporairement pour test');
   });
 
 // Événements MongoDB
