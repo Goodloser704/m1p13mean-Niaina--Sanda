@@ -15,38 +15,40 @@
   </header>
 
   <!-- Login Modal -->
-  <div class="login-modal" [class.show]="showLogin" *ngIf="showLogin">
-    <div class="modal-content">
-      <h2>Connexion</h2>
-      <form (ngSubmit)="login()">
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input 
-            type="email" 
-            id="email" 
-            [(ngModel)]="email" 
-            placeholder="admin@mall.com"
-            required>
+  @if (showLogin) {
+    <div class="login-modal" [class.show]="showLogin">
+      <div class="modal-content">
+        <h2>Connexion</h2>
+        <form (ngSubmit)="login()">
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input 
+              type="email" 
+              id="email" 
+              [(ngModel)]="email" 
+              placeholder="admin@mall.com"
+              required>
+          </div>
+          <div class="form-group">
+            <label for="password">Mot de passe:</label>
+            <input 
+              type="password" 
+              id="password" 
+              [(ngModel)]="password" 
+              placeholder="admin123"
+              required>
+          </div>
+          <button type="submit" class="btn-primary">Se connecter</button>
+        </form>
+        <div class="test-accounts">
+          <h3>Comptes de test:</h3>
+          <p><strong>Admin:</strong> admin@mall.com / admin123</p>
+          <p><strong>Boutique:</strong> fashion@mall.com / boutique123</p>
+          <p><strong>Client:</strong> client1@test.com / client123</p>
         </div>
-        <div class="form-group">
-          <label for="password">Mot de passe:</label>
-          <input 
-            type="password" 
-            id="password" 
-            [(ngModel)]="password" 
-            placeholder="admin123"
-            required>
-        </div>
-        <button type="submit" class="btn-primary">Se connecter</button>
-      </form>
-      <div class="test-accounts">
-        <h3>Comptes de test:</h3>
-        <p><strong>Admin:</strong> admin@mall.com / admin123</p>
-        <p><strong>Boutique:</strong> fashion@mall.com / boutique123</p>
-        <p><strong>Client:</strong> client1@test.com / client123</p>
       </div>
     </div>
-  </div>
+  }
 
   <!-- Main Content -->
   <main class="main-content">
@@ -67,24 +69,31 @@
       </section>
 
       <!-- Monitoring Section -->
-      <section class="monitoring" *ngIf="connectionLogs.length > 0">
-        <h2>📊 Logs de Connexion</h2>
-        <div class="logs-container">
-          <div class="log-entry" *ngFor="let log of connectionLogs">
-            {{ log }}
+      @if (connectionLogs.length > 0) {
+        <section class="monitoring">
+          <h2>📊 Logs de Connexion</h2>
+          <div class="logs-container">
+            @for (log of connectionLogs; track log) {
+              <div class="log-entry">
+                {{ log }}
+              </div>
+            }
           </div>
-        </div>
-      </section>
+        </section>
+      }
+      
 
       <!-- Categories Grid -->
       <section class="categories">
         <h2>Catégories</h2>
         <div class="categories-grid">
-          <div class="category-card" *ngFor="let category of categories">
-            <div class="category-icon">{{ category.icon }}</div>
-            <h3>{{ category.name }}</h3>
-            <p>{{ category.count }} boutiques</p>
-          </div>
+          @for (category of categories; track category) {
+            <div class="category-card">
+              <div class="category-icon">{{ category.icon }}</div>
+              <h3>{{ category.name }}</h3>
+              <p>{{ category.count }} boutiques</p>
+            </div>
+          }
         </div>
       </section>
 
