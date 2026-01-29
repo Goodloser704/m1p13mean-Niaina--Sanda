@@ -1,4 +1,4 @@
-<!-- Mall Application Template - Version Simplifiée -->
+<!-- Mall Application Template - Version avec Notifications -->
 <div class="mall-app">
   <!-- Header -->
   <header class="header">
@@ -9,13 +9,46 @@
       <nav class="nav">
         <!-- Si utilisateur connecté -->
         <div *ngIf="isLoggedIn" class="user-info">
-          <span class="user-welcome">
-            {{ getRoleIcon(currentUser?.role || '') }} 
-            Bonjour {{ currentUser?.prenom }}
-          </span>
-          <button class="btn-secondary" (click)="logout()">
-            🚪 Déconnexion
-          </button>
+          <div class="nav-menu">
+            <!-- Navigation -->
+            <button 
+              class="nav-btn"
+              [class.active]="currentView === 'home'"
+              (click)="setView('home')">
+              🏠 Accueil
+            </button>
+            
+            <!-- Notifications (tous les utilisateurs connectés) -->
+            <button 
+              class="nav-btn notification-btn"
+              [class.active]="currentView === 'notifications'"
+              (click)="setView('notifications')"
+              *ngIf="canViewNotifications()">
+              🔔 Notifications
+              <span class="notification-badge" *ngIf="unreadNotifications > 0">
+                {{ unreadNotifications }}
+              </span>
+            </button>
+            
+            <!-- Gestion boutiques (admin seulement) -->
+            <button 
+              class="nav-btn"
+              [class.active]="currentView === 'admin-boutiques'"
+              (click)="setView('admin-boutiques')"
+              *ngIf="canViewAdminBoutiques()">
+              🏪 Boutiques
+            </button>
+          </div>
+          
+          <div class="user-profile">
+            <span class="user-welcome">
+              {{ getRoleIcon(currentUser?.role || '') }} 
+              {{ currentUser?.prenom }}
+            </span>
+            <button class="btn-secondary" (click)="logout()">
+              🚪 Déconnexion
+            </button>
+          </div>
         </div>
         
         <!-- Si utilisateur non connecté -->
@@ -118,7 +151,7 @@
           <label for="registerRole">Rôle :</label>
           <select id="registerRole" [(ngModel)]="registerForm.role" name="role" class="form-select">
             <option value="client">🛍️ Client</option>
-            <option value="boutique">🏪 Boutique</option>
+            <option value="boutique">🏪 Boutique (validation admin requise)</option>
           </select>
         </div>
 
@@ -190,6 +223,11 @@
             rows="2"></textarea>
         </div>
 
+        <!-- Avertissement pour les boutiques -->
+        <div class="boutique-warning" *ngIf="registerForm.role === 'boutique'">
+          <p>⚠️ <strong>Important :</strong> Les inscriptions boutiques nécessitent une validation par un administrateur. Vous recevrez un email une fois votre demande traitée.</p>
+        </div>
+
         <button type="submit" class="btn-primary btn-full">S'inscrire</button>
       </form>
 
@@ -222,82 +260,105 @@
   <!-- Contenu Principal -->
   <main class="main-content">
     <div class="container">
-      <!-- Section Hero -->
-      <section class="hero">
-        <h2>Bienvenue dans votre Centre Commercial</h2>
-        <p *ngIf="!isLoggedIn">Connectez-vous pour découvrir toutes nos fonctionnalités</p>
-        <p *ngIf="isLoggedIn">
-          Bonjour {{ currentUser?.prenom }}, 
-          <span [style.color]="getRoleColor(currentUser?.role || '')">
-            {{ getRoleIcon(currentUser?.role || '') }} {{ currentUser?.role | titlecase }}
-          </span>
-        </p>
-        
-        <!-- Statut Backend -->
-        <div class="api-status">
-          <span class="status-label">Backend :</span>
-          <span class="status-value">{{ backendStatus }}</span>
-        </div>
-      </section>
+      
+      <!-- Vue Accueil -->
+      <div *ngIf="currentView === 'home'">
+        <!-- Section Hero -->
+        <section class="hero">
+          <h2>Bienvenue dans votre Centre Commercial</h2>
+          <p *ngIf="!isLoggedIn">Connectez-vous pour découvrir toutes nos fonctionnalités</p>
+          <p *ngIf="isLoggedIn">
+            Bonjour {{ currentUser?.prenom }}, 
+            <span [style.color]="getRoleColor(currentUser?.role || '')">
+              {{ getRoleIcon(currentUser?.role || '') }} {{ currentUser?.role | titlecase }}
+            </span>
+          </p>
+          
+          <!-- Statut Backend -->
+          <div class="api-status">
+            <span class="status-label">Backend :</span>
+            <span class="status-value">{{ backendStatus }}</span>
+          </div>
+        </section>
 
-      <!-- Dashboard utilisateur connecté -->
-      <section *ngIf="isLoggedIn" class="user-dashboard">
-        <h2>{{ getRoleIcon(currentUser?.role || '') }} Dashboard {{ currentUser?.role | titlecase }}</h2>
-        
-        <div class="dashboard-cards">
-          <!-- Admin Dashboard -->
-          <div *ngIf="currentUser?.role === 'admin'" class="dashboard-card">
-            <h3>👨‍💼 Gestion Administrative</h3>
-            <ul>
-              <li>📊 Statistiques globales</li>
-              <li>🏪 Gestion des boutiques</li>
-              <li>👥 Gestion des utilisateurs</li>
-              <li>📈 Rapports et analytics</li>
-            </ul>
-          </div>
+        <!-- Dashboard utilisateur connecté -->
+        <section *ngIf="isLoggedIn" class="user-dashboard">
+          <h2>{{ getRoleIcon(currentUser?.role || '') }} Dashboard {{ currentUser?.role | titlecase }}</h2>
+          
+          <div class="dashboard-cards">
+            <!-- Admin Dashboard -->
+            <div *ngIf="currentUser?.role === 'admin'" class="dashboard-card">
+              <h3>👨‍💼 Gestion Administrative</h3>
+              <ul>
+                <li>🔔 {{ unreadNotifications }} notifications non lues</li>
+                <li>🏪 Gestion des boutiques</li>
+                <li>👥 Gestion des utilisateurs</li>
+                <li>📈 Rapports et analytics</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn-card" (click)="setView('notifications')">
+                  🔔 Voir notifications
+                </button>
+                <button class="btn-card" (click)="setView('admin-boutiques')">
+                  🏪 Gérer boutiques
+                </button>
+              </div>
+            </div>
 
-          <!-- Boutique Dashboard -->
-          <div *ngIf="currentUser?.role === 'boutique'" class="dashboard-card">
-            <h3>🏪 Gestion de Boutique</h3>
-            <ul>
-              <li>📦 Gestion des produits</li>
-              <li>📋 Suivi des commandes</li>
-              <li>💰 Tableau de bord des ventes</li>
-              <li>⚙️ Paramètres de la boutique</li>
-            </ul>
-          </div>
+            <!-- Boutique Dashboard -->
+            <div *ngIf="currentUser?.role === 'boutique'" class="dashboard-card">
+              <h3>🏪 Gestion de Boutique</h3>
+              <ul>
+                <li>📦 Gestion des produits</li>
+                <li>📋 Suivi des commandes</li>
+                <li>💰 Tableau de bord des ventes</li>
+                <li>⚙️ Paramètres de la boutique</li>
+              </ul>
+            </div>
 
-          <!-- Client Dashboard -->
-          <div *ngIf="currentUser?.role === 'client'" class="dashboard-card">
-            <h3>🛍️ Espace Client</h3>
-            <ul>
-              <li>🛒 Mes commandes</li>
-              <li>❤️ Mes favoris</li>
-              <li>👤 Mon profil</li>
-              <li>🎯 Recommandations</li>
-            </ul>
+            <!-- Client Dashboard -->
+            <div *ngIf="currentUser?.role === 'client'" class="dashboard-card">
+              <h3>🛍️ Espace Client</h3>
+              <ul>
+                <li>🛒 Mes commandes</li>
+                <li>❤️ Mes favoris</li>
+                <li>👤 Mon profil</li>
+                <li>🎯 Recommandations</li>
+              </ul>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Fonctionnalités générales -->
-      <section *ngIf="!isLoggedIn" class="features">
-        <h2>Fonctionnalités</h2>
-        <div class="features-grid">
-          <div class="feature-card">
-            <h3>👨‍💼 Interface Admin</h3>
-            <p>Gestion complète du centre commercial</p>
+        <!-- Fonctionnalités générales -->
+        <section *ngIf="!isLoggedIn" class="features">
+          <h2>Fonctionnalités</h2>
+          <div class="features-grid">
+            <div class="feature-card">
+              <h3>👨‍💼 Interface Admin</h3>
+              <p>Gestion complète du centre commercial avec notifications</p>
+            </div>
+            <div class="feature-card">
+              <h3>🏪 Interface Boutique</h3>
+              <p>Inscription avec validation admin et outils de gestion</p>
+            </div>
+            <div class="feature-card">
+              <h3>🛍️ Interface Client</h3>
+              <p>Shopping et services personnalisés</p>
+            </div>
           </div>
-          <div class="feature-card">
-            <h3>🏪 Interface Boutique</h3>
-            <p>Outils pour gérer votre boutique</p>
-          </div>
-          <div class="feature-card">
-            <h3>🛍️ Interface Client</h3>
-            <p>Shopping et services personnalisés</p>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
+
+      <!-- Vue Notifications -->
+      <div *ngIf="currentView === 'notifications' && canViewNotifications()">
+        <app-notifications></app-notifications>
+      </div>
+
+      <!-- Vue Admin Boutiques -->
+      <div *ngIf="currentView === 'admin-boutiques' && canViewAdminBoutiques()">
+        <app-admin-boutiques></app-admin-boutiques>
+      </div>
+
     </div>
   </main>
 
@@ -305,7 +366,7 @@
   <footer class="footer">
     <div class="container">
       <p>&copy; 2026 Centre Commercial - Application MEAN Stack</p>
-      <p>Angular SPA + Express.js + MongoDB</p>
+      <p>Angular SPA + Express.js + MongoDB + Système de Notifications</p>
     </div>
   </footer>
 </div>

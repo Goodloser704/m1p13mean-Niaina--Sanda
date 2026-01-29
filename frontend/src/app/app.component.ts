@@ -4,11 +4,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService, User } from './services/auth.service';
+import { NotificationService } from './services/notification.service';
+import { NotificationsComponent } from './components/notifications/notifications.component';
+import { AdminBoutiquesComponent } from './components/admin-boutiques/admin-boutiques.component';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, FormsModule],
+  imports: [RouterOutlet, CommonModule, FormsModule, NotificationsComponent, AdminBoutiquesComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -20,6 +23,12 @@ export class AppComponent implements OnInit, OnDestroy {
   showRegister = false;
   currentUser: User | null = null;
   isLoggedIn = false;
+  
+  // 🔔 État des notifications
+  unreadNotifications = 0;
+  
+  // 📱 Navigation
+  currentView: 'home' | 'notifications' | 'admin-boutiques' = 'home';
   
   // 📝 Formulaires
   loginForm = {
@@ -71,7 +80,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private notificationService: NotificationService
   ) {
     console.log('🚀 AppComponent constructor appelé');
   }
@@ -110,6 +120,11 @@ export class AppComponent implements OnInit, OnDestroy {
       this.authService.currentUser$.subscribe(user => {
         this.currentUser = user;
         console.log('👤 Utilisateur actuel:', user?.email || 'Non connecté');
+        
+        // Charger les notifications si l'utilisateur est connecté
+        if (user) {
+          this.loadNotifications();
+        }
       })
     );
     
@@ -120,11 +135,25 @@ export class AppComponent implements OnInit, OnDestroy {
       })
     );
     
+    // S'abonner aux notifications
+    this.subscriptions.push(
+      this.notificationService.unreadCount$.subscribe(count => {
+        this.unreadNotifications = count;
+      })
+    );
+    
     this.checkBackendConnection();
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  // 🔔 Charger les notifications
+  loadNotifications() {
+    if (this.isLoggedIn) {
+      this.notificationService.getUnreadCount().subscribe();
+    }
   }
 
   // 🔍 Vérifier la connexion backend (simplifié)
@@ -190,10 +219,16 @@ export class AppComponent implements OnInit, OnDestroy {
     console.log(`📝 Tentative d'inscription: ${this.registerForm.email} (${this.registerForm.role})`);
     
     try {
-      await this.authService.register(this.registerForm).toPromise();
+      const response = await this.authService.register(this.registerForm).toPromise();
       
       console.log('✅ Inscription réussie');
-      alert(`Inscription réussie !\nBienvenue ${this.registerForm.prenom} ${this.registerForm.nom}`);
+      
+      // Message différent selon le rôle
+      if (this.registerForm.role === 'boutique') {
+        alert(`Inscription réussie !\n\n${response?.message || 'Demande envoyée'}\n\nVous recevrez un email une fois votre boutique validée par un administrateur.`);
+      } else {
+        alert(`Inscription réussie !\nBienvenue ${this.registerForm.prenom} ${this.registerForm.nom}`);
+      }
       
       this.showRegister = false;
       this.resetForms();
@@ -207,6 +242,7 @@ export class AppComponent implements OnInit, OnDestroy {
   // 🚪 Déconnexion
   logout() {
     this.authService.logout();
+    this.currentView = 'home';
     alert('Vous avez été déconnecté');
     console.log('🚪 Déconnexion effectuée');
   }
@@ -227,6 +263,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.resetForms();
   }
 
+  // 📱 Navigation
+  setView(view: 'home' | 'notifications' | 'admin-boutiques') {
+    this.currentView = view;
+  }
+
   // 📱 Obtenir l'icône du rôle
   getRoleIcon(role: string): string {
     switch (role) {
@@ -245,5 +286,15 @@ export class AppComponent implements OnInit, OnDestroy {
       case 'client': return '#007bff';
       default: return '#6c757d';
     }
+  }
+
+  // 🔔 Vérifier si l'utilisateur peut voir les notifications
+  canViewNotifications(): boolean {
+    return this.isLoggedIn;
+  }
+
+  // 👨‍💼 Vérifier si l'utilisateur peut voir l'interface admin
+  canViewAdminBoutiques(): boolean {
+    return this.isLoggedIn && this.currentUser?.role === 'admin';
   }
 }
