@@ -1,0 +1,11 @@
+{
+  "/api/*": {
+    "target": "https://m1p13mean-niaina-1.onrender.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "headers": {
+      "Origin": "https://m1p13mean-niaina-xjl4.vercel.app"
+    }
+  }
+}
