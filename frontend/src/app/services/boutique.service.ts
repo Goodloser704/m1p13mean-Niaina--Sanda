@@ -16,22 +16,20 @@ export interface BoutiqueRegistration {
     email?: string;
     siteWeb?: string;
   };
-  horaires?: {
-    lundi?: { ouverture?: string; fermeture?: string };
-    mardi?: { ouverture?: string; fermeture?: string };
-    mercredi?: { ouverture?: string; fermeture?: string };
-    jeudi?: { ouverture?: string; fermeture?: string };
-    vendredi?: { ouverture?: string; fermeture?: string };
-    samedi?: { ouverture?: string; fermeture?: string };
-    dimanche?: { ouverture?: string; fermeture?: string };
-  };
+  horaires?: Record<string, { ouverture?: string; fermeture?: string }>;
   images?: string[];
   logo?: string;
 }
 
 export interface Boutique extends BoutiqueRegistration {
   _id: string;
-  proprietaire: string;
+  proprietaire: {
+    _id: string;
+    nom: string;
+    prenom: string;
+    email: string;
+    telephone?: string;
+  };
   statut: 'en_attente' | 'approuve' | 'suspendu';
   note: {
     moyenne: number;

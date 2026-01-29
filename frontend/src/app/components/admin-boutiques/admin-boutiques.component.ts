@@ -59,8 +59,8 @@ import { BoutiqueService, Boutique } from '../../services/boutique.service';
               </div>
               
               <div class="boutique-details">
-                <p><strong>📧 Propriétaire:</strong> {{ boutique.proprietaire?.prenom }} {{ boutique.proprietaire?.nom }}</p>
-                <p><strong>📧 Email:</strong> {{ boutique.proprietaire?.email }}</p>
+                <p><strong>📧 Propriétaire:</strong> {{ getProprietaireName(boutique) }}</p>
+                <p><strong>📧 Email:</strong> {{ boutique.proprietaire?.email || 'Non renseigné' }}</p>
                 <p *ngIf="boutique.proprietaire?.telephone"><strong>📞 Téléphone:</strong> {{ boutique.proprietaire.telephone }}</p>
                 <p><strong>🏷️ Catégorie:</strong> {{ getCategoryIcon(boutique.categorie) }} {{ boutique.categorie }}</p>
                 <p><strong>📅 Inscription:</strong> {{ formatDate(boutique.dateCreation) }}</p>
@@ -71,15 +71,15 @@ import { BoutiqueService, Boutique } from '../../services/boutique.service';
                     <strong>📝 Description:</strong> {{ boutique.description }}
                   </p>
                   <p *ngIf="boutique.emplacement?.zone">
-                    <strong>📍 Zone souhaitée:</strong> {{ boutique.emplacement.zone }}
+                    <strong>📍 Zone souhaitée:</strong> {{ boutique.emplacement?.zone }}
                   </p>
                   <p *ngIf="boutique.contact?.telephone">
-                    <strong>📞 Téléphone boutique:</strong> {{ boutique.contact.telephone }}
+                    <strong>📞 Téléphone boutique:</strong> {{ boutique.contact?.telephone }}
                   </p>
                   <p *ngIf="boutique.contact?.siteWeb">
                     <strong>🌐 Site web:</strong> 
-                    <a [href]="boutique.contact.siteWeb" target="_blank">
-                      {{ boutique.contact.siteWeb }}
+                    <a [href]="boutique.contact?.siteWeb" target="_blank">
+                      {{ boutique.contact?.siteWeb }}
                     </a>
                   </p>
                 </div>
@@ -132,8 +132,8 @@ import { BoutiqueService, Boutique } from '../../services/boutique.service';
           
           <div class="modal-body">
             <p><strong>Boutique :</strong> {{ selectedBoutique?.nom }}</p>
-            <p><strong>Propriétaire :</strong> {{ selectedBoutique?.proprietaire?.prenom }} {{ selectedBoutique?.proprietaire?.nom }}</p>
-            <p><strong>Email :</strong> {{ selectedBoutique?.proprietaire?.email }}</p>
+            <p><strong>Propriétaire :</strong> {{ getProprietaireName(selectedBoutique) }}</p>
+            <p><strong>Email :</strong> {{ selectedBoutique?.proprietaire?.email || 'Non renseigné' }}</p>
             
             <div class="form-group">
               <label for="rejectionReason">Raison du rejet (optionnel) :</label>
@@ -181,9 +181,9 @@ import { BoutiqueService, Boutique } from '../../services/boutique.service';
               
               <div class="detail-section">
                 <h4>👤 Propriétaire</h4>
-                <p><strong>Nom :</strong> {{ selectedBoutique.proprietaire?.nom }}</p>
-                <p><strong>Prénom :</strong> {{ selectedBoutique.proprietaire?.prenom }}</p>
-                <p><strong>Email :</strong> {{ selectedBoutique.proprietaire?.email }}</p>
+                <p><strong>Nom :</strong> {{ selectedBoutique.proprietaire?.nom || 'Non renseigné' }}</p>
+                <p><strong>Prénom :</strong> {{ selectedBoutique.proprietaire?.prenom || 'Non renseigné' }}</p>
+                <p><strong>Email :</strong> {{ selectedBoutique.proprietaire?.email || 'Non renseigné' }}</p>
                 <p><strong>Téléphone :</strong> {{ selectedBoutique.proprietaire?.telephone || 'Non renseigné' }}</p>
               </div>
               
@@ -210,13 +210,13 @@ import { BoutiqueService, Boutique } from '../../services/boutique.service';
               
               <div class="detail-section" *ngIf="selectedBoutique.horaires">
                 <h4>🕒 Horaires souhaités</h4>
-                <p><strong>Lundi :</strong> {{ formatHoraire(selectedBoutique.horaires.lundi) }}</p>
-                <p><strong>Mardi :</strong> {{ formatHoraire(selectedBoutique.horaires.mardi) }}</p>
-                <p><strong>Mercredi :</strong> {{ formatHoraire(selectedBoutique.horaires.mercredi) }}</p>
-                <p><strong>Jeudi :</strong> {{ formatHoraire(selectedBoutique.horaires.jeudi) }}</p>
-                <p><strong>Vendredi :</strong> {{ formatHoraire(selectedBoutique.horaires.vendredi) }}</p>
-                <p><strong>Samedi :</strong> {{ formatHoraire(selectedBoutique.horaires.samedi) }}</p>
-                <p><strong>Dimanche :</strong> {{ formatHoraire(selectedBoutique.horaires.dimanche) }}</p>
+                <p><strong>Lundi :</strong> {{ formatHoraire(selectedBoutique.horaires?.['lundi']) }}</p>
+                <p><strong>Mardi :</strong> {{ formatHoraire(selectedBoutique.horaires?.['mardi']) }}</p>
+                <p><strong>Mercredi :</strong> {{ formatHoraire(selectedBoutique.horaires?.['mercredi']) }}</p>
+                <p><strong>Jeudi :</strong> {{ formatHoraire(selectedBoutique.horaires?.['jeudi']) }}</p>
+                <p><strong>Vendredi :</strong> {{ formatHoraire(selectedBoutique.horaires?.['vendredi']) }}</p>
+                <p><strong>Samedi :</strong> {{ formatHoraire(selectedBoutique.horaires?.['samedi']) }}</p>
+                <p><strong>Dimanche :</strong> {{ formatHoraire(selectedBoutique.horaires?.['dimanche']) }}</p>
               </div>
               
               <div class="detail-section">
@@ -722,5 +722,10 @@ export class AdminBoutiquesComponent implements OnInit {
       return 'Fermé';
     }
     return `${horaire.ouverture} - ${horaire.fermeture}`;
+  }
+
+  getProprietaireName(boutique: Boutique | null): string {
+    if (!boutique?.proprietaire) return 'Non renseigné';
+    return `${boutique.proprietaire.prenom || ''} ${boutique.proprietaire.nom || ''}`.trim();
   }
 }

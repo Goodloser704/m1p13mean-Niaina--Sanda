@@ -188,13 +188,15 @@ import { AuthService } from '../../services/auth.service';
                 <div class="horaire-inputs">
                   <input 
                     type="time" 
-                    [(ngModel)]="boutiqueData.horaires![jour].ouverture" 
+                    [value]="getHoraireValue(jour, 'ouverture')" 
+                    (input)="setHoraireValue(jour, 'ouverture', $any($event.target).value)"
                     [name]="jour + '_ouverture'"
                     placeholder="Ouverture">
                   <span class="separator">-</span>
                   <input 
                     type="time" 
-                    [(ngModel)]="boutiqueData.horaires![jour].fermeture" 
+                    [value]="getHoraireValue(jour, 'fermeture')" 
+                    (input)="setHoraireValue(jour, 'fermeture', $any($event.target).value)"
                     [name]="jour + '_fermeture'"
                     placeholder="Fermeture">
                 </div>
@@ -566,7 +568,7 @@ export class BoutiqueRegistrationComponent implements OnInit {
     emplacement: {
       zone: '',
       numeroLocal: '',
-      etage: null
+      etage: undefined
     },
     contact: {
       telephone: '',
@@ -641,21 +643,31 @@ export class BoutiqueRegistrationComponent implements OnInit {
     if (preset === 'standard') {
       const horairesStandard = { ouverture: '09:00', fermeture: '19:00' };
       this.jours.slice(0, 6).forEach(jour => {
-        this.boutiqueData.horaires![jour] = { ...horairesStandard };
+        if (this.boutiqueData.horaires && this.boutiqueData.horaires[jour]) {
+          this.boutiqueData.horaires[jour] = { ...horairesStandard };
+        }
       });
-      this.boutiqueData.horaires!.dimanche = { ouverture: '', fermeture: '' };
+      if (this.boutiqueData.horaires && this.boutiqueData.horaires['dimanche']) {
+        this.boutiqueData.horaires['dimanche'] = { ouverture: '', fermeture: '' };
+      }
     } else if (preset === 'etendu') {
       const horairesEtendu = { ouverture: '08:00', fermeture: '20:00' };
       this.jours.slice(0, 6).forEach(jour => {
-        this.boutiqueData.horaires![jour] = { ...horairesEtendu };
+        if (this.boutiqueData.horaires && this.boutiqueData.horaires[jour]) {
+          this.boutiqueData.horaires[jour] = { ...horairesEtendu };
+        }
       });
-      this.boutiqueData.horaires!.dimanche = { ouverture: '10:00', fermeture: '18:00' };
+      if (this.boutiqueData.horaires && this.boutiqueData.horaires['dimanche']) {
+        this.boutiqueData.horaires['dimanche'] = { ouverture: '10:00', fermeture: '18:00' };
+      }
     }
   }
 
   clearHoraires() {
     this.jours.forEach(jour => {
-      this.boutiqueData.horaires![jour] = { ouverture: '', fermeture: '' };
+      if (this.boutiqueData.horaires && this.boutiqueData.horaires[jour]) {
+        this.boutiqueData.horaires[jour] = { ouverture: '', fermeture: '' };
+      }
     });
   }
 
@@ -683,5 +695,19 @@ export class BoutiqueRegistrationComponent implements OnInit {
       month: 'long',
       day: 'numeric'
     });
+  }
+
+  getHoraireValue(jour: string, type: 'ouverture' | 'fermeture'): string {
+    return this.boutiqueData.horaires?.[jour]?.[type] || '';
+  }
+
+  setHoraireValue(jour: string, type: 'ouverture' | 'fermeture', value: string): void {
+    if (!this.boutiqueData.horaires) {
+      this.boutiqueData.horaires = {};
+    }
+    if (!this.boutiqueData.horaires[jour]) {
+      this.boutiqueData.horaires[jour] = {};
+    }
+    this.boutiqueData.horaires[jour][type] = value;
   }
 }
