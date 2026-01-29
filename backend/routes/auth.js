@@ -44,4 +44,21 @@ router.get('/users/search', adminAuth, authController.searchUsers);
 // @access  Private (Admin)
 router.put('/users/:userId/status', adminAuth, authController.updateUserStatus);
 
+// @route   GET /api/auth/boutiques/pending
+// @desc    Obtenir les boutiques en attente de validation (Admin seulement)
+// @access  Private (Admin)
+router.get('/boutiques/pending', adminAuth, authController.getPendingBoutiques);
+
+// @route   PUT /api/auth/boutiques/:boutiqueId/approve
+// @desc    Approuver une boutique (Admin seulement)
+// @access  Private (Admin)
+router.put('/boutiques/:boutiqueId/approve', adminAuth, authController.approveBoutique);
+
+// @route   PUT /api/auth/boutiques/:boutiqueId/reject
+// @desc    Rejeter une boutique (Admin seulement)
+// @access  Private (Admin)
+router.put('/boutiques/:boutiqueId/reject', [
+  body('reason').optional().isLength({ max: 500 })
+], adminAuth, authController.rejectBoutique);
+
 module.exports = router;

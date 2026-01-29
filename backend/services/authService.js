@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const notificationService = require('./notificationService');
 
 /**
  * 🔐 Service d'Authentification
@@ -46,13 +47,30 @@ class AuthService {
       prenom,
       role,
       telephone,
-      adresse
+      adresse,
+      // Les boutiques sont créées en attente de validation
+      isActive: role === 'client' ? true : false,
+      status: role === 'boutique' ? 'pending' : 'active'
     });
 
     await user.save();
     
-    // Générer le token
-    const token = this.generateToken(user._id);
+    // 🔔 Si c'est une boutique, créer une notification pour les admins
+    if (role === 'boutique') {
+      try {
+        await notificationService.createBoutiqueRegistrationNotification(user);
+        console.log(`🔔 Notification d'inscription boutique envoyée pour ${email}`);
+      } catch (notifError) {
+        console.error('⚠️ Erreur notification boutique:', notifError.message);
+        // Ne pas faire échouer l'inscription si la notification échoue
+      }
+    }
+    
+    // Générer le token seulement si le compte est actif
+    let token = null;
+    if (user.isActive) {
+      token = this.generateToken(user._id);
+    }
     
     return {
       token,
@@ -61,8 +79,13 @@ class AuthService {
         email: user.email,
         nom: user.nom,
         prenom: user.prenom,
-        role: user.role
-      }
+        role: user.role,
+        isActive: user.isActive,
+        status: user.status
+      },
+      message: role === 'boutique' 
+        ? 'Inscription réussie ! Votre demande est en attente de validation par un administrateur.'
+        : 'Inscription réussie !'
     };
   }
 
@@ -89,6 +112,15 @@ class AuthService {
       throw new Error('Identifiants invalides');
     }
 
+    // Vérifier le statut du compte
+    if (user.role === 'boutique' && user.status === 'pending') {
+      throw new Error('Votre compte boutique est en attente de validation par un administrateur');
+    }
+
+    if (user.role === 'boutique' && user.status === 'rejected') {
+      throw new Error('Votre demande d\'inscription boutique a été refusée');
+    }
+
     // Vérifier si le compte est actif
     if (!user.isActive) {
       throw new Error('Compte désactivé');
@@ -104,7 +136,8 @@ class AuthService {
         email: user.email,
         nom: user.nom,
         prenom: user.prenom,
-        role: user.role
+        role: user.role,
+        status: user.status
       }
     };
   }
@@ -122,6 +155,7 @@ class AuthService {
       telephone: user.telephone,
       adresse: user.adresse,
       isActive: user.isActive,
+      status: user.status,
       createdAt: user.createdAt
     };
   }
@@ -162,6 +196,79 @@ class AuthService {
     }
     
     return user;
+  }
+
+  /**
+   * ✅ Approuver une boutique (Admin seulement)
+   */
+  async approveBoutique(boutiqueId, adminId) {
+    const boutique = await User.findOne({
+      _id: boutiqueId,
+      role: 'boutique'
+    });
+
+    if (!boutique) {
+      throw new Error('Boutique non trouvée');
+    }
+
+    if (boutique.status !== 'pending') {
+      throw new Error('Cette boutique n\'est pas en attente de validation');
+    }
+
+    // Mettre à jour le statut
+    boutique.status = 'approved';
+    boutique.isActive = true;
+    boutique.approvedBy = adminId;
+    boutique.approvedAt = new Date();
+
+    await boutique.save();
+
+    console.log(`✅ Boutique ${boutique.email} approuvée par admin ${adminId}`);
+    
+    return boutique;
+  }
+
+  /**
+   * ❌ Rejeter une boutique (Admin seulement)
+   */
+  async rejectBoutique(boutiqueId, adminId, reason = '') {
+    const boutique = await User.findOne({
+      _id: boutiqueId,
+      role: 'boutique'
+    });
+
+    if (!boutique) {
+      throw new Error('Boutique non trouvée');
+    }
+
+    if (boutique.status !== 'pending') {
+      throw new Error('Cette boutique n\'est pas en attente de validation');
+    }
+
+    // Mettre à jour le statut
+    boutique.status = 'rejected';
+    boutique.isActive = false;
+    boutique.rejectedBy = adminId;
+    boutique.rejectedAt = new Date();
+    boutique.rejectionReason = reason;
+
+    await boutique.save();
+
+    console.log(`❌ Boutique ${boutique.email} rejetée par admin ${adminId}`);
+    
+    return boutique;
+  }
+
+  /**
+   * 📋 Obtenir les boutiques en attente (Admin seulement)
+   */
+  async getPendingBoutiques() {
+    return await User.find({
+      role: 'boutique',
+      status: 'pending'
+    })
+    .select('-password')
+    .sort({ createdAt: -1 });
   }
 }
 

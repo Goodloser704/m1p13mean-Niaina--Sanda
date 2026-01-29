@@ -95,6 +95,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes avec logging
 console.log('🛣️  Initialisation des routes...');
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/boutique', require('./routes/boutique'));
 app.use('/api/client', require('./routes/client'));

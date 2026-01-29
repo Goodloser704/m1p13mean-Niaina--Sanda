@@ -37,11 +37,48 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  // 🏪 Champs spécifiques aux boutiques
+  status: {
+    type: String,
+    enum: ['active', 'pending', 'approved', 'rejected', 'suspended'],
+    default: 'active'
+  },
+  // Validation par admin
+  approvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  approvedAt: Date,
+  rejectedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  rejectedAt: Date,
+  rejectionReason: String,
+  // Informations boutique supplémentaires
+  businessInfo: {
+    siret: String,
+    description: String,
+    category: String,
+    website: String,
+    socialMedia: {
+      facebook: String,
+      instagram: String,
+      twitter: String
+    }
+  },
   dateCreation: {
     type: Date,
     default: Date.now
   }
+}, {
+  timestamps: true // Ajoute createdAt et updatedAt automatiquement
 });
+
+// Index pour optimiser les requêtes
+userSchema.index({ email: 1 });
+userSchema.index({ role: 1, status: 1 });
+userSchema.index({ role: 1, isActive: 1 });
 
 // Hash password avant sauvegarde
 userSchema.pre('save', async function(next) {
@@ -53,6 +90,35 @@ userSchema.pre('save', async function(next) {
 // Méthode pour vérifier le mot de passe
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Méthodes pour les boutiques
+userSchema.methods.isPendingBoutique = function() {
+  return this.role === 'boutique' && this.status === 'pending';
+};
+
+userSchema.methods.isApprovedBoutique = function() {
+  return this.role === 'boutique' && this.status === 'approved';
+};
+
+userSchema.methods.canLogin = function() {
+  if (this.role === 'boutique') {
+    return this.isActive && (this.status === 'approved' || this.status === 'active');
+  }
+  return this.isActive;
+};
+
+// Méthodes statiques
+userSchema.statics.getPendingBoutiques = function() {
+  return this.find({ role: 'boutique', status: 'pending' })
+    .select('-password')
+    .sort({ createdAt: -1 });
+};
+
+userSchema.statics.getApprovedBoutiques = function() {
+  return this.find({ role: 'boutique', status: { $in: ['approved', 'active'] } })
+    .select('-password')
+    .sort({ createdAt: -1 });
 };
 
 module.exports = mongoose.model('User', userSchema);
