@@ -65,7 +65,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   // 📊 Variables pour monitoring (simplifiées)
   backendStatus = 'Vérification...';
-  backendUrl = 'https://m1p13mean-niaina-1.onrender.com';
+  backendUrl = this.getBackendUrl();
   
   private subscriptions: Subscription[] = [];
 
@@ -74,6 +74,29 @@ export class AppComponent implements OnInit, OnDestroy {
     private authService: AuthService
   ) {
     console.log('🚀 AppComponent constructor appelé');
+  }
+
+  /**
+   * 🌐 Obtenir l'URL du backend selon l'environnement
+   */
+  private getBackendUrl(): string {
+    // En production, utiliser l'URL de Render
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      
+      // Si on est sur Vercel (production)
+      if (hostname.includes('vercel.app')) {
+        return 'https://m1p13mean-niaina-1.onrender.com';
+      }
+      
+      // Si on est en local
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:3000';
+      }
+    }
+    
+    // Par défaut, utiliser l'URL de production
+    return 'https://m1p13mean-niaina-1.onrender.com';
   }
 
   ngOnInit() {

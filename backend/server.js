@@ -48,7 +48,7 @@ app.use(cors({
       'http://localhost:4200',
       'https://localhost:4200',
       'https://m1p13mean-niaina-1.onrender.com',
-      'https://m1p13mean-niaina-xjl4.vercel.app', // Frontend Vercel
+      'https://m1p13mean-niaina-xjl4.vercel.app', // Frontend Vercel principal
       process.env.FRONTEND_URL
     ].filter(Boolean);
     
@@ -58,14 +58,31 @@ app.use(cors({
       return callback(null, true);
     }
     
+    // Vérifier les origines exactes
     if (allowedOrigins.includes(origin)) {
       console.log(`✅ CORS: Origin ${origin} is allowed`);
-      callback(null, true);
-    } else {
-      console.log(`❌ CORS: Origin ${origin} is NOT allowed`);
-      console.log(`   Allowed origins:`, allowedOrigins);
-      callback(new Error('Not allowed by CORS'));
+      return callback(null, true);
     }
+    
+    // Vérifier les patterns Vercel (pour les branches de déploiement)
+    const vercelPattern = /^https:\/\/m1p13mean-niaina-xjl4.*\.vercel\.app$/;
+    if (vercelPattern.test(origin)) {
+      console.log(`✅ CORS: Vercel deployment ${origin} is allowed`);
+      return callback(null, true);
+    }
+    
+    // Vérifier les patterns Render (pour les branches de déploiement)
+    const renderPattern = /^https:\/\/m1p13mean-niaina.*\.onrender\.com$/;
+    if (renderPattern.test(origin)) {
+      console.log(`✅ CORS: Render deployment ${origin} is allowed`);
+      return callback(null, true);
+    }
+    
+    console.log(`❌ CORS: Origin ${origin} is NOT allowed`);
+    console.log(`   Allowed origins:`, allowedOrigins);
+    console.log(`   Vercel pattern: ${vercelPattern}`);
+    console.log(`   Render pattern: ${renderPattern}`);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

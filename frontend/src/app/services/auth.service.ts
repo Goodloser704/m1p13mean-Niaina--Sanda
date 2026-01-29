@@ -23,7 +23,7 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'https://m1p13mean-niaina-1.onrender.com/api/auth';
+  private readonly API_URL = this.getBackendUrl() + '/api/auth';
   private readonly TOKEN_KEY = 'mall_token';
   private readonly USER_KEY = 'mall_user';
 
@@ -38,6 +38,29 @@ export class AuthService {
   constructor(private http: HttpClient) {
     // Vérifier le token au démarrage
     this.checkTokenValidity();
+  }
+
+  /**
+   * 🌐 Obtenir l'URL du backend selon l'environnement
+   */
+  private getBackendUrl(): string {
+    // En production, utiliser l'URL de Render
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      
+      // Si on est sur Vercel (production)
+      if (hostname.includes('vercel.app')) {
+        return 'https://m1p13mean-niaina-1.onrender.com';
+      }
+      
+      // Si on est en local
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:3000';
+      }
+    }
+    
+    // Par défaut, utiliser l'URL de production
+    return 'https://m1p13mean-niaina-1.onrender.com';
   }
 
   /**
