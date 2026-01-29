@@ -1,4 +1,4 @@
-<!-- Mall Application Template - SPA Version -->
+<!-- Mall Application Template - Version Simplifiée -->
 <div class="mall-app">
   <!-- Header -->
   <header class="header">
@@ -7,117 +7,294 @@
         <h1>🏬 {{ title() }}</h1>
       </div>
       <nav class="nav">
-        <button class="btn-primary" (click)="showLogin = !showLogin">
-          {{ showLogin ? 'Fermer' : 'Se connecter' }}
-        </button>
+        <!-- Si utilisateur connecté -->
+        <div *ngIf="isLoggedIn" class="user-info">
+          <span class="user-welcome">
+            {{ getRoleIcon(currentUser?.role || '') }} 
+            Bonjour {{ currentUser?.prenom }}
+          </span>
+          <button class="btn-secondary" (click)="logout()">
+            🚪 Déconnexion
+          </button>
+        </div>
+        
+        <!-- Si utilisateur non connecté -->
+        <div *ngIf="!isLoggedIn" class="auth-buttons">
+          <button class="btn-primary" (click)="showLogin = !showLogin; showRegister = false">
+            {{ showLogin ? 'Fermer' : '🔐 Connexion' }}
+          </button>
+          <button class="btn-outline" (click)="showRegister = !showRegister; showLogin = false">
+            {{ showRegister ? 'Fermer' : '📝 Inscription' }}
+          </button>
+        </div>
       </nav>
     </div>
   </header>
 
-  <!-- Login Modal -->
-  <div class="login-modal" [class.show]="showLogin" *ngIf="showLogin">
+  <!-- Modal de Connexion -->
+  <div class="auth-modal" [class.show]="showLogin" *ngIf="showLogin">
     <div class="modal-content">
-      <h2>Connexion</h2>
+      <div class="modal-header">
+        <h2>🔐 Connexion</h2>
+        <button class="close-btn" (click)="showLogin = false">×</button>
+      </div>
+      
       <form (ngSubmit)="login()">
+        <!-- Sélection du rôle -->
         <div class="form-group">
-          <label for="email">Email:</label>
+          <label for="loginRole">Rôle :</label>
+          <select id="loginRole" [(ngModel)]="loginForm.role" name="role" class="form-select">
+            <option value="client">🛍️ Client</option>
+            <option value="boutique">🏪 Boutique</option>
+            <option value="admin">👨‍💼 Administrateur</option>
+          </select>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="loginEmail">Email :</label>
           <input 
             type="email" 
-            id="email" 
-            [(ngModel)]="email" 
-            placeholder="admin@mall.com"
+            id="loginEmail" 
+            [(ngModel)]="loginForm.email" 
+            name="email"
+            placeholder="Votre email"
             required>
         </div>
+
+        <!-- Mot de passe -->
         <div class="form-group">
-          <label for="password">Mot de passe:</label>
+          <label for="loginPassword">Mot de passe :</label>
           <input 
             type="password" 
-            id="password" 
-            [(ngModel)]="password" 
-            placeholder="admin123"
+            id="loginPassword" 
+            [(ngModel)]="loginForm.password" 
+            name="password"
+            placeholder="Votre mot de passe"
             required>
         </div>
-        <button type="submit" class="btn-primary">Se connecter</button>
+
+        <button type="submit" class="btn-primary btn-full">Se connecter</button>
       </form>
-      <div class="test-accounts">
-        <h3>Comptes de test:</h3>
-        <p><strong>Admin:</strong> admin@mall.com / admin123</p>
-        <p><strong>Boutique:</strong> fashion@mall.com / boutique123</p>
-        <p><strong>Client:</strong> client1@test.com / client123</p>
+
+      <!-- Profils de démonstration -->
+      <div class="demo-profiles">
+        <h3>🎭 Comptes de démonstration :</h3>
+        <div class="demo-grid">
+          <div 
+            *ngFor="let profile of demoProfiles" 
+            class="demo-card"
+            [style.border-color]="getRoleColor(profile.role)"
+            (click)="selectDemoProfile(profile)">
+            <div class="demo-icon">{{ getRoleIcon(profile.role) }}</div>
+            <div class="demo-info">
+              <strong>{{ profile.role | titlecase }}</strong>
+              <small>{{ profile.email }}</small>
+            </div>
+          </div>
+        </div>
+        <p class="demo-note">Cliquez sur un profil pour pré-remplir le formulaire</p>
+      </div>
+
+      <div class="modal-footer">
+        <p>Pas encore de compte ? 
+          <a href="#" (click)="toggleAuthMode(); $event.preventDefault()">S'inscrire</a>
+        </p>
       </div>
     </div>
   </div>
 
-  <!-- Main Content -->
+  <!-- Modal d'Inscription -->
+  <div class="auth-modal" [class.show]="showRegister" *ngIf="showRegister">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📝 Inscription</h2>
+        <button class="close-btn" (click)="showRegister = false">×</button>
+      </div>
+      
+      <form (ngSubmit)="register()">
+        <!-- Sélection du rôle -->
+        <div class="form-group">
+          <label for="registerRole">Rôle :</label>
+          <select id="registerRole" [(ngModel)]="registerForm.role" name="role" class="form-select">
+            <option value="client">🛍️ Client</option>
+            <option value="boutique">🏪 Boutique</option>
+          </select>
+        </div>
+
+        <!-- Informations personnelles -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="registerNom">Nom * :</label>
+            <input 
+              type="text" 
+              id="registerNom" 
+              [(ngModel)]="registerForm.nom" 
+              name="nom"
+              placeholder="Votre nom"
+              required>
+          </div>
+          <div class="form-group">
+            <label for="registerPrenom">Prénom * :</label>
+            <input 
+              type="text" 
+              id="registerPrenom" 
+              [(ngModel)]="registerForm.prenom" 
+              name="prenom"
+              placeholder="Votre prénom"
+              required>
+          </div>
+        </div>
+
+        <!-- Email et mot de passe -->
+        <div class="form-group">
+          <label for="registerEmail">Email * :</label>
+          <input 
+            type="email" 
+            id="registerEmail" 
+            [(ngModel)]="registerForm.email" 
+            name="email"
+            placeholder="Votre email"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="registerPassword">Mot de passe * :</label>
+          <input 
+            type="password" 
+            id="registerPassword" 
+            [(ngModel)]="registerForm.password" 
+            name="password"
+            placeholder="Minimum 6 caractères"
+            required>
+        </div>
+
+        <!-- Informations optionnelles -->
+        <div class="form-group">
+          <label for="registerTelephone">Téléphone :</label>
+          <input 
+            type="tel" 
+            id="registerTelephone" 
+            [(ngModel)]="registerForm.telephone" 
+            name="telephone"
+            placeholder="Votre numéro de téléphone">
+        </div>
+
+        <div class="form-group">
+          <label for="registerAdresse">Adresse :</label>
+          <textarea 
+            id="registerAdresse" 
+            [(ngModel)]="registerForm.adresse" 
+            name="adresse"
+            placeholder="Votre adresse complète"
+            rows="2"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full">S'inscrire</button>
+      </form>
+
+      <!-- Profils de démonstration -->
+      <div class="demo-profiles">
+        <h3>🎭 Profils de test :</h3>
+        <div class="demo-grid">
+          <div 
+            *ngFor="let profile of demoProfiles.slice(1)" 
+            class="demo-card"
+            [style.border-color]="getRoleColor(profile.role)"
+            (click)="selectDemoProfile(profile)">
+            <div class="demo-icon">{{ getRoleIcon(profile.role) }}</div>
+            <div class="demo-info">
+              <strong>{{ profile.role | titlecase }}</strong>
+              <small>{{ profile.nom }} {{ profile.prenom }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <p>Déjà un compte ? 
+          <a href="#" (click)="toggleAuthMode(); $event.preventDefault()">Se connecter</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu Principal -->
   <main class="main-content">
     <div class="container">
-      <!-- Hero Section -->
+      <!-- Section Hero -->
       <section class="hero">
         <h2>Bienvenue dans votre Centre Commercial</h2>
-        <p>Découvrez nos boutiques et produits</p>
-        <div class="api-info">
-          <p><strong>API Backend:</strong> {{ backendUrl }}</p>
-          <p><strong>Status:</strong> {{ backendStatus }}</p>
-          <div class="monitoring-buttons">
-            <button class="btn-small" (click)="testApi()">🧪 Test API</button>
-            <button class="btn-small" (click)="refreshConnection()">🔄 Refresh</button>
-            <button class="btn-small" (click)="clearLogs()">🗑️ Clear Logs</button>
+        <p *ngIf="!isLoggedIn">Connectez-vous pour découvrir toutes nos fonctionnalités</p>
+        <p *ngIf="isLoggedIn">
+          Bonjour {{ currentUser?.prenom }}, 
+          <span [style.color]="getRoleColor(currentUser?.role || '')">
+            {{ getRoleIcon(currentUser?.role || '') }} {{ currentUser?.role | titlecase }}
+          </span>
+        </p>
+        
+        <!-- Statut Backend -->
+        <div class="api-status">
+          <span class="status-label">Backend :</span>
+          <span class="status-value">{{ backendStatus }}</span>
+        </div>
+      </section>
+
+      <!-- Dashboard utilisateur connecté -->
+      <section *ngIf="isLoggedIn" class="user-dashboard">
+        <h2>{{ getRoleIcon(currentUser?.role || '') }} Dashboard {{ currentUser?.role | titlecase }}</h2>
+        
+        <div class="dashboard-cards">
+          <!-- Admin Dashboard -->
+          <div *ngIf="currentUser?.role === 'admin'" class="dashboard-card">
+            <h3>👨‍💼 Gestion Administrative</h3>
+            <ul>
+              <li>📊 Statistiques globales</li>
+              <li>🏪 Gestion des boutiques</li>
+              <li>👥 Gestion des utilisateurs</li>
+              <li>📈 Rapports et analytics</li>
+            </ul>
+          </div>
+
+          <!-- Boutique Dashboard -->
+          <div *ngIf="currentUser?.role === 'boutique'" class="dashboard-card">
+            <h3>🏪 Gestion de Boutique</h3>
+            <ul>
+              <li>📦 Gestion des produits</li>
+              <li>📋 Suivi des commandes</li>
+              <li>💰 Tableau de bord des ventes</li>
+              <li>⚙️ Paramètres de la boutique</li>
+            </ul>
+          </div>
+
+          <!-- Client Dashboard -->
+          <div *ngIf="currentUser?.role === 'client'" class="dashboard-card">
+            <h3>🛍️ Espace Client</h3>
+            <ul>
+              <li>🛒 Mes commandes</li>
+              <li>❤️ Mes favoris</li>
+              <li>👤 Mon profil</li>
+              <li>🎯 Recommandations</li>
+            </ul>
           </div>
         </div>
       </section>
 
-      <!-- Monitoring Section -->
-      <section class="monitoring" *ngIf="connectionLogs.length > 0">
-        <h2>📊 Logs de Connexion</h2>
-        <div class="logs-container">
-          <div class="log-entry" *ngFor="let log of connectionLogs">
-            {{ log }}
-          </div>
-        </div>
-      </section>
-
-      <!-- Categories Grid -->
-      <section class="categories">
-        <h2>Catégories</h2>
-        <div class="categories-grid">
-          <div class="category-card" *ngFor="let category of categories">
-            <div class="category-icon">{{ category.icon }}</div>
-            <h3>{{ category.name }}</h3>
-            <p>{{ category.count }} boutiques</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Features Section -->
-      <section class="features">
+      <!-- Fonctionnalités générales -->
+      <section *ngIf="!isLoggedIn" class="features">
         <h2>Fonctionnalités</h2>
         <div class="features-grid">
           <div class="feature-card">
             <h3>👨‍💼 Interface Admin</h3>
-            <ul>
-              <li>Dashboard avec statistiques</li>
-              <li>Gestion des boutiques</li>
-              <li>Validation des comptes</li>
-              <li>Rapports et analytics</li>
-            </ul>
+            <p>Gestion complète du centre commercial</p>
           </div>
           <div class="feature-card">
             <h3>🏪 Interface Boutique</h3>
-            <ul>
-              <li>Gestion des produits</li>
-              <li>Suivi des commandes</li>
-              <li>Dashboard de vente</li>
-              <li>Profil boutique</li>
-            </ul>
+            <p>Outils pour gérer votre boutique</p>
           </div>
           <div class="feature-card">
             <h3>🛍️ Interface Client</h3>
-            <ul>
-              <li>Catalogue des produits</li>
-              <li>Recherche et filtres</li>
-              <li>Panier et commandes</li>
-              <li>Profil utilisateur</li>
-            </ul>
+            <p>Shopping et services personnalisés</p>
           </div>
         </div>
       </section>
@@ -128,7 +305,7 @@
   <footer class="footer">
     <div class="container">
       <p>&copy; 2026 Centre Commercial - Application MEAN Stack</p>
-      <p>Développé avec Angular SPA + Express.js + MongoDB</p>
+      <p>Angular SPA + Express.js + MongoDB</p>
     </div>
   </footer>
 </div>

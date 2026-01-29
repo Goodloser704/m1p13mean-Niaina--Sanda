@@ -1,140 +1,223 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { AuthService, User } from './services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, FormsModule], // ✅ HttpClientModule retiré (fourni par app.config.ts)
+  imports: [RouterOutlet, CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   protected readonly title = signal('Centre Commercial');
   
+  // 🔐 État de connexion
   showLogin = false;
-  email = '';
-  password = '';
+  showRegister = false;
+  currentUser: User | null = null;
+  isLoggedIn = false;
   
-  // 📊 Variables pour monitoring
-  backendStatus = 'Vérification...';
-  backendUrl = 'https://m1p13mean-niaina-1.onrender.com';
-  connectionLogs: string[] = [];
+  // 📝 Formulaires
+  loginForm = {
+    email: '',
+    password: '',
+    role: 'client' as 'admin' | 'boutique' | 'client'
+  };
   
-  categories = [
-    { name: 'Mode', icon: '👗', count: 15 },
-    { name: 'Électronique', icon: '📱', count: 8 },
-    { name: 'Alimentation', icon: '🍕', count: 12 },
-    { name: 'Beauté', icon: '💄', count: 6 },
-    { name: 'Sport', icon: '⚽', count: 4 },
-    { name: 'Maison', icon: '🏠', count: 10 }
+  registerForm = {
+    email: '',
+    password: '',
+    nom: '',
+    prenom: '',
+    role: 'client' as 'boutique' | 'client',
+    telephone: '',
+    adresse: ''
+  };
+
+  // 📊 Profils de démonstration
+  demoProfiles = [
+    {
+      role: 'admin',
+      email: 'admin@mall.com',
+      password: 'admin123',
+      nom: 'Administrateur',
+      prenom: 'Principal'
+    },
+    {
+      role: 'boutique',
+      email: 'fashion@mall.com',
+      password: 'boutique123',
+      nom: 'Fashion',
+      prenom: 'Store'
+    },
+    {
+      role: 'client',
+      email: 'client1@test.com',
+      password: 'client123',
+      nom: 'Dupont',
+      prenom: 'Jean'
+    }
   ];
 
-  constructor(private http: HttpClient) {}
+  // 📊 Variables pour monitoring (simplifiées)
+  backendStatus = 'Vérification...';
+  backendUrl = 'https://m1p13mean-niaina-1.onrender.com';
+  
+  private subscriptions: Subscription[] = [];
+
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {
+    console.log('🚀 AppComponent constructor appelé');
+  }
 
   ngOnInit() {
-    this.logMessage('🚀 Frontend Angular SPA démarré');
-    this.logMessage(`🌐 URL Backend configurée: ${this.backendUrl}`);
+    console.log('🔄 AppComponent ngOnInit appelé');
+    
+    // S'abonner aux changements d'état d'authentification
+    this.subscriptions.push(
+      this.authService.currentUser$.subscribe(user => {
+        this.currentUser = user;
+        console.log('👤 Utilisateur actuel:', user?.email || 'Non connecté');
+      })
+    );
+    
+    this.subscriptions.push(
+      this.authService.isLoggedIn$.subscribe(isLoggedIn => {
+        this.isLoggedIn = isLoggedIn;
+        console.log('🔐 État connexion:', isLoggedIn ? 'Connecté' : 'Déconnecté');
+      })
+    );
+    
     this.checkBackendConnection();
   }
 
-  // 📊 Fonction de logging
-  logMessage(message: string) {
-    const timestamp = new Date().toISOString();
-    const logEntry = `[${timestamp}] ${message}`;
-    console.log(logEntry);
-    this.connectionLogs.unshift(logEntry);
-    
-    // Garder seulement les 10 derniers logs
-    if (this.connectionLogs.length > 10) {
-      this.connectionLogs = this.connectionLogs.slice(0, 10);
-    }
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
-  // 🔍 Vérifier la connexion backend
+  // 🔍 Vérifier la connexion backend (simplifié)
   async checkBackendConnection() {
-    this.logMessage('🔍 Test de connexion au backend...');
-    
     try {
-      const response = await firstValueFrom(this.http.get(`${this.backendUrl}/`)) as any;
+      const response = await this.http.get(`${this.backendUrl}/`).toPromise() as any;
       this.backendStatus = '✅ Connecté';
-      this.logMessage('✅ Backend accessible');
-      this.logMessage(`📊 Réponse: ${response.message}`);
-      
-      if (response.mongodb?.connected) {
-        this.logMessage('✅ Base de données connectée');
-      } else {
-        this.logMessage('⚠️ Base de données non connectée');
-      }
-      
-    } catch (error: any) {
+      console.log('✅ Backend accessible');
+    } catch (error) {
       this.backendStatus = '❌ Erreur';
-      this.logMessage('❌ Erreur connexion backend');
-      this.logMessage(`🔍 Détail erreur: ${error.message || error.status}`);
-      console.error('Backend connection error:', error);
+      console.error('❌ Erreur connexion backend:', error);
     }
   }
 
-  // 🔐 Test de connexion avec logs détaillés
+  // 🎭 Sélectionner un profil de démonstration
+  selectDemoProfile(profile: any) {
+    if (this.showLogin) {
+      this.loginForm.email = profile.email;
+      this.loginForm.password = profile.password;
+      this.loginForm.role = profile.role;
+    } else if (this.showRegister) {
+      this.registerForm.email = profile.email;
+      this.registerForm.password = profile.password;
+      this.registerForm.nom = profile.nom;
+      this.registerForm.prenom = profile.prenom;
+      this.registerForm.role = profile.role === 'admin' ? 'boutique' : profile.role;
+    }
+    console.log('🎭 Profil sélectionné:', profile.role);
+  }
+
+  // 🔐 Connexion
   async login() {
-    if (!this.email || !this.password) {
-      this.logMessage('⚠️ Champs manquants pour la connexion');
+    if (!this.loginForm.email || !this.loginForm.password) {
       alert('Veuillez remplir tous les champs');
       return;
     }
 
-    this.logMessage(`🔐 Tentative de connexion: ${this.email}`);
+    console.log(`🔐 Tentative de connexion: ${this.loginForm.email} (${this.loginForm.role})`);
     
     try {
-      const loginData = { email: this.email, password: this.password };
-      this.logMessage('📤 Envoi requête de connexion...');
+      await this.authService.login(this.loginForm.email, this.loginForm.password).toPromise();
       
-      const response = await firstValueFrom(this.http.post(`${this.backendUrl}/api/auth/login`, loginData)) as any;
+      console.log('✅ Connexion réussie');
+      alert(`Connexion réussie !\nBienvenue ${this.currentUser?.prenom} ${this.currentUser?.nom}`);
       
-      this.logMessage('✅ Connexion réussie');
-      this.logMessage(`👤 Utilisateur: ${response.user.nom} ${response.user.prenom}`);
-      this.logMessage(`🎭 Rôle: ${response.user.role}`);
-      this.logMessage('🎫 Token reçu et sauvegardé');
-      
-      // Sauvegarder le token
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      
-      alert(`Connexion réussie !\nUtilisateur: ${response.user.nom} ${response.user.prenom}\nRôle: ${response.user.role}`);
+      this.showLogin = false;
+      this.resetForms();
       
     } catch (error: any) {
-      this.logMessage('❌ Échec de la connexion');
-      this.logMessage(`🔍 Erreur: ${error.error?.message || error.message}`);
-      console.error('Login error:', error);
-      
+      console.error('❌ Échec de la connexion:', error);
       alert(`Erreur de connexion:\n${error.error?.message || 'Erreur serveur'}`);
     }
   }
 
-  // 🧪 Test de l'API
-  async testApi() {
-    this.logMessage('🧪 Test des endpoints API...');
+  // 📝 Inscription
+  async register() {
+    if (!this.registerForm.email || !this.registerForm.password || 
+        !this.registerForm.nom || !this.registerForm.prenom) {
+      alert('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    console.log(`📝 Tentative d'inscription: ${this.registerForm.email} (${this.registerForm.role})`);
     
     try {
-      const health = await firstValueFrom(this.http.get(`${this.backendUrl}/health`)) as any;
-      this.logMessage(`💚 Health check: ${health.status}`);
-      this.logMessage(`🗄️ Base de données: ${health.checks.database}`);
-    } catch (error) {
-      this.logMessage('❌ Health check échoué');
+      await this.authService.register(this.registerForm).toPromise();
+      
+      console.log('✅ Inscription réussie');
+      alert(`Inscription réussie !\nBienvenue ${this.registerForm.prenom} ${this.registerForm.nom}`);
+      
+      this.showRegister = false;
+      this.resetForms();
+      
+    } catch (error: any) {
+      console.error('❌ Échec de l\'inscription:', error);
+      alert(`Erreur d'inscription:\n${error.error?.message || 'Erreur serveur'}`);
     }
   }
 
-  // 🔄 Rafraîchir la connexion
-  refreshConnection() {
-    this.logMessage('🔄 Rafraîchissement de la connexion...');
-    this.checkBackendConnection();
+  // 🚪 Déconnexion
+  logout() {
+    this.authService.logout();
+    alert('Vous avez été déconnecté');
+    console.log('🚪 Déconnexion effectuée');
   }
 
-  // 🗑️ Vider les logs
-  clearLogs() {
-    this.connectionLogs = [];
-    this.logMessage('🗑️ Logs vidés');
+  // 🔄 Réinitialiser les formulaires
+  resetForms() {
+    this.loginForm = { email: '', password: '', role: 'client' };
+    this.registerForm = { 
+      email: '', password: '', nom: '', prenom: '', 
+      role: 'client', telephone: '', adresse: '' 
+    };
+  }
+
+  // 🎯 Basculer entre connexion et inscription
+  toggleAuthMode() {
+    this.showLogin = !this.showLogin;
+    this.showRegister = !this.showRegister;
+    this.resetForms();
+  }
+
+  // 📱 Obtenir l'icône du rôle
+  getRoleIcon(role: string): string {
+    switch (role) {
+      case 'admin': return '👨‍💼';
+      case 'boutique': return '🏪';
+      case 'client': return '🛍️';
+      default: return '👤';
+    }
+  }
+
+  // 🎨 Obtenir la couleur du rôle
+  getRoleColor(role: string): string {
+    switch (role) {
+      case 'admin': return '#dc3545';
+      case 'boutique': return '#28a745';
+      case 'client': return '#007bff';
+      default: return '#6c757d';
+    }
   }
 }
