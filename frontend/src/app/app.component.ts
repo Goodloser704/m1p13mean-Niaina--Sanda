@@ -7,11 +7,12 @@ import { AuthService, User } from './services/auth.service';
 import { NotificationService } from './services/notification.service';
 import { NotificationsComponent } from './components/notifications/notifications.component';
 import { AdminBoutiquesComponent } from './components/admin-boutiques/admin-boutiques.component';
+import { BoutiqueRegistrationComponent } from './components/boutique-registration/boutique-registration.component';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, FormsModule, NotificationsComponent, AdminBoutiquesComponent],
+  imports: [RouterOutlet, CommonModule, FormsModule, NotificationsComponent, AdminBoutiquesComponent, BoutiqueRegistrationComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -28,7 +29,7 @@ export class AppComponent implements OnInit, OnDestroy {
   unreadNotifications = 0;
   
   // 📱 Navigation
-  currentView: 'home' | 'notifications' | 'admin-boutiques' = 'home';
+  currentView: 'home' | 'notifications' | 'admin-boutiques' | 'boutique-registration' = 'home';
   
   // 📝 Formulaires
   loginForm = {
@@ -264,7 +265,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   // 📱 Navigation
-  setView(view: 'home' | 'notifications' | 'admin-boutiques') {
+  setView(view: 'home' | 'notifications' | 'admin-boutiques' | 'boutique-registration') {
     this.currentView = view;
   }
 
@@ -291,6 +292,11 @@ export class AppComponent implements OnInit, OnDestroy {
   // 🔔 Vérifier si l'utilisateur peut voir les notifications
   canViewNotifications(): boolean {
     return this.isLoggedIn;
+  }
+
+  // 🏪 Vérifier si l'utilisateur peut voir l'interface boutique
+  canViewBoutiqueRegistration(): boolean {
+    return this.isLoggedIn && this.currentUser?.role === 'boutique';
   }
 
   // 👨‍💼 Vérifier si l'utilisateur peut voir l'interface admin

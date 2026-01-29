@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminService, PendingBoutique } from '../../services/admin.service';
+import { BoutiqueService, Boutique } from '../../services/boutique.service';
 
 @Component({
   selector: 'app-admin-boutiques',
@@ -54,30 +54,32 @@ import { AdminService, PendingBoutique } from '../../services/admin.service';
             <!-- Info boutique -->
             <div class="boutique-info">
               <div class="boutique-header">
-                <h4>{{ boutique.prenom }} {{ boutique.nom }}</h4>
-                <span class="status-badge pending">{{ boutique.status }}</span>
+                <h4>{{ boutique.nom }}</h4>
+                <span class="status-badge pending">{{ boutique.statut }}</span>
               </div>
               
               <div class="boutique-details">
-                <p><strong>📧 Email:</strong> {{ boutique.email }}</p>
-                <p *ngIf="boutique.telephone"><strong>📞 Téléphone:</strong> {{ boutique.telephone }}</p>
-                <p><strong>📅 Inscription:</strong> {{ formatDate(boutique.createdAt) }}</p>
+                <p><strong>📧 Propriétaire:</strong> {{ boutique.proprietaire?.prenom }} {{ boutique.proprietaire?.nom }}</p>
+                <p><strong>📧 Email:</strong> {{ boutique.proprietaire?.email }}</p>
+                <p *ngIf="boutique.proprietaire?.telephone"><strong>📞 Téléphone:</strong> {{ boutique.proprietaire.telephone }}</p>
+                <p><strong>🏷️ Catégorie:</strong> {{ getCategoryIcon(boutique.categorie) }} {{ boutique.categorie }}</p>
+                <p><strong>📅 Inscription:</strong> {{ formatDate(boutique.dateCreation) }}</p>
                 
-                <!-- Informations business si disponibles -->
-                <div *ngIf="boutique.businessInfo" class="business-info">
-                  <p *ngIf="boutique.businessInfo.description">
-                    <strong>📝 Description:</strong> {{ boutique.businessInfo.description }}
+                <!-- Informations boutique -->
+                <div class="business-info">
+                  <p *ngIf="boutique.description">
+                    <strong>📝 Description:</strong> {{ boutique.description }}
                   </p>
-                  <p *ngIf="boutique.businessInfo.category">
-                    <strong>🏷️ Catégorie:</strong> {{ boutique.businessInfo.category }}
+                  <p *ngIf="boutique.emplacement?.zone">
+                    <strong>📍 Zone souhaitée:</strong> {{ boutique.emplacement.zone }}
                   </p>
-                  <p *ngIf="boutique.businessInfo.siret">
-                    <strong>🏢 SIRET:</strong> {{ boutique.businessInfo.siret }}
+                  <p *ngIf="boutique.contact?.telephone">
+                    <strong>📞 Téléphone boutique:</strong> {{ boutique.contact.telephone }}
                   </p>
-                  <p *ngIf="boutique.businessInfo.website">
+                  <p *ngIf="boutique.contact?.siteWeb">
                     <strong>🌐 Site web:</strong> 
-                    <a [href]="boutique.businessInfo.website" target="_blank">
-                      {{ boutique.businessInfo.website }}
+                    <a [href]="boutique.contact.siteWeb" target="_blank">
+                      {{ boutique.contact.siteWeb }}
                     </a>
                   </p>
                 </div>
@@ -129,8 +131,9 @@ import { AdminService, PendingBoutique } from '../../services/admin.service';
           </div>
           
           <div class="modal-body">
-            <p><strong>Boutique :</strong> {{ selectedBoutique?.prenom }} {{ selectedBoutique?.nom }}</p>
-            <p><strong>Email :</strong> {{ selectedBoutique?.email }}</p>
+            <p><strong>Boutique :</strong> {{ selectedBoutique?.nom }}</p>
+            <p><strong>Propriétaire :</strong> {{ selectedBoutique?.proprietaire?.prenom }} {{ selectedBoutique?.proprietaire?.nom }}</p>
+            <p><strong>Email :</strong> {{ selectedBoutique?.proprietaire?.email }}</p>
             
             <div class="form-group">
               <label for="rejectionReason">Raison du rejet (optionnel) :</label>
@@ -169,42 +172,58 @@ import { AdminService, PendingBoutique } from '../../services/admin.service';
           <div class="modal-body" *ngIf="selectedBoutique">
             <div class="details-grid">
               <div class="detail-section">
-                <h4>👤 Informations personnelles</h4>
+                <h4>🏪 Informations boutique</h4>
                 <p><strong>Nom :</strong> {{ selectedBoutique.nom }}</p>
-                <p><strong>Prénom :</strong> {{ selectedBoutique.prenom }}</p>
-                <p><strong>Email :</strong> {{ selectedBoutique.email }}</p>
-                <p><strong>Téléphone :</strong> {{ selectedBoutique.telephone || 'Non renseigné' }}</p>
+                <p><strong>Catégorie :</strong> {{ getCategoryIcon(selectedBoutique.categorie) }} {{ selectedBoutique.categorie }}</p>
+                <p><strong>Description :</strong> {{ selectedBoutique.description || 'Non renseignée' }}</p>
+                <p><strong>Statut :</strong> {{ selectedBoutique.statut }}</p>
               </div>
               
-              <div class="detail-section" *ngIf="selectedBoutique.adresse">
-                <h4>📍 Adresse</h4>
-                <p>{{ selectedBoutique.adresse.rue || 'Non renseignée' }}</p>
-                <p>{{ selectedBoutique.adresse.codePostal }} {{ selectedBoutique.adresse.ville }}</p>
-                <p>{{ selectedBoutique.adresse.pays || 'France' }}</p>
+              <div class="detail-section">
+                <h4>👤 Propriétaire</h4>
+                <p><strong>Nom :</strong> {{ selectedBoutique.proprietaire?.nom }}</p>
+                <p><strong>Prénom :</strong> {{ selectedBoutique.proprietaire?.prenom }}</p>
+                <p><strong>Email :</strong> {{ selectedBoutique.proprietaire?.email }}</p>
+                <p><strong>Téléphone :</strong> {{ selectedBoutique.proprietaire?.telephone || 'Non renseigné' }}</p>
               </div>
               
-              <div class="detail-section" *ngIf="selectedBoutique.businessInfo">
-                <h4>🏢 Informations business</h4>
-                <p><strong>Description :</strong> {{ selectedBoutique.businessInfo.description || 'Non renseignée' }}</p>
-                <p><strong>Catégorie :</strong> {{ selectedBoutique.businessInfo.category || 'Non renseignée' }}</p>
-                <p><strong>SIRET :</strong> {{ selectedBoutique.businessInfo.siret || 'Non renseigné' }}</p>
+              <div class="detail-section" *ngIf="selectedBoutique.emplacement">
+                <h4>📍 Emplacement souhaité</h4>
+                <p><strong>Zone :</strong> {{ selectedBoutique.emplacement.zone || 'Non renseignée' }}</p>
+                <p><strong>Étage :</strong> {{ selectedBoutique.emplacement.etage !== null ? selectedBoutique.emplacement.etage : 'Non renseigné' }}</p>
+                <p><strong>Numéro local :</strong> {{ selectedBoutique.emplacement.numeroLocal || 'Non renseigné' }}</p>
+              </div>
+              
+              <div class="detail-section" *ngIf="selectedBoutique.contact">
+                <h4>📞 Contact boutique</h4>
+                <p><strong>Téléphone :</strong> {{ selectedBoutique.contact.telephone || 'Non renseigné' }}</p>
+                <p><strong>Email :</strong> {{ selectedBoutique.contact.email || 'Non renseigné' }}</p>
                 <p><strong>Site web :</strong> 
-                  <a *ngIf="selectedBoutique.businessInfo.website" 
-                     [href]="selectedBoutique.businessInfo.website" 
+                  <a *ngIf="selectedBoutique.contact.siteWeb" 
+                     [href]="selectedBoutique.contact.siteWeb" 
                      target="_blank">
-                    {{ selectedBoutique.businessInfo.website }}
+                    {{ selectedBoutique.contact.siteWeb }}
                   </a>
-                  <span *ngIf="!selectedBoutique.businessInfo.website">Non renseigné</span>
+                  <span *ngIf="!selectedBoutique.contact.siteWeb">Non renseigné</span>
                 </p>
+              </div>
+              
+              <div class="detail-section" *ngIf="selectedBoutique.horaires">
+                <h4>🕒 Horaires souhaités</h4>
+                <p><strong>Lundi :</strong> {{ formatHoraire(selectedBoutique.horaires.lundi) }}</p>
+                <p><strong>Mardi :</strong> {{ formatHoraire(selectedBoutique.horaires.mardi) }}</p>
+                <p><strong>Mercredi :</strong> {{ formatHoraire(selectedBoutique.horaires.mercredi) }}</p>
+                <p><strong>Jeudi :</strong> {{ formatHoraire(selectedBoutique.horaires.jeudi) }}</p>
+                <p><strong>Vendredi :</strong> {{ formatHoraire(selectedBoutique.horaires.vendredi) }}</p>
+                <p><strong>Samedi :</strong> {{ formatHoraire(selectedBoutique.horaires.samedi) }}</p>
+                <p><strong>Dimanche :</strong> {{ formatHoraire(selectedBoutique.horaires.dimanche) }}</p>
               </div>
               
               <div class="detail-section">
                 <h4>📊 Informations système</h4>
                 <p><strong>ID :</strong> {{ selectedBoutique._id }}</p>
-                <p><strong>Statut :</strong> {{ selectedBoutique.status }}</p>
-                <p><strong>Actif :</strong> {{ selectedBoutique.isActive ? 'Oui' : 'Non' }}</p>
-                <p><strong>Inscription :</strong> {{ formatDate(selectedBoutique.createdAt) }}</p>
-                <p><strong>Dernière MAJ :</strong> {{ formatDate(selectedBoutique.updatedAt) }}</p>
+                <p><strong>Statut :</strong> {{ selectedBoutique.statut }}</p>
+                <p><strong>Inscription :</strong> {{ formatDate(selectedBoutique.dateCreation) }}</p>
               </div>
             </div>
           </div>
@@ -582,7 +601,7 @@ import { AdminService, PendingBoutique } from '../../services/admin.service';
   `]
 })
 export class AdminBoutiquesComponent implements OnInit {
-  pendingBoutiques: PendingBoutique[] = [];
+  pendingBoutiques: Boutique[] = [];
   approvedToday = 0;
   rejectedToday = 0;
   isProcessing = false;
@@ -590,17 +609,17 @@ export class AdminBoutiquesComponent implements OnInit {
   // Modal states
   showRejectModalFlag = false;
   showDetailsModalFlag = false;
-  selectedBoutique: PendingBoutique | null = null;
+  selectedBoutique: Boutique | null = null;
   rejectionReason = '';
 
-  constructor(private adminService: AdminService) {}
+  constructor(private boutiqueService: BoutiqueService) {}
 
   ngOnInit() {
     this.loadPendingBoutiques();
   }
 
   loadPendingBoutiques() {
-    this.adminService.getPendingBoutiques().subscribe({
+    this.boutiqueService.getPendingBoutiques().subscribe({
       next: (response) => {
         this.pendingBoutiques = response.boutiques;
         console.log('✅ Boutiques en attente chargées:', response.count);
@@ -612,18 +631,18 @@ export class AdminBoutiquesComponent implements OnInit {
     });
   }
 
-  approveBoutique(boutique: PendingBoutique) {
+  approveBoutique(boutique: Boutique) {
     if (this.isProcessing) return;
     
     const confirm = window.confirm(
-      `Êtes-vous sûr de vouloir approuver la boutique "${boutique.prenom} ${boutique.nom}" ?`
+      `Êtes-vous sûr de vouloir approuver la boutique "${boutique.nom}" ?`
     );
     
     if (!confirm) return;
     
     this.isProcessing = true;
     
-    this.adminService.approveBoutique(boutique._id).subscribe({
+    this.boutiqueService.approveBoutique(boutique._id).subscribe({
       next: (response) => {
         console.log('✅ Boutique approuvée:', response.message);
         alert('Boutique approuvée avec succès !');
@@ -639,7 +658,7 @@ export class AdminBoutiquesComponent implements OnInit {
     });
   }
 
-  showRejectModal(boutique: PendingBoutique) {
+  showRejectModal(boutique: Boutique) {
     this.selectedBoutique = boutique;
     this.rejectionReason = '';
     this.showRejectModalFlag = true;
@@ -656,7 +675,7 @@ export class AdminBoutiquesComponent implements OnInit {
     
     this.isProcessing = true;
     
-    this.adminService.rejectBoutique(this.selectedBoutique._id, this.rejectionReason).subscribe({
+    this.boutiqueService.rejectBoutique(this.selectedBoutique._id, this.rejectionReason).subscribe({
       next: (response) => {
         console.log('❌ Boutique rejetée:', response.message);
         alert('Boutique rejetée');
@@ -673,7 +692,7 @@ export class AdminBoutiquesComponent implements OnInit {
     });
   }
 
-  showBoutiqueDetails(boutique: PendingBoutique) {
+  showBoutiqueDetails(boutique: Boutique) {
     this.selectedBoutique = boutique;
     this.showDetailsModalFlag = true;
   }
@@ -692,5 +711,16 @@ export class AdminBoutiquesComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  getCategoryIcon(category: string): string {
+    return this.boutiqueService.getCategoryIcon(category);
+  }
+
+  formatHoraire(horaire: any): string {
+    if (!horaire || !horaire.ouverture || !horaire.fermeture) {
+      return 'Fermé';
+    }
+    return `${horaire.ouverture} - ${horaire.fermeture}`;
   }
 }

@@ -38,6 +38,15 @@
               *ngIf="canViewAdminBoutiques()">
               🏪 Boutiques
             </button>
+            
+            <!-- Inscription boutique (boutique seulement) -->
+            <button 
+              class="nav-btn"
+              [class.active]="currentView === 'boutique-registration'"
+              (click)="setView('boutique-registration')"
+              *ngIf="canViewBoutiqueRegistration()">
+              📝 Ma Boutique
+            </button>
           </div>
           
           <div class="user-profile">
@@ -309,11 +318,20 @@
             <div *ngIf="currentUser?.role === 'boutique'" class="dashboard-card">
               <h3>🏪 Gestion de Boutique</h3>
               <ul>
+                <li>📝 Inscription et informations boutique</li>
                 <li>📦 Gestion des produits</li>
                 <li>📋 Suivi des commandes</li>
                 <li>💰 Tableau de bord des ventes</li>
                 <li>⚙️ Paramètres de la boutique</li>
               </ul>
+              <div class="card-actions">
+                <button class="btn-card" (click)="setView('boutique-registration')">
+                  📝 Ma boutique
+                </button>
+                <button class="btn-card" (click)="setView('notifications')">
+                  🔔 Notifications
+                </button>
+              </div>
             </div>
 
             <!-- Client Dashboard -->
@@ -357,6 +375,11 @@
       <!-- Vue Admin Boutiques -->
       <div *ngIf="currentView === 'admin-boutiques' && canViewAdminBoutiques()">
         <app-admin-boutiques></app-admin-boutiques>
+      </div>
+
+      <!-- Vue Inscription Boutique -->
+      <div *ngIf="currentView === 'boutique-registration' && canViewBoutiqueRegistration()">
+        <app-boutique-registration></app-boutique-registration>
       </div>
 
     </div>

@@ -59,7 +59,7 @@ export class AdminService {
     return this.http.get<{
       boutiques: PendingBoutique[];
       count: number;
-    }>(`${this.API_URL}/boutiques/pending`);
+    }>(`${this.API_URL.replace('/auth', '/boutique')}/pending`);
   }
 
   /**
@@ -72,7 +72,7 @@ export class AdminService {
     return this.http.put<{
       message: string;
       boutique: any;
-    }>(`${this.API_URL}/boutiques/${boutiqueId}/approve`, {});
+    }>(`${this.API_URL.replace('/auth', '/boutique')}/${boutiqueId}/approve`, {});
   }
 
   /**
@@ -85,7 +85,7 @@ export class AdminService {
     return this.http.put<{
       message: string;
       boutique: any;
-    }>(`${this.API_URL}/boutiques/${boutiqueId}/reject`, { reason });
+    }>(`${this.API_URL.replace('/auth', '/boutique')}/${boutiqueId}/reject`, { reason });
   }
 
   /**
