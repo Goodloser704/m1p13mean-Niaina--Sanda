@@ -79,10 +79,50 @@ export class BoutiqueService {
   }
 
   /**
-   * 🏪 Obtenir ma boutique
+   * 🏪 Obtenir toutes mes boutiques
    */
-  getMyBoutique(): Observable<{ boutique: Boutique }> {
-    return this.http.get<{ boutique: Boutique }>(`${this.API_URL}/me`);
+  getMyBoutiques(): Observable<{ 
+    boutiques: Boutique[]; 
+    count: number; 
+  }> {
+    return this.http.get<{ 
+      boutiques: Boutique[]; 
+      count: number; 
+    }>(`${this.API_URL}/my-boutiques`);
+  }
+
+  /**
+   * 🏪 Obtenir une boutique spécifique
+   */
+  getMyBoutique(boutiqueId?: string): Observable<{ boutique: Boutique }> {
+    const url = boutiqueId 
+      ? `${this.API_URL}/me/${boutiqueId}`
+      : `${this.API_URL}/me`;
+    return this.http.get<{ boutique: Boutique }>(url);
+  }
+
+  /**
+   * ✏️ Mettre à jour une boutique
+   */
+  updateBoutique(boutiqueId: string, boutiqueData: Partial<BoutiqueRegistration>): Observable<{
+    message: string;
+    boutique: Boutique;
+  }> {
+    return this.http.put<{
+      message: string;
+      boutique: Boutique;
+    }>(`${this.API_URL}/me/${boutiqueId}`, boutiqueData);
+  }
+
+  /**
+   * 🗑️ Supprimer une boutique
+   */
+  deleteBoutique(boutiqueId: string): Observable<{
+    message: string;
+  }> {
+    return this.http.delete<{
+      message: string;
+    }>(`${this.API_URL}/me/${boutiqueId}`);
   }
 
   /**

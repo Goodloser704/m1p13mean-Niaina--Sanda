@@ -45,7 +45,16 @@
               [class.active]="currentView === 'boutique-registration'"
               (click)="setView('boutique-registration')"
               *ngIf="canViewBoutiqueRegistration()">
-              📝 Ma Boutique
+              ➕ Nouvelle Boutique
+            </button>
+            
+            <!-- Mes boutiques (boutique seulement) -->
+            <button 
+              class="nav-btn"
+              [class.active]="currentView === 'my-boutiques'"
+              (click)="setView('my-boutiques')"
+              *ngIf="canViewBoutiqueRegistration()">
+              🏪 Mes Boutiques
             </button>
           </div>
           
@@ -316,17 +325,21 @@
 
             <!-- Boutique Dashboard -->
             <div *ngIf="currentUser?.role === 'boutique'" class="dashboard-card">
-              <h3>🏪 Gestion de Boutique</h3>
+              <h3>🏪 Gestion de Boutiques</h3>
               <ul>
-                <li>📝 Inscription et informations boutique</li>
+                <li>🏪 Mes boutiques (multi-boutiques)</li>
+                <li>➕ Créer une nouvelle boutique</li>
                 <li>📦 Gestion des produits</li>
                 <li>📋 Suivi des commandes</li>
                 <li>💰 Tableau de bord des ventes</li>
-                <li>⚙️ Paramètres de la boutique</li>
+                <li>⚙️ Paramètres des boutiques</li>
               </ul>
               <div class="card-actions">
+                <button class="btn-card" (click)="setView('my-boutiques')">
+                  🏪 Mes boutiques
+                </button>
                 <button class="btn-card" (click)="setView('boutique-registration')">
-                  📝 Ma boutique
+                  ➕ Nouvelle boutique
                 </button>
                 <button class="btn-card" (click)="setView('notifications')">
                   🔔 Notifications
@@ -380,6 +393,11 @@
       <!-- Vue Inscription Boutique -->
       <div *ngIf="currentView === 'boutique-registration' && canViewBoutiqueRegistration()">
         <app-boutique-registration></app-boutique-registration>
+      </div>
+
+      <!-- Vue Mes Boutiques -->
+      <div *ngIf="currentView === 'my-boutiques' && canViewBoutiqueRegistration()">
+        <app-my-boutiques></app-my-boutiques>
       </div>
 
     </div>

@@ -56,15 +56,43 @@ class BoutiqueController {
   }
 
   /**
-   * 🏪 Obtenir la boutique de l'utilisateur connecté
+   * 🏪 Obtenir toutes les boutiques de l'utilisateur connecté
    */
-  async getMyBoutique(req, res) {
+  async getMyBoutiques(req, res) {
     const timestamp = new Date().toISOString();
-    console.log(`🏪 [${timestamp}] Récupération boutique utilisateur`);
+    console.log(`🏪 [${timestamp}] Récupération boutiques utilisateur`);
     console.log(`   👤 User ID: ${req.user._id}`);
     
     try {
-      const boutique = await boutiqueService.getUserBoutique(req.user._id);
+      const boutiques = await boutiqueService.getUserBoutiques(req.user._id);
+
+      console.log(`✅ ${boutiques.length} boutiques trouvées`);
+      
+      res.json({ 
+        boutiques,
+        count: boutiques.length 
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur récupération boutiques:`, error.message);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * 🏪 Obtenir une boutique spécifique de l'utilisateur connecté
+   */
+  async getMyBoutique(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🏪 [${timestamp}] Récupération boutique spécifique`);
+    console.log(`   👤 User ID: ${req.user._id}`);
+    console.log(`   🏪 Boutique ID: ${req.params.boutiqueId || 'première'}`);
+    
+    try {
+      const boutique = await boutiqueService.getUserBoutique(
+        req.user._id, 
+        req.params.boutiqueId
+      );
 
       if (!boutique) {
         return res.status(404).json({ 
@@ -240,8 +268,75 @@ class BoutiqueController {
   }
 
   /**
-   * 📊 Obtenir les statistiques des boutiques (Admin seulement)
+   * ✏️ Mettre à jour une boutique
    */
+  async updateMyBoutique(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`✏️ [${timestamp}] Mise à jour boutique`);
+    console.log(`   👤 User ID: ${req.user._id}`);
+    console.log(`   🏪 Boutique ID: ${req.params.boutiqueId}`);
+    
+    try {
+      const { boutiqueId } = req.params;
+      const updateData = req.body;
+      
+      const boutique = await boutiqueService.updateBoutique(
+        boutiqueId, 
+        req.user._id, 
+        updateData
+      );
+
+      console.log(`✅ Boutique mise à jour: ${boutique.nom}`);
+      
+      res.json({
+        message: 'Boutique mise à jour avec succès',
+        boutique
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur mise à jour boutique:`, error.message);
+      
+      if (error.message.includes('non trouvée') || error.message.includes('propriétaire')) {
+        return res.status(404).json({ message: error.message });
+      }
+      
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * 🗑️ Supprimer une boutique
+   */
+  async deleteMyBoutique(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🗑️ [${timestamp}] Suppression boutique`);
+    console.log(`   👤 User ID: ${req.user._id}`);
+    console.log(`   🏪 Boutique ID: ${req.params.boutiqueId}`);
+    
+    try {
+      const { boutiqueId } = req.params;
+      
+      const result = await boutiqueService.deleteBoutique(
+        boutiqueId, 
+        req.user._id
+      );
+
+      console.log(`✅ Boutique supprimée`);
+      
+      res.json(result);
+
+    } catch (error) {
+      console.error(`❌ Erreur suppression boutique:`, error.message);
+      
+      if (error.message.includes('non trouvée') || 
+          error.message.includes('propriétaire') ||
+          error.message.includes('en attente')) {
+        return res.status(400).json({ message: error.message });
+      }
+      
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
   async getBoutiqueStats(req, res) {
     const timestamp = new Date().toISOString();
     console.log(`📊 [${timestamp}] Statistiques boutiques`);

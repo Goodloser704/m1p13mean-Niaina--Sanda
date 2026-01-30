@@ -8,11 +8,12 @@ import { NotificationService } from './services/notification.service';
 import { NotificationsComponent } from './components/notifications/notifications.component';
 import { AdminBoutiquesComponent } from './components/admin-boutiques/admin-boutiques.component';
 import { BoutiqueRegistrationComponent } from './components/boutique-registration/boutique-registration.component';
+import { MyBoutiquesComponent } from './components/my-boutiques/my-boutiques.component';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, FormsModule, NotificationsComponent, AdminBoutiquesComponent, BoutiqueRegistrationComponent],
+  imports: [RouterOutlet, CommonModule, FormsModule, NotificationsComponent, AdminBoutiquesComponent, BoutiqueRegistrationComponent, MyBoutiquesComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -29,7 +30,7 @@ export class AppComponent implements OnInit, OnDestroy {
   unreadNotifications = 0;
   
   // 📱 Navigation
-  currentView: 'home' | 'notifications' | 'admin-boutiques' | 'boutique-registration' = 'home';
+  currentView: 'home' | 'notifications' | 'admin-boutiques' | 'boutique-registration' | 'my-boutiques' = 'home';
   
   // 📝 Formulaires
   loginForm = {
@@ -265,7 +266,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   // 📱 Navigation
-  setView(view: 'home' | 'notifications' | 'admin-boutiques' | 'boutique-registration') {
+  setView(view: 'home' | 'notifications' | 'admin-boutiques' | 'boutique-registration' | 'my-boutiques') {
     this.currentView = view;
   }
 

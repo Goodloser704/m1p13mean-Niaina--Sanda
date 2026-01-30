@@ -14,10 +14,25 @@ const router = express.Router();
 // @access  Private (Boutique seulement)
 router.post('/register', auth, boutiqueController.createBoutique);
 
-// @route   GET /api/boutique/me
-// @desc    Obtenir ma boutique
+// @route   GET /api/boutique/my-boutiques
+// @desc    Obtenir toutes mes boutiques
 // @access  Private (Boutique seulement)
-router.get('/me', auth, boutiqueController.getMyBoutique);
+router.get('/my-boutiques', auth, boutiqueController.getMyBoutiques);
+
+// @route   GET /api/boutique/me/:boutiqueId?
+// @desc    Obtenir une boutique spécifique (ou la première si pas d'ID)
+// @access  Private (Boutique seulement)
+router.get('/me/:boutiqueId?', auth, boutiqueController.getMyBoutique);
+
+// @route   PUT /api/boutique/me/:boutiqueId
+// @desc    Mettre à jour une boutique
+// @access  Private (Boutique seulement)
+router.put('/me/:boutiqueId', auth, boutiqueController.updateMyBoutique);
+
+// @route   DELETE /api/boutique/me/:boutiqueId
+// @desc    Supprimer une boutique (si en attente)
+// @access  Private (Boutique seulement)
+router.delete('/me/:boutiqueId', auth, boutiqueController.deleteMyBoutique);
 
 // Routes Admin pour la gestion des boutiques
 // @route   GET /api/boutique/pending

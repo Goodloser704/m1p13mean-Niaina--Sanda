@@ -23,10 +23,13 @@ class BoutiqueService {
         throw new Error('Seuls les utilisateurs avec le rôle boutique peuvent créer une boutique');
       }
 
-      // Vérifier si l'utilisateur a déjà une boutique
-      const existingBoutique = await Boutique.findOne({ proprietaire: userId });
+      // Vérifier si une boutique avec le même nom existe déjà pour cet utilisateur
+      const existingBoutique = await Boutique.findOne({ 
+        proprietaire: userId, 
+        nom: boutiqueData.nom 
+      });
       if (existingBoutique) {
-        throw new Error('Vous avez déjà une boutique enregistrée');
+        throw new Error('Vous avez déjà une boutique avec ce nom');
       }
 
       // Créer la boutique
@@ -238,11 +241,30 @@ class BoutiqueService {
   }
 
   /**
-   * 🏪 Obtenir la boutique d'un utilisateur
+   * 🏪 Obtenir toutes les boutiques d'un utilisateur
    */
-  async getUserBoutique(userId) {
+  async getUserBoutiques(userId) {
     try {
-      const boutique = await Boutique.findOne({ proprietaire: userId });
+      const boutiques = await Boutique.find({ proprietaire: userId })
+        .sort({ dateCreation: -1 });
+      return boutiques;
+    } catch (error) {
+      console.error('❌ Erreur récupération boutiques utilisateur:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * 🏪 Obtenir une boutique spécifique d'un utilisateur
+   */
+  async getUserBoutique(userId, boutiqueId = null) {
+    try {
+      let query = { proprietaire: userId };
+      if (boutiqueId) {
+        query._id = boutiqueId;
+      }
+      
+      const boutique = await Boutique.findOne(query);
       return boutique;
     } catch (error) {
       console.error('❌ Erreur récupération boutique utilisateur:', error.message);
@@ -251,8 +273,63 @@ class BoutiqueService {
   }
 
   /**
-   * 📊 Obtenir les statistiques des boutiques (Admin)
+   * ✏️ Mettre à jour une boutique
    */
+  async updateBoutique(boutiqueId, userId, updateData) {
+    try {
+      const boutique = await Boutique.findOne({
+        _id: boutiqueId,
+        proprietaire: userId
+      });
+
+      if (!boutique) {
+        throw new Error('Boutique non trouvée ou vous n\'êtes pas le propriétaire');
+      }
+
+      // Ne pas permettre de changer le statut via cette méthode
+      delete updateData.statut;
+      delete updateData.proprietaire;
+
+      Object.assign(boutique, updateData);
+      await boutique.save();
+
+      console.log(`✅ Boutique mise à jour: ${boutique.nom}`);
+      return boutique;
+
+    } catch (error) {
+      console.error('❌ Erreur mise à jour boutique:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * 🗑️ Supprimer une boutique (seulement si en attente)
+   */
+  async deleteBoutique(boutiqueId, userId) {
+    try {
+      const boutique = await Boutique.findOne({
+        _id: boutiqueId,
+        proprietaire: userId
+      });
+
+      if (!boutique) {
+        throw new Error('Boutique non trouvée ou vous n\'êtes pas le propriétaire');
+      }
+
+      if (boutique.statut !== 'en_attente') {
+        throw new Error('Seules les boutiques en attente peuvent être supprimées');
+      }
+
+      await Boutique.findByIdAndDelete(boutiqueId);
+      console.log(`✅ Boutique supprimée: ${boutique.nom}`);
+      
+      return { message: 'Boutique supprimée avec succès' };
+
+    } catch (error) {
+      console.error('❌ Erreur suppression boutique:', error.message);
+      throw error;
+    }
+  }
   async getBoutiqueStats() {
     try {
       const stats = await Boutique.aggregate([

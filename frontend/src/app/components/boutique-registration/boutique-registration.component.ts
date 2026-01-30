@@ -12,47 +12,12 @@ import { AuthService } from '../../services/auth.service';
     <div class="boutique-registration-container">
       <!-- Header -->
       <div class="registration-header">
-        <h2>🏪 Inscription de votre Boutique</h2>
-        <p class="subtitle">Complétez les informations de votre boutique pour rejoindre notre centre commercial</p>
-      </div>
-
-      <!-- Vérification si l'utilisateur a déjà une boutique -->
-      <div class="existing-boutique" *ngIf="existingBoutique">
-        <div class="alert alert-info">
-          <h3>📋 Votre boutique existante</h3>
-          <div class="boutique-info">
-            <p><strong>Nom:</strong> {{ existingBoutique.nom }}</p>
-            <p><strong>Catégorie:</strong> {{ getCategoryIcon(existingBoutique.categorie) }} {{ existingBoutique.categorie }}</p>
-            <p><strong>Statut:</strong> 
-              <span class="status-badge" [style.background-color]="getStatusColor(existingBoutique.statut)">
-                {{ getStatusText(existingBoutique.statut) }}
-              </span>
-            </p>
-            <p><strong>Date d'inscription:</strong> {{ formatDate(existingBoutique.dateCreation) }}</p>
-          </div>
-          
-          <div class="status-message">
-            <div *ngIf="existingBoutique.statut === 'en_attente'" class="waiting-message">
-              ⏳ Votre boutique est en attente de validation par un administrateur.
-            </div>
-            <div *ngIf="existingBoutique.statut === 'approuve'" class="approved-message">
-              ✅ Félicitations ! Votre boutique a été approuvée et est maintenant active.
-            </div>
-            <div *ngIf="existingBoutique.statut === 'suspendu'" class="suspended-message">
-              ⚠️ Votre boutique est actuellement suspendue. Contactez un administrateur.
-            </div>
-          </div>
-        </div>
-        
-        <div class="actions">
-          <button class="btn-secondary" (click)="showRegistrationForm = true" *ngIf="existingBoutique.statut !== 'approuve'">
-            ✏️ Modifier les informations
-          </button>
-        </div>
+        <h2>➕ Créer une Nouvelle Boutique</h2>
+        <p class="subtitle">Ajoutez une nouvelle boutique à votre portfolio dans notre centre commercial</p>
       </div>
 
       <!-- Formulaire d'inscription -->
-      <div class="registration-form" *ngIf="!existingBoutique || showRegistrationForm">
+      <div class="registration-form">
         <form (ngSubmit)="submitRegistration()" #registrationForm="ngForm">
           
           <!-- Informations de base -->
@@ -220,29 +185,20 @@ import { AuthService } from '../../services/auth.service';
           <!-- Actions -->
           <div class="form-actions">
             <button 
-              type="button" 
-              class="btn-secondary" 
-              (click)="showRegistrationForm = false"
-              *ngIf="existingBoutique">
-              Annuler
-            </button>
-            
-            <button 
               type="submit" 
               class="btn-primary"
               [disabled]="isSubmitting || !registrationForm.valid">
-              <span *ngIf="!isSubmitting">
-                {{ existingBoutique ? '✏️ Mettre à jour' : '📝 Soumettre l\'inscription' }}
-              </span>
-              <span *ngIf="isSubmitting">⏳ Traitement...</span>
+              <span *ngIf="!isSubmitting">➕ Créer la boutique</span>
+              <span *ngIf="isSubmitting">⏳ Création en cours...</span>
             </button>
           </div>
 
           <!-- Note importante -->
           <div class="important-note">
-            <h4>⚠️ Important</h4>
+            <h4>ℹ️ Information</h4>
             <ul>
-              <li>Votre inscription sera examinée par notre équipe administrative</li>
+              <li>Vous pouvez créer plusieurs boutiques avec des spécialités différentes</li>
+              <li>Chaque boutique sera examinée individuellement par notre équipe</li>
               <li>Vous recevrez une notification une fois votre boutique validée</li>
               <li>L'emplacement final sera attribué selon la disponibilité</li>
               <li>Les horaires peuvent être ajustés selon les règles du centre commercial</li>
@@ -592,28 +548,15 @@ export class BoutiqueRegistrationComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadExistingBoutique();
+    // Ne plus charger de boutique existante puisqu'on peut en avoir plusieurs
+    // L'utilisateur peut créer autant de boutiques qu'il veut
+    this.showRegistrationForm = true;
   }
 
   loadExistingBoutique() {
-    this.boutiqueService.getMyBoutique().subscribe({
-      next: (response) => {
-        this.existingBoutique = response.boutique;
-        console.log('✅ Boutique existante trouvée:', this.existingBoutique.nom);
-        
-        // Pré-remplir le formulaire avec les données existantes
-        if (this.existingBoutique) {
-          this.boutiqueData = { ...this.existingBoutique };
-        }
-      },
-      error: (error) => {
-        if (error.status !== 404) {
-          console.error('❌ Erreur chargement boutique:', error);
-        }
-        // Pas de boutique existante, on peut créer une nouvelle inscription
-        this.showRegistrationForm = true;
-      }
-    });
+    // Méthode conservée pour compatibilité mais ne fait plus rien
+    // Le système multi-boutiques ne nécessite plus cette vérification
+    console.log('Mode multi-boutiques : pas de vérification de boutique existante');
   }
 
   submitRegistration() {
