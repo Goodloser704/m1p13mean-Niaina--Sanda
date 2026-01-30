@@ -1,0 +1,179 @@
+<div class="boutique-registration-container">
+  <!-- Header avec bouton retour -->
+  <div class="page-header">
+    <button class="back-btn" (click)="goBack()">← Retour</button>
+    <h2>📝 Inscription Boutique</h2>
+  </div>
+
+  <div class="registration-form">
+    <form (ngSubmit)="onSubmit()" #registrationForm="ngForm">
+      
+      <!-- Informations générales -->
+      <div class="form-section">
+        <h3>📋 Informations générales</h3>
+        
+        <div class="form-group">
+          <label for="nom">Nom de la boutique *</label>
+          <input 
+            type="text" 
+            id="nom" 
+            [(ngModel)]="boutiqueForm.nom" 
+            name="nom"
+            placeholder="Ex: Fashion Store"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="categorie">Catégorie *</label>
+          <select 
+            id="categorie" 
+            [(ngModel)]="boutiqueForm.categorie" 
+            name="categorie"
+            required>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea 
+            id="description" 
+            [(ngModel)]="boutiqueForm.description" 
+            name="description"
+            placeholder="Décrivez votre boutique, vos produits, votre style..."
+            rows="4"></textarea>
+        </div>
+      </div>
+
+      <!-- Emplacement souhaité -->
+      <div class="form-section">
+        <h3>📍 Emplacement souhaité</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="zone">Zone préférée</label>
+            <input 
+              type="text" 
+              id="zone" 
+              [(ngModel)]="boutiqueForm.emplacement!.zone" 
+              name="zone"
+              placeholder="Ex: Centre, Aile Nord, Food Court">
+          </div>
+
+          <div class="form-group">
+            <label for="numeroLocal">Numéro de local souhaité</label>
+            <input 
+              type="text" 
+              id="numeroLocal" 
+              [(ngModel)]="boutiqueForm.emplacement!.numeroLocal" 
+              name="numeroLocal"
+              placeholder="Ex: A12, B05">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="etage">Étage préféré</label>
+          <select 
+            id="etage" 
+            [(ngModel)]="boutiqueForm.emplacement!.etage" 
+            name="etage">
+            <option value="0">Rez-de-chaussée</option>
+            <option value="1">1er étage</option>
+            <option value="2">2ème étage</option>
+            <option value="3">3ème étage</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Informations de contact -->
+      <div class="form-section">
+        <h3>📞 Informations de contact</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="telephone">Téléphone</label>
+            <input 
+              type="tel" 
+              id="telephone" 
+              [(ngModel)]="boutiqueForm.contact!.telephone" 
+              name="telephone"
+              placeholder="Ex: +33 1 23 45 67 89">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email de contact</label>
+            <input 
+              type="email" 
+              id="email" 
+              [(ngModel)]="boutiqueForm.contact!.email" 
+              name="email"
+              placeholder="contact@maboutique.com">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="siteWeb">Site web</label>
+          <input 
+            type="url" 
+            id="siteWeb" 
+            [(ngModel)]="boutiqueForm.contact!.siteWeb" 
+            name="siteWeb"
+            placeholder="https://www.maboutique.com">
+        </div>
+      </div>
+
+      <!-- Horaires d'ouverture -->
+      <div class="form-section">
+        <h3>🕒 Horaires d'ouverture</h3>
+        
+        <div class="horaires-presets">
+          <button type="button" class="preset-btn" (click)="applyPreset('standard')">
+            📅 Horaires standards (9h-18h)
+          </button>
+          <button type="button" class="preset-btn" (click)="applyPreset('extended')">
+            🌙 Horaires étendus (8h-20h)
+          </button>
+          <button type="button" class="preset-btn" (click)="applyPreset('weekend')">
+            🎯 Ouvert le weekend (10h-19h)
+          </button>
+        </div>
+
+        <div class="horaires-grid">
+          <div *ngFor="let jour of getJours()" class="horaire-row">
+            <label class="jour-label">{{ jour | titlecase }}</label>
+            <div class="horaire-inputs">
+              <input 
+                type="time" 
+                [(ngModel)]="boutiqueForm.horaires![jour].ouverture" 
+                [name]="jour + '_ouverture'"
+                class="time-input">
+              <span class="separator">-</span>
+              <input 
+                type="time" 
+                [(ngModel)]="boutiqueForm.horaires![jour].fermeture" 
+                [name]="jour + '_fermeture'"
+                class="time-input">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="resetForm()">
+          🔄 Réinitialiser
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="isSubmitting || !registrationForm.valid">
+          <span *ngIf="isSubmitting">⏳ Création...</span>
+          <span *ngIf="!isSubmitting">✅ Créer la boutique</span>
+        </button>
+      </div>
+
+      <!-- Note importante -->
+      <div class="info-note">
+        <h4>ℹ️ Information importante</h4>
+        <p>Votre demande d'inscription sera examinée par notre équipe d'administration. Vous recevrez une notification par email une fois votre boutique validée.</p>
+      </div>
+    </form>
+  </div>
+</div>

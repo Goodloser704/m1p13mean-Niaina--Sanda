@@ -6,8 +6,8 @@ import { AuthService, User } from '../../services/auth.service';
 @Component({
   selector: 'app-login-modal',
   imports: [CommonModule, FormsModule],
-  templateUrl: './login-modal.html',
-  styleUrl: './login-modal.scss',
+  templateUrl: './login-modal.component.html',
+  styleUrl: './login-modal.component.scss',
 })
 export class LoginModal implements OnInit {
   @Output() closeModal = new EventEmitter<boolean>();

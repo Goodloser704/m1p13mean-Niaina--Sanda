@@ -1,0 +1,41 @@
+<div class="home-container">
+  <div class="hero-section">
+    <h1>🏬 Bienvenue au Centre Commercial</h1>
+    <p class="hero-subtitle">Découvrez nos boutiques et services</p>
+    
+    <!-- Actions selon le statut de connexion -->
+    <div class="hero-actions" *ngIf="!isLoggedIn">
+      <p>Connectez-vous pour accéder à toutes les fonctionnalités</p>
+    </div>
+    
+    <!-- Navigation pour utilisateurs connectés -->
+    <div class="user-dashboard" *ngIf="isLoggedIn && currentUser">
+      <h2>👋 Bonjour {{ currentUser.prenom }} !</h2>
+      <p>Que souhaitez-vous faire aujourd'hui ?</p>
+      
+      <div class="dashboard-actions">
+        <!-- Actions pour les commerçants -->
+        <div *ngIf="currentUser.role === 'boutique'" class="role-actions">
+          <button class="action-btn boutique-btn" (click)="setView('my-boutiques')">
+            🏪 Mes Boutiques
+          </button>
+          <button class="action-btn register-btn" (click)="setView('boutique-registration')">
+            ➕ Nouvelle Boutique
+          </button>
+        </div>
+        
+        <!-- Actions pour les admins -->
+        <div *ngIf="currentUser.role === 'admin'" class="role-actions">
+          <button class="action-btn admin-btn" (click)="setView('admin-boutiques')">
+            👨‍💼 Gestion Boutiques
+          </button>
+        </div>
+        
+        <!-- Actions communes -->
+        <button class="action-btn notification-btn" (click)="setView('notifications')">
+          🔔 Notifications
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

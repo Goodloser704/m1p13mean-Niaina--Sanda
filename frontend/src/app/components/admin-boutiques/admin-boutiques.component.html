@@ -1,0 +1,150 @@
+<div class="admin-boutiques-container">
+  <!-- Header avec bouton retour -->
+  <div class="page-header">
+    <button class="back-btn" (click)="goBack()">← Retour</button>
+    <h2>👨‍💼 Gestion des Boutiques</h2>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Chargement des boutiques...</p>
+  </div>
+
+  <!-- Liste des boutiques -->
+  <div *ngIf="!isLoading" class="boutiques-grid">
+    <div *ngIf="boutiques.length === 0" class="no-boutiques">
+      <h3>Aucune boutique en attente</h3>
+      <p>Toutes les demandes ont été traitées.</p>
+    </div>
+
+    <div *ngFor="let boutique of boutiques" class="boutique-card">
+      <div class="card-header">
+        <h3>{{ boutique.nom }}</h3>
+        <span class="status-badge" [style.background-color]="getStatusColor(boutique.statut)">
+          {{ getStatusIcon(boutique.statut) }} {{ boutique.statut | titlecase }}
+        </span>
+      </div>
+
+      <div class="card-content">
+        <div class="boutique-info">
+          <p><strong>📂 Catégorie:</strong> {{ boutique.categorie }}</p>
+          <p *ngIf="boutique.description"><strong>📝 Description:</strong> {{ boutique.description }}</p>
+          
+          <!-- Propriétaire -->
+          <div class="proprietaire-info">
+            <h4>👤 Propriétaire</h4>
+            <p><strong>📧 Email:</strong> {{ getProprietaireEmail(boutique.proprietaire) || 'Non renseigné' }}</p>
+            <p *ngIf="getProprietaireTelephone(boutique.proprietaire)"><strong>📞 Téléphone:</strong> {{ getProprietaireTelephone(boutique.proprietaire) }}</p>
+          </div>
+
+          <!-- Emplacement -->
+          <div *ngIf="boutique.emplacement" class="emplacement-info">
+            <h4>📍 Emplacement</h4>
+            <p *ngIf="boutique.emplacement.zone"><strong>Zone:</strong> {{ boutique.emplacement.zone }}</p>
+            <p *ngIf="boutique.emplacement.numeroLocal"><strong>Local:</strong> {{ boutique.emplacement.numeroLocal }}</p>
+            <p *ngIf="boutique.emplacement.etage"><strong>Étage:</strong> {{ boutique.emplacement.etage }}</p>
+          </div>
+
+          <!-- Contact -->
+          <div *ngIf="boutique.contact" class="contact-info">
+            <h4>📞 Contact</h4>
+            <p *ngIf="boutique.contact.telephone"><strong>Téléphone:</strong> {{ boutique.contact.telephone }}</p>
+            <p *ngIf="boutique.contact.email"><strong>Email:</strong> {{ boutique.contact.email }}</p>
+            <p *ngIf="boutique.contact.siteWeb"><strong>Site web:</strong> {{ boutique.contact.siteWeb }}</p>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn-details" (click)="viewDetails(boutique)">
+            👁️ Voir détails
+          </button>
+          
+          <div *ngIf="boutique.statut === 'en_attente'" class="action-buttons">
+            <button class="btn-approve" (click)="approveBoutique(boutique._id)">
+              ✅ Approuver
+            </button>
+            <button class="btn-reject" (click)="rejectBoutique(boutique._id)">
+              ❌ Rejeter
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <small>📅 Créée le {{ boutique.dateCreation | date:'dd/MM/yyyy à HH:mm' }}</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de détails -->
+  <div *ngIf="showDetails && selectedBoutique" class="modal-overlay" (click)="closeDetails()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🏪 {{ selectedBoutique.nom }}</h3>
+        <button class="close-btn" (click)="closeDetails()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="detail-section">
+          <h4>📋 Informations générales</h4>
+          <p><strong>Nom:</strong> {{ selectedBoutique.nom }}</p>
+          <p><strong>Catégorie:</strong> {{ selectedBoutique.categorie }}</p>
+          <p><strong>Statut:</strong> 
+            <span [style.color]="getStatusColor(selectedBoutique.statut)">
+              {{ getStatusIcon(selectedBoutique.statut) }} {{ selectedBoutique.statut | titlecase }}
+            </span>
+          </p>
+          <p *ngIf="selectedBoutique.description"><strong>Description:</strong> {{ selectedBoutique.description }}</p>
+        </div>
+
+        <div class="detail-section">
+          <h4>👤 Propriétaire</h4>
+          <p><strong>Nom:</strong> {{ getProprietaireNom(selectedBoutique.proprietaire) || 'Non renseigné' }}</p>
+          <p><strong>Prénom:</strong> {{ getProprietairePrenom(selectedBoutique.proprietaire) || 'Non renseigné' }}</p>
+          <p><strong>Email:</strong> {{ getProprietaireEmail(selectedBoutique.proprietaire) || 'Non renseigné' }}</p>
+          <p><strong>Téléphone:</strong> {{ getProprietaireTelephone(selectedBoutique.proprietaire) || 'Non renseigné' }}</p>
+        </div>
+
+        <div *ngIf="selectedBoutique.emplacement" class="detail-section">
+          <h4>📍 Emplacement souhaité</h4>
+          <p *ngIf="selectedBoutique.emplacement.zone"><strong>Zone:</strong> {{ selectedBoutique.emplacement.zone }}</p>
+          <p *ngIf="selectedBoutique.emplacement.numeroLocal"><strong>Numéro de local:</strong> {{ selectedBoutique.emplacement.numeroLocal }}</p>
+          <p *ngIf="selectedBoutique.emplacement.etage"><strong>Étage:</strong> {{ selectedBoutique.emplacement.etage }}</p>
+        </div>
+
+        <div *ngIf="selectedBoutique.contact" class="detail-section">
+          <h4>📞 Informations de contact</h4>
+          <p *ngIf="selectedBoutique.contact.telephone"><strong>Téléphone:</strong> {{ selectedBoutique.contact.telephone }}</p>
+          <p *ngIf="selectedBoutique.contact.email"><strong>Email:</strong> {{ selectedBoutique.contact.email }}</p>
+          <p *ngIf="selectedBoutique.contact.siteWeb"><strong>Site web:</strong> {{ selectedBoutique.contact.siteWeb }}</p>
+        </div>
+
+        <div *ngIf="selectedBoutique.horaires" class="detail-section">
+          <h4>🕒 Horaires d'ouverture</h4>
+          <div class="horaires-grid">
+            <p><strong>Lundi:</strong> {{ formatHoraire(selectedBoutique.horaires?.['lundi']) }}</p>
+            <p><strong>Mardi:</strong> {{ formatHoraire(selectedBoutique.horaires?.['mardi']) }}</p>
+            <p><strong>Mercredi:</strong> {{ formatHoraire(selectedBoutique.horaires?.['mercredi']) }}</p>
+            <p><strong>Jeudi:</strong> {{ formatHoraire(selectedBoutique.horaires?.['jeudi']) }}</p>
+            <p><strong>Vendredi:</strong> {{ formatHoraire(selectedBoutique.horaires?.['vendredi']) }}</p>
+            <p><strong>Samedi:</strong> {{ formatHoraire(selectedBoutique.horaires?.['samedi']) }}</p>
+            <p><strong>Dimanche:</strong> {{ formatHoraire(selectedBoutique.horaires?.['dimanche']) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div *ngIf="selectedBoutique.statut === 'en_attente'" class="modal-actions">
+          <button class="btn-approve" (click)="approveBoutique(selectedBoutique._id); closeDetails()">
+            ✅ Approuver cette boutique
+          </button>
+          <button class="btn-reject" (click)="rejectBoutique(selectedBoutique._id); closeDetails()">
+            ❌ Rejeter cette boutique
+          </button>
+        </div>
+        <button class="btn-secondary" (click)="closeDetails()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

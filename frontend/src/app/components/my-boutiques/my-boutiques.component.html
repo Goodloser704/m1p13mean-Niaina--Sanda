@@ -1,0 +1,175 @@
+<div class="my-boutiques-container">
+  <!-- Header -->
+  <div class="boutiques-header">
+    <h2>🏪 Mes Boutiques</h2>
+    <div class="header-actions">
+      <span class="boutiques-count">{{ boutiques.length }} boutique{{ boutiques.length > 1 ? 's' : '' }}</span>
+      <button class="btn-debug" (click)="debugComponent()" style="background: #ffc107; color: black; margin-right: 0.5rem;">
+        🔍 Debug
+      </button>
+      <button class="btn-primary" (click)="showCreateForm = true">
+        ➕ Nouvelle Boutique
+      </button>
+    </div>
+  </div>
+
+  <!-- Formulaire de création (si demandé) -->
+  <div class="create-form-container" *ngIf="showCreateForm">
+    <div class="create-form-header">
+      <h3>➕ Créer une nouvelle boutique</h3>
+      <button class="btn-close" (click)="showCreateForm = false">×</button>
+    </div>
+    <p class="form-note">Vous pouvez créer plusieurs boutiques avec des spécialités différentes.</p>
+    <button class="btn-secondary" (click)="goToRegistration()">
+      📝 Aller au formulaire d'inscription
+    </button>
+  </div>
+
+  <!-- Liste des boutiques -->
+  <div class="boutiques-grid" *ngIf="boutiques.length > 0">
+    <div 
+      *ngFor="let boutique of boutiques" 
+      class="boutique-card"
+      [class.pending]="boutique.statut === 'en_attente'"
+      [class.approved]="boutique.statut === 'approuve'"
+      [class.suspended]="boutique.statut === 'suspendu'">
+      
+      <!-- Header de la carte -->
+      <div class="card-header">
+        <div class="boutique-title">
+          <h3>{{ boutique.nom }}</h3>
+          <span class="category-badge">
+            {{ getCategoryIcon(boutique.categorie) }} {{ boutique.categorie }}
+          </span>
+        </div>
+        <div class="status-badge" [style.background-color]="getStatusColor(boutique.statut)">
+          {{ getStatusText(boutique.statut) }}
+        </div>
+      </div>
+
+      <!-- Informations boutique -->
+      <div class="card-content">
+        <p class="description" *ngIf="boutique.description">
+          {{ boutique.description }}
+        </p>
+        
+        <div class="boutique-details">
+          <div class="detail-item" *ngIf="boutique.emplacement?.zone">
+            <span class="detail-icon">📍</span>
+            <span>{{ boutique.emplacement?.zone }}</span>
+            <span *ngIf="boutique.emplacement?.etage !== undefined"> - Étage {{ boutique.emplacement?.etage }}</span>
+          </div>
+          
+          <div class="detail-item" *ngIf="boutique.contact?.telephone">
+            <span class="detail-icon">📞</span>
+            <span>{{ boutique.contact?.telephone }}</span>
+          </div>
+          
+          <div class="detail-item" *ngIf="boutique.contact?.email">
+            <span class="detail-icon">📧</span>
+            <span>{{ boutique.contact?.email }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-icon">📅</span>
+            <span>Créée le {{ formatDate(boutique.dateCreation) }}</span>
+          </div>
+        </div>
+
+        <!-- Horaires résumés -->
+        <div class="horaires-summary" *ngIf="boutique.horaires">
+          <span class="detail-icon">🕒</span>
+          <span>{{ getHorairesSummary(boutique.horaires) }}</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card-actions">
+        <button class="btn-action btn-view" (click)="viewBoutique(boutique)">
+          👁️ Voir
+        </button>
+        
+        <button 
+          class="btn-action btn-edit" 
+          (click)="editBoutique(boutique)"
+          *ngIf="boutique.statut === 'en_attente' || boutique.statut === 'approuve'">
+          ✏️ Modifier
+        </button>
+        
+        <button 
+          class="btn-action btn-delete" 
+          (click)="deleteBoutique(boutique)"
+          *ngIf="boutique.statut === 'en_attente'">
+          🗑️ Supprimer
+        </button>
+        
+        <button 
+          class="btn-action btn-manage" 
+          (click)="manageBoutique(boutique)"
+          *ngIf="boutique.statut === 'approuve'">
+          ⚙️ Gérer
+        </button>
+      </div>
+
+      <!-- Messages selon le statut -->
+      <div class="status-message">
+        <div *ngIf="boutique.statut === 'en_attente'" class="message pending-message">
+          ⏳ En attente de validation par un administrateur
+        </div>
+        <div *ngIf="boutique.statut === 'approuve'" class="message approved-message">
+          ✅ Boutique active et opérationnelle
+        </div>
+        <div *ngIf="boutique.statut === 'suspendu'" class="message suspended-message">
+          ⚠️ Boutique suspendue - Contactez un administrateur
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message si aucune boutique -->
+  <div class="no-boutiques" *ngIf="boutiques.length === 0 && !isLoading">
+    <div class="empty-state">
+      <span class="empty-icon">🏪</span>
+      <h3>Aucune boutique enregistrée</h3>
+      <p>Créez votre première boutique pour commencer à vendre dans notre centre commercial</p>
+      <button class="btn-primary" (click)="goToRegistration()">
+        ➕ Créer ma première boutique
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="isLoading">
+    <p>⏳ Chargement de vos boutiques...</p>
+  </div>
+
+  <!-- Modal de confirmation suppression -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🗑️ Supprimer la boutique</h3>
+        <button class="close-btn" (click)="closeDeleteModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <p><strong>Êtes-vous sûr de vouloir supprimer cette boutique ?</strong></p>
+        <p><strong>Nom :</strong> {{ selectedBoutique?.nom }}</p>
+        <p><strong>Catégorie :</strong> {{ selectedBoutique?.categorie }}</p>
+        <p class="warning">⚠️ Cette action est irréversible.</p>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeDeleteModal()">
+          Annuler
+        </button>
+        <button 
+          class="btn-danger" 
+          (click)="confirmDeleteBoutique()"
+          [disabled]="isDeleting">
+          <span *ngIf="!isDeleting">🗑️ Supprimer</span>
+          <span *ngIf="isDeleting">⏳ Suppression...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

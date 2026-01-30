@@ -1,32 +1,18 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Header } from "./shared/header/header";
-import { Footer } from "./shared/footer/footer";
-import { AuthService, User } from './services/auth.service';
-import { NotificationService } from './services/notification.service';
-import { NotificationsComponent } from './components/notifications/notifications.component';
-import { AdminBoutiquesComponent } from './components/admin-boutiques/admin-boutiques.component';
-import { BoutiqueRegistrationComponent } from './components/boutique-registration/boutique-registration.component';
-import { MyBoutiquesComponent } from './components/my-boutiques/my-boutiques.component';
+import { Router } from '@angular/router';
+import { AuthService, User } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-home',
   imports: [
-    CommonModule, 
-    FormsModule, 
-    Header, 
-    Footer,
-    NotificationsComponent,
-    AdminBoutiquesComponent,
-    BoutiqueRegistrationComponent,
-    MyBoutiquesComponent
+    CommonModule
   ],
-  templateUrl: './app.html',
-  styleUrl: './app.scss'
+  templateUrl: './home.component.html',
+  styleUrl: './home.component.scss'
 })
-export class App implements OnInit, OnDestroy {
+export class HomeComponent implements OnInit, OnDestroy {
   // État de l'utilisateur
   currentUser: User | null = null;
   isLoggedIn = false;
@@ -37,27 +23,27 @@ export class App implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
 
   constructor(
-    private authService: AuthService,
-    private notificationService: NotificationService
+    private router: Router,
+    private authService: AuthService
   ) {
-    console.log('🚀 App constructor appelé');
+    console.log('🚀 HomeComponent constructor appelé');
   }
 
   ngOnInit() {
-    console.log('🔄 App ngOnInit appelé');
+    console.log('🔄 HomeComponent ngOnInit appelé');
     
     // S'abonner aux changements d'état d'authentification
     this.subscriptions.push(
       this.authService.currentUser$.subscribe(user => {
         this.currentUser = user;
-        console.log('👤 App - Utilisateur actuel:', user?.email || 'Non connecté');
+        console.log('👤 HomeComponent - Utilisateur actuel:', user?.email || 'Non connecté');
       })
     );
     
     this.subscriptions.push(
       this.authService.isLoggedIn$.subscribe(isLoggedIn => {
         this.isLoggedIn = isLoggedIn;
-        console.log('🔐 App - État connexion:', isLoggedIn ? 'Connecté' : 'Déconnecté');
+        console.log('🔐 HomeComponent - État connexion:', isLoggedIn ? 'Connecté' : 'Déconnecté');
         
         // Retourner à l'accueil si déconnecté
         if (!isLoggedIn && this.currentView !== 'home') {
@@ -71,10 +57,14 @@ export class App implements OnInit, OnDestroy {
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
-  // 📱 Navigation
+  // 📱 Navigation avec router
   setView(view: 'home' | 'notifications' | 'admin-boutiques' | 'boutique-registration' | 'my-boutiques') {
-    this.currentView = view;
     console.log('📱 Navigation vers:', view);
+    if (view === 'home') {
+      this.router.navigate(['/']);
+    } else {
+      this.router.navigate([`/${view}`]);
+    }
   }
 
   // 🔔 Vérifier si l'utilisateur peut voir les notifications

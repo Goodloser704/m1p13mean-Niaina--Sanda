@@ -1,16 +1,17 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { environment, title } from '../../../environments/environment';
 import { AuthService, User } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
-import { LoginModal } from "../../components/login-modal/login-modal";
+import { LoginModal } from "../../components/login-modal/login-modal.component";
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
   imports: [CommonModule, LoginModal],
-  templateUrl: './header.html',
-  styleUrl: './header.scss',
+  templateUrl: './header.component.html',
+  styleUrl: './header.component.scss',
 })
 export class Header implements OnInit, OnDestroy {
   title = title;
@@ -24,6 +25,7 @@ export class Header implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
 
   constructor(
+    private router: Router,
     private authService: AuthService,
     private notificationService: NotificationService
   ) {}
