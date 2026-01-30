@@ -14,6 +14,9 @@ import { BoutiqueService, Boutique } from '../../services/boutique.service';
         <h2>🏪 Mes Boutiques</h2>
         <div class="header-actions">
           <span class="boutiques-count">{{ boutiques.length }} boutique{{ boutiques.length > 1 ? 's' : '' }}</span>
+          <button class="btn-debug" (click)="debugComponent()" style="background: #ffc107; color: black; margin-right: 0.5rem;">
+            🔍 Debug
+          </button>
           <button class="btn-primary" (click)="showCreateForm = true">
             ➕ Nouvelle Boutique
           </button>
@@ -590,6 +593,15 @@ export class MyBoutiquesComponent implements OnInit {
 
   ngOnInit() {
     this.loadBoutiques();
+    
+    // Debug: vérifier l'état toutes les 2 secondes
+    setInterval(() => {
+      console.log('🔍 État composant:', {
+        isLoading: this.isLoading,
+        boutiquesLength: this.boutiques.length,
+        boutiques: this.boutiques
+      });
+    }, 2000);
   }
 
   loadBoutiques() {
@@ -599,9 +611,15 @@ export class MyBoutiquesComponent implements OnInit {
     this.boutiqueService.getMyBoutiques().subscribe({
       next: (response) => {
         console.log('✅ Réponse reçue:', response);
-        this.boutiques = response.boutiques;
+        this.boutiques = response.boutiques || [];
         console.log(`✅ ${response.count} boutiques chargées:`, this.boutiques);
-        this.isLoading = false;
+        console.log('🔍 Boutiques assignées:', this.boutiques.length);
+        
+        // Forcer la détection de changement
+        setTimeout(() => {
+          this.isLoading = false;
+          console.log('🔄 isLoading mis à false:', this.isLoading);
+        }, 100);
       },
       error: (error) => {
         console.error('❌ Erreur chargement boutiques:', error);
@@ -611,7 +629,11 @@ export class MyBoutiquesComponent implements OnInit {
           message: error.message,
           error: error.error
         });
-        this.isLoading = false;
+        
+        setTimeout(() => {
+          this.isLoading = false;
+          console.log('🔄 isLoading mis à false (erreur):', this.isLoading);
+        }, 100);
         
         // Message d'erreur plus détaillé
         const errorMessage = error.error?.message || error.message || 'Erreur serveur';
@@ -718,5 +740,21 @@ export class MyBoutiquesComponent implements OnInit {
     }
     
     return `${horairesList.length} jours d'ouverture`;
+  }
+
+  debugComponent() {
+    console.log('🔍 DEBUG - État actuel du composant:');
+    console.log('  isLoading:', this.isLoading);
+    console.log('  boutiques.length:', this.boutiques.length);
+    console.log('  boutiques:', this.boutiques);
+    
+    // Forcer le rafraîchissement
+    this.isLoading = false;
+    console.log('  isLoading forcé à false');
+    
+    alert(`Debug Info:
+isLoading: ${this.isLoading}
+boutiques.length: ${this.boutiques.length}
+Voir console pour plus de détails`);
   }
 }
