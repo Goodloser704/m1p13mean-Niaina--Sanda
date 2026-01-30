@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BoutiqueService, Boutique } from '../../services/boutique.service';
@@ -589,24 +589,16 @@ export class MyBoutiquesComponent implements OnInit {
   selectedBoutique: Boutique | null = null;
   isDeleting = false;
 
-  constructor(private boutiqueService: BoutiqueService) {}
+  constructor(private boutiqueService: BoutiqueService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.loadBoutiques();
-    
-    // Debug: vérifier l'état toutes les 2 secondes
-    setInterval(() => {
-      console.log('🔍 État composant:', {
-        isLoading: this.isLoading,
-        boutiquesLength: this.boutiques.length,
-        boutiques: this.boutiques
-      });
-    }, 2000);
   }
 
   loadBoutiques() {
     console.log('🔄 Début chargement boutiques...');
     this.isLoading = true;
+    this.cdr.detectChanges(); // Forcer la détection pour le loading
     
     this.boutiqueService.getMyBoutiques().subscribe({
       next: (response) => {
@@ -615,11 +607,10 @@ export class MyBoutiquesComponent implements OnInit {
         console.log(`✅ ${response.count} boutiques chargées:`, this.boutiques);
         console.log('🔍 Boutiques assignées:', this.boutiques.length);
         
-        // Forcer la détection de changement
-        setTimeout(() => {
-          this.isLoading = false;
-          console.log('🔄 isLoading mis à false:', this.isLoading);
-        }, 100);
+        // Mettre à jour l'état et forcer la détection
+        this.isLoading = false;
+        this.cdr.detectChanges(); // Forcer la détection de changement
+        console.log('🔄 isLoading mis à false et detectChanges appelé:', this.isLoading);
       },
       error: (error) => {
         console.error('❌ Erreur chargement boutiques:', error);
@@ -630,10 +621,9 @@ export class MyBoutiquesComponent implements OnInit {
           error: error.error
         });
         
-        setTimeout(() => {
-          this.isLoading = false;
-          console.log('🔄 isLoading mis à false (erreur):', this.isLoading);
-        }, 100);
+        this.isLoading = false;
+        this.cdr.detectChanges(); // Forcer la détection même en cas d'erreur
+        console.log('🔄 isLoading mis à false (erreur) et detectChanges appelé:', this.isLoading);
         
         // Message d'erreur plus détaillé
         const errorMessage = error.error?.message || error.message || 'Erreur serveur';
@@ -750,7 +740,8 @@ export class MyBoutiquesComponent implements OnInit {
     
     // Forcer le rafraîchissement
     this.isLoading = false;
-    console.log('  isLoading forcé à false');
+    this.cdr.detectChanges(); // Forcer la détection de changement
+    console.log('  isLoading forcé à false et detectChanges appelé');
     
     alert(`Debug Info:
 isLoading: ${this.isLoading}
