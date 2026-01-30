@@ -1,0 +1,26 @@
+Extension pour vs code:
+Prettier
+Angular Essentials
+Angular Language Server
+Angular Snippets
+Stylelint (pour scss)
+EsLint
+
+Pour Stylelint executer:
+npm install --save-dev stylelint stylelint-config-standard-scss
+Créez ensuite un fichier .stylelintrc.json à la racine avec :
+{ "extends": "stylelint-config-standard-scss" }.
+Disable VS Code's Built-In Linters (optional) for Stylelint:
+ajouter dans .vscode/settings.json :
+{
+  "stylelint.enable": true,
+  "css.validate": false,
+  "scss.validate": false
+}
+
+Pour ESLint executer:
+npm install --save-dev eslint ou Globale: npm install -g eslint
+
+Commande pour test local:
+ng serve (utilisera environment.ts)
+ng serve --configuration production (utilisera environment.prod.ts)

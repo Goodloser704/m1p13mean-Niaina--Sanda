@@ -1,0 +1,40 @@
+// Mixins SCSS: Des suites de styles qui se ressembre toujours et repetitifs
+// A Importer dans les fichiers scss qui l'utilise avec @use "/chemin_relatif" 
+// utiliser avec @include
+
+@use "./variables" as v;
+
+// Exemple
+@mixin default-border {
+  border-style: solid;
+  border-width: 2;
+  border-color: black;
+}
+
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin card-hover {
+  transition: transform 0.3s ease;
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+@mixin button-style($bg-color: v.$primary-gradient) {
+  background: $bg-color;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+}

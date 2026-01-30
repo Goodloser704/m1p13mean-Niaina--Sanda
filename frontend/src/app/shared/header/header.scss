@@ -1,0 +1,40 @@
+@use "../../styles/shared/variables" as v;
+
+
+// 🎨 Header
+.header {
+  background: v.$primary-gradient;
+  color: white;
+  padding: 1rem 0;
+  box-shadow: v.$shadow-light;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+
+  .nav .btn-primary {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: v.$transition;
+    font-weight: 500;
+
+    &:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.5);
+    }
+  }
+}

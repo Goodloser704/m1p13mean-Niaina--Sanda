@@ -1,0 +1,62 @@
+@use '../../styles/shared/variables' as v;
+@use '../../styles/shared/mixins' as m;
+
+// 🎨 Login Modal
+.login-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  @include m.flex-center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: v.$transition;
+
+  &.show {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: v.$border-radius;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: v.$shadow-medium;
+
+  h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+  }
+}
+
+.form-group {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #555;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+  }
+}
