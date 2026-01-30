@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 export interface BoutiqueRegistration {
   nom: string;
@@ -85,10 +86,24 @@ export class BoutiqueService {
     boutiques: Boutique[]; 
     count: number; 
   }> {
+    const url = `${this.API_URL}/my-boutiques`;
+    console.log('🔄 Requête GET vers:', url);
+    console.log('🌐 Backend URL configuré:', this.getBackendUrl());
+    
     return this.http.get<{ 
       boutiques: Boutique[]; 
       count: number; 
-    }>(`${this.API_URL}/my-boutiques`);
+    }>(url).pipe(
+      tap(response => {
+        console.log('✅ Réponse service boutique:', response);
+      }),
+      tap({
+        error: (error) => {
+          console.error('❌ Erreur service boutique:', error);
+          console.error('❌ URL appelée:', url);
+        }
+      })
+    );
   }
 
   /**

@@ -593,17 +593,29 @@ export class MyBoutiquesComponent implements OnInit {
   }
 
   loadBoutiques() {
+    console.log('🔄 Début chargement boutiques...');
     this.isLoading = true;
+    
     this.boutiqueService.getMyBoutiques().subscribe({
       next: (response) => {
+        console.log('✅ Réponse reçue:', response);
         this.boutiques = response.boutiques;
-        console.log(`✅ ${response.count} boutiques chargées`);
+        console.log(`✅ ${response.count} boutiques chargées:`, this.boutiques);
         this.isLoading = false;
       },
       error: (error) => {
         console.error('❌ Erreur chargement boutiques:', error);
+        console.error('❌ Détails erreur:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          error: error.error
+        });
         this.isLoading = false;
-        alert('Erreur lors du chargement de vos boutiques');
+        
+        // Message d'erreur plus détaillé
+        const errorMessage = error.error?.message || error.message || 'Erreur serveur';
+        alert(`Erreur lors du chargement de vos boutiques:\n${errorMessage}\n\nStatut: ${error.status || 'Inconnu'}`);
       }
     });
   }

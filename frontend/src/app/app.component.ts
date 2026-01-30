@@ -49,28 +49,42 @@ export class AppComponent implements OnInit, OnDestroy {
     adresse: ''
   };
 
-  // 📊 Profils de démonstration
+  // 📊 Profils de démonstration (conformes à la base de données)
   demoProfiles = [
     {
       role: 'admin',
       email: 'admin@mall.com',
       password: 'admin123',
-      nom: 'Administrateur',
-      prenom: 'Principal'
+      nom: 'Dubois',
+      prenom: 'Pierre'
     },
     {
       role: 'boutique',
-      email: 'fashion@mall.com',
+      email: 'marie.leroy@boutique.com',
       password: 'boutique123',
-      nom: 'Fashion',
-      prenom: 'Store'
+      nom: 'Leroy',
+      prenom: 'Marie (3 boutiques)'
+    },
+    {
+      role: 'boutique',
+      email: 'jean.moreau@boutique.com',
+      password: 'boutique123',
+      nom: 'Moreau',
+      prenom: 'Jean (2 boutiques)'
+    },
+    {
+      role: 'boutique',
+      email: 'carmen.garcia@boutique.com',
+      password: 'boutique123',
+      nom: 'Garcia',
+      prenom: 'Carmen (2 boutiques)'
     },
     {
       role: 'client',
-      email: 'client1@test.com',
+      email: 'paul.dupont@client.com',
       password: 'client123',
       nom: 'Dupont',
-      prenom: 'Jean'
+      prenom: 'Paul'
     }
   ];
 
