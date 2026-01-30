@@ -1,0 +1,53 @@
+<header class="main-header">
+  <div class="header-container">
+    <!-- Logo et titre -->
+    <div class="header-brand">
+      <h1 class="brand-title">🏬 {{ title }}</h1>
+    </div>
+
+    <!-- Navigation principale -->
+    <nav class="header-nav" *ngIf="isLoggedIn">
+      <div class="nav-items">
+        <!-- Notifications -->
+        <div class="nav-item notifications" *ngIf="currentUser">
+          <button class="nav-button" title="Notifications">
+            🔔
+            <span class="notification-badge" *ngIf="unreadNotifications > 0">
+              {{ unreadNotifications }}
+            </span>
+          </button>
+        </div>
+
+        <!-- Menu utilisateur -->
+        <div class="nav-item user-menu" *ngIf="currentUser">
+          <div class="user-info">
+            <span class="user-icon" [style.color]="getRoleColor(currentUser.role)">
+              {{ getRoleIcon(currentUser.role) }}
+            </span>
+            <span class="user-name">{{ currentUser.prenom }} {{ currentUser.nom }}</span>
+            <span class="user-role">({{ currentUser.role }})</span>
+          </div>
+          
+          <div class="user-actions">
+            <button class="btn-logout" (click)="logout()">
+              🚪 Déconnexion
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Bouton de connexion -->
+    <div class="header-auth" *ngIf="!isLoggedIn">
+      <button class="btn-login" (click)="onShowLogin()">
+        🔐 Se connecter
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal de connexion -->
+  <app-login-modal 
+    *ngIf="showLogin()"
+    (closeModal)="onCloseLogin($event)">
+  </app-login-modal>
+</header>

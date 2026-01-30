@@ -1,0 +1,161 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2>{{ showLogin ? '🔐 Connexion' : '📝 Inscription' }}</h2>
+      <button class="close-btn" (click)="onClose()">×</button>
+    </div>
+
+    <!-- Profils de démonstration -->
+    <div class="demo-profiles">
+      <h3>🎭 Comptes de test</h3>
+      <div class="profiles-grid">
+        <button 
+          *ngFor="let profile of demoProfiles" 
+          class="profile-btn"
+          [style.border-color]="getRoleColor(profile.role)"
+          (click)="selectDemoProfile(profile)">
+          <span class="profile-icon" [style.color]="getRoleColor(profile.role)">
+            {{ getRoleIcon(profile.role) }}
+          </span>
+          <div class="profile-info">
+            <strong>{{ profile.prenom }}</strong>
+            <small>{{ profile.role }}</small>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulaire de connexion -->
+    <form *ngIf="showLogin" (ngSubmit)="login()" class="auth-form">
+      <div class="form-group">
+        <label for="email">📧 Email</label>
+        <input 
+          type="email" 
+          id="email"
+          [(ngModel)]="loginForm.email" 
+          name="email"
+          placeholder="votre@email.com"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">🔒 Mot de passe</label>
+        <input 
+          type="password" 
+          id="password"
+          [(ngModel)]="loginForm.password" 
+          name="password"
+          placeholder="Votre mot de passe"
+          required>
+      </div>
+
+      <button type="submit" class="btn-primary">
+        🔐 Se connecter
+      </button>
+    </form>
+
+    <!-- Formulaire d'inscription -->
+    <form *ngIf="showRegister" (ngSubmit)="register()" class="auth-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="prenom">👤 Prénom</label>
+          <input 
+            type="text" 
+            id="prenom"
+            [(ngModel)]="registerForm.prenom" 
+            name="prenom"
+            placeholder="Votre prénom"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="nom">👤 Nom</label>
+          <input 
+            type="text" 
+            id="nom"
+            [(ngModel)]="registerForm.nom" 
+            name="nom"
+            placeholder="Votre nom"
+            required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="register-email">📧 Email</label>
+        <input 
+          type="email" 
+          id="register-email"
+          [(ngModel)]="registerForm.email" 
+          name="register-email"
+          placeholder="votre@email.com"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="register-password">🔒 Mot de passe</label>
+        <input 
+          type="password" 
+          id="register-password"
+          [(ngModel)]="registerForm.password" 
+          name="register-password"
+          placeholder="Minimum 6 caractères"
+          required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="role">🎭 Rôle</label>
+          <select 
+            id="role"
+            [(ngModel)]="registerForm.role" 
+            name="role"
+            required>
+            <option value="client">🛍️ Client</option>
+            <option value="boutique">🏪 Commerçant</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="telephone">📞 Téléphone</label>
+          <input 
+            type="tel" 
+            id="telephone"
+            [(ngModel)]="registerForm.telephone" 
+            name="telephone"
+            placeholder="01 23 45 67 89">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="adresse">🏠 Adresse</label>
+        <input 
+          type="text" 
+          id="adresse"
+          [(ngModel)]="registerForm.adresse" 
+          name="adresse"
+          placeholder="Votre adresse complète">
+      </div>
+
+      <button type="submit" class="btn-primary">
+        📝 S'inscrire
+      </button>
+    </form>
+
+    <!-- Toggle entre connexion et inscription -->
+    <div class="auth-toggle">
+      <p *ngIf="showLogin">
+        Pas encore de compte ? 
+        <button type="button" class="link-btn" (click)="toggleAuthMode()">
+          S'inscrire
+        </button>
+      </p>
+      <p *ngIf="showRegister">
+        Déjà un compte ? 
+        <button type="button" class="link-btn" (click)="toggleAuthMode()">
+          Se connecter
+        </button>
+      </p>
+    </div>
+  </div>
+</div>

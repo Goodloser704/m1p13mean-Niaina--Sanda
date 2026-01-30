@@ -1,0 +1,98 @@
+<div class="mall-app">
+  <!-- Header avec navigation -->
+  <app-header />
+
+  <!-- Contenu principal -->
+  <main class="main-content">
+    <!-- Page d'accueil -->
+    <div *ngIf="currentView === 'home'" class="home-page">
+      <div class="hero-section">
+        <h1>🏬 Bienvenue au Centre Commercial</h1>
+        <p class="hero-subtitle">Découvrez nos boutiques et services</p>
+        
+        <!-- Actions selon le statut de connexion -->
+        <div class="hero-actions" *ngIf="!isLoggedIn">
+          <p>Connectez-vous pour accéder à toutes les fonctionnalités</p>
+        </div>
+        
+        <!-- Navigation pour utilisateurs connectés -->
+        <div class="user-dashboard" *ngIf="isLoggedIn && currentUser">
+          <h2>👋 Bonjour {{ currentUser.prenom }} !</h2>
+          <p>Que souhaitez-vous faire aujourd'hui ?</p>
+          
+          <div class="dashboard-actions">
+            <!-- Actions pour les commerçants -->
+            <div *ngIf="currentUser.role === 'boutique'" class="role-actions">
+              <button class="action-btn boutique-btn" (click)="setView('my-boutiques')">
+                🏪 Mes Boutiques
+              </button>
+              <button class="action-btn register-btn" (click)="setView('boutique-registration')">
+                ➕ Nouvelle Boutique
+              </button>
+            </div>
+            
+            <!-- Actions pour les admins -->
+            <div *ngIf="currentUser.role === 'admin'" class="role-actions">
+              <button class="action-btn admin-btn" (click)="setView('admin-boutiques')">
+                👨‍💼 Gestion Boutiques
+              </button>
+            </div>
+            
+            <!-- Actions communes -->
+            <button class="action-btn notification-btn" (click)="setView('notifications')">
+              🔔 Notifications
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div *ngIf="currentView === 'notifications' && canViewNotifications()">
+      <div class="page-header">
+        <button class="back-btn" (click)="setView('home')">← Retour</button>
+        <h2>🔔 Notifications</h2>
+      </div>
+      <app-notifications />
+    </div>
+
+    <!-- Gestion Admin des Boutiques -->
+    <div *ngIf="currentView === 'admin-boutiques' && canViewAdminBoutiques()">
+      <div class="page-header">
+        <button class="back-btn" (click)="setView('home')">← Retour</button>
+        <h2>👨‍💼 Gestion des Boutiques</h2>
+      </div>
+      <app-admin-boutiques />
+    </div>
+
+    <!-- Inscription Boutique -->
+    <div *ngIf="currentView === 'boutique-registration' && canViewBoutiqueRegistration()">
+      <div class="page-header">
+        <button class="back-btn" (click)="setView('home')">← Retour</button>
+        <h2>📝 Inscription Boutique</h2>
+      </div>
+      <app-boutique-registration />
+    </div>
+
+    <!-- Mes Boutiques -->
+    <div *ngIf="currentView === 'my-boutiques' && canViewMyBoutiques()">
+      <div class="page-header">
+        <button class="back-btn" (click)="setView('home')">← Retour</button>
+        <h2>🏪 Mes Boutiques</h2>
+      </div>
+      <app-my-boutiques />
+    </div>
+
+    <!-- Message d'accès refusé -->
+    <div *ngIf="!isLoggedIn && currentView !== 'home'" class="access-denied">
+      <h2>🔒 Accès Refusé</h2>
+      <p>Vous devez être connecté pour accéder à cette page.</p>
+      <button class="btn-primary" (click)="setView('home')">
+        Retour à l'accueil
+      </button>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <app-footer />
+</div>
