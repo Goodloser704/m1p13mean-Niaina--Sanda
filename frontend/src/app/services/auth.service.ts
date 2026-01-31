@@ -130,8 +130,16 @@ export class AuthService {
   private getUserFromStorage(): User | null {
     try {
       const userStr = localStorage.getItem(this.USER_KEY) || sessionStorage.getItem(this.USER_KEY);
-      return userStr ? JSON.parse(userStr) : null;
-    } catch {
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        console.log('📦 Utilisateur récupéré du stockage:', user.email, user.role);
+        return user;
+      } else {
+        console.log('📦 Aucun utilisateur trouvé dans le stockage');
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération de l\'utilisateur:', error);
       return null;
     }
   }
@@ -140,7 +148,9 @@ export class AuthService {
    * 🎫 Obtenir le token
    */
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY) || sessionStorage.getItem(this.TOKEN_KEY);
+    const token = localStorage.getItem(this.TOKEN_KEY) || sessionStorage.getItem(this.TOKEN_KEY);
+    console.log('🎫 Token récupéré:', token ? 'Présent' : 'Absent');
+    return token;
   }
 
   /**
@@ -149,7 +159,16 @@ export class AuthService {
   private hasValidToken(): boolean {
     const token = this.getToken();
     const user = this.getUserFromStorage();
-    return !!(token && user);
+    const isValid = !!(token && user);
+    
+    console.log('🔍 Vérification token au démarrage:', {
+      hasToken: !!token,
+      hasUser: !!user,
+      isValid: isValid,
+      userEmail: user?.email
+    });
+    
+    return isValid;
   }
 
   /**
@@ -157,19 +176,35 @@ export class AuthService {
    */
   private checkTokenValidity(): void {
     const token = this.getToken();
-    if (token) {
-      // Optionnel: Vérifier avec le serveur
+    const user = this.getUserFromStorage();
+    
+    if (token && user) {
+      // D'abord, restaurer l'état depuis le stockage local
+      this.currentUserSubject.next(user);
+      this.isLoggedInSubject.next(true);
+      console.log('🔄 Session restaurée depuis le stockage local:', user.email);
+      
+      // Ensuite, vérifier optionnellement avec le serveur (sans déconnecter en cas d'erreur)
       this.http.get(`${this.API_URL}/me`).subscribe({
         next: (response: any) => {
-          console.log('✅ Token valide, utilisateur connecté');
+          console.log('✅ Token validé avec le serveur');
+          // Mettre à jour avec les données fraîches du serveur
           this.currentUserSubject.next(response.user);
-          this.isLoggedInSubject.next(true);
+          // Sauvegarder les données mises à jour
+          localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
+          sessionStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
         },
-        error: () => {
-          console.log('❌ Token invalide, déconnexion');
-          this.logout();
+        error: (error) => {
+          console.warn('⚠️ Impossible de valider le token avec le serveur:', error.message);
+          console.log('🔄 Utilisation des données en cache - utilisateur reste connecté');
+          // Ne pas déconnecter, garder la session locale
+          // L'utilisateur reste connecté avec les données en cache
         }
       });
+    } else {
+      console.log('❌ Aucune session trouvée');
+      this.isLoggedInSubject.next(false);
+      this.currentUserSubject.next(null);
     }
   }
 
@@ -237,6 +272,24 @@ export class AuthService {
    */
   deleteAccount(): Observable<any> {
     return this.http.delete(`${this.API_URL}/account`);
+  }
+
+  /**
+   * 🔄 Forcer la restauration de session depuis le stockage local
+   */
+  forceRestoreSession(): void {
+    const token = this.getToken();
+    const user = this.getUserFromStorage();
+    
+    console.log('🔄 Tentative de restauration forcée de session');
+    
+    if (token && user) {
+      this.currentUserSubject.next(user);
+      this.isLoggedInSubject.next(true);
+      console.log('✅ Session restaurée avec succès:', user.email);
+    } else {
+      console.log('❌ Impossible de restaurer la session - données manquantes');
+    }
   }
 
   /**
