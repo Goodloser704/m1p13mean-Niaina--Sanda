@@ -135,93 +135,57 @@ export class UserProfileComponent implements OnInit {
     if (this.profileForm.valid && this.currentUser) {
       this.isLoading = true;
       
-      const updatedData = {
-        ...this.profileForm.value,
-        _id: this.currentUser._id
-      };
-
-      // 🔍 LOGS DE DEBUG - Données envoyées
-      console.group('🔍 DEBUG - Mise à jour profil');
-      console.log('📋 Formulaire valide:', this.profileForm.valid);
-      console.log('👤 Utilisateur actuel:', this.currentUser);
-      console.log('📝 Valeurs du formulaire:', this.profileForm.value);
-      console.log('📤 Données à envoyer:', updatedData);
-      console.log('🔗 URL de l\'API:', this.authService['API_URL'] + '/profile');
+      // Nettoyer les données - ne garder que les champs non vides
+      const formData = this.profileForm.value;
+      const cleanedData: any = {};
       
-      // Vérifier les erreurs de validation du formulaire
-      if (this.profileForm.errors) {
-        console.log('❌ Erreurs du formulaire:', this.profileForm.errors);
-      }
-      
-      // Vérifier les erreurs de chaque champ
-      Object.keys(this.profileForm.controls).forEach(key => {
-        const control = this.profileForm.get(key);
-        if (control && control.errors) {
-          console.log(`❌ Erreur champ "${key}":`, control.errors, 'Valeur:', control.value);
+      // Ne garder que les champs qui ont une valeur
+      Object.keys(formData).forEach(key => {
+        const value = formData[key];
+        if (value !== null && value !== undefined && value !== '') {
+          cleanedData[key] = value;
         }
       });
+      
+      // Ne pas envoyer l'_id dans les données
+      const updatedData = cleanedData;
+
+      console.group('🔍 DEBUG - Mise à jour profil');
+      console.log('📝 Valeurs du formulaire (brutes):', this.profileForm.value);
+      console.log('🧹 Données nettoyées:', cleanedData);
+      console.log('📤 Données à envoyer:', updatedData);
+      console.log('📋 JSON exact:', JSON.stringify(updatedData, null, 2));
       console.groupEnd();
 
       this.authService.updateProfile(updatedData).subscribe({
         next: (response) => {
-          console.group('✅ SUCCESS - Profil mis à jour');
-          console.log('📥 Réponse serveur:', response);
-          console.groupEnd();
-          
           this.isLoading = false;
           this.isEditing = false;
-          console.log('Profil mis à jour avec succès');
-          
-          // Mettre à jour l'utilisateur courant
+          console.log('✅ Profil mis à jour avec succès');
           this.authService.refreshCurrentUser();
         },
         error: (error) => {
+          this.isLoading = false;
           console.group('❌ ERROR - Échec mise à jour profil');
           console.log('🔴 Erreur complète:', error);
           console.log('📊 Status:', error.status);
-          console.log('📝 Message:', error.message);
           console.log('🗂️ Error body:', error.error);
           
           if (error.error && error.error.errors) {
-            console.log('📋 Détails des erreurs de validation:', error.error.errors);
+            console.log('📋 Détails des erreurs:', error.error.errors);
             error.error.errors.forEach((validationError: any, index: number) => {
-              console.log(`   ${index + 1}. ${validationError.msg} (champ: ${validationError.param})`);
+              console.log(`   ${index + 1}. ${validationError.msg} (champ: ${validationError.param || 'undefined'}) - valeur: ${validationError.value}`);
             });
-          }
-          
-          if (error.error && error.error.message) {
-            console.log('💬 Message d\'erreur serveur:', error.error.message);
           }
           console.groupEnd();
           
-          this.isLoading = false;
-          
-          // Afficher un message d'erreur plus détaillé
           let errorMessage = 'Erreur lors de la mise à jour du profil';
           if (error.error && error.error.errors && error.error.errors.length > 0) {
-            errorMessage += ':\n' + error.error.errors.map((e: any) => `• ${e.msg} (${e.param})`).join('\n');
-          } else if (error.error && error.error.message) {
-            errorMessage += ': ' + error.error.message;
+            errorMessage += ':\n' + error.error.errors.map((e: any) => `• ${e.msg} (${e.param || 'champ inconnu'})`).join('\n');
           }
-          
           alert(errorMessage);
-          console.error('Erreur lors de la mise à jour du profil:', errorMessage);
         }
       });
-    } else {
-      console.group('⚠️ WARNING - Formulaire invalide');
-      console.log('📋 Formulaire valide:', this.profileForm.valid);
-      console.log('👤 Utilisateur présent:', !!this.currentUser);
-      console.log('❌ Erreurs du formulaire:', this.profileForm.errors);
-      
-      // Afficher les erreurs de chaque champ
-      Object.keys(this.profileForm.controls).forEach(key => {
-        const control = this.profileForm.get(key);
-        if (control && control.errors) {
-          console.log(`❌ Erreur champ "${key}":`, control.errors, 'Valeur:', control.value);
-        }
-      });
-      console.groupEnd();
     }
   }
 

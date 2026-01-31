@@ -38,18 +38,23 @@ router.get('/me', auth, authController.getProfile);
 // @desc    Mettre à jour le profil utilisateur
 // @access  Private
 router.put('/profile', [
-  body('nom').optional().notEmpty().trim(),
-  body('prenom').optional().notEmpty().trim(),
-  body('email').optional().isEmail().normalizeEmail(),
-  body('telephone').optional().isLength({ min: 0 }).trim(), // Plus permissif pour le téléphone
-  body('dateNaissance').optional().isISO8601().toDate(),
-  body('genre').optional().isIn(['homme', 'femme', 'autre']),
-  body('nomBoutique').optional().trim(),
-  body('descriptionBoutique').optional().trim(),
-  body('categorieActivite').optional().isIn(['mode', 'electronique', 'maison', 'beaute', 'sport', 'alimentation', 'autre']),
-  body('numeroSiret').optional().trim(),
-  body('adresseBoutique').optional().trim(),
-  body('adresse').optional().trim() // Ajout du champ adresse manquant
+  // Champs obligatoires seulement s'ils sont présents
+  body('nom').optional({ nullable: true, checkFalsy: true }).isLength({ min: 1 }).trim(),
+  body('prenom').optional({ nullable: true, checkFalsy: true }).isLength({ min: 1 }).trim(),
+  body('email').optional({ nullable: true, checkFalsy: true }).isEmail().normalizeEmail(),
+  
+  // Champs complètement optionnels
+  body('telephone').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('dateNaissance').optional({ nullable: true, checkFalsy: false }),
+  body('genre').optional({ nullable: true, checkFalsy: false }).isIn(['homme', 'femme', 'autre']),
+  body('adresse').optional({ nullable: true, checkFalsy: false }).trim(),
+  
+  // Champs boutique optionnels
+  body('nomBoutique').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('descriptionBoutique').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('categorieActivite').optional({ nullable: true, checkFalsy: false }).isIn(['mode', 'electronique', 'maison', 'beaute', 'sport', 'alimentation', 'autre']),
+  body('numeroSiret').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('adresseBoutique').optional({ nullable: true, checkFalsy: false }).trim()
 ], auth, authController.updateProfile);
 
 // @route   PUT /api/auth/change-password
