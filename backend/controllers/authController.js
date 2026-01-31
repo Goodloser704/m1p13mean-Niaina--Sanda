@@ -134,12 +134,17 @@ class AuthController {
     const timestamp = new Date().toISOString();
     console.log(`📝 [${timestamp}] Mise à jour profil utilisateur`);
     console.log(`   🎫 User ID: ${req.user._id}`);
+    console.log(`   📤 Données reçues:`, JSON.stringify(req.body, null, 2));
     
     try {
       // Validation des données
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         console.log(`❌ Validation échouée:`, errors.array());
+        console.log(`   📋 Détails des erreurs:`);
+        errors.array().forEach((error, index) => {
+          console.log(`      ${index + 1}. Champ "${error.param}": ${error.msg} (valeur: ${error.value})`);
+        });
         return res.status(400).json({ 
           message: 'Données invalides',
           errors: errors.array() 
@@ -158,6 +163,7 @@ class AuthController {
 
     } catch (error) {
       console.error(`❌ Erreur mise à jour profil:`, error.message);
+      console.error(`   📊 Stack:`, error.stack);
       
       if (error.message === 'Utilisateur non trouvé') {
         return res.status(404).json({ message: error.message });

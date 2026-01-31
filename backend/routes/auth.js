@@ -41,14 +41,15 @@ router.put('/profile', [
   body('nom').optional().notEmpty().trim(),
   body('prenom').optional().notEmpty().trim(),
   body('email').optional().isEmail().normalizeEmail(),
-  body('telephone').optional().isMobilePhone('any', { strictMode: false }),
-  body('dateNaissance').optional().isISO8601(),
+  body('telephone').optional().isLength({ min: 0 }).trim(), // Plus permissif pour le téléphone
+  body('dateNaissance').optional().isISO8601().toDate(),
   body('genre').optional().isIn(['homme', 'femme', 'autre']),
   body('nomBoutique').optional().trim(),
   body('descriptionBoutique').optional().trim(),
   body('categorieActivite').optional().isIn(['mode', 'electronique', 'maison', 'beaute', 'sport', 'alimentation', 'autre']),
   body('numeroSiret').optional().trim(),
-  body('adresseBoutique').optional().trim()
+  body('adresseBoutique').optional().trim(),
+  body('adresse').optional().trim() // Ajout du champ adresse manquant
 ], auth, authController.updateProfile);
 
 // @route   PUT /api/auth/change-password

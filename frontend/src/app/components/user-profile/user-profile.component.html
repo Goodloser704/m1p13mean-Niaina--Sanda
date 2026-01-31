@@ -171,6 +171,14 @@
         </div>
 
         <div class="form-actions" *ngIf="isEditing">
+          <!-- Bouton de debug temporaire -->
+          <button 
+            type="button" 
+            class="btn-debug"
+            (click)="debugFormData()">
+            🔍 Debug Données
+          </button>
+          
           <button 
             type="submit" 
             class="btn-primary"

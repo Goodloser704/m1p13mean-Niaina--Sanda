@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, catchError } from 'rxjs/operators';
 
 export interface User {
   id: string;
@@ -199,10 +199,28 @@ export class AuthService {
    * 📝 Mettre à jour le profil utilisateur
    */
   updateProfile(profileData: any): Observable<any> {
+    console.group('🔍 DEBUG - AuthService.updateProfile');
+    console.log('📤 Données reçues:', profileData);
+    console.log('🔗 URL complète:', `${this.API_URL}/profile`);
+    console.log('🎫 Token présent:', !!this.getToken());
+    console.groupEnd();
+    
     return this.http.put(`${this.API_URL}/profile`, profileData)
       .pipe(
         tap(response => {
-          console.log('✅ Profil mis à jour');
+          console.group('✅ SUCCESS - AuthService.updateProfile');
+          console.log('📥 Réponse:', response);
+          console.groupEnd();
+        }),
+        catchError(error => {
+          console.group('❌ ERROR - AuthService.updateProfile');
+          console.log('🔴 Erreur HTTP complète:', error);
+          console.log('📊 Status:', error.status);
+          console.log('📝 Status Text:', error.statusText);
+          console.log('🗂️ Error body:', error.error);
+          console.log('🔗 URL appelée:', error.url);
+          console.groupEnd();
+          throw error;
         })
       );
   }

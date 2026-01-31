@@ -181,7 +181,8 @@
 .btn-primary,
 .btn-secondary,
 .btn-edit,
-.btn-danger {
+.btn-danger,
+.btn-debug {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
@@ -240,6 +241,18 @@
     background-color: #ff5252;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(255, 107, 107, 0.3);
+  }
+}
+
+.btn-debug {
+  background-color: #9c27b0;
+  color: white;
+  font-size: 0.8rem;
+
+  &:hover:not(:disabled) {
+    background-color: #7b1fa2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(156, 39, 176, 0.3);
   }
 }
 

@@ -140,21 +140,88 @@ export class UserProfileComponent implements OnInit {
         _id: this.currentUser._id
       };
 
+      // 🔍 LOGS DE DEBUG - Données envoyées
+      console.group('🔍 DEBUG - Mise à jour profil');
+      console.log('📋 Formulaire valide:', this.profileForm.valid);
+      console.log('👤 Utilisateur actuel:', this.currentUser);
+      console.log('📝 Valeurs du formulaire:', this.profileForm.value);
+      console.log('📤 Données à envoyer:', updatedData);
+      console.log('🔗 URL de l\'API:', this.authService['API_URL'] + '/profile');
+      
+      // Vérifier les erreurs de validation du formulaire
+      if (this.profileForm.errors) {
+        console.log('❌ Erreurs du formulaire:', this.profileForm.errors);
+      }
+      
+      // Vérifier les erreurs de chaque champ
+      Object.keys(this.profileForm.controls).forEach(key => {
+        const control = this.profileForm.get(key);
+        if (control && control.errors) {
+          console.log(`❌ Erreur champ "${key}":`, control.errors, 'Valeur:', control.value);
+        }
+      });
+      console.groupEnd();
+
       this.authService.updateProfile(updatedData).subscribe({
         next: (response) => {
+          console.group('✅ SUCCESS - Profil mis à jour');
+          console.log('📥 Réponse serveur:', response);
+          console.groupEnd();
+          
           this.isLoading = false;
           this.isEditing = false;
-          // Simuler les méthodes de notification
           console.log('Profil mis à jour avec succès');
           
           // Mettre à jour l'utilisateur courant
           this.authService.refreshCurrentUser();
         },
         error: (error) => {
+          console.group('❌ ERROR - Échec mise à jour profil');
+          console.log('🔴 Erreur complète:', error);
+          console.log('📊 Status:', error.status);
+          console.log('📝 Message:', error.message);
+          console.log('🗂️ Error body:', error.error);
+          
+          if (error.error && error.error.errors) {
+            console.log('📋 Détails des erreurs de validation:', error.error.errors);
+            error.error.errors.forEach((validationError: any, index: number) => {
+              console.log(`   ${index + 1}. ${validationError.msg} (champ: ${validationError.param})`);
+            });
+          }
+          
+          if (error.error && error.error.message) {
+            console.log('💬 Message d\'erreur serveur:', error.error.message);
+          }
+          console.groupEnd();
+          
           this.isLoading = false;
-          console.error('Erreur lors de la mise à jour du profil:', error.error?.message || 'Erreur lors de la mise à jour du profil');
+          
+          // Afficher un message d'erreur plus détaillé
+          let errorMessage = 'Erreur lors de la mise à jour du profil';
+          if (error.error && error.error.errors && error.error.errors.length > 0) {
+            errorMessage += ':\n' + error.error.errors.map((e: any) => `• ${e.msg} (${e.param})`).join('\n');
+          } else if (error.error && error.error.message) {
+            errorMessage += ': ' + error.error.message;
+          }
+          
+          alert(errorMessage);
+          console.error('Erreur lors de la mise à jour du profil:', errorMessage);
         }
       });
+    } else {
+      console.group('⚠️ WARNING - Formulaire invalide');
+      console.log('📋 Formulaire valide:', this.profileForm.valid);
+      console.log('👤 Utilisateur présent:', !!this.currentUser);
+      console.log('❌ Erreurs du formulaire:', this.profileForm.errors);
+      
+      // Afficher les erreurs de chaque champ
+      Object.keys(this.profileForm.controls).forEach(key => {
+        const control = this.profileForm.get(key);
+        if (control && control.errors) {
+          console.log(`❌ Erreur champ "${key}":`, control.errors, 'Valeur:', control.value);
+        }
+      });
+      console.groupEnd();
     }
   }
 
@@ -200,7 +267,36 @@ export class UserProfileComponent implements OnInit {
     }
   }
 
-  // Getters pour faciliter l'accès aux contrôles du formulaire
+  // Méthode de debug temporaire
+  debugFormData(): void {
+    console.group('🔍 DEBUG - Données du formulaire');
+    console.log('📋 Formulaire valide:', this.profileForm.valid);
+    console.log('📝 Valeurs brutes:', this.profileForm.value);
+    console.log('👤 Utilisateur actuel:', this.currentUser);
+    
+    // Vérifier chaque champ individuellement
+    Object.keys(this.profileForm.controls).forEach(key => {
+      const control = this.profileForm.get(key);
+      console.log(`📄 ${key}:`, {
+        value: control?.value,
+        valid: control?.valid,
+        errors: control?.errors,
+        touched: control?.touched,
+        dirty: control?.dirty
+      });
+    });
+    
+    // Données qui seraient envoyées
+    const dataToSend = {
+      ...this.profileForm.value,
+      _id: this.currentUser?._id
+    };
+    console.log('📤 Données qui seraient envoyées:', dataToSend);
+    console.groupEnd();
+    
+    // Afficher aussi dans une alerte pour faciliter la lecture
+    alert('Voir la console pour les détails complets des données du formulaire');
+  }
   get f() { return this.profileForm.controls; }
   get pf() { return this.passwordForm.controls; }
 
