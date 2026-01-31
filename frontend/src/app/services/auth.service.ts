@@ -194,4 +194,46 @@ export class AuthService {
   isAuthenticated(): boolean {
     return this.isLoggedInSubject.value;
   }
+
+  /**
+   * 📝 Mettre à jour le profil utilisateur
+   */
+  updateProfile(profileData: any): Observable<any> {
+    return this.http.put(`${this.API_URL}/profile`, profileData)
+      .pipe(
+        tap(response => {
+          console.log('✅ Profil mis à jour');
+        })
+      );
+  }
+
+  /**
+   * 🔑 Changer le mot de passe
+   */
+  changePassword(passwordData: { currentPassword: string; newPassword: string }): Observable<any> {
+    return this.http.put(`${this.API_URL}/change-password`, passwordData);
+  }
+
+  /**
+   * 🗑️ Supprimer le compte utilisateur
+   */
+  deleteAccount(): Observable<any> {
+    return this.http.delete(`${this.API_URL}/account`);
+  }
+
+  /**
+   * 🔄 Rafraîchir les données de l'utilisateur actuel
+   */
+  refreshCurrentUser(): void {
+    this.http.get(`${this.API_URL}/me`).subscribe({
+      next: (response: any) => {
+        this.currentUserSubject.next(response.user);
+        localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
+        sessionStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
+      },
+      error: (error) => {
+        console.error('Erreur lors du rafraîchissement du profil:', error);
+      }
+    });
+  }
 }

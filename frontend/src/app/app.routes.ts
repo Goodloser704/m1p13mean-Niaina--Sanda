@@ -6,6 +6,10 @@ export const routes: Routes = [
     loadComponent: () => import('./components/home/home.component').then(m => m.HomeComponent)
   },
   { 
+    path: 'profile', 
+    loadComponent: () => import('./components/user-profile/user-profile.component').then(m => m.UserProfileComponent)
+  },
+  { 
     path: 'notifications', 
     loadComponent: () => import('./components/notifications/notifications.component').then(m => m.NotificationsComponent)
   },

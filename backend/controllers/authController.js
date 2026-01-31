@@ -128,6 +128,133 @@ class AuthController {
   }
 
   /**
+   * 📝 Mettre à jour le profil utilisateur
+   */
+  async updateProfile(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`📝 [${timestamp}] Mise à jour profil utilisateur`);
+    console.log(`   🎫 User ID: ${req.user._id}`);
+    
+    try {
+      // Validation des données
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(`❌ Validation échouée:`, errors.array());
+        return res.status(400).json({ 
+          message: 'Données invalides',
+          errors: errors.array() 
+        });
+      }
+
+      // Appeler le service
+      const updatedUser = await authService.updateUserProfile(req.user._id, req.body);
+      
+      console.log(`✅ Profil mis à jour pour: ${req.user._id}`);
+      
+      res.json({
+        message: 'Profil mis à jour avec succès',
+        user: updatedUser
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur mise à jour profil:`, error.message);
+      
+      if (error.message === 'Utilisateur non trouvé') {
+        return res.status(404).json({ message: error.message });
+      }
+      
+      if (error.message === 'Cet email est déjà utilisé') {
+        return res.status(400).json({ message: error.message });
+      }
+      
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * 🔑 Changer le mot de passe
+   */
+  async changePassword(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🔑 [${timestamp}] Changement mot de passe`);
+    console.log(`   🎫 User ID: ${req.user._id}`);
+    
+    try {
+      // Validation des données
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(`❌ Validation échouée:`, errors.array());
+        return res.status(400).json({ 
+          message: 'Données invalides',
+          errors: errors.array() 
+        });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+
+      // Appeler le service
+      await authService.changeUserPassword(req.user._id, currentPassword, newPassword);
+      
+      console.log(`✅ Mot de passe changé pour: ${req.user._id}`);
+      
+      res.json({
+        message: 'Mot de passe modifié avec succès'
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur changement mot de passe:`, error.message);
+      
+      if (error.message === 'Mot de passe actuel incorrect') {
+        return res.status(400).json({ message: error.message });
+      }
+      
+      if (error.message === 'Utilisateur non trouvé') {
+        return res.status(404).json({ message: error.message });
+      }
+      
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * 🗑️ Supprimer le compte utilisateur
+   */
+  async deleteAccount(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🗑️ [${timestamp}] Suppression compte utilisateur`);
+    console.log(`   🎫 User ID: ${req.user._id}`);
+    console.log(`   👤 Rôle: ${req.user.role}`);
+    
+    try {
+      // Empêcher la suppression des comptes admin
+      if (req.user.role === 'admin') {
+        console.log(`❌ Tentative de suppression compte admin refusée`);
+        return res.status(403).json({ 
+          message: 'Les comptes administrateur ne peuvent pas être supprimés' 
+        });
+      }
+
+      // Appeler le service
+      await authService.deleteUserAccount(req.user._id);
+      
+      console.log(`✅ Compte supprimé pour: ${req.user._id}`);
+      
+      res.json({
+        message: 'Compte supprimé avec succès'
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur suppression compte:`, error.message);
+      
+      if (error.message === 'Utilisateur non trouvé') {
+        return res.status(404).json({ message: error.message });
+      }
+      
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
    * 🔍 Rechercher des utilisateurs (Admin seulement)
    */
   async searchUsers(req, res) {

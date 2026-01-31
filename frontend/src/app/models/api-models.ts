@@ -65,7 +65,18 @@ export interface User {
   adresse?: UserAddress | string; // Peut être string ou objet selon l'endpoint
   isActive: boolean;
   
-  // Champs spécifiques aux boutiques
+  // Champs de profil personnel
+  dateNaissance?: string;
+  genre?: 'homme' | 'femme' | 'autre';
+  
+  // Champs spécifiques aux propriétaires de boutique
+  nomBoutique?: string;
+  descriptionBoutique?: string;
+  categorieActivite?: string;
+  numeroSiret?: string;
+  adresseBoutique?: string;
+  
+  // Champs spécifiques aux boutiques (legacy)
   status?: UserStatus;
   approvedBy?: ObjectId;
   approvedAt?: string;

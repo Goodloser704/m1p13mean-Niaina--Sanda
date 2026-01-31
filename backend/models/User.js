@@ -33,6 +33,21 @@ const userSchema = new mongoose.Schema({
     codePostal: String,
     pays: { type: String, default: 'France' }
   },
+  // 👤 Champs de profil personnel
+  dateNaissance: Date,
+  genre: {
+    type: String,
+    enum: ['homme', 'femme', 'autre']
+  },
+  // 🏪 Champs spécifiques aux propriétaires de boutique
+  nomBoutique: String,
+  descriptionBoutique: String,
+  categorieActivite: {
+    type: String,
+    enum: ['mode', 'electronique', 'maison', 'beaute', 'sport', 'alimentation', 'autre']
+  },
+  numeroSiret: String,
+  adresseBoutique: String,
   isActive: {
     type: Boolean,
     default: true

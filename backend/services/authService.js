@@ -154,10 +154,109 @@ class AuthService {
       role: user.role,
       telephone: user.telephone,
       adresse: user.adresse,
+      dateNaissance: user.dateNaissance,
+      genre: user.genre,
+      nomBoutique: user.nomBoutique,
+      descriptionBoutique: user.descriptionBoutique,
+      categorieActivite: user.categorieActivite,
+      numeroSiret: user.numeroSiret,
+      adresseBoutique: user.adresseBoutique,
       isActive: user.isActive,
       status: user.status,
       createdAt: user.createdAt
     };
+  }
+
+  /**
+   * 📝 Mettre à jour le profil utilisateur
+   */
+  async updateUserProfile(userId, profileData) {
+    const {
+      nom, prenom, email, telephone, adresse, dateNaissance, genre,
+      nomBoutique, descriptionBoutique, categorieActivite, numeroSiret, adresseBoutique
+    } = profileData;
+
+    // Vérifier si l'utilisateur existe
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    // Vérifier si l'email est déjà utilisé par un autre utilisateur
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email, _id: { $ne: userId } });
+      if (emailExists) {
+        throw new Error('Cet email est déjà utilisé');
+      }
+    }
+
+    // Mettre à jour les champs
+    const updateData = {};
+    if (nom) updateData.nom = nom;
+    if (prenom) updateData.prenom = prenom;
+    if (email) updateData.email = email;
+    if (telephone !== undefined) updateData.telephone = telephone;
+    if (adresse !== undefined) updateData.adresse = adresse;
+    if (dateNaissance !== undefined) updateData.dateNaissance = dateNaissance;
+    if (genre !== undefined) updateData.genre = genre;
+
+    // Champs spécifiques aux propriétaires de boutique
+    if (user.role === 'proprietaire' || user.role === 'boutique') {
+      if (nomBoutique !== undefined) updateData.nomBoutique = nomBoutique;
+      if (descriptionBoutique !== undefined) updateData.descriptionBoutique = descriptionBoutique;
+      if (categorieActivite !== undefined) updateData.categorieActivite = categorieActivite;
+      if (numeroSiret !== undefined) updateData.numeroSiret = numeroSiret;
+      if (adresseBoutique !== undefined) updateData.adresseBoutique = adresseBoutique;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true }
+    ).select('-password');
+
+    console.log(`✅ Profil mis à jour pour utilisateur ${userId}`);
+    
+    return updatedUser;
+  }
+
+  /**
+   * 🔑 Changer le mot de passe utilisateur
+   */
+  async changeUserPassword(userId, currentPassword, newPassword) {
+    // Vérifier si l'utilisateur existe
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    // Vérifier le mot de passe actuel
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      throw new Error('Mot de passe actuel incorrect');
+    }
+
+    // Mettre à jour le mot de passe
+    user.password = newPassword;
+    await user.save();
+
+    console.log(`✅ Mot de passe changé pour utilisateur ${userId}`);
+  }
+
+  /**
+   * 🗑️ Supprimer le compte utilisateur
+   */
+  async deleteUserAccount(userId) {
+    // Vérifier si l'utilisateur existe
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    // Supprimer l'utilisateur
+    await User.findByIdAndDelete(userId);
+
+    console.log(`✅ Compte supprimé pour utilisateur ${userId}`);
   }
 
   /**

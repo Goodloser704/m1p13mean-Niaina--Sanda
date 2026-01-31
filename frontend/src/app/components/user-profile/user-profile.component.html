@@ -1,0 +1,275 @@
+<div class="user-profile-container">
+  <div class="profile-header">
+    <h1>Mon Profil</h1>
+    <div class="user-role-badge" [ngClass]="currentUser?.role">
+      {{ getRoleLabel() }}
+    </div>
+  </div>
+
+  <div class="profile-content" *ngIf="currentUser">
+    <!-- Section Informations Personnelles -->
+    <div class="profile-section">
+      <div class="section-header">
+        <h2>Informations Personnelles</h2>
+        <button 
+          type="button" 
+          class="btn-edit"
+          (click)="toggleEdit()"
+          [disabled]="isLoading">
+          {{ isEditing ? 'Annuler' : 'Modifier' }}
+        </button>
+      </div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmitProfile()" class="profile-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prenom">Prénom *</label>
+            <input 
+              type="text" 
+              id="prenom" 
+              formControlName="prenom"
+              [readonly]="!isEditing"
+              [class.error]="f['prenom'].invalid && f['prenom'].touched">
+            <div class="error-message" *ngIf="getFieldError('prenom')">
+              {{ getFieldError('prenom') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="nom">Nom *</label>
+            <input 
+              type="text" 
+              id="nom" 
+              formControlName="nom"
+              [readonly]="!isEditing"
+              [class.error]="f['nom'].invalid && f['nom'].touched">
+            <div class="error-message" *ngIf="getFieldError('nom')">
+              {{ getFieldError('nom') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email"
+            [readonly]="!isEditing"
+            [class.error]="f['email'].invalid && f['email'].touched">
+          <div class="error-message" *ngIf="getFieldError('email')">
+            {{ getFieldError('email') }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="telephone">Téléphone</label>
+            <input 
+              type="tel" 
+              id="telephone" 
+              formControlName="telephone"
+              [readonly]="!isEditing"
+              [class.error]="f['telephone'].invalid && f['telephone'].touched">
+            <div class="error-message" *ngIf="getFieldError('telephone')">
+              {{ getFieldError('telephone') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="dateNaissance">Date de naissance</label>
+            <input 
+              type="date" 
+              id="dateNaissance" 
+              formControlName="dateNaissance"
+              [readonly]="!isEditing">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="genre">Genre</label>
+            <select 
+              id="genre" 
+              formControlName="genre"
+              [disabled]="!isEditing">
+              <option value="">Sélectionner</option>
+              <option value="homme">Homme</option>
+              <option value="femme">Femme</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="adresse">Adresse</label>
+          <textarea 
+            id="adresse" 
+            formControlName="adresse"
+            [readonly]="!isEditing"
+            rows="3"></textarea>
+        </div>
+
+        <!-- Section spécifique aux propriétaires de boutique -->
+        <div *ngIf="isProprietaire()" class="boutique-section">
+          <h3>Informations Boutique</h3>
+          
+          <div class="form-group">
+            <label for="nomBoutique">Nom de la boutique</label>
+            <input 
+              type="text" 
+              id="nomBoutique" 
+              formControlName="nomBoutique"
+              [readonly]="!isEditing">
+          </div>
+
+          <div class="form-group">
+            <label for="descriptionBoutique">Description</label>
+            <textarea 
+              id="descriptionBoutique" 
+              formControlName="descriptionBoutique"
+              [readonly]="!isEditing"
+              rows="4"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="categorieActivite">Catégorie d'activité</label>
+              <select 
+                id="categorieActivite" 
+                formControlName="categorieActivite"
+                [disabled]="!isEditing">
+                <option value="">Sélectionner</option>
+                <option value="mode">Mode & Vêtements</option>
+                <option value="electronique">Électronique</option>
+                <option value="maison">Maison & Jardin</option>
+                <option value="beaute">Beauté & Santé</option>
+                <option value="sport">Sport & Loisirs</option>
+                <option value="alimentation">Alimentation</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="numeroSiret">Numéro SIRET</label>
+              <input 
+                type="text" 
+                id="numeroSiret" 
+                formControlName="numeroSiret"
+                [readonly]="!isEditing">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="adresseBoutique">Adresse de la boutique</label>
+            <textarea 
+              id="adresseBoutique" 
+              formControlName="adresseBoutique"
+              [readonly]="!isEditing"
+              rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions" *ngIf="isEditing">
+          <button 
+            type="submit" 
+            class="btn-primary"
+            [disabled]="profileForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="loading-spinner"></span>
+            {{ isLoading ? 'Enregistrement...' : 'Enregistrer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Section Sécurité -->
+    <div class="profile-section">
+      <div class="section-header">
+        <h2>Sécurité</h2>
+        <button 
+          type="button" 
+          class="btn-secondary"
+          (click)="togglePasswordForm()"
+          [disabled]="isLoading">
+          {{ showPasswordForm ? 'Annuler' : 'Changer le mot de passe' }}
+        </button>
+      </div>
+
+      <form 
+        *ngIf="showPasswordForm" 
+        [formGroup]="passwordForm" 
+        (ngSubmit)="onSubmitPassword()" 
+        class="password-form">
+        
+        <div class="form-group">
+          <label for="currentPassword">Mot de passe actuel *</label>
+          <input 
+            type="password" 
+            id="currentPassword" 
+            formControlName="currentPassword"
+            [class.error]="pf['currentPassword'].invalid && pf['currentPassword'].touched">
+          <div class="error-message" *ngIf="getPasswordError('currentPassword')">
+            {{ getPasswordError('currentPassword') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="newPassword">Nouveau mot de passe *</label>
+          <input 
+            type="password" 
+            id="newPassword" 
+            formControlName="newPassword"
+            [class.error]="pf['newPassword'].invalid && pf['newPassword'].touched">
+          <div class="error-message" *ngIf="getPasswordError('newPassword')">
+            {{ getPasswordError('newPassword') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirmer le nouveau mot de passe *</label>
+          <input 
+            type="password" 
+            id="confirmPassword" 
+            formControlName="confirmPassword"
+            [class.error]="pf['confirmPassword'].invalid && pf['confirmPassword'].touched">
+          <div class="error-message" *ngIf="getPasswordError('confirmPassword')">
+            {{ getPasswordError('confirmPassword') }}
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            type="submit" 
+            class="btn-primary"
+            [disabled]="passwordForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="loading-spinner"></span>
+            {{ isLoading ? 'Modification...' : 'Modifier le mot de passe' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Section Danger Zone (sauf pour admin) -->
+    <div class="profile-section danger-zone" *ngIf="!isAdmin()">
+      <div class="section-header">
+        <h2>Zone de danger</h2>
+      </div>
+      
+      <div class="danger-content">
+        <p>La suppression de votre compte est irréversible. Toutes vos données seront perdues.</p>
+        <button 
+          type="button" 
+          class="btn-danger"
+          (click)="deleteAccount()"
+          [disabled]="isLoading">
+          Supprimer mon compte
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner-large"></div>
+  </div>
+</div>
