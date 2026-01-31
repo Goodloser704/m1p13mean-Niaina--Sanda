@@ -133,26 +133,71 @@ export class UserProfileComponent implements OnInit {
 
   onSubmitProfile(): void {
     if (this.profileForm.valid && this.currentUser) {
-      // Solution temporaire : Afficher un message d'information
-      alert('⚠️ Fonctionnalité en cours de déploiement\n\nLa modification du profil sera disponible après la mise à jour du serveur.\n\nPour l\'instant, vous pouvez consulter vos informations en mode lecture seule.');
+      this.isLoading = true;
       
-      console.log('Données du profil à sauvegarder:', this.profileForm.value);
-      this.isEditing = false;
+      const updatedData = {
+        ...this.profileForm.value,
+        _id: this.currentUser._id
+      };
+
+      this.authService.updateProfile(updatedData).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.isEditing = false;
+          // Simuler les méthodes de notification
+          console.log('Profil mis à jour avec succès');
+          
+          // Mettre à jour l'utilisateur courant
+          this.authService.refreshCurrentUser();
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Erreur lors de la mise à jour du profil:', error.error?.message || 'Erreur lors de la mise à jour du profil');
+        }
+      });
     }
   }
 
   onSubmitPassword(): void {
     if (this.passwordForm.valid) {
-      // Solution temporaire : Afficher un message d'information
-      alert('⚠️ Fonctionnalité en cours de déploiement\n\nLe changement de mot de passe sera disponible après la mise à jour du serveur.');
+      this.isLoading = true;
       
-      this.showPasswordForm = false;
-      this.passwordForm.reset();
+      const passwordData = {
+        currentPassword: this.passwordForm.value.currentPassword,
+        newPassword: this.passwordForm.value.newPassword
+      };
+
+      this.authService.changePassword(passwordData).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.showPasswordForm = false;
+          this.passwordForm.reset();
+          console.log('Mot de passe modifié avec succès');
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Erreur lors du changement de mot de passe:', error.error?.message || 'Erreur lors du changement de mot de passe');
+        }
+      });
     }
   }
 
   deleteAccount(): void {
-    alert('⚠️ Fonctionnalité en cours de déploiement\n\nLa suppression de compte sera disponible après la mise à jour du serveur.');
+    if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
+      this.isLoading = true;
+      
+      this.authService.deleteAccount().subscribe({
+        next: () => {
+          console.log('Compte supprimé avec succès');
+          this.authService.logout();
+          this.router.navigate(['/']);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Erreur lors de la suppression du compte:', error.error?.message || 'Erreur lors de la suppression du compte');
+        }
+      });
+    }
   }
 
   // Getters pour faciliter l'accès aux contrôles du formulaire
