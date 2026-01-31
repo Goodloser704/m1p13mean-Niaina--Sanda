@@ -85,6 +85,7 @@ export class Header implements OnInit, OnDestroy {
   // 🚪 Déconnexion
   logout() {
     this.authService.logout();
+    this.router.navigate(['/']);
     alert('Vous avez été déconnecté');
     console.log('🚪 Déconnexion effectuée depuis le header');
   }
