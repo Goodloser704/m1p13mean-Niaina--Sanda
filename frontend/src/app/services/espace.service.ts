@@ -21,11 +21,13 @@ export class EspaceService {
 
   // Créer un nouvel espace
   creerEspace(espaceData: EspaceRequest): Observable<ApiResponse<{ espace: Espace }>> {
+    console.log('🏪 Création espace:', espaceData);
     return this.http.post<ApiResponse<{ espace: Espace }>>(this.apiUrl, espaceData);
   }
 
   // Obtenir tous les espaces avec filtres
   obtenirEspaces(filters: EspaceFilters = {}): Observable<EspacesResponse> {
+    console.log('🏪 Récupération espaces avec filtres:', filters);
     let params = new HttpParams();
     
     Object.keys(filters).forEach(key => {
@@ -35,6 +37,7 @@ export class EspaceService {
       }
     });
 
+    console.log('🏪 URL de requête:', this.apiUrl);
     return this.http.get<EspacesResponse>(this.apiUrl, { params });
   }
 

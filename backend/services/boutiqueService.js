@@ -368,13 +368,17 @@ class BoutiqueService {
    */
   async getAllBoutiques() {
     try {
-      const boutiques = await Boutique.find({ isActive: true })
+      console.log('🔍 Récupération de toutes les boutiques approuvées...');
+      
+      const boutiques = await Boutique.find({ statut: 'approuve' })
         .populate('proprietaire', 'nom prenom email telephone')
         .sort({ dateCreation: -1 });
 
+      console.log(`✅ ${boutiques.length} boutiques approuvées trouvées`);
       return boutiques;
     } catch (error) {
       console.error('❌ Erreur récupération toutes boutiques:', error.message);
+      console.error('❌ Stack trace:', error.stack);
       throw error;
     }
   }

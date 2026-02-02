@@ -48,6 +48,7 @@ export class AdminEtagesComponent implements OnInit {
 
   // Chargement des données
   async chargerEtages() {
+    console.log('🏢 Chargement des étages - Page:', this.currentPage);
     this.loading = true;
     this.error = '';
 
@@ -58,26 +59,29 @@ export class AdminEtagesComponent implements OnInit {
       }).toPromise();
 
       if (response) {
+        console.log('✅ Étages chargés:', response.etages.length);
         this.etages = response.etages;
         this.total = response.total;
         this.totalPages = response.totalPages;
       }
     } catch (error: any) {
+      console.error('❌ Erreur chargement étages:', error);
       this.error = 'Erreur lors du chargement des étages';
-      console.error('Erreur chargement étages:', error);
     } finally {
       this.loading = false;
     }
   }
 
   async chargerStatistiques() {
+    console.log('📊 Chargement des statistiques étages');
     try {
       const response = await this.etageService.obtenirStatistiques().toPromise();
       if (response) {
+        console.log('✅ Statistiques étages chargées:', response.stats);
         this.stats = response.stats;
       }
     } catch (error) {
-      console.error('Erreur chargement statistiques:', error);
+      console.error('❌ Erreur chargement statistiques étages:', error);
     }
   }
 

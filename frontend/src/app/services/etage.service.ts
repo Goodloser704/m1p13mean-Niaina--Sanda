@@ -20,6 +20,7 @@ export class EtageService {
 
   // Créer un nouvel étage
   creerEtage(etageData: EtageRequest): Observable<ApiResponse<{ etage: Etage }>> {
+    console.log('🏢 Création étage:', etageData);
     return this.http.post<ApiResponse<{ etage: Etage }>>(this.apiUrl, etageData);
   }
 
@@ -29,6 +30,7 @@ export class EtageService {
     limit?: number;
     actifSeulement?: boolean;
   } = {}): Observable<EtagesResponse> {
+    console.log('🏢 Récupération étages avec options:', options);
     let params = new HttpParams();
     
     if (options.page) params = params.set('page', options.page.toString());
@@ -37,6 +39,7 @@ export class EtageService {
       params = params.set('actifSeulement', options.actifSeulement.toString());
     }
 
+    console.log('🏢 URL de requête:', this.apiUrl);
     return this.http.get<EtagesResponse>(this.apiUrl, { params });
   }
 

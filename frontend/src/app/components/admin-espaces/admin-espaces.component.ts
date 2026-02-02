@@ -82,6 +82,7 @@ export class AdminEspacesComponent implements OnInit {
 
   // Chargement des données
   async chargerEspaces() {
+    console.log('🏪 Chargement des espaces - Page:', this.currentPage, 'Filtres:', this.filters);
     this.loading = true;
     this.error = '';
 
@@ -90,48 +91,55 @@ export class AdminEspacesComponent implements OnInit {
       const response = await this.espaceService.obtenirEspaces(this.filters).toPromise();
 
       if (response) {
+        console.log('✅ Espaces chargés:', response.espaces.length);
         this.espaces = response.espaces;
         this.total = response.total;
         this.totalPages = response.totalPages;
       }
     } catch (error: any) {
+      console.error('❌ Erreur chargement espaces:', error);
       this.error = 'Erreur lors du chargement des espaces';
-      console.error('Erreur chargement espaces:', error);
     } finally {
       this.loading = false;
     }
   }
 
   async chargerEtages() {
+    console.log('🏢 Chargement liste des étages');
     try {
       const etages = await this.etageService.obtenirListeEtages().toPromise();
       if (etages) {
+        console.log('✅ Étages chargés:', etages.length);
         this.etages = etages;
       }
     } catch (error) {
-      console.error('Erreur chargement étages:', error);
+      console.error('❌ Erreur chargement étages:', error);
     }
   }
 
   async chargerBoutiques() {
+    console.log('🏪 Chargement liste des boutiques');
     try {
       const response = await this.boutiqueService.obtenirBoutiques().toPromise();
       if (response) {
+        console.log('✅ Boutiques chargées:', response.boutiques.length);
         this.boutiques = response.boutiques;
       }
     } catch (error) {
-      console.error('Erreur chargement boutiques:', error);
+      console.error('❌ Erreur chargement boutiques:', error);
     }
   }
 
   async chargerStatistiques() {
+    console.log('📊 Chargement des statistiques espaces');
     try {
       const response = await this.espaceService.obtenirStatistiques().toPromise();
       if (response) {
+        console.log('✅ Statistiques espaces chargées:', response.stats);
         this.stats = response.stats;
       }
     } catch (error) {
-      console.error('Erreur chargement statistiques:', error);
+      console.error('❌ Erreur chargement statistiques espaces:', error);
     }
   }
 
