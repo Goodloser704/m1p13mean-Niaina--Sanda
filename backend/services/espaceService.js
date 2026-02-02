@@ -1,21 +1,9 @@
 const Espace = require('../models/Espace');
-const Etage = require('../models/Etage');
-const Boutique = require('../models/Boutique');
 
 class EspaceService {
   // Créer un nouvel espace
   async creerEspace(espaceData) {
     try {
-      // Vérifier que l'étage existe
-      const etageExiste = await Etage.findOne({ 
-        numero: espaceData.etage, 
-        isActive: true 
-      });
-      
-      if (!etageExiste) {
-        throw new Error('L\'étage spécifié n\'existe pas');
-      }
-
       const espace = new Espace(espaceData);
       await espace.save();
       return espace;
@@ -241,52 +229,14 @@ class EspaceService {
       });
       const espacesOccupes = totalEspaces - espacesDisponibles;
 
-      // Statistiques par étage
-      const statsParEtage = await Espace.aggregate([
-        { $match: { isActive: true } },
-        {
-          $group: {
-            _id: '$etage',
-            totalEspaces: { $sum: 1 },
-            espacesDisponibles: {
-              $sum: { $cond: [{ $eq: ['$statut', 'Disponible'] }, 1, 0] }
-            },
-            espacesOccupes: {
-              $sum: { $cond: [{ $eq: ['$statut', 'Occupe'] }, 1, 0] }
-            },
-            surfaceTotale: { $sum: '$surface' },
-            loyerMoyen: { $avg: '$loyer' },
-            loyerTotal: { $sum: '$loyer' }
-          }
-        },
-        { $sort: { _id: 1 } }
-      ]);
-
-      // Statistiques par surface
-      const statsParSurface = await Espace.aggregate([
-        { $match: { isActive: true } },
-        {
-          $bucket: {
-            groupBy: '$surface',
-            boundaries: [0, 50, 100, 200, 500, 1000, 10000],
-            default: 'Très grand',
-            output: {
-              count: { $sum: 1 },
-              disponibles: {
-                $sum: { $cond: [{ $eq: ['$statut', 'Disponible'] }, 1, 0] }
-              }
-            }
-          }
-        }
-      ]);
-
+      // Version simplifiée sans agrégations complexes
       return {
         totalEspaces,
         espacesDisponibles,
         espacesOccupes,
         tauxOccupation: totalEspaces > 0 ? ((espacesOccupes / totalEspaces) * 100).toFixed(2) : 0,
-        statsParEtage,
-        statsParSurface
+        statsParEtage: [],
+        statsParSurface: []
       };
     } catch (error) {
       throw error;
