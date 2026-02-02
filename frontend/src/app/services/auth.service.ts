@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface User {
   id: string;
@@ -23,7 +24,7 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = this.getBackendUrl() + '/api/auth';
+  private readonly API_URL = `${environment.apiUrl}/auth`;
   private readonly TOKEN_KEY = 'mall_token';
   private readonly USER_KEY = 'mall_user';
 
@@ -38,32 +39,6 @@ export class AuthService {
   constructor(private http: HttpClient) {
     // Vérifier le token au démarrage
     this.checkTokenValidity();
-  }
-
-  /**
-   * 🌐 Obtenir l'URL du backend selon l'environnement
-   */
-  private getBackendUrl(): string {
-    // En développement local avec proxy
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      
-      // Si on est en local, utiliser le proxy
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        console.log('🔧 Mode développement local - Utilisation du proxy');
-        return ''; // URL relative pour utiliser le proxy
-      }
-      
-      // Si on est sur Vercel (production)
-      if (hostname.includes('vercel.app')) {
-        console.log('🌐 Mode production Vercel');
-        return 'https://m1p13mean-niaina-1.onrender.com';
-      }
-    }
-    
-    // Par défaut, utiliser l'URL de production
-    console.log('🌐 Mode production par défaut');
-    return 'https://m1p13mean-niaina-1.onrender.com';
   }
 
   /**
