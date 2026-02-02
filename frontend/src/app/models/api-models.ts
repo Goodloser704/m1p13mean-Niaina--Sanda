@@ -488,8 +488,134 @@ export interface ModalConfig {
 }
 
 // ============================================================================
+// 🏢 Modèle Etage
+// ============================================================================
+
+export interface Etage {
+  _id: ObjectId;
+  numero: number;
+  nom: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  // Statistiques calculées
+  nombreEspaces?: number;
+  espacesDisponibles?: number;
+  espacesOccupes?: number;
+}
+
+export interface EtageRequest {
+  numero: number;
+  nom: string;
+  description?: string;
+}
+
+export interface EtagesResponse {
+  etages: Etage[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface EtageStatsResponse {
+  totalEtages: number;
+  totalEspaces: number;
+  espacesDisponibles: number;
+  espacesOccupes: number;
+  tauxOccupation: string;
+  statsParEtage: Array<{
+    _id: number;
+    totalEspaces: number;
+    espacesDisponibles: number;
+    espacesOccupes: number;
+    surfaceTotale: number;
+    loyerTotal: number;
+  }>;
+}
+
+// ============================================================================
+// 🏪 Modèle Espace
+// ============================================================================
+
+export type EspaceStatut = 'Disponible' | 'Occupe';
+
+export interface EspaceCaracteristiques {
+  vitrine: boolean;
+  climatisation: boolean;
+  stockage: boolean;
+  accesPMR: boolean;
+}
+
+export interface Espace {
+  _id: ObjectId;
+  codeEspace: string;
+  surface: number;
+  etage: number;
+  loyer: number;
+  statut: EspaceStatut;
+  boutique?: ObjectId | Boutique;
+  dateOccupation?: string;
+  description?: string;
+  caracteristiques: EspaceCaracteristiques;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EspaceRequest {
+  codeEspace: string;
+  surface: number;
+  etage: number;
+  loyer: number;
+  statut?: EspaceStatut;
+  description?: string;
+  caracteristiques?: Partial<EspaceCaracteristiques>;
+}
+
+export interface EspacesResponse {
+  espaces: Espace[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface EspaceFilters {
+  page?: number;
+  limit?: number;
+  etage?: number;
+  statut?: EspaceStatut;
+  surfaceMin?: number;
+  surfaceMax?: number;
+  loyerMax?: number;
+  search?: string;
+  actifSeulement?: boolean;
+}
+
+export interface EspaceStatsResponse {
+  totalEspaces: number;
+  espacesDisponibles: number;
+  espacesOccupes: number;
+  tauxOccupation: string;
+  statsParEtage: Array<{
+    _id: number;
+    totalEspaces: number;
+    espacesDisponibles: number;
+    espacesOccupes: number;
+    surfaceTotale: number;
+    loyerMoyen: number;
+    loyerTotal: number;
+  }>;
+  statsParSurface: Array<{
+    _id: string;
+    count: number;
+    disponibles: number;
+  }>;
+}
+
+// ============================================================================
 // 🎯 Types exportés - Utilisez les imports nommés
 // ============================================================================
 
 // Tous les types sont exportés individuellement ci-dessus
-// Utilisez: import { User, Boutique, ApiResponse } from './api-models';
+// Utilisez: import { User, Boutique, Etage, Espace, ApiResponse } from './api-models';

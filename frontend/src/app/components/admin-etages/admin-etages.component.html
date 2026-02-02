@@ -1,0 +1,185 @@
+<div class="admin-etages">
+  <!-- En-tête -->
+  <div class="page-header">
+    <h1>🏢 Gestion des Étages</h1>
+    <div class="header-actions">
+      <button class="btn btn-stats" (click)="toggleStats()">
+        📊 {{ showStats ? 'Masquer' : 'Afficher' }} Statistiques
+      </button>
+      <button class="btn btn-primary" (click)="ouvrirModal('create')">
+        ➕ Nouvel Étage
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages">
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="stats-panel" *ngIf="showStats && stats">
+    <h3>📊 Statistiques Générales</h3>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.totalEtages }}</div>
+        <div class="stat-label">Étages</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.totalEspaces }}</div>
+        <div class="stat-label">Espaces Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.espacesDisponibles }}</div>
+        <div class="stat-label">Disponibles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.espacesOccupes }}</div>
+        <div class="stat-label">Occupés</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.tauxOccupation }}%</div>
+        <div class="stat-label">Taux d'Occupation</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <!-- Liste des étages -->
+  <div class="etages-list" *ngIf="!loading">
+    <div class="list-header">
+      <h3>📋 Liste des Étages ({{ total }})</h3>
+    </div>
+
+    <div class="etages-grid" *ngIf="etages.length > 0">
+      <div class="etage-card" *ngFor="let etage of etages">
+        <div class="etage-header">
+          <div class="etage-numero">Étage {{ etage.numero }}</div>
+          <div class="etage-actions">
+            <button class="btn-icon" (click)="ouvrirModal('edit', etage)" title="Modifier">
+              ✏️
+            </button>
+            <button class="btn-icon btn-danger" (click)="supprimerEtage(etage)" title="Supprimer">
+              🗑️
+            </button>
+          </div>
+        </div>
+        
+        <div class="etage-content">
+          <h4>{{ etage.nom }}</h4>
+          <p class="etage-description" *ngIf="etage.description">{{ etage.description }}</p>
+          
+          <div class="etage-stats">
+            <div class="stat-item">
+              <span class="stat-icon">🏪</span>
+              <span>{{ formaterNombreEspaces(etage) }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="etage-footer">
+          <small>Créé le {{ etage.createdAt | date:'dd/MM/yyyy' }}</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message si aucun étage -->
+    <div class="empty-state" *ngIf="etages.length === 0">
+      <div class="empty-icon">🏢</div>
+      <h3>Aucun étage trouvé</h3>
+      <p>Commencez par créer votre premier étage</p>
+      <button class="btn btn-primary" (click)="ouvrirModal('create')">
+        ➕ Créer un Étage
+      </button>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button 
+        class="btn-page" 
+        [disabled]="currentPage === 1"
+        (click)="changerPage(currentPage - 1)">
+        ← Précédent
+      </button>
+      
+      <button 
+        *ngFor="let page of obtenirPagesArray()" 
+        class="btn-page"
+        [class.active]="page === currentPage"
+        (click)="changerPage(page)">
+        {{ page }}
+      </button>
+      
+      <button 
+        class="btn-page" 
+        [disabled]="currentPage === totalPages"
+        (click)="changerPage(currentPage + 1)">
+        Suivant →
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal de création/édition -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="fermerModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ modalMode === 'create' ? '➕ Nouvel Étage' : '✏️ Modifier l\'Étage' }}</h3>
+        <button class="btn-close" (click)="fermerModal()">✕</button>
+      </div>
+
+      <form (ngSubmit)="soumettre()" class="modal-form">
+        <div class="form-group">
+          <label for="numero">Numéro d'Étage *</label>
+          <input 
+            type="number" 
+            id="numero"
+            [(ngModel)]="etageForm.numero"
+            name="numero"
+            required
+            min="-2"
+            max="10"
+            placeholder="Ex: 0, 1, 2...">
+          <small>Utilisez des nombres négatifs pour les sous-sols (-1, -2)</small>
+        </div>
+
+        <div class="form-group">
+          <label for="nom">Nom de l'Étage *</label>
+          <input 
+            type="text" 
+            id="nom"
+            [(ngModel)]="etageForm.nom"
+            name="nom"
+            required
+            maxlength="100"
+            placeholder="Ex: Rez-de-chaussée, Premier étage...">
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea 
+            id="description"
+            [(ngModel)]="etageForm.description"
+            name="description"
+            maxlength="500"
+            rows="3"
+            placeholder="Description optionnelle de l'étage..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="fermerModal()">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            {{ loading ? 'Sauvegarde...' : (modalMode === 'create' ? 'Créer' : 'Modifier') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

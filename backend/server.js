@@ -101,6 +101,8 @@ app.use('/api/boutique', require('./routes/boutique'));
 app.use('/api/client', require('./routes/client'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
+app.use('/api/etages', require('./routes/etages'));
+app.use('/api/espaces', require('./routes/espaces'));
 console.log('✅ Routes initialisées avec succès');
 
 // 🗄️ Connexion MongoDB avec logs détaillés

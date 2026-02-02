@@ -362,6 +362,22 @@ class BoutiqueService {
       throw error;
     }
   }
+
+  /**
+   * 🏪 Obtenir toutes les boutiques (Admin seulement)
+   */
+  async getAllBoutiques() {
+    try {
+      const boutiques = await Boutique.find({ isActive: true })
+        .populate('proprietaire', 'nom prenom email telephone')
+        .sort({ dateCreation: -1 });
+
+      return boutiques;
+    } catch (error) {
+      console.error('❌ Erreur récupération toutes boutiques:', error.message);
+      throw error;
+    }
+  }
 }
 
 module.exports = new BoutiqueService();

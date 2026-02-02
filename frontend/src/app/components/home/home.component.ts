@@ -18,7 +18,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   
   // Navigation
-  currentView: 'home' | 'notifications' | 'admin-boutiques' | 'boutique-registration' | 'my-boutiques' = 'home';
+  currentView: 'home' | 'notifications' | 'admin-boutiques' | 'admin-etages' | 'admin-espaces' | 'boutique-registration' | 'my-boutiques' = 'home';
   
   private subscriptions: Subscription[] = [];
 
@@ -58,7 +58,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // 📱 Navigation avec router
-  setView(view: 'home' | 'notifications' | 'admin-boutiques' | 'boutique-registration' | 'my-boutiques') {
+  setView(view: 'home' | 'notifications' | 'admin-boutiques' | 'admin-etages' | 'admin-espaces' | 'boutique-registration' | 'my-boutiques') {
     console.log('📱 Navigation vers:', view);
     if (view === 'home') {
       this.router.navigate(['/']);

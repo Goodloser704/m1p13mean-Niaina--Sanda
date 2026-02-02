@@ -60,4 +60,9 @@ router.get('/:boutiqueId', adminAuth, boutiqueController.getBoutiqueById);
 // @access  Private (Admin seulement)
 router.get('/admin/stats', adminAuth, boutiqueController.getBoutiqueStats);
 
+// @route   GET /api/boutique/all
+// @desc    Obtenir toutes les boutiques
+// @access  Private (Admin seulement)
+router.get('/all', adminAuth, boutiqueController.getAllBoutiques);
+
 module.exports = router;

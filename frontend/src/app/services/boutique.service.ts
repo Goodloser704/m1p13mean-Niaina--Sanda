@@ -202,6 +202,19 @@ export class BoutiqueService {
   }
 
   /**
+   * 🏪 Obtenir toutes les boutiques (Admin seulement)
+   */
+  obtenirBoutiques(): Observable<{
+    boutiques: Boutique[];
+    count: number;
+  }> {
+    return this.http.get<{
+      boutiques: Boutique[];
+      count: number;
+    }>(`${this.API_URL}/all`);
+  }
+
+  /**
    * 🎨 Obtenir l'icône de la catégorie
    */
   getCategoryIcon(category: string): string {

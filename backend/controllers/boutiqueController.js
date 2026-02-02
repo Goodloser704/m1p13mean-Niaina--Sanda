@@ -360,6 +360,30 @@ class BoutiqueController {
       res.status(500).json({ message: 'Erreur serveur' });
     }
   }
+
+  /**
+   * 🏪 Obtenir toutes les boutiques (Admin seulement)
+   */
+  async getAllBoutiques(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🏪 [${timestamp}] Récupération toutes boutiques`);
+    console.log(`   👤 Admin ID: ${req.user._id}`);
+    
+    try {
+      const boutiques = await boutiqueService.getAllBoutiques();
+
+      console.log(`✅ ${boutiques.length} boutiques récupérées`);
+      
+      res.json({
+        boutiques,
+        count: boutiques.length
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur récupération boutiques:`, error.message);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
 }
 
 module.exports = new BoutiqueController();
