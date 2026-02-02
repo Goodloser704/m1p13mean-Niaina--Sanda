@@ -6,6 +6,16 @@ const { auth, authorize } = require('../middleware/auth');
 // Middleware d'authentification pour toutes les routes
 router.use(auth);
 
+// Route de test simple (sans auth admin)
+router.get('/test', (req, res) => {
+  console.log('🧪 Route de test étages appelée');
+  res.json({ 
+    message: 'Route étages fonctionnelle',
+    timestamp: new Date().toISOString(),
+    user: req.user ? req.user._id : 'Non authentifié'
+  });
+});
+
 // Middleware de vérification du rôle admin
 const requireAdmin = (req, res, next) => {
   if (req.user.role !== 'admin') {

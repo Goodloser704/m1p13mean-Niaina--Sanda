@@ -42,8 +42,21 @@ export class AdminEtagesComponent implements OnInit {
   constructor(private etageService: EtageService) {}
 
   ngOnInit() {
+    // Test de connectivité d'abord
+    this.testerConnectivite();
     this.chargerEtages();
     this.chargerStatistiques();
+  }
+
+  // Test de connectivité
+  async testerConnectivite() {
+    console.log('🧪 Test de connectivité étages...');
+    try {
+      const response = await this.etageService.testerConnexion().toPromise();
+      console.log('✅ Test connectivité étages réussi:', response);
+    } catch (error) {
+      console.error('❌ Test connectivité étages échoué:', error);
+    }
   }
 
   // Chargement des données

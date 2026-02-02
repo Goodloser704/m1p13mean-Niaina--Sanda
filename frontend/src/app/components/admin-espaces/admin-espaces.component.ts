@@ -68,7 +68,20 @@ export class AdminEspacesComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // Test de connectivité d'abord
+    this.testerConnectivite();
     this.chargerDonneesInitiales();
+  }
+
+  // Test de connectivité
+  async testerConnectivite() {
+    console.log('🧪 Test de connectivité espaces...');
+    try {
+      const response = await this.espaceService.testerConnexion().toPromise();
+      console.log('✅ Test connectivité espaces réussi:', response);
+    } catch (error) {
+      console.error('❌ Test connectivité espaces échoué:', error);
+    }
   }
 
   async chargerDonneesInitiales() {

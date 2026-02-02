@@ -18,6 +18,12 @@ export class EtageService {
 
   constructor(private http: HttpClient) {}
 
+  // Méthode de test pour vérifier la connectivité
+  testerConnexion(): Observable<any> {
+    console.log('🧪 Test de connexion étages - URL:', `${this.apiUrl}/test`);
+    return this.http.get<any>(`${this.apiUrl}/test`);
+  }
+
   // Créer un nouvel étage
   creerEtage(etageData: EtageRequest): Observable<ApiResponse<{ etage: Etage }>> {
     console.log('🏢 Création étage:', etageData);

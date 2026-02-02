@@ -19,6 +19,12 @@ export class EspaceService {
 
   constructor(private http: HttpClient) {}
 
+  // Méthode de test pour vérifier la connectivité
+  testerConnexion(): Observable<any> {
+    console.log('🧪 Test de connexion espaces - URL:', `${this.apiUrl}/test`);
+    return this.http.get<any>(`${this.apiUrl}/test`);
+  }
+
   // Créer un nouvel espace
   creerEspace(espaceData: EspaceRequest): Observable<ApiResponse<{ espace: Espace }>> {
     console.log('🏪 Création espace:', espaceData);
