@@ -58,7 +58,9 @@ export class AdminEtagesComponent implements OnInit {
     } catch (error) {
       console.error('❌ [FRONTEND-COMPONENT] Test connectivité étages échoué:', error);
       console.error('❌ [FRONTEND-COMPONENT] Type d\'erreur:', typeof error);
-      console.error('❌ [FRONTEND-COMPONENT] Propriétés de l\'erreur:', Object.keys(error));
+      if (error && typeof error === 'object') {
+        console.error('❌ [FRONTEND-COMPONENT] Propriétés de l\'erreur:', Object.keys(error as any));
+      }
       console.log('🧪 [FRONTEND-COMPONENT] === FIN testerConnectivite (ERROR) ===');
     }
   }
