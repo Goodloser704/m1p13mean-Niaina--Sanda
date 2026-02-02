@@ -1,13 +1,29 @@
 const Etage = require('../models/Etage');
 
+console.log('🏢 [SERVICE] Initialisation EtageService...');
+
 class EtageService {
   // Créer un nouvel étage
   async creerEtage(etageData) {
+    console.log(`🏢 [SERVICE] === DEBUT creerEtage ===`);
+    console.log(`🏢 [SERVICE] Données reçues:`, JSON.stringify(etageData, null, 2));
+    
     try {
+      console.log(`🏢 [SERVICE] Création instance Etage...`);
       const etage = new Etage(etageData);
+      console.log(`🏢 [SERVICE] Instance créée:`, JSON.stringify(etage, null, 2));
+      
+      console.log(`🏢 [SERVICE] Sauvegarde en base...`);
       await etage.save();
+      console.log(`✅ [SERVICE] Sauvegarde réussie`);
+      console.log(`🏢 [SERVICE] === FIN creerEtage ===`);
+      
       return etage;
     } catch (error) {
+      console.error('❌ [SERVICE] Erreur creerEtage:', error.message);
+      console.error('❌ [SERVICE] Stack:', error.stack);
+      console.log(`🏢 [SERVICE] === FIN creerEtage (ERREUR) ===`);
+      
       if (error.code === 11000) {
         throw new Error('Un étage avec ce numéro existe déjà');
       }
@@ -17,16 +33,25 @@ class EtageService {
 
   // Obtenir tous les étages
   async obtenirEtages(options = {}) {
+    console.log(`🏢 [SERVICE] === DEBUT obtenirEtages ===`);
+    console.log(`🏢 [SERVICE] Options:`, JSON.stringify(options, null, 2));
+    
     try {
       const { page = 1, limit = 50, actifSeulement = true } = options;
       const skip = (page - 1) * limit;
       
       const query = actifSeulement ? { isActive: true } : {};
+      console.log(`🔍 [SERVICE] Query MongoDB:`, JSON.stringify(query, null, 2));
+      console.log(`🔍 [SERVICE] Skip: ${skip}, Limit: ${limit}`);
       
+      console.log(`🏢 [SERVICE] Recherche étages en base...`);
       const etages = await Etage.find(query)
         .sort({ numero: 1 })
         .skip(skip)
         .limit(limit);
+      
+      console.log(`✅ [SERVICE] ${etages.length} étages trouvés`);
+      console.log(`🏢 [SERVICE] Étages bruts:`, JSON.stringify(etages, null, 2));
 
       // Version simplifiée sans statistiques d'espaces pour éviter les dépendances circulaires
       const etagesSimples = etages.map(etage => ({
@@ -35,16 +60,28 @@ class EtageService {
         espacesDisponibles: 0,
         espacesOccupes: 0
       }));
+      
+      console.log(`🏢 [SERVICE] Étages traités:`, JSON.stringify(etagesSimples, null, 2));
 
+      console.log(`🏢 [SERVICE] Comptage total...`);
       const total = await Etage.countDocuments(query);
+      console.log(`📊 [SERVICE] Total: ${total}`);
 
-      return {
+      const result = {
         etages: etagesSimples,
         total,
         page,
         totalPages: Math.ceil(total / limit)
       };
+      
+      console.log(`🏢 [SERVICE] Résultat final:`, JSON.stringify(result, null, 2));
+      console.log(`🏢 [SERVICE] === FIN obtenirEtages ===`);
+
+      return result;
     } catch (error) {
+      console.error('❌ [SERVICE] Erreur obtenirEtages:', error.message);
+      console.error('❌ [SERVICE] Stack:', error.stack);
+      console.log(`🏢 [SERVICE] === FIN obtenirEtages (ERREUR) ===`);
       throw error;
     }
   }
@@ -119,11 +156,15 @@ class EtageService {
 
   // Obtenir les statistiques des étages
   async obtenirStatistiques() {
+    console.log(`📊 [SERVICE] === DEBUT obtenirStatistiques ===`);
+    
     try {
+      console.log(`📊 [SERVICE] Comptage étages actifs...`);
       const totalEtages = await Etage.countDocuments({ isActive: true });
+      console.log(`📊 [SERVICE] Total étages: ${totalEtages}`);
       
       // Version simplifiée sans dépendances circulaires
-      return {
+      const result = {
         totalEtages,
         totalEspaces: 0,
         espacesDisponibles: 0,
@@ -131,10 +172,19 @@ class EtageService {
         tauxOccupation: 0,
         statsParEtage: []
       };
+      
+      console.log(`📊 [SERVICE] Statistiques calculées:`, JSON.stringify(result, null, 2));
+      console.log(`📊 [SERVICE] === FIN obtenirStatistiques ===`);
+      
+      return result;
     } catch (error) {
+      console.error('❌ [SERVICE] Erreur obtenirStatistiques:', error.message);
+      console.error('❌ [SERVICE] Stack:', error.stack);
+      console.log(`📊 [SERVICE] === FIN obtenirStatistiques (ERREUR) ===`);
       throw error;
     }
   }
 }
 
+console.log('✅ [SERVICE] EtageService initialisé');
 module.exports = new EtageService();

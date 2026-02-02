@@ -50,51 +50,67 @@ export class AdminEtagesComponent implements OnInit {
 
   // Test de connectivité
   async testerConnectivite() {
-    console.log('🧪 Test de connectivité étages...');
+    console.log('🧪 [FRONTEND-COMPONENT] === DEBUT testerConnectivite ===');
     try {
       const response = await this.etageService.testerConnexion().toPromise();
-      console.log('✅ Test connectivité étages réussi:', response);
+      console.log('✅ [FRONTEND-COMPONENT] Test connectivité étages réussi:', response);
+      console.log('🧪 [FRONTEND-COMPONENT] === FIN testerConnectivite (SUCCESS) ===');
     } catch (error) {
-      console.error('❌ Test connectivité étages échoué:', error);
+      console.error('❌ [FRONTEND-COMPONENT] Test connectivité étages échoué:', error);
+      console.error('❌ [FRONTEND-COMPONENT] Type d\'erreur:', typeof error);
+      console.error('❌ [FRONTEND-COMPONENT] Propriétés de l\'erreur:', Object.keys(error));
+      console.log('🧪 [FRONTEND-COMPONENT] === FIN testerConnectivite (ERROR) ===');
     }
   }
 
   // Chargement des données
   async chargerEtages() {
-    console.log('🏢 Chargement des étages - Page:', this.currentPage);
+    console.log('🏢 [FRONTEND-COMPONENT] === DEBUT chargerEtages ===');
+    console.log('🏢 [FRONTEND-COMPONENT] Page courante:', this.currentPage);
     this.loading = true;
     this.error = '';
 
     try {
-      const response = await this.etageService.obtenirEtages({
+      const options = {
         page: this.currentPage,
         limit: 20
-      }).toPromise();
+      };
+      console.log('🏢 [FRONTEND-COMPONENT] Options de requête:', options);
+      
+      const response = await this.etageService.obtenirEtages(options).toPromise();
 
       if (response) {
-        console.log('✅ Étages chargés:', response.etages.length);
+        console.log('✅ [FRONTEND-COMPONENT] Étages chargés:', response.etages.length);
+        console.log('🏢 [FRONTEND-COMPONENT] Réponse complète:', response);
         this.etages = response.etages;
         this.total = response.total;
         this.totalPages = response.totalPages;
+        console.log('🏢 [FRONTEND-COMPONENT] État mis à jour - Total:', this.total, 'Pages:', this.totalPages);
       }
+      console.log('🏢 [FRONTEND-COMPONENT] === FIN chargerEtages (SUCCESS) ===');
     } catch (error: any) {
-      console.error('❌ Erreur chargement étages:', error);
+      console.error('❌ [FRONTEND-COMPONENT] Erreur chargement étages:', error);
+      console.error('❌ [FRONTEND-COMPONENT] Message:', error.message);
+      console.error('❌ [FRONTEND-COMPONENT] Status:', error.status);
       this.error = 'Erreur lors du chargement des étages';
+      console.log('🏢 [FRONTEND-COMPONENT] === FIN chargerEtages (ERROR) ===');
     } finally {
       this.loading = false;
     }
   }
 
   async chargerStatistiques() {
-    console.log('📊 Chargement des statistiques étages');
+    console.log('📊 [FRONTEND-COMPONENT] === DEBUT chargerStatistiques ===');
     try {
       const response = await this.etageService.obtenirStatistiques().toPromise();
       if (response) {
-        console.log('✅ Statistiques étages chargées:', response.stats);
+        console.log('✅ [FRONTEND-COMPONENT] Statistiques étages chargées:', response.stats);
         this.stats = response.stats;
       }
+      console.log('📊 [FRONTEND-COMPONENT] === FIN chargerStatistiques (SUCCESS) ===');
     } catch (error) {
-      console.error('❌ Erreur chargement statistiques étages:', error);
+      console.error('❌ [FRONTEND-COMPONENT] Erreur chargement statistiques étages:', error);
+      console.log('📊 [FRONTEND-COMPONENT] === FIN chargerStatistiques (ERROR) ===');
     }
   }
 

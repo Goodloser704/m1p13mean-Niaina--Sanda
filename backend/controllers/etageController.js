@@ -1,23 +1,34 @@
 const etageService = require('../services/etageService');
 
+console.log('🏢 [CONTROLLER] Initialisation EtageController...');
+
 class EtageController {
   // Créer un nouvel étage
   async creerEtage(req, res) {
     const timestamp = new Date().toISOString();
-    console.log(`🏢 [${timestamp}] Création étage`);
-    console.log(`   👤 User ID: ${req.user._id} (${req.user.role})`);
-    console.log(`   📝 Données:`, req.body);
+    console.log(`🏢 [CONTROLLER] [${timestamp}] === DEBUT creerEtage ===`);
+    console.log(`🏢 [CONTROLLER] User ID: ${req.user._id} (${req.user.role})`);
+    console.log(`🏢 [CONTROLLER] Body:`, JSON.stringify(req.body, null, 2));
     
     try {
+      console.log(`🏢 [CONTROLLER] Appel etageService.creerEtage...`);
       const etage = await etageService.creerEtage(req.body);
-      console.log(`✅ Étage créé: ${etage.nom} (${etage.numero})`);
+      console.log(`✅ [CONTROLLER] Étage créé:`, JSON.stringify(etage, null, 2));
       
-      res.status(201).json({
+      const response = {
         message: 'Étage créé avec succès',
         etage
-      });
+      };
+      
+      console.log(`🏢 [CONTROLLER] Réponse:`, JSON.stringify(response, null, 2));
+      console.log(`🏢 [CONTROLLER] === FIN creerEtage ===`);
+      
+      res.status(201).json(response);
     } catch (error) {
-      console.error('❌ Erreur création étage:', error.message);
+      console.error('❌ [CONTROLLER] Erreur création étage:', error.message);
+      console.error('❌ [CONTROLLER] Stack:', error.stack);
+      console.log(`🏢 [CONTROLLER] === FIN creerEtage (ERREUR) ===`);
+      
       res.status(400).json({
         message: error.message || 'Erreur lors de la création de l\'étage'
       });
@@ -27,9 +38,9 @@ class EtageController {
   // Obtenir tous les étages
   async obtenirEtages(req, res) {
     const timestamp = new Date().toISOString();
-    console.log(`🏢 [${timestamp}] Récupération étages`);
-    console.log(`   👤 User ID: ${req.user._id} (${req.user.role})`);
-    console.log(`   📝 Query params:`, req.query);
+    console.log(`🏢 [CONTROLLER] [${timestamp}] === DEBUT obtenirEtages ===`);
+    console.log(`🏢 [CONTROLLER] User ID: ${req.user._id} (${req.user.role})`);
+    console.log(`🏢 [CONTROLLER] Query params:`, JSON.stringify(req.query, null, 2));
     
     try {
       const options = {
@@ -38,14 +49,20 @@ class EtageController {
         actifSeulement: req.query.actifSeulement !== 'false'
       };
 
-      console.log(`🔍 Options de recherche:`, options);
+      console.log(`🔍 [CONTROLLER] Options de recherche:`, JSON.stringify(options, null, 2));
+      console.log(`🏢 [CONTROLLER] Appel etageService.obtenirEtages...`);
+      
       const result = await etageService.obtenirEtages(options);
-      console.log(`✅ ${result.etages.length} étages récupérés`);
+      console.log(`✅ [CONTROLLER] ${result.etages.length} étages récupérés`);
+      console.log(`🏢 [CONTROLLER] Résultat:`, JSON.stringify(result, null, 2));
+      console.log(`🏢 [CONTROLLER] === FIN obtenirEtages ===`);
       
       res.json(result);
     } catch (error) {
-      console.error('❌ Erreur récupération étages:', error.message);
-      console.error('❌ Stack trace:', error.stack);
+      console.error('❌ [CONTROLLER] Erreur récupération étages:', error.message);
+      console.error('❌ [CONTROLLER] Stack trace:', error.stack);
+      console.log(`🏢 [CONTROLLER] === FIN obtenirEtages (ERREUR) ===`);
+      
       res.status(500).json({
         message: 'Erreur lors de la récupération des étages'
       });
@@ -100,16 +117,24 @@ class EtageController {
   // Obtenir les statistiques des étages
   async obtenirStatistiques(req, res) {
     const timestamp = new Date().toISOString();
-    console.log(`📊 [${timestamp}] Récupération statistiques étages`);
-    console.log(`   👤 User ID: ${req.user._id} (${req.user.role})`);
+    console.log(`📊 [CONTROLLER] [${timestamp}] === DEBUT obtenirStatistiques ===`);
+    console.log(`📊 [CONTROLLER] User ID: ${req.user._id} (${req.user.role})`);
     
     try {
+      console.log(`📊 [CONTROLLER] Appel etageService.obtenirStatistiques...`);
       const stats = await etageService.obtenirStatistiques();
-      console.log(`✅ Statistiques étages récupérées`);
-      res.json({ stats });
+      console.log(`✅ [CONTROLLER] Statistiques récupérées:`, JSON.stringify(stats, null, 2));
+      
+      const response = { stats };
+      console.log(`📊 [CONTROLLER] Réponse finale:`, JSON.stringify(response, null, 2));
+      console.log(`📊 [CONTROLLER] === FIN obtenirStatistiques ===`);
+      
+      res.json(response);
     } catch (error) {
-      console.error('❌ Erreur récupération statistiques étages:', error.message);
-      console.error('❌ Stack trace:', error.stack);
+      console.error('❌ [CONTROLLER] Erreur récupération statistiques étages:', error.message);
+      console.error('❌ [CONTROLLER] Stack trace:', error.stack);
+      console.log(`📊 [CONTROLLER] === FIN obtenirStatistiques (ERREUR) ===`);
+      
       res.status(500).json({
         message: 'Erreur lors de la récupération des statistiques'
       });
@@ -117,4 +142,5 @@ class EtageController {
   }
 }
 
+console.log('✅ [CONTROLLER] EtageController initialisé');
 module.exports = new EtageController();

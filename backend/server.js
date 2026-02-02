@@ -94,14 +94,23 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes avec logging
 console.log('🛣️  Initialisation des routes...');
+console.log('🛣️  Chargement route auth...');
 app.use('/api/auth', require('./routes/auth'));
+console.log('🛣️  Chargement route notifications...');
 app.use('/api/notifications', require('./routes/notifications'));
+console.log('🛣️  Chargement route admin...');
 app.use('/api/admin', require('./routes/admin'));
+console.log('🛣️  Chargement route boutique...');
 app.use('/api/boutique', require('./routes/boutique'));
+console.log('🛣️  Chargement route client...');
 app.use('/api/client', require('./routes/client'));
+console.log('🛣️  Chargement route products...');
 app.use('/api/products', require('./routes/products'));
+console.log('🛣️  Chargement route orders...');
 app.use('/api/orders', require('./routes/orders'));
+console.log('🛣️  Chargement route etages...');
 app.use('/api/etages', require('./routes/etages'));
+console.log('🛣️  Chargement route espaces...');
 app.use('/api/espaces', require('./routes/espaces'));
 console.log('✅ Routes initialisées avec succès');
 
