@@ -42,10 +42,49 @@ export class AdminEtagesComponent implements OnInit {
   constructor(private etageService: EtageService) {}
 
   ngOnInit() {
+    console.log('🏢 [FRONTEND-COMPONENT] === DEBUT ngOnInit ===');
+    
+    // Vérifier d'abord si l'utilisateur est connecté et a les bonnes permissions
+    if (!this.isUserAuthenticated()) {
+      console.log('❌ [FRONTEND-COMPONENT] Utilisateur non authentifié ou sans permissions admin');
+      this.error = 'Vous devez être connecté en tant qu\'administrateur pour accéder à cette page.';
+      return;
+    }
+    
     // Test de connectivité d'abord
     this.testerConnectivite();
     this.chargerEtages();
     this.chargerStatistiques();
+    
+    console.log('🏢 [FRONTEND-COMPONENT] === FIN ngOnInit ===');
+  }
+
+  // Vérifier l'authentification et les permissions
+  private isUserAuthenticated(): boolean {
+    // Cette méthode devrait vérifier si l'utilisateur est connecté et a le rôle admin
+    // Pour l'instant, on va juste vérifier s'il y a un token
+    const token = localStorage.getItem('mall_token') || sessionStorage.getItem('mall_token');
+    const userStr = localStorage.getItem('mall_user') || sessionStorage.getItem('mall_user');
+    
+    if (!token || !userStr) {
+      console.log('🔐 [FRONTEND-COMPONENT] Aucun token ou utilisateur trouvé');
+      return false;
+    }
+    
+    try {
+      const user = JSON.parse(userStr);
+      if (user.role !== 'admin') {
+        console.log('🔐 [FRONTEND-COMPONENT] Utilisateur n\'est pas admin:', user.role);
+        this.error = 'Seuls les administrateurs peuvent accéder à cette page.';
+        return false;
+      }
+      
+      console.log('✅ [FRONTEND-COMPONENT] Utilisateur admin authentifié:', user.email);
+      return true;
+    } catch (error) {
+      console.error('❌ [FRONTEND-COMPONENT] Erreur parsing user data:', error);
+      return false;
+    }
   }
 
   // Test de connectivité
@@ -55,12 +94,23 @@ export class AdminEtagesComponent implements OnInit {
       const response = await this.etageService.testerConnexion().toPromise();
       console.log('✅ [FRONTEND-COMPONENT] Test connectivité étages réussi:', response);
       console.log('🧪 [FRONTEND-COMPONENT] === FIN testerConnectivite (SUCCESS) ===');
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ [FRONTEND-COMPONENT] Test connectivité étages échoué:', error);
       console.error('❌ [FRONTEND-COMPONENT] Type d\'erreur:', typeof error);
-      if (error && typeof error === 'object') {
-        console.error('❌ [FRONTEND-COMPONENT] Propriétés de l\'erreur:', Object.keys(error as any));
+      
+      // Afficher un message d'erreur convivial à l'utilisateur
+      const friendlyMessage = error.friendlyMessage || 
+                             error.error?.message || 
+                             'Erreur de connexion au serveur';
+      
+      this.error = friendlyMessage;
+      
+      // Si c'est une erreur d'authentification, ne pas continuer le chargement
+      if (error.status === 401 || error.error?.code === 'AUTH_EXPIRED') {
+        console.log('🚨 [FRONTEND-COMPONENT] Erreur d\'authentification détectée - Arrêt du chargement');
+        return;
       }
+      
       console.log('🧪 [FRONTEND-COMPONENT] === FIN testerConnectivite (ERROR) ===');
     }
   }
@@ -94,7 +144,13 @@ export class AdminEtagesComponent implements OnInit {
       console.error('❌ [FRONTEND-COMPONENT] Erreur chargement étages:', error);
       console.error('❌ [FRONTEND-COMPONENT] Message:', error.message);
       console.error('❌ [FRONTEND-COMPONENT] Status:', error.status);
-      this.error = 'Erreur lors du chargement des étages';
+      
+      // Utiliser le message d'erreur convivial
+      const friendlyMessage = error.friendlyMessage || 
+                             error.error?.message || 
+                             'Erreur lors du chargement des étages';
+      
+      this.error = friendlyMessage;
       console.log('🏢 [FRONTEND-COMPONENT] === FIN chargerEtages (ERROR) ===');
     } finally {
       this.loading = false;
@@ -110,8 +166,21 @@ export class AdminEtagesComponent implements OnInit {
         this.stats = response.stats;
       }
       console.log('📊 [FRONTEND-COMPONENT] === FIN chargerStatistiques (SUCCESS) ===');
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ [FRONTEND-COMPONENT] Erreur chargement statistiques étages:', error);
+      
+      // Ne pas afficher d'erreur pour les statistiques si c'est juste un problème de permissions
+      if (error.status !== 403) {
+        const friendlyMessage = error.friendlyMessage || 
+                               error.error?.message || 
+                               'Erreur lors du chargement des statistiques';
+        
+        // Afficher l'erreur seulement si ce n'est pas déjà affiché
+        if (!this.error) {
+          this.error = friendlyMessage;
+        }
+      }
+      
       console.log('📊 [FRONTEND-COMPONENT] === FIN chargerStatistiques (ERROR) ===');
     }
   }

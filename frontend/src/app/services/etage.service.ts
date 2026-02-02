@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { 
   Etage, 
@@ -38,10 +38,21 @@ export class EtageService {
           console.error('❌ [FRONTEND-SERVICE] Status:', error.status);
           console.error('❌ [FRONTEND-SERVICE] StatusText:', error.statusText);
           console.error('❌ [FRONTEND-SERVICE] URL:', error.url);
-          console.error('❌ [FRONTEND-SERVICE] Headers:', error.headers);
-          console.error('❌ [FRONTEND-SERVICE] Error object:', JSON.stringify(error, null, 2));
+          console.error('❌ [FRONTEND-SERVICE] Error details:', {
+            message: error.error?.message || error.message,
+            code: error.error?.code,
+            originalStatus: error.error?.originalStatus
+          });
           console.log('🧪 [FRONTEND-SERVICE] === FIN testerConnexion (ERROR) ===');
         }
+      }),
+      catchError((error) => {
+        // Transformation de l'erreur pour un message plus clair
+        const friendlyMessage = this.getFriendlyErrorMessage(error);
+        return throwError(() => ({
+          ...error,
+          friendlyMessage
+        }));
       })
     );
   }
@@ -98,8 +109,20 @@ export class EtageService {
           console.error('❌ [FRONTEND-SERVICE] Erreur récupération étages:', error);
           console.error('❌ [FRONTEND-SERVICE] Status:', error.status);
           console.error('❌ [FRONTEND-SERVICE] URL:', error.url);
+          console.error('❌ [FRONTEND-SERVICE] Error details:', {
+            message: error.error?.message || error.message,
+            code: error.error?.code,
+            originalStatus: error.error?.originalStatus
+          });
           console.log('🏢 [FRONTEND-SERVICE] === FIN obtenirEtages (ERROR) ===');
         }
+      }),
+      catchError((error) => {
+        const friendlyMessage = this.getFriendlyErrorMessage(error);
+        return throwError(() => ({
+          ...error,
+          friendlyMessage
+        }));
       })
     );
   }
@@ -135,9 +158,20 @@ export class EtageService {
           console.error('❌ [FRONTEND-SERVICE] Erreur statistiques:', error);
           console.error('❌ [FRONTEND-SERVICE] Status:', error.status);
           console.error('❌ [FRONTEND-SERVICE] URL:', error.url);
-          console.error('❌ [FRONTEND-SERVICE] Response text:', error.error);
+          console.error('❌ [FRONTEND-SERVICE] Error details:', {
+            message: error.error?.message || error.message,
+            code: error.error?.code,
+            originalStatus: error.error?.originalStatus
+          });
           console.log('📊 [FRONTEND-SERVICE] === FIN obtenirStatistiques (ERROR) ===');
         }
+      }),
+      catchError((error) => {
+        const friendlyMessage = this.getFriendlyErrorMessage(error);
+        return throwError(() => ({
+          ...error,
+          friendlyMessage
+        }));
       })
     );
   }
@@ -157,5 +191,36 @@ export class EtageService {
         error: (error) => observer.error(error)
       });
     });
+  }
+
+  /**
+   * 🔧 Obtenir un message d'erreur convivial basé sur le type d'erreur
+   */
+  private getFriendlyErrorMessage(error: any): string {
+    if (error.error?.code === 'AUTH_EXPIRED') {
+      return 'Votre session a expiré. Veuillez vous reconnecter.';
+    }
+    
+    if (error.error?.code === 'NETWORK_ERROR') {
+      return 'Impossible de contacter le serveur. Vérifiez votre connexion internet.';
+    }
+    
+    if (error.error?.code === 'PARSE_ERROR') {
+      return 'Erreur de communication avec le serveur. Veuillez réessayer.';
+    }
+    
+    if (error.status === 403) {
+      return 'Vous n\'avez pas les permissions nécessaires pour cette action.';
+    }
+    
+    if (error.status === 404) {
+      return 'La ressource demandée n\'a pas été trouvée.';
+    }
+    
+    if (error.status >= 500) {
+      return 'Erreur serveur. Veuillez réessayer plus tard.';
+    }
+    
+    return error.error?.message || error.message || 'Une erreur inattendue s\'est produite.';
   }
 }

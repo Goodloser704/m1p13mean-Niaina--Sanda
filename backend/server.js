@@ -209,23 +209,40 @@ app.use((err, req, res, next) => {
   console.error(`   📱 Origin: ${req.get('Origin') || 'Direct'}`);
   console.error(`   🔍 Stack:`, err.stack);
   
+  // S'assurer que la réponse est toujours en JSON
   res.status(500).json({ 
     message: 'Erreur serveur interne',
+    code: 'INTERNAL_SERVER_ERROR',
     timestamp,
     path: req.url
   });
 });
 
-// Route 404 avec logging
+// Route 404 avec logging - TOUJOURS retourner du JSON
 app.use('*', (req, res) => {
   const timestamp = new Date().toISOString();
   console.warn(`⚠️  [${timestamp}] Route non trouvée: ${req.method} ${req.originalUrl}`);
   console.warn(`   📱 Origin: ${req.get('Origin') || 'Direct'}`);
+  console.warn(`   🎫 Authorization: ${req.get('Authorization') ? 'Présent' : 'Absent'}`);
   
+  // IMPORTANT: Toujours retourner du JSON, jamais du HTML
   res.status(404).json({ 
     message: 'Route non trouvée',
+    code: 'ROUTE_NOT_FOUND',
     path: req.originalUrl,
-    timestamp
+    method: req.method,
+    timestamp,
+    availableRoutes: [
+      'GET /',
+      'GET /health',
+      'POST /api/auth/login',
+      'POST /api/auth/register',
+      'GET /api/etages/test',
+      'GET /api/etages',
+      'GET /api/espaces',
+      'GET /api/boutique',
+      'GET /api/notifications'
+    ]
   });
 });
 
