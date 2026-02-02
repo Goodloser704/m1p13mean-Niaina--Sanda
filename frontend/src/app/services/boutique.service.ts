@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface BoutiqueRegistration {
   nom: string;
@@ -43,28 +44,9 @@ export interface Boutique extends BoutiqueRegistration {
   providedIn: 'root'
 })
 export class BoutiqueService {
-  private readonly API_URL = this.getBackendUrl() + '/api/boutique';
+  private readonly API_URL = `${environment.apiUrl}/boutique`;
 
   constructor(private http: HttpClient) {}
-
-  /**
-   * 🌐 Obtenir l'URL du backend selon l'environnement
-   */
-  private getBackendUrl(): string {
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return ''; // URL relative pour utiliser le proxy
-      }
-      
-      if (hostname.includes('vercel.app')) {
-        return 'https://m1p13mean-niaina-1.onrender.com';
-      }
-    }
-    
-    return 'https://m1p13mean-niaina-1.onrender.com';
-  }
 
   /**
    * 📝 Créer une nouvelle inscription boutique
@@ -73,6 +55,7 @@ export class BoutiqueService {
     message: string;
     boutique: Partial<Boutique>;
   }> {
+    console.log('🏪 Création boutique:', boutiqueData);
     return this.http.post<{
       message: string;
       boutique: Partial<Boutique>;
@@ -86,21 +69,18 @@ export class BoutiqueService {
     boutiques: Boutique[]; 
     count: number; 
   }> {
-    const url = `${this.API_URL}/my-boutiques`;
-    console.log('🔄 Requête GET vers:', url);
-    console.log('🌐 Backend URL configuré:', this.getBackendUrl());
+    console.log('🏪 Récupération mes boutiques - URL:', `${this.API_URL}/my-boutiques`);
     
     return this.http.get<{ 
       boutiques: Boutique[]; 
       count: number; 
-    }>(url).pipe(
+    }>(`${this.API_URL}/my-boutiques`).pipe(
       tap(response => {
-        console.log('✅ Réponse service boutique:', response);
+        console.log('✅ Mes boutiques récupérées:', response.boutiques.length);
       }),
       tap({
         error: (error) => {
-          console.error('❌ Erreur service boutique:', error);
-          console.error('❌ URL appelée:', url);
+          console.error('❌ Erreur récupération mes boutiques:', error);
         }
       })
     );
@@ -113,6 +93,7 @@ export class BoutiqueService {
     const url = boutiqueId 
       ? `${this.API_URL}/me/${boutiqueId}`
       : `${this.API_URL}/me`;
+    console.log('🏪 Récupération boutique spécifique - URL:', url);
     return this.http.get<{ boutique: Boutique }>(url);
   }
 
@@ -123,6 +104,7 @@ export class BoutiqueService {
     message: string;
     boutique: Boutique;
   }> {
+    console.log('🏪 Mise à jour boutique:', boutiqueId, boutiqueData);
     return this.http.put<{
       message: string;
       boutique: Boutique;
@@ -135,6 +117,7 @@ export class BoutiqueService {
   deleteBoutique(boutiqueId: string): Observable<{
     message: string;
   }> {
+    console.log('🏪 Suppression boutique:', boutiqueId);
     return this.http.delete<{
       message: string;
     }>(`${this.API_URL}/me/${boutiqueId}`);
@@ -147,6 +130,7 @@ export class BoutiqueService {
     boutiques: Boutique[];
     count: number;
   }> {
+    console.log('🏪 Récupération boutiques en attente - URL:', `${this.API_URL}/pending`);
     return this.http.get<{
       boutiques: Boutique[];
       count: number;
@@ -160,6 +144,7 @@ export class BoutiqueService {
     message: string;
     boutique: Boutique;
   }> {
+    console.log('🏪 Approbation boutique:', boutiqueId);
     return this.http.put<{
       message: string;
       boutique: Boutique;
@@ -173,6 +158,7 @@ export class BoutiqueService {
     message: string;
     reason?: string;
   }> {
+    console.log('🏪 Rejet boutique:', boutiqueId, reason);
     return this.http.put<{
       message: string;
       reason?: string;
@@ -183,6 +169,7 @@ export class BoutiqueService {
    * 🔍 Obtenir une boutique par ID (Admin seulement)
    */
   getBoutiqueById(boutiqueId: string): Observable<{ boutique: Boutique }> {
+    console.log('🏪 Récupération boutique par ID:', boutiqueId);
     return this.http.get<{ boutique: Boutique }>(`${this.API_URL}/${boutiqueId}`);
   }
 
@@ -194,6 +181,7 @@ export class BoutiqueService {
     total: number;
     parCategorie: Array<{ _id: string; count: number }>;
   }> {
+    console.log('🏪 Récupération statistiques boutiques - URL:', `${this.API_URL}/admin/stats`);
     return this.http.get<{
       parStatut: Array<{ _id: string; count: number }>;
       total: number;
@@ -208,6 +196,7 @@ export class BoutiqueService {
     boutiques: Boutique[];
     count: number;
   }> {
+    console.log('🏪 Récupération toutes boutiques - URL:', `${this.API_URL}/all`);
     return this.http.get<{
       boutiques: Boutique[];
       count: number;

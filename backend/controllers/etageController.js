@@ -3,14 +3,21 @@ const etageService = require('../services/etageService');
 class EtageController {
   // Créer un nouvel étage
   async creerEtage(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🏢 [${timestamp}] Création étage`);
+    console.log(`   👤 User ID: ${req.user._id} (${req.user.role})`);
+    console.log(`   📝 Données:`, req.body);
+    
     try {
       const etage = await etageService.creerEtage(req.body);
+      console.log(`✅ Étage créé: ${etage.nom} (${etage.numero})`);
+      
       res.status(201).json({
         message: 'Étage créé avec succès',
         etage
       });
     } catch (error) {
-      console.error('Erreur création étage:', error);
+      console.error('❌ Erreur création étage:', error.message);
       res.status(400).json({
         message: error.message || 'Erreur lors de la création de l\'étage'
       });
@@ -19,6 +26,11 @@ class EtageController {
 
   // Obtenir tous les étages
   async obtenirEtages(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🏢 [${timestamp}] Récupération étages`);
+    console.log(`   👤 User ID: ${req.user._id} (${req.user.role})`);
+    console.log(`   📝 Query params:`, req.query);
+    
     try {
       const options = {
         page: parseInt(req.query.page) || 1,
@@ -26,10 +38,14 @@ class EtageController {
         actifSeulement: req.query.actifSeulement !== 'false'
       };
 
+      console.log(`🔍 Options de recherche:`, options);
       const result = await etageService.obtenirEtages(options);
+      console.log(`✅ ${result.etages.length} étages récupérés`);
+      
       res.json(result);
     } catch (error) {
-      console.error('Erreur récupération étages:', error);
+      console.error('❌ Erreur récupération étages:', error.message);
+      console.error('❌ Stack trace:', error.stack);
       res.status(500).json({
         message: 'Erreur lors de la récupération des étages'
       });
@@ -83,11 +99,17 @@ class EtageController {
 
   // Obtenir les statistiques des étages
   async obtenirStatistiques(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`📊 [${timestamp}] Récupération statistiques étages`);
+    console.log(`   👤 User ID: ${req.user._id} (${req.user.role})`);
+    
     try {
       const stats = await etageService.obtenirStatistiques();
+      console.log(`✅ Statistiques étages récupérées`);
       res.json({ stats });
     } catch (error) {
-      console.error('Erreur récupération statistiques étages:', error);
+      console.error('❌ Erreur récupération statistiques étages:', error.message);
+      console.error('❌ Stack trace:', error.stack);
       res.status(500).json({
         message: 'Erreur lors de la récupération des statistiques'
       });

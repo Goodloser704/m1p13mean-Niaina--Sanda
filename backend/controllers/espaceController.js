@@ -3,14 +3,21 @@ const espaceService = require('../services/espaceService');
 class EspaceController {
   // Créer un nouvel espace
   async creerEspace(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🏪 [${timestamp}] Création espace`);
+    console.log(`   👤 User ID: ${req.user._id} (${req.user.role})`);
+    console.log(`   📝 Données:`, req.body);
+    
     try {
       const espace = await espaceService.creerEspace(req.body);
+      console.log(`✅ Espace créé: ${espace.codeEspace} (Étage ${espace.etage})`);
+      
       res.status(201).json({
         message: 'Espace créé avec succès',
         espace
       });
     } catch (error) {
-      console.error('Erreur création espace:', error);
+      console.error('❌ Erreur création espace:', error.message);
       res.status(400).json({
         message: error.message || 'Erreur lors de la création de l\'espace'
       });
@@ -19,6 +26,11 @@ class EspaceController {
 
   // Obtenir tous les espaces avec filtres
   async obtenirEspaces(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🏪 [${timestamp}] Récupération espaces`);
+    console.log(`   👤 User ID: ${req.user._id} (${req.user.role})`);
+    console.log(`   📝 Query params:`, req.query);
+    
     try {
       const options = {
         page: parseInt(req.query.page) || 1,
@@ -32,10 +44,14 @@ class EspaceController {
         actifSeulement: req.query.actifSeulement !== 'false'
       };
 
+      console.log(`🔍 Options de recherche:`, options);
       const result = await espaceService.obtenirEspaces(options);
+      console.log(`✅ ${result.espaces.length} espaces récupérés`);
+      
       res.json(result);
     } catch (error) {
-      console.error('Erreur récupération espaces:', error);
+      console.error('❌ Erreur récupération espaces:', error.message);
+      console.error('❌ Stack trace:', error.stack);
       res.status(500).json({
         message: 'Erreur lors de la récupération des espaces'
       });
@@ -158,11 +174,17 @@ class EspaceController {
 
   // Obtenir les statistiques des espaces
   async obtenirStatistiques(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`📊 [${timestamp}] Récupération statistiques espaces`);
+    console.log(`   👤 User ID: ${req.user._id} (${req.user.role})`);
+    
     try {
       const stats = await espaceService.obtenirStatistiques();
+      console.log(`✅ Statistiques espaces récupérées`);
       res.json({ stats });
     } catch (error) {
-      console.error('Erreur récupération statistiques espaces:', error);
+      console.error('❌ Erreur récupération statistiques espaces:', error.message);
+      console.error('❌ Stack trace:', error.stack);
       res.status(500).json({
         message: 'Erreur lors de la récupération des statistiques'
       });
