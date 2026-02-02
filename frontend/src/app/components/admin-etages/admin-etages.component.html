@@ -16,14 +16,8 @@
   <div class="messages">
     <div class="alert alert-error" *ngIf="error">
       {{ error }}
-      <div class="error-help" *ngIf="error.includes('administrateur') || error.includes('connecté')">
-        <p><strong>💡 Pour résoudre ce problème :</strong></p>
-        <ol>
-          <li>Connectez-vous avec un compte administrateur</li>
-          <li>Utilisez les identifiants de test : <code>admin@mall.com</code> / <code>admin123</code></li>
-          <li>Ou créez un nouveau compte administrateur</li>
-        </ol>
-        <p><small>Si le problème persiste, vérifiez que le serveur backend est accessible.</small></p>
+      <div *ngIf="error.includes('administrateur') || error.includes('connecté')">
+        <p><strong>💡 Solution:</strong> Connectez-vous avec: admin@mall.com / admin123</p>
       </div>
     </div>
     <div class="alert alert-success" *ngIf="success">{{ success }}</div>
