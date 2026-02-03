@@ -31,6 +31,25 @@ const validatePanier = [
 // Middleware pour vérifier le rôle acheteur
 const acheteurAuth = [auth, authorize(RoleEnum.Acheteur)];
 
+// @route   GET /api/achats
+// @desc    Test de l'API achats (route publique pour tests)
+// @access  Public
+router.get('/', (req, res) => {
+  res.json({
+    message: 'API Achats fonctionnelle',
+    endpoints: [
+      'POST /api/achats/panier/valider - Valider panier (Auth requise)',
+      'GET /api/achats/en-cours - Achats en cours (Auth requise)',
+      'GET /api/achats/historique - Historique achats (Auth requise)',
+      'GET /api/achats/statistiques - Statistiques (Auth requise)',
+      'GET /api/achats/factures - Mes factures (Auth requise)',
+      'GET /api/achats/:id - Achat par ID (Auth requise)',
+      'PUT /api/achats/:id/annuler - Annuler achat (Auth requise)'
+    ],
+    timestamp: new Date().toISOString()
+  });
+});
+
 // @route   POST /api/achats/panier/valider
 // @desc    Valider un panier et créer les achats
 // @access  Private (Acheteur)
