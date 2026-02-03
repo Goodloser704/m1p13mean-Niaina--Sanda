@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { RoleEnum } = require('../utils/enums');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -8,25 +9,35 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true
   },
-  password: {
+  mdp: { // Renommé selon les règles de gestion
+    type: String,
+    required: true,
+    minlength: 6
+  },
+  password: { // Alias pour compatibilité
     type: String,
     required: true,
     minlength: 6
   },
   role: {
     type: String,
-    enum: ['admin', 'boutique', 'client'],
+    enum: [RoleEnum.Admin, RoleEnum.Commercant, RoleEnum.Acheteur],
     required: true
   },
   nom: {
     type: String,
     required: true
   },
-  prenom: {
+  prenoms: { // Renommé selon les règles de gestion
+    type: String,
+    required: true
+  },
+  prenom: { // Alias pour compatibilité
     type: String,
     required: true
   },
   telephone: String,
+  photo: String, // Ajouté selon les règles de gestion
   adresse: {
     rue: String,
     ville: String,
@@ -97,27 +108,45 @@ userSchema.index({ role: 1, isActive: 1 });
 
 // Hash password avant sauvegarde
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
+  // Synchroniser mdp et password
+  if (this.isModified('password') && !this.isModified('mdp')) {
+    this.mdp = this.password;
+  } else if (this.isModified('mdp') && !this.isModified('password')) {
+    this.password = this.mdp;
+  }
+  
+  // Synchroniser prenoms et prenom
+  if (this.isModified('prenom') && !this.isModified('prenoms')) {
+    this.prenoms = this.prenom;
+  } else if (this.isModified('prenoms') && !this.isModified('prenom')) {
+    this.prenom = this.prenoms;
+  }
+  
+  if (!this.isModified('password') && !this.isModified('mdp')) return next();
+  
+  const passwordToHash = this.password || this.mdp;
+  const hashedPassword = await bcrypt.hash(passwordToHash, 12);
+  this.password = hashedPassword;
+  this.mdp = hashedPassword;
   next();
 });
 
 // Méthode pour vérifier le mot de passe
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  return await bcrypt.compare(candidatePassword, this.password || this.mdp);
 };
 
 // Méthodes pour les boutiques
 userSchema.methods.isPendingBoutique = function() {
-  return this.role === 'boutique' && this.status === 'pending';
+  return this.role === RoleEnum.Commercant && this.status === 'pending';
 };
 
 userSchema.methods.isApprovedBoutique = function() {
-  return this.role === 'boutique' && this.status === 'approved';
+  return this.role === RoleEnum.Commercant && this.status === 'approved';
 };
 
 userSchema.methods.canLogin = function() {
-  if (this.role === 'boutique') {
+  if (this.role === RoleEnum.Commercant) {
     return this.isActive && (this.status === 'approved' || this.status === 'active');
   }
   return this.isActive;
@@ -125,14 +154,14 @@ userSchema.methods.canLogin = function() {
 
 // Méthodes statiques
 userSchema.statics.getPendingBoutiques = function() {
-  return this.find({ role: 'boutique', status: 'pending' })
-    .select('-password')
+  return this.find({ role: RoleEnum.Commercant, status: 'pending' })
+    .select('-password -mdp')
     .sort({ createdAt: -1 });
 };
 
 userSchema.statics.getApprovedBoutiques = function() {
-  return this.find({ role: 'boutique', status: { $in: ['approved', 'active'] } })
-    .select('-password')
+  return this.find({ role: RoleEnum.Commercant, status: { $in: ['approved', 'active'] } })
+    .select('-password -mdp')
     .sort({ createdAt: -1 });
 };
 

@@ -1,0 +1,332 @@
+<div class="gestion-produits-container">
+  <div class="header">
+    <h2>Gestion des Produits</h2>
+    
+    <!-- Sélection de boutique -->
+    <div class="boutique-selector" *ngIf="boutiques.length > 1">
+      <label>Boutique :</label>
+      <select [(ngModel)]="boutiqueSelectionnee" (change)="changerBoutique(boutiqueSelectionnee)">
+        <option *ngFor="let boutique of boutiques" [ngValue]="boutique">
+          {{ boutique.nom }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="alert alert-success" *ngIf="message" (click)="effacerMessages()">
+    {{ message }}
+  </div>
+  <div class="alert alert-danger" *ngIf="erreur" (click)="effacerMessages()">
+    {{ erreur }}
+  </div>
+
+  <!-- Actions principales -->
+  <div class="actions-section">
+    <button class="btn btn-primary" (click)="ouvrirModalProduit()">
+      <i class="fas fa-plus"></i>
+      Nouveau Produit
+    </button>
+    <button class="btn btn-secondary" (click)="ouvrirModalType()">
+      <i class="fas fa-tags"></i>
+      Nouveau Type
+    </button>
+    <button class="btn btn-info" (click)="chargerDonneesBoutique()">
+      <i class="fas fa-sync-alt"></i>
+      Actualiser
+    </button>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <input type="text" [(ngModel)]="filtreNom" (input)="filtrerProduits()" 
+             placeholder="Rechercher par nom..." class="form-control">
+      
+      <select [(ngModel)]="filtreType" (change)="filtrerProduits()" class="form-control">
+        <option value="">Tous les types</option>
+        <option *ngFor="let type of typesProduit" [value]="type._id">
+          {{ type.nom }}
+        </option>
+      </select>
+      
+      <select [(ngModel)]="filtreStock" (change)="filtrerProduits()" class="form-control">
+        <option value="">Tous les stocks</option>
+        <option value="normal">Stock normal</option>
+        <option value="faible">Stock faible</option>
+        <option value="rupture">Rupture de stock</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Liste des produits -->
+  <div class="produits-section">
+    <div class="produits-header">
+      <h3>Produits ({{ totalProduits }})</h3>
+    </div>
+
+    <div class="produits-grid" *ngIf="produits.length > 0; else noProduits">
+      <div class="produit-card" *ngFor="let produit of produits">
+        <div class="produit-header">
+          <h4>{{ produit.nom }}</h4>
+          <div class="produit-actions">
+            <button class="btn btn-sm btn-outline-primary" (click)="ouvrirModalProduit(produit)">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-info" (click)="ouvrirModalStock(produit)">
+              <i class="fas fa-boxes"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="supprimerProduit(produit)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="produit-info">
+          <p class="description">{{ produit.description }}</p>
+          <div class="prix">{{ produit.prix | number:'1.2-2' }}€</div>
+          
+          <div class="stock-info">
+            <span class="stock-label">Stock :</span>
+            <span [class]="getClasseStock(produit)">
+              {{ produit.stock.nombreDispo }}
+              <small *ngIf="produit.stock.nombreReserve > 0">
+                ({{ produit.stock.nombreReserve }} réservés)
+              </small>
+            </span>
+          </div>
+          
+          <div class="meta-info">
+            <span class="type-badge">{{ produit.typeProduit?.nom }}</span>
+            <span class="preparation-time">{{ produit.dureePreparation }}min</span>
+            <span class="type-achat" *ngFor="let type of produit.typeAchat">
+              {{ type }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noProduits>
+      <div class="no-produits">
+        <i class="fas fa-box-open"></i>
+        <p>Aucun produit trouvé</p>
+        <button class="btn btn-primary" (click)="ouvrirModalProduit()">
+          Créer le premier produit
+        </button>
+      </div>
+    </ng-template>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button class="btn btn-sm" [disabled]="pageActuelle === 1" (click)="changerPage(pageActuelle - 1)">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <span class="page-info">Page {{ pageActuelle }} sur {{ totalPages }}</span>
+      <button class="btn btn-sm" [disabled]="pageActuelle === totalPages" (click)="changerPage(pageActuelle + 1)">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Produit -->
+<div class="modal" [class.show]="modalProduitOuverte" *ngIf="modalProduitOuverte">
+  <div class="modal-content modal-lg">
+    <div class="modal-header">
+      <h3>{{ modeEdition ? 'Modifier' : 'Nouveau' }} Produit</h3>
+      <button class="btn-close" (click)="fermerModalProduit()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="sauvegarderProduit()" #produitFormRef="ngForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="produitNom">Nom *</label>
+            <input type="text" id="produitNom" name="produitNom" 
+                   [(ngModel)]="produitForm.nom" required class="form-control">
+          </div>
+          
+          <div class="form-group">
+            <label for="produitPrix">Prix (€) *</label>
+            <input type="number" id="produitPrix" name="produitPrix" 
+                   [(ngModel)]="produitForm.prix" required min="0" step="0.01" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="produitDescription">Description</label>
+          <textarea id="produitDescription" name="produitDescription" 
+                    [(ngModel)]="produitForm.description" rows="3" class="form-control"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="produitType">Type de produit</label>
+            <select id="produitType" name="produitType" 
+                    [(ngModel)]="produitForm.typeProduit" class="form-control">
+              <option value="">Sélectionner un type</option>
+              <option *ngFor="let type of typesProduit" [ngValue]="type">
+                {{ type.nom }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="dureePreparation">Durée préparation (min)</label>
+            <input type="number" id="dureePreparation" name="dureePreparation" 
+                   [(ngModel)]="produitForm.dureePreparation" min="0" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Types d'achat</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" 
+                     [checked]="produitForm.typeAchat?.includes(TypeAchatEnum.Recuperer)"
+                     (change)="toggleTypeAchat(TypeAchatEnum.Recuperer, $event)">
+              Récupérer
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" 
+                     [checked]="produitForm.typeAchat?.includes(TypeAchatEnum.Livrer)"
+                     (change)="toggleTypeAchat(TypeAchatEnum.Livrer, $event)">
+              Livrer
+            </label>
+          </div>
+        </div>
+
+        <div class="stock-section">
+          <h4>Stock</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="stockDispo">Stock disponible</label>
+              <input type="number" id="stockDispo" name="stockDispo" 
+                     [(ngModel)]="produitForm.stock!.nombreDispo" min="0" class="form-control">
+            </div>
+            
+            <div class="form-group">
+              <label for="seuilAlerte">Seuil d'alerte</label>
+              <input type="number" id="seuilAlerte" name="seuilAlerte" 
+                     [(ngModel)]="produitForm.stock!.seuilAlerte" min="0" class="form-control">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="produitForm.isActive" name="isActive">
+            Produit actif
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="fermerModalProduit()">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="!produitFormRef.valid || chargement">
+            <i class="fas fa-spinner fa-spin" *ngIf="chargement"></i>
+            {{ modeEdition ? 'Mettre à jour' : 'Créer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Type de Produit -->
+<div class="modal" [class.show]="modalTypeOuverte" *ngIf="modalTypeOuverte">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>{{ modeEdition ? 'Modifier' : 'Nouveau' }} Type de Produit</h3>
+      <button class="btn-close" (click)="fermerModalType()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="sauvegarderType()" #typeFormRef="ngForm">
+        <div class="form-group">
+          <label for="typeNom">Nom *</label>
+          <input type="text" id="typeNom" name="typeNom" 
+                 [(ngModel)]="typeForm.nom" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="typeDescription">Description</label>
+          <textarea id="typeDescription" name="typeDescription" 
+                    [(ngModel)]="typeForm.description" rows="3" class="form-control"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="typeForm.isActive" name="typeIsActive">
+            Type actif
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="fermerModalType()">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="!typeFormRef.valid || chargement">
+            <i class="fas fa-spinner fa-spin" *ngIf="chargement"></i>
+            {{ modeEdition ? 'Mettre à jour' : 'Créer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Stock -->
+<div class="modal" [class.show]="modalStockOuverte" *ngIf="modalStockOuverte">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Gestion du Stock</h3>
+      <button class="btn-close" (click)="fermerModalStock()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="mettreAJourStock()" #stockFormRef="ngForm">
+        <div class="form-group">
+          <label for="operation">Opération</label>
+          <select id="operation" name="operation" 
+                  [(ngModel)]="stockForm.operation" class="form-control">
+            <option value="definir">Définir le stock</option>
+            <option value="ajouter">Ajouter au stock</option>
+            <option value="retirer">Retirer du stock</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="nouveauStock">
+            {{ stockForm.operation === 'definir' ? 'Nouveau stock' : 'Quantité' }}
+          </label>
+          <input type="number" id="nouveauStock" name="nouveauStock" 
+                 [(ngModel)]="stockForm.nouveauStock" required min="0" class="form-control">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="fermerModalStock()">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="!stockFormRef.valid || chargement">
+            <i class="fas fa-spinner fa-spin" *ngIf="chargement"></i>
+            Mettre à jour
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" *ngIf="chargement">
+  <div class="loading-spinner">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Chargement...</p>
+  </div>
+</div>

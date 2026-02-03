@@ -1,42 +1,54 @@
 const mongoose = require('mongoose');
+const { TypeNotificationEnum } = require('../utils/enums');
 
 const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['boutique_registration', 'boutique_approved', 'boutique_rejected', 'order_placed', 'payment_received', 'system_alert']
-  },
-  title: {
-    type: String,
-    required: true,
-    maxlength: 200
+    enum: [TypeNotificationEnum.Paiement, TypeNotificationEnum.Achat, TypeNotificationEnum.Vente]
   },
   message: {
     type: String,
     required: true,
     maxlength: 1000
   },
-  recipient: {
+  receveur: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
+  estLu: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  urlRoute: {
+    type: String
+  },
+  // Champs supplémentaires pour compatibilité avec l'ancien système
+  title: {
+    type: String,
+    maxlength: 200
+  },
+  recipient: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   recipientRole: {
     type: String,
-    required: true,
     enum: ['admin', 'boutique', 'client']
   },
   relatedEntity: {
     entityType: {
       type: String,
-      enum: ['User', 'Boutique', 'Order', 'Product']
+      enum: ['User', 'Boutique', 'Order', 'Product', 'Achat', 'DemandeLocation']
     },
     entityId: {
       type: mongoose.Schema.Types.ObjectId
     }
   },
   data: {
-    type: mongoose.Schema.Types.Mixed, // Données supplémentaires flexibles
+    type: mongoose.Schema.Types.Mixed,
     default: {}
   },
   isRead: {
@@ -58,28 +70,54 @@ const notificationSchema = new mongoose.Schema({
   },
   actionType: {
     type: String,
-    enum: ['approve_boutique', 'review_order', 'verify_payment', 'none'],
+    enum: ['approve_boutique', 'review_order', 'verify_payment', 'approve_location', 'none'],
     default: 'none'
   },
   actionUrl: {
-    type: String // URL pour l'action à effectuer
+    type: String
   },
   expiresAt: {
-    type: Date // Pour les notifications temporaires
+    type: Date
   }
 }, {
   timestamps: true
 });
 
 // Index pour optimiser les requêtes
-notificationSchema.index({ recipient: 1, isRead: 1, createdAt: -1 });
+notificationSchema.index({ receveur: 1, estLu: 1, createdAt: -1 });
+notificationSchema.index({ recipient: 1, isRead: 1, createdAt: -1 }); // Compatibilité
 notificationSchema.index({ recipientRole: 1, isRead: 1 });
 notificationSchema.index({ type: 1, createdAt: -1 });
 notificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
+// Middleware pre-save pour synchroniser les champs
+notificationSchema.pre('save', function(next) {
+  // Synchroniser receveur et recipient
+  if (this.isModified('receveur') && !this.isModified('recipient')) {
+    this.recipient = this.receveur;
+  } else if (this.isModified('recipient') && !this.isModified('receveur')) {
+    this.receveur = this.recipient;
+  }
+  
+  // Synchroniser estLu et isRead
+  if (this.isModified('estLu') && !this.isModified('isRead')) {
+    this.isRead = this.estLu;
+  } else if (this.isModified('isRead') && !this.isModified('estLu')) {
+    this.estLu = this.isRead;
+  }
+  
+  // Générer title si pas présent
+  if (!this.title && this.message) {
+    this.title = this.message.substring(0, 50) + (this.message.length > 50 ? '...' : '');
+  }
+  
+  next();
+});
+
 // Méthodes du modèle
 notificationSchema.methods.markAsRead = function() {
   this.isRead = true;
+  this.estLu = true;
   return this.save();
 };
 

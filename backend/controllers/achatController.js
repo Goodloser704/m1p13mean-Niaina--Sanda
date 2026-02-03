@@ -1,0 +1,654 @@
+const Achat = require('../models/Achat');
+const Facture = require('../models/Facture');
+const Produit = require('../models/Produit');
+const PorteFeuille = require('../models/PorteFeuille');
+const PFTransaction = require('../models/PFTransaction');
+const { validationResult } = require('express-validator');
+const { EtatAchatEnum, TypeAchatEnum, TypeTransactionEnum } = require('../utils/enums');
+
+/**
+ * 🛒 Contrôleur Achat
+ * Gestion des achats et du panier pour les acheteurs
+ */
+
+// @route   POST /api/achats/panier/valider
+// @desc    Valider un panier et créer les achats
+// @access  Private (Acheteur)
+exports.validerPanier = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        message: 'Données invalides',
+        errors: errors.array()
+      });
+    }
+
+    const { achats: achatsData, montantTotal } = req.body;
+    const acheteurId = req.user._id;
+
+    console.log('🛒 Validation panier pour utilisateur:', acheteurId);
+    console.log('📦 Nombre d\'achats:', achatsData.length);
+    console.log('💰 Montant total:', montantTotal);
+
+    // Vérifier le portefeuille de l'acheteur
+    const portefeuilleAcheteur = await PorteFeuille.findOne({ owner: acheteurId });
+    if (!portefeuilleAcheteur) {
+      return res.status(404).json({
+        message: 'Portefeuille non trouvé'
+      });
+    }
+
+    if (portefeuilleAcheteur.balance < montantTotal) {
+      return res.status(400).json({
+        message: 'Solde insuffisant',
+        soldeActuel: portefeuilleAcheteur.balance,
+        montantRequis: montantTotal
+      });
+    }
+
+    // Créer la facture
+    const facture = new Facture({
+      acheteur: acheteurId,
+      description: `Achat de ${achatsData.length} produit${achatsData.length > 1 ? 's' : ''}`,
+      montantTotal
+    });
+    await facture.save();
+
+    console.log('🧾 Facture créée:', facture._id);
+
+    const achatsCreees = [];
+    const transactions = [];
+    let montantTotalVerifie = 0;
+
+    // Traiter chaque achat
+    for (const achatData of achatsData) {
+      const { produit: produitId, quantite, typeAchat, prixUnitaire } = achatData;
+
+      // Vérifier le produit
+      const produit = await Produit.findById(produitId).populate('boutique');
+      if (!produit) {
+        throw new Error(`Produit ${produitId} non trouvé`);
+      }
+
+      // Vérifier le stock
+      if (produit.stock.nombreDispo < quantite) {
+        throw new Error(`Stock insuffisant pour ${produit.nom}. Disponible: ${produit.stock.nombreDispo}, Demandé: ${quantite}`);
+      }
+
+      // Vérifier le prix
+      if (Math.abs(produit.prix - prixUnitaire) > 0.01) {
+        throw new Error(`Prix modifié pour ${produit.nom}. Prix actuel: ${produit.prix}`);
+      }
+
+      const montantAchat = prixUnitaire * quantite;
+      montantTotalVerifie += montantAchat;
+
+      // Calculer les dates selon le type d'achat
+      const dateDebut = new Date();
+      let dateFin = new Date(dateDebut);
+
+      if (typeAchat === TypeAchatEnum.Recuperer) {
+        // Ajouter le temps de préparation
+        if (produit.tempsPreparation) {
+          const [heures, minutes, secondes] = produit.tempsPreparation.split(':').map(Number);
+          const tempsPreparationMs = (heures * 3600 + minutes * 60 + secondes) * 1000;
+          dateFin = new Date(dateDebut.getTime() + tempsPreparationMs);
+        }
+      } else if (typeAchat === TypeAchatEnum.Livrer) {
+        // Pour la livraison, l'état sera "EnAttente" jusqu'à ce que le commerçant saisisse la durée
+        dateFin = dateDebut; // Sera mis à jour par le commerçant
+      }
+
+      // Créer l'achat
+      const achat = new Achat({
+        acheteur: acheteurId,
+        produit: produitId,
+        facture: facture._id,
+        quantite,
+        prixUnitaire,
+        montantTotal: montantAchat,
+        typeAchat: {
+          type: typeAchat,
+          dateDebut,
+          dateFin
+        },
+        etat: typeAchat === TypeAchatEnum.Livrer ? EtatAchatEnum.EnAttente : EtatAchatEnum.Validee
+      });
+
+      await achat.save();
+      achatsCreees.push(achat);
+
+      // Décrémenter le stock
+      produit.stock.nombreDispo -= quantite;
+      produit.stock.updatedAt = new Date();
+      await produit.save();
+
+      console.log(`📦 Achat créé: ${produit.nom} x${quantite} = ${montantAchat}€`);
+
+      // Créer la transaction de portefeuille (Acheteur -> Commerçant)
+      const portefeuilleCommercant = await PorteFeuille.findOne({ owner: produit.boutique.commercant });
+      if (!portefeuilleCommercant) {
+        throw new Error(`Portefeuille du commerçant non trouvé pour la boutique ${produit.boutique.nom}`);
+      }
+
+      const transaction = new PFTransaction({
+        fromWallet: portefeuilleAcheteur._id,
+        toWallet: portefeuilleCommercant._id,
+        type: TypeTransactionEnum.Achat,
+        amount: montantAchat,
+        description: `Achat: ${produit.nom} x${quantite}`,
+        relatedEntity: {
+          entityType: 'Achat',
+          entityId: achat._id
+        }
+      });
+
+      await transaction.save();
+      transactions.push(transaction);
+
+      // Mettre à jour les balances
+      portefeuilleAcheteur.balance -= montantAchat;
+      portefeuilleCommercant.balance += montantAchat;
+
+      await portefeuilleAcheteur.save();
+      await portefeuilleCommercant.save();
+
+      console.log(`💰 Transaction: ${montantAchat}€ de ${req.user.email} vers ${produit.boutique.nom}`);
+    }
+
+    // Vérifier que le montant total correspond
+    if (Math.abs(montantTotalVerifie - montantTotal) > 0.01) {
+      throw new Error(`Montant total incohérent. Calculé: ${montantTotalVerifie}, Reçu: ${montantTotal}`);
+    }
+
+    // Populer les données pour la réponse
+    await facture.populate('acheteur', 'nom prenom email');
+    const achatsPopulees = await Achat.find({ facture: facture._id })
+      .populate('produit', 'nom prix')
+      .populate({
+        path: 'produit',
+        populate: {
+          path: 'boutique',
+          select: 'nom',
+          populate: {
+            path: 'commercant',
+            select: 'nom prenom'
+          }
+        }
+      });
+
+    console.log('✅ Panier validé avec succès');
+
+    res.status(201).json({
+      message: 'Panier validé avec succès',
+      facture: {
+        _id: facture._id,
+        description: facture.description,
+        montantTotal: facture.montantTotal,
+        createdAt: facture.createdAt
+      },
+      achats: achatsPopulees,
+      transactions: transactions.map(t => ({
+        _id: t._id,
+        amount: t.amount,
+        description: t.description,
+        createdAt: t.createdAt
+      }))
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur validation panier:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la validation du panier',
+      error: error.message
+    });
+  }
+};
+
+// @route   GET /api/achats/en-cours
+// @desc    Obtenir mes achats en cours
+// @access  Private (Acheteur)
+exports.obtenirMesAchatsEnCours = async (req, res) => {
+  try {
+    const acheteurId = req.user._id;
+
+    const achats = await Achat.find({
+      acheteur: acheteurId,
+      etat: { $in: [EtatAchatEnum.EnAttente, EtatAchatEnum.Validee] }
+    })
+    .populate('produit', 'nom prix tempsPreparation')
+    .populate({
+      path: 'produit',
+      populate: {
+        path: 'boutique',
+        select: 'nom',
+        populate: {
+          path: 'commercant',
+          select: 'nom prenom'
+        }
+      }
+    })
+    .populate('facture', 'description createdAt')
+    .sort({ createdAt: -1 });
+
+    res.json({
+      achats,
+      count: achats.length
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur récupération achats en cours:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la récupération des achats en cours'
+    });
+  }
+};
+
+// @route   GET /api/achats/historique
+// @desc    Obtenir mon historique d'achats
+// @access  Private (Acheteur)
+exports.obtenirMonHistoriqueAchats = async (req, res) => {
+  try {
+    const acheteurId = req.user._id;
+    const { page = 1, limit = 20, etat, dateDebut, dateFin } = req.query;
+
+    const criteres = { acheteur: acheteurId };
+
+    if (etat) {
+      criteres.etat = etat;
+    }
+
+    if (dateDebut || dateFin) {
+      criteres.createdAt = {};
+      if (dateDebut) criteres.createdAt.$gte = new Date(dateDebut);
+      if (dateFin) criteres.createdAt.$lte = new Date(dateFin);
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const total = await Achat.countDocuments(criteres);
+
+    const achats = await Achat.find(criteres)
+      .populate('produit', 'nom prix')
+      .populate({
+        path: 'produit',
+        populate: {
+          path: 'boutique',
+          select: 'nom',
+          populate: {
+            path: 'commercant',
+            select: 'nom prenom'
+          }
+        }
+      })
+      .populate('facture', 'description createdAt')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    res.json({
+      achats,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur récupération historique achats:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la récupération de l\'historique des achats'
+    });
+  }
+};
+
+// @route   GET /api/achats/:id
+// @desc    Obtenir un achat par ID
+// @access  Private (Acheteur)
+exports.obtenirAchatParId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const acheteurId = req.user._id;
+
+    const achat = await Achat.findOne({ _id: id, acheteur: acheteurId })
+      .populate('produit', 'nom prix description tempsPreparation')
+      .populate({
+        path: 'produit',
+        populate: {
+          path: 'boutique',
+          select: 'nom description contact',
+          populate: {
+            path: 'commercant',
+            select: 'nom prenom email telephone'
+          }
+        }
+      })
+      .populate('facture', 'description montantTotal createdAt');
+
+    if (!achat) {
+      return res.status(404).json({
+        message: 'Achat non trouvé'
+      });
+    }
+
+    res.json({ achat });
+
+  } catch (error) {
+    console.error('❌ Erreur récupération achat:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la récupération de l\'achat'
+    });
+  }
+};
+
+// @route   PUT /api/achats/:id/annuler
+// @desc    Annuler un achat (si possible)
+// @access  Private (Acheteur)
+exports.annulerAchat = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { raison } = req.body;
+    const acheteurId = req.user._id;
+
+    const achat = await Achat.findOne({ _id: id, acheteur: acheteurId })
+      .populate('produit');
+
+    if (!achat) {
+      return res.status(404).json({
+        message: 'Achat non trouvé'
+      });
+    }
+
+    // Vérifier si l'achat peut être annulé
+    if (achat.etat === EtatAchatEnum.Annulee) {
+      return res.status(400).json({
+        message: 'Cet achat est déjà annulé'
+      });
+    }
+
+    // Pour les achats "Récupérer", on peut annuler jusqu'à la date de fin
+    // Pour les achats "Livrer", on peut annuler tant qu'ils sont en attente
+    const maintenant = new Date();
+    const peutAnnuler = 
+      (achat.typeAchat.type === TypeAchatEnum.Recuperer && maintenant < achat.typeAchat.dateFin) ||
+      (achat.typeAchat.type === TypeAchatEnum.Livrer && achat.etat === EtatAchatEnum.EnAttente);
+
+    if (!peutAnnuler) {
+      return res.status(400).json({
+        message: 'Cet achat ne peut plus être annulé'
+      });
+    }
+
+    // Annuler l'achat
+    achat.etat = EtatAchatEnum.Annulee;
+    achat.raisonAnnulation = raison;
+    await achat.save();
+
+    // Remettre le stock
+    const produit = achat.produit;
+    produit.stock.nombreDispo += achat.quantite;
+    produit.stock.updatedAt = new Date();
+    await produit.save();
+
+    // Rembourser l'acheteur (créer une transaction inverse)
+    const portefeuilleAcheteur = await PorteFeuille.findOne({ owner: acheteurId });
+    const portefeuilleCommercant = await PorteFeuille.findOne({ owner: produit.boutique.commercant });
+
+    if (portefeuilleAcheteur && portefeuilleCommercant) {
+      const transaction = new PFTransaction({
+        fromWallet: portefeuilleCommercant._id,
+        toWallet: portefeuilleAcheteur._id,
+        type: TypeTransactionEnum.Achat,
+        amount: achat.montantTotal,
+        description: `Remboursement: ${produit.nom} x${achat.quantite}`,
+        relatedEntity: {
+          entityType: 'Achat',
+          entityId: achat._id
+        }
+      });
+
+      await transaction.save();
+
+      // Mettre à jour les balances
+      portefeuilleAcheteur.balance += achat.montantTotal;
+      portefeuilleCommercant.balance -= achat.montantTotal;
+
+      await portefeuilleAcheteur.save();
+      await portefeuilleCommercant.save();
+    }
+
+    console.log(`❌ Achat annulé: ${achat._id} - Raison: ${raison}`);
+
+    res.json({
+      message: 'Achat annulé avec succès',
+      achat
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur annulation achat:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de l\'annulation de l\'achat'
+    });
+  }
+};
+
+// @route   GET /api/achats/factures
+// @desc    Obtenir mes factures
+// @access  Private (Acheteur)
+exports.obtenirMesFactures = async (req, res) => {
+  try {
+    const acheteurId = req.user._id;
+    const { page = 1, limit = 20, dateDebut, dateFin } = req.query;
+
+    const criteres = { acheteur: acheteurId };
+
+    if (dateDebut || dateFin) {
+      criteres.createdAt = {};
+      if (dateDebut) criteres.createdAt.$gte = new Date(dateDebut);
+      if (dateFin) criteres.createdAt.$lte = new Date(dateFin);
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const total = await Facture.countDocuments(criteres);
+
+    const factures = await Facture.find(criteres)
+      .populate('acheteur', 'nom prenom email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    // Ajouter les achats pour chaque facture
+    for (const facture of factures) {
+      const achats = await Achat.find({ facture: facture._id })
+        .populate('produit', 'nom prix')
+        .populate({
+          path: 'produit',
+          populate: {
+            path: 'boutique',
+            select: 'nom'
+          }
+        });
+      facture.achats = achats;
+    }
+
+    res.json({
+      factures,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur récupération factures:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la récupération des factures'
+    });
+  }
+};
+
+// @route   GET /api/achats/factures/:id
+// @desc    Obtenir une facture par ID
+// @access  Private (Acheteur)
+exports.obtenirFactureParId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const acheteurId = req.user._id;
+
+    const facture = await Facture.findOne({ _id: id, acheteur: acheteurId })
+      .populate('acheteur', 'nom prenom email');
+
+    if (!facture) {
+      return res.status(404).json({
+        message: 'Facture non trouvée'
+      });
+    }
+
+    // Ajouter les achats
+    const achats = await Achat.find({ facture: facture._id })
+      .populate('produit', 'nom prix description')
+      .populate({
+        path: 'produit',
+        populate: {
+          path: 'boutique',
+          select: 'nom',
+          populate: {
+            path: 'commercant',
+            select: 'nom prenom'
+          }
+        }
+      });
+
+    facture.achats = achats;
+
+    res.json({ facture });
+
+  } catch (error) {
+    console.error('❌ Erreur récupération facture:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la récupération de la facture'
+    });
+  }
+};
+
+// @route   GET /api/achats/statistiques
+// @desc    Obtenir les statistiques de mes achats
+// @access  Private (Acheteur)
+exports.obtenirStatistiquesAchats = async (req, res) => {
+  try {
+    const acheteurId = req.user._id;
+
+    // Statistiques générales
+    const totalAchats = await Achat.countDocuments({ acheteur: acheteurId });
+    
+    const montantTotalResult = await Achat.aggregate([
+      { $match: { acheteur: acheteurId } },
+      { $group: { _id: null, total: { $sum: '$montantTotal' } } }
+    ]);
+    const montantTotal = montantTotalResult[0]?.total || 0;
+
+    // Achats par état
+    const achatsParEtat = await Achat.aggregate([
+      { $match: { acheteur: acheteurId } },
+      {
+        $group: {
+          _id: '$etat',
+          count: { $sum: 1 },
+          montant: { $sum: '$montantTotal' }
+        }
+      }
+    ]);
+
+    // Achats par mois (derniers 12 mois)
+    const dateIlYaUnAn = new Date();
+    dateIlYaUnAn.setFullYear(dateIlYaUnAn.getFullYear() - 1);
+
+    const achatsParMois = await Achat.aggregate([
+      { 
+        $match: { 
+          acheteur: acheteurId,
+          createdAt: { $gte: dateIlYaUnAn }
+        } 
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          count: { $sum: 1 },
+          montant: { $sum: '$montantTotal' }
+        }
+      },
+      {
+        $project: {
+          mois: {
+            $concat: [
+              { $toString: '$_id.year' },
+              '-',
+              { $cond: [
+                { $lt: ['$_id.month', 10] },
+                { $concat: ['0', { $toString: '$_id.month' }] },
+                { $toString: '$_id.month' }
+              ]}
+            ]
+          },
+          count: 1,
+          montant: 1
+        }
+      },
+      { $sort: { mois: 1 } }
+    ]);
+
+    // Boutiques préférées
+    const boutiquesPreferees = await Achat.aggregate([
+      { $match: { acheteur: acheteurId } },
+      {
+        $lookup: {
+          from: 'produits',
+          localField: 'produit',
+          foreignField: '_id',
+          as: 'produitInfo'
+        }
+      },
+      { $unwind: '$produitInfo' },
+      {
+        $lookup: {
+          from: 'boutiques',
+          localField: 'produitInfo.boutique',
+          foreignField: '_id',
+          as: 'boutiqueInfo'
+        }
+      },
+      { $unwind: '$boutiqueInfo' },
+      {
+        $group: {
+          _id: '$boutiqueInfo._id',
+          boutique: { $first: '$boutiqueInfo.nom' },
+          count: { $sum: 1 },
+          montant: { $sum: '$montantTotal' }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 5 }
+    ]);
+
+    res.json({
+      totalAchats,
+      montantTotal,
+      achatsParEtat,
+      achatsParMois,
+      boutiquesPreferees
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur récupération statistiques achats:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la récupération des statistiques'
+    });
+  }
+};

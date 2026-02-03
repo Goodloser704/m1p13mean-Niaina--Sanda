@@ -1,0 +1,282 @@
+<!-- 🛍️ Mes Commandes -->
+<div class="mes-commandes-container">
+  <!-- En-tête -->
+  <div class="header-section">
+    <div class="title-area">
+      <h1>
+        <i class="fas fa-shopping-bag"></i>
+        Mes Commandes
+      </h1>
+      <p class="subtitle">Suivez vos achats et commandes</p>
+    </div>
+    
+    <div class="actions-area">
+      <button class="btn btn-primary" (click)="allerPanier()">
+        <i class="fas fa-shopping-cart"></i>
+        Voir le panier
+      </button>
+      <button class="btn btn-outline-primary" (click)="allerBoutiques()">
+        <i class="fas fa-store"></i>
+        Continuer les achats
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="erreur" class="alert alert-danger alert-dismissible">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ erreur }}
+    <button type="button" class="btn-close" (click)="effacerMessages()"></button>
+  </div>
+
+  <div *ngIf="message" class="alert alert-success alert-dismissible">
+    <i class="fas fa-check-circle"></i>
+    {{ message }}
+    <button type="button" class="btn-close" (click)="effacerMessages()"></button>
+  </div>
+
+  <!-- Onglets -->
+  <div class="tabs-container">
+    <div class="nav nav-tabs">
+      <button 
+        class="nav-link"
+        [class.active]="filtreActif === 'en-cours'"
+        (click)="changerFiltre('en-cours')">
+        <i class="fas fa-clock"></i>
+        En cours
+        <span *ngIf="achatsEnCours.length > 0" class="badge">{{ achatsEnCours.length }}</span>
+      </button>
+      <button 
+        class="nav-link"
+        [class.active]="filtreActif === 'historique'"
+        (click)="changerFiltre('historique')">
+        <i class="fas fa-history"></i>
+        Historique
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenu des onglets -->
+  <div class="tab-content">
+    
+    <!-- Onglet En cours -->
+    <div *ngIf="filtreActif === 'en-cours'" class="tab-pane active">
+      <div *ngIf="chargement" class="loading-container">
+        <div class="spinner-border text-primary"></div>
+        <p>Chargement des commandes en cours...</p>
+      </div>
+
+      <div *ngIf="!chargement && achatsEnCours.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-shopping-bag"></i>
+        </div>
+        <h3>Aucune commande en cours</h3>
+        <p>Vous n'avez pas de commandes en cours de traitement.</p>
+        <button class="btn btn-primary" (click)="allerBoutiques()">
+          <i class="fas fa-store"></i>
+          Découvrir les boutiques
+        </button>
+      </div>
+
+      <div *ngIf="!chargement && achatsEnCours.length > 0" class="commandes-list">
+        <div *ngFor="let achat of achatsEnCours" class="commande-card">
+          <div class="commande-header">
+            <div class="commande-info">
+              <h4>{{ achat.produit.nom }}</h4>
+              <p class="boutique-name" (click)="voirDetailsBoutique(achat.produit.boutique._id)">
+                <i class="fas fa-store"></i>
+                {{ achat.produit.boutique.nom }}
+              </p>
+            </div>
+            <div class="commande-status">
+              <span class="status-badge" [style.background-color]="getEtatColor(achat.etat)">
+                {{ getEtatIcon(achat.etat) }} {{ getEtatLabel(achat.etat) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="commande-details">
+            <div class="detail-row">
+              <span class="label">Type:</span>
+              <span class="value">
+                {{ getTypeAchatIcon(achat.typeAchat.type) }} {{ getTypeAchatLabel(achat.typeAchat.type) }}
+              </span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Quantité:</span>
+              <span class="value">{{ achat.quantite }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Prix unitaire:</span>
+              <span class="value">{{ formatMontant(achat.prixUnitaire) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Total:</span>
+              <span class="value total-amount">{{ formatMontant(achat.montantTotal) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Temps restant:</span>
+              <span class="value">{{ getTempsRestant(achat.typeAchat.dateFin) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Commandé le:</span>
+              <span class="value">{{ formatDate(achat.createdAt) }}</span>
+            </div>
+          </div>
+
+          <div class="commande-actions" *ngIf="peutAnnuler(achat)">
+            <button class="btn btn-outline-danger btn-sm" (click)="ouvrirModalAnnulation(achat)">
+              <i class="fas fa-times"></i>
+              Annuler
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Historique -->
+    <div *ngIf="filtreActif === 'historique'" class="tab-pane active">
+      <!-- Filtres -->
+      <div class="filters-container">
+        <div class="filter-group">
+          <label>Filtrer par état:</label>
+          <select class="form-select" [(ngModel)]="filtreEtat" (change)="changerFiltreEtat(filtreEtat)">
+            <option value="">Tous les états</option>
+            <option [value]="EtatAchatEnum.EnAttente">En attente</option>
+            <option [value]="EtatAchatEnum.Validee">Validée</option>
+            <option [value]="EtatAchatEnum.Annulee">Annulée</option>
+          </select>
+        </div>
+      </div>
+
+      <div *ngIf="chargement" class="loading-container">
+        <div class="spinner-border text-primary"></div>
+        <p>Chargement de l'historique...</p>
+      </div>
+
+      <div *ngIf="!chargement && historiqueAchats.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-history"></i>
+        </div>
+        <h3>Aucun historique</h3>
+        <p>Vous n'avez pas encore d'historique de commandes.</p>
+      </div>
+
+      <div *ngIf="!chargement && historiqueAchats.length > 0" class="commandes-list">
+        <div *ngFor="let achat of historiqueAchats" class="commande-card">
+          <div class="commande-header">
+            <div class="commande-info">
+              <h4>{{ achat.produit.nom }}</h4>
+              <p class="boutique-name" (click)="voirDetailsBoutique(achat.produit.boutique._id)">
+                <i class="fas fa-store"></i>
+                {{ achat.produit.boutique.nom }}
+              </p>
+            </div>
+            <div class="commande-status">
+              <span class="status-badge" [style.background-color]="getEtatColor(achat.etat)">
+                {{ getEtatIcon(achat.etat) }} {{ getEtatLabel(achat.etat) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="commande-details">
+            <div class="detail-row">
+              <span class="label">Type:</span>
+              <span class="value">
+                {{ getTypeAchatIcon(achat.typeAchat.type) }} {{ getTypeAchatLabel(achat.typeAchat.type) }}
+              </span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Quantité:</span>
+              <span class="value">{{ achat.quantite }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Total:</span>
+              <span class="value total-amount">{{ formatMontant(achat.montantTotal) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Date:</span>
+              <span class="value">{{ formatDate(achat.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="totalPages > 1" class="pagination-container">
+        <nav>
+          <ul class="pagination">
+            <li class="page-item" [class.disabled]="page === 1">
+              <button class="page-link" (click)="changerPage(page - 1)">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+            </li>
+            <li *ngFor="let p of [].constructor(totalPages); let i = index" 
+                class="page-item" [class.active]="page === i + 1">
+              <button class="page-link" (click)="changerPage(i + 1)">
+                {{ i + 1 }}
+              </button>
+            </li>
+            <li class="page-item" [class.disabled]="page === totalPages">
+              <button class="page-link" (click)="changerPage(page + 1)">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal d'annulation -->
+<div *ngIf="modalAnnulationOuverte" class="modal-overlay" (click)="fermerModalAnnulation()">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle text-warning"></i>
+          Annuler la commande
+        </h5>
+        <button type="button" class="btn-close" (click)="fermerModalAnnulation()"></button>
+      </div>
+      
+      <div class="modal-body">
+        <p>Êtes-vous sûr de vouloir annuler cette commande ?</p>
+        
+        <div *ngIf="achatAnnuler" class="commande-resume">
+          <h6>{{ achatAnnuler.produit.nom }}</h6>
+          <p>{{ achatAnnuler.quantite }} × {{ formatMontant(achatAnnuler.prixUnitaire) }} = {{ formatMontant(achatAnnuler.montantTotal) }}</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="raisonAnnulation">Raison de l'annulation (optionnel):</label>
+          <textarea 
+            id="raisonAnnulation"
+            class="form-control" 
+            [(ngModel)]="raisonAnnulation"
+            placeholder="Expliquez pourquoi vous annulez cette commande..."
+            rows="3"
+            maxlength="500">
+          </textarea>
+          <small class="form-text text-muted">{{ raisonAnnulation.length }}/500 caractères</small>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fermerModalAnnulation()">
+          Garder la commande
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-danger" 
+          (click)="confirmerAnnulation()"
+          [disabled]="chargement">
+          <span *ngIf="chargement" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!chargement" class="fas fa-times"></i>
+          Confirmer l'annulation
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

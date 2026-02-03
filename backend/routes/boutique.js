@@ -9,6 +9,11 @@ const router = express.Router();
  * Architecture: Route → Controller → Service
  */
 
+// @route   GET /api/boutique
+// @desc    Obtenir toutes les boutiques (publique)
+// @access  Public
+router.get('/', boutiqueController.getAllBoutiques);
+
 // @route   POST /api/boutique/register
 // @desc    Créer une nouvelle inscription boutique
 // @access  Private (Boutique seulement)

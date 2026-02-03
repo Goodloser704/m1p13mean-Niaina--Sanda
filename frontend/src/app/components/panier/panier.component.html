@@ -1,0 +1,224 @@
+<div class="panier-container">
+  <div class="header">
+    <h2>Mon Panier</h2>
+    <div class="panier-stats">
+      <span class="total-produits">{{ panier.totalProduits }} article(s)</span>
+      <span class="total-montant">{{ panier.totalMontant | number:'1.2-2' }}€</span>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="alert alert-success" *ngIf="message" (click)="effacerMessages()">
+    {{ message }}
+  </div>
+  <div class="alert alert-danger" *ngIf="erreur" (click)="effacerMessages()">
+    {{ erreur }}
+  </div>
+
+  <!-- Solde du portefeuille -->
+  <div class="solde-info" *ngIf="portefeuille">
+    <div class="solde-card">
+      <div class="solde-label">Solde disponible</div>
+      <div class="solde-montant" [class]="getClasseSolde()">
+        {{ portefeuille.balance | number:'1.2-2' }}€
+      </div>
+      <div class="solde-barre">
+        <div class="solde-utilise" [style.width.%]="getPourcentageSolde()"></div>
+      </div>
+      <div class="solde-actions" *ngIf="portefeuille.balance < panier.totalMontant">
+        <button class="btn btn-warning btn-sm" (click)="allerPortefeuille()">
+          <i class="fas fa-plus"></i>
+          Recharger
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu du panier -->
+  <div class="panier-content" *ngIf="panier.boutiques.length > 0; else panierVide">
+    
+    <!-- Boutiques -->
+    <div class="boutique-section" *ngFor="let boutique of panier.boutiques">
+      <div class="boutique-header">
+        <h3>{{ boutique.nomBoutique }}</h3>
+        <div class="boutique-info">
+          <span class="preparation-time">
+            <i class="fas fa-clock"></i>
+            {{ boutique.dureePreparationMax }} min
+          </span>
+          <span class="sous-total">{{ boutique.sousTotal | number:'1.2-2' }}€</span>
+        </div>
+      </div>
+
+      <!-- Produits de la boutique -->
+      <div class="produits-list">
+        <div class="produit-item" *ngFor="let produit of boutique.produits">
+          <div class="produit-info">
+            <h4>{{ produit.nom }}</h4>
+            <p class="description">{{ produit.description }}</p>
+            <div class="prix-unitaire">{{ produit.prix | number:'1.2-2' }}€ / unité</div>
+          </div>
+
+          <div class="produit-options">
+            <!-- Type d'achat -->
+            <div class="type-achat-selector" *ngIf="produit.typeAchat.length > 1">
+              <label>Mode :</label>
+              <div class="type-buttons">
+                <button *ngFor="let type of produit.typeAchat" 
+                        class="btn btn-sm type-btn"
+                        [class.active]="produit.typeAchatChoisi === type"
+                        (click)="changerTypeAchat(produit, type)">
+                  <i [class]="getIconeTypeAchat(type)"></i>
+                  {{ type }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Contrôles de quantité -->
+            <div class="quantite-controls">
+              <button class="btn btn-sm btn-outline-secondary" 
+                      (click)="diminuerQuantite(boutique, produit)">
+                <i class="fas fa-minus"></i>
+              </button>
+              <input type="number" class="quantite-input" 
+                     [value]="produit.quantite" 
+                     (change)="modifierQuantite(boutique, produit, +$event.target.value)"
+                     min="1">
+              <button class="btn btn-sm btn-outline-secondary" 
+                      (click)="augmenterQuantite(boutique, produit)">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+
+            <!-- Sous-total et suppression -->
+            <div class="produit-actions">
+              <div class="sous-total-produit">{{ produit.sousTotal | number:'1.2-2' }}€</div>
+              <button class="btn btn-sm btn-outline-danger" 
+                      (click)="retirerProduit(boutique, produit)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résumé de commande -->
+    <div class="resume-commande">
+      <h3>Résumé de la commande</h3>
+      
+      <div class="resume-details">
+        <div class="resume-ligne">
+          <span>Nombre d'articles :</span>
+          <span>{{ panier.totalProduits }}</span>
+        </div>
+        <div class="resume-ligne">
+          <span>Temps de préparation max :</span>
+          <span>{{ getTempsPreparationTotal() }}</span>
+        </div>
+        <div class="resume-ligne total">
+          <span>Total à payer :</span>
+          <span>{{ panier.totalMontant | number:'1.2-2' }}€</span>
+        </div>
+      </div>
+
+      <div class="actions-commande">
+        <button class="btn btn-secondary" (click)="continuerAchats()">
+          <i class="fas fa-arrow-left"></i>
+          Continuer mes achats
+        </button>
+        <button class="btn btn-primary" (click)="ouvrirModalConfirmation()"
+                [disabled]="panier.totalMontant === 0">
+          <i class="fas fa-check"></i>
+          Valider la commande
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panier vide -->
+  <ng-template #panierVide>
+    <div class="panier-vide">
+      <i class="fas fa-shopping-cart"></i>
+      <h3>Votre panier est vide</h3>
+      <p>Découvrez nos boutiques et ajoutez des produits à votre panier</p>
+      <button class="btn btn-primary" (click)="continuerAchats()">
+        <i class="fas fa-store"></i>
+        Découvrir les boutiques
+      </button>
+    </div>
+  </ng-template>
+</div>
+
+<!-- Modal de confirmation -->
+<div class="modal" [class.show]="modalConfirmationOuverte" *ngIf="modalConfirmationOuverte">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Confirmer la commande</h3>
+      <button class="btn-close" (click)="fermerModalConfirmation()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="confirmation-details">
+        <h4>Récapitulatif</h4>
+        
+        <div class="boutiques-recap">
+          <div class="boutique-recap" *ngFor="let boutique of panier.boutiques">
+            <h5>{{ boutique.nomBoutique }}</h5>
+            <div class="produits-recap">
+              <div class="produit-recap" *ngFor="let produit of boutique.produits">
+                <span class="nom">{{ produit.nom }}</span>
+                <span class="quantite">x{{ produit.quantite }}</span>
+                <span class="type">{{ produit.typeAchatChoisi }}</span>
+                <span class="prix">{{ produit.sousTotal | number:'1.2-2' }}€</span>
+              </div>
+            </div>
+            <div class="sous-total-boutique">
+              Sous-total : {{ boutique.sousTotal | number:'1.2-2' }}€
+            </div>
+          </div>
+        </div>
+
+        <div class="total-final">
+          <strong>Total à payer : {{ panier.totalMontant | number:'1.2-2' }}€</strong>
+        </div>
+
+        <div class="solde-verification" *ngIf="portefeuille">
+          <div class="solde-actuel">
+            Solde actuel : {{ portefeuille.balance | number:'1.2-2' }}€
+          </div>
+          <div class="solde-apres" [class]="getClasseSolde()">
+            Solde après achat : {{ (portefeuille.balance - panier.totalMontant) | number:'1.2-2' }}€
+          </div>
+        </div>
+
+        <div class="temps-preparation">
+          <i class="fas fa-clock"></i>
+          Temps de préparation maximum : {{ getTempsPreparationTotal() }}
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="fermerModalConfirmation()">
+          Annuler
+        </button>
+        <button type="button" class="btn btn-primary" 
+                (click)="validerCommande()" 
+                [disabled]="commandeEnCours || (portefeuille && portefeuille.balance < panier.totalMontant)">
+          <i class="fas fa-spinner fa-spin" *ngIf="commandeEnCours"></i>
+          <i class="fas fa-check" *ngIf="!commandeEnCours"></i>
+          {{ commandeEnCours ? 'Validation...' : 'Confirmer la commande' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" *ngIf="chargement">
+  <div class="loading-spinner">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Chargement...</p>
+  </div>
+</div>

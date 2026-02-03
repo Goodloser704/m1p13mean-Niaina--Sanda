@@ -362,12 +362,11 @@ class BoutiqueController {
   }
 
   /**
-   * 🏪 Obtenir toutes les boutiques (Admin seulement)
+   * 🏪 Obtenir toutes les boutiques (Public)
    */
   async getAllBoutiques(req, res) {
     const timestamp = new Date().toISOString();
     console.log(`🏪 [${timestamp}] Récupération toutes boutiques`);
-    console.log(`   👤 Admin ID: ${req.user._id}`);
     
     try {
       const boutiques = await boutiqueService.getAllBoutiques();

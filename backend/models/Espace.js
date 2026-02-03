@@ -1,7 +1,21 @@
 const mongoose = require('mongoose');
 
 const espaceSchema = new mongoose.Schema({
-  codeEspace: {
+  centreCommercial: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CentreCommercial',
+    required: true
+  },
+  code: { // Renommé selon les règles de gestion
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    uppercase: true,
+    match: /^[A-Z]\d{1,3}$/, // Format: A12, B5, etc.
+    maxlength: 10
+  },
+  codeEspace: { // Alias pour compatibilité
     type: String,
     required: true,
     unique: true,
@@ -17,9 +31,9 @@ const espaceSchema = new mongoose.Schema({
     max: 10000 // Surface max en m²
   },
   etage: {
-    type: Number,
-    required: true,
-    ref: 'Etage'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Etage',
+    required: true
   },
   loyer: {
     type: Number,
@@ -28,7 +42,7 @@ const espaceSchema = new mongoose.Schema({
   },
   statut: {
     type: String,
-    enum: ['Disponible', 'Occupe'],
+    enum: ['Disponible', 'Occupee'], // Selon les règles de gestion exactes
     default: 'Disponible',
     required: true
   },

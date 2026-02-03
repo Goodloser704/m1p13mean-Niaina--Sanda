@@ -33,5 +33,17 @@ export const routes: Routes = [
     path: 'my-boutiques', 
     loadComponent: () => import('./components/my-boutiques/my-boutiques.component').then(m => m.MyBoutiquesComponent)
   },
+  { 
+    path: 'mes-commandes', 
+    loadComponent: () => import('./components/mes-commandes/mes-commandes.component').then(m => m.MesCommandesComponent)
+  },
+  { 
+    path: 'panier', 
+    loadComponent: () => import('./components/panier/panier.component').then(m => m.PanierComponent)
+  },
+  { 
+    path: 'portefeuille', 
+    loadComponent: () => import('./components/portefeuille/portefeuille.component').then(m => m.PortefeuilleComponent)
+  },
   { path: '**', redirectTo: '' }
 ];

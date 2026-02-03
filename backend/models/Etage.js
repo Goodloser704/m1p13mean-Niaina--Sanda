@@ -1,7 +1,14 @@
 const mongoose = require('mongoose');
 
 const etageSchema = new mongoose.Schema({
-  numero: {
+  niveau: { // Selon les règles de gestion
+    type: Number,
+    required: true,
+    unique: true,
+    min: -2, // Sous-sols possibles
+    max: 10  // Limite raisonnable
+  },
+  numero: { // Alias pour compatibilité
     type: Number,
     required: true,
     unique: true,
@@ -28,20 +35,31 @@ const etageSchema = new mongoose.Schema({
 });
 
 // Index pour optimiser les requêtes
-etageSchema.index({ numero: 1 });
+etageSchema.index({ niveau: 1 });
+etageSchema.index({ numero: 1 }); // Alias
 etageSchema.index({ isActive: 1 });
+
+// Middleware pre-save pour synchroniser niveau et numero
+etageSchema.pre('save', function(next) {
+  if (this.isModified('niveau') && !this.isModified('numero')) {
+    this.numero = this.niveau;
+  } else if (this.isModified('numero') && !this.isModified('niveau')) {
+    this.niveau = this.numero;
+  }
+  next();
+});
 
 // Méthode pour obtenir le nombre d'espaces par étage
 etageSchema.methods.getNombreEspaces = async function() {
   const Espace = mongoose.model('Espace');
-  return await Espace.countDocuments({ etage: this.numero });
+  return await Espace.countDocuments({ etage: this._id });
 };
 
 // Méthode pour obtenir les espaces disponibles
 etageSchema.methods.getEspacesDisponibles = async function() {
   const Espace = mongoose.model('Espace');
   return await Espace.countDocuments({ 
-    etage: this.numero, 
+    etage: this._id, 
     statut: 'Disponible' 
   });
 };

@@ -112,6 +112,20 @@ console.log('🛣️  Chargement route etages...');
 app.use('/api/etages', require('./routes/etages'));
 console.log('🛣️  Chargement route espaces...');
 app.use('/api/espaces', require('./routes/espaces'));
+console.log('🛣️  Chargement route portefeuille...');
+app.use('/api/portefeuille', require('./routes/portefeuille'));
+console.log('🛣️  Chargement route demandes-location...');
+app.use('/api/demandes-location', require('./routes/demandes-location'));
+console.log('🛣️  Chargement route centre-commercial...');
+app.use('/api/centre-commercial', require('./routes/centre-commercial'));
+console.log('🛣️  Chargement route produits...');
+app.use('/api/produits', require('./routes/produits'));
+console.log('🛣️  Chargement route types-produit...');
+app.use('/api/types-produit', require('./routes/types-produit'));
+console.log('🛣️  Chargement route achats...');
+app.use('/api/achats', require('./routes/achats'));
+console.log('🛣️  Chargement route categories-boutique...');
+app.use('/api/categories-boutique', require('./routes/categories-boutique'));
 console.log('✅ Routes initialisées avec succès');
 
 // 🗄️ Connexion MongoDB avec logs détaillés
