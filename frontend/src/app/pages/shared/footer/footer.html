@@ -1,0 +1,47 @@
+<footer id="footer" class="footer">
+
+  <div class="container footer-top">
+    <div class="row gy-4">
+      <div class="col-lg-4 col-md-6 footer-about">
+        <a href="#" class="logo d-flex align-items-center">
+          <span class="sitename">{{ centre().nom | titlecase }}</span>
+        </a>
+        <div class="footer-contact pt-2">
+          <p>{{ centre().adresse }}</p>
+          <p class="mt-2">
+            <strong class="me-2">Phone:</strong> <span>{{ centre().telephone }}</span>
+          </p>
+          <p>
+            <strong class="me-2">Email:</strong> <span>{{ centre().email }}</span>
+          </p>
+        </div>
+        <div class="social-links d-flex mt-4">
+          <a href="https://web.facebook.com/sandanirina.razanajatovo" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook"></i></a>
+          <a href="https://www.instagram.com/sanda_rz/" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i></a>
+          <a href="https://mg.linkedin.com/in/sanda-razanajatovo" target="_blank" rel="noopener noreferrer"><i class="bi bi-linkedin"></i></a>
+          <a href="https://x.com/_speeed" target="_blank" rel="noopener noreferrer"><i class="bi bi-twitter-x"></i></a>
+          <a href="https://www.pinterest.com/sandanirina25/_profile/" target="_blank" rel="noopener noreferrer"><i class="bi bi-pinterest"></i></a>
+          <a href="https://open.spotify.com/user/31vnuokmcpm5bc5dikiaigfd6jsi?si=-sDkC8HzSZmAxBLcwGZe8g" target="_blank" rel="noopener noreferrer"><i class="bi bi-spotify"></i></a>
+        </div>
+      </div>
+
+      <div class="col-lg-8 col-md-6 footer-links">
+        <h4>Nos Equipes</h4>
+        <ul>
+          <li>Razanajatovo <b class="ms-1">Sanda</b>nirina Roberto</li>
+          <li>Razafitsialonina Tantelisoa <b class="ms-1">Niaina</b></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="container copyright text-center mt-4">
+    <p>
+      © <span>Copyright</span> 
+      <strong class="px-1 sitename">{{ centre().nom }}</strong> 
+      <span> - {{ annee }} - </span>
+      <span>All Rights Reserved</span>
+    </p>
+  </div>
+
+</footer>

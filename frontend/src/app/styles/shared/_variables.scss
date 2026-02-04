@@ -1,7 +1,26 @@
-// 🎨 Variables SCSS
-$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-$secondary-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-$shadow-light: 0 5px 15px rgba(0,0,0,0.1);
-$shadow-medium: 0 10px 30px rgba(0,0,0,0.3);
-$border-radius: 10px;
-$transition: all 0.3s ease;
+// Orange Sunset Sky
+/* 
+  Jet Black #2d3142
+  Blue Slate #4f5d75
+  Silver #bfc0c0
+  White #ffffff
+  Coral Glow #ef8354
+*/
+
+$background-color: #ffffff;
+$default-color: #2d3142;
+$heading-color: #ef8354;
+$accent-color: #4f5d75;
+$surface-color: #ffffff;
+$contrast-color: #ffffff;
+
+$nav-color: #2d3142;
+$nav-hover-color: #ef8354;
+$nav-mobile-background-color: #ffffff;
+$nav-dropdown-background-color: #ffffff;
+$nav-dropdown-color: #2d3142;
+$nav-dropdown-hover-color: #ef8354;
+
+$default-font: "Roboto",  system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+$heading-font: "Nunito",  sans-serif;
+$nav-font: "Inter",  sans-serif;

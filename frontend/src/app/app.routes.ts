@@ -1,13 +1,21 @@
 import { Routes } from '@angular/router';
-import { HomeTest } from './pages/home-test/home-test';
-import { AuthLayout } from './shared/layout/auth-layout/auth-layout';
+import { AuthLayout } from './pages/shared/layout/auth-layout/auth-layout';
+import { AcheteurLayout } from './pages/shared/layout/acheteur-layout/acheteur-layout';
+import { Login } from './components/auth/login/login';
 
 export const routes: Routes = [
   {
     path: '', 
     component: AuthLayout,
+    children: [
+      { path: 'login', component: Login },
+      { path: '', redirectTo: 'login', pathMatch: 'full' }
+    ]
+  },
+  {
+    path: 'acheteur',
+    component: AcheteurLayout,
     children: []
   },
-  { path: 'home', component: HomeTest },
-  { path: '', redirectTo: 'home', pathMatch: 'full' }
+  { path: '**', redirectTo: '' } // Url inconnue
 ];

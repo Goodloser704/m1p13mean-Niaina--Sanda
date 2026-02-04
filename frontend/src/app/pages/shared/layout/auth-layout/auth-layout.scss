@@ -1,0 +1,17 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero {
+  flex: 1; // prend tout l’espace disponible
+  display: flex;
+  align-items: center;
+  padding: 0; // IMPORTANT pour éviter le scroll
+}
