@@ -40,6 +40,16 @@ router.put('/me/:boutiqueId', auth, boutiqueController.updateMyBoutique);
 router.delete('/me/:boutiqueId', auth, boutiqueController.deleteMyBoutique);
 
 // Routes Admin pour la gestion des boutiques
+// @route   GET /api/boutique/all
+// @desc    Obtenir toutes les boutiques (Admin seulement)
+// @access  Private (Admin seulement)
+router.get('/all', adminAuth, boutiqueController.getAllBoutiques);
+
+// @route   GET /api/boutique/admin/stats
+// @desc    Obtenir les statistiques des boutiques
+// @access  Private (Admin seulement)
+router.get('/admin/stats', adminAuth, boutiqueController.getBoutiqueStats);
+
 // @route   GET /api/boutique/pending
 // @desc    Obtenir les boutiques en attente de validation
 // @access  Private (Admin seulement)
@@ -59,15 +69,5 @@ router.put('/:boutiqueId/reject', adminAuth, boutiqueController.rejectBoutique);
 // @desc    Obtenir une boutique par ID
 // @access  Private (Admin seulement)
 router.get('/:boutiqueId', adminAuth, boutiqueController.getBoutiqueById);
-
-// @route   GET /api/boutique/admin/stats
-// @desc    Obtenir les statistiques des boutiques
-// @access  Private (Admin seulement)
-router.get('/admin/stats', adminAuth, boutiqueController.getBoutiqueStats);
-
-// @route   GET /api/boutique/all
-// @desc    Obtenir toutes les boutiques
-// @access  Private (Admin seulement)
-router.get('/all', adminAuth, boutiqueController.getAllBoutiques);
 
 module.exports = router;

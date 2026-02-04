@@ -266,11 +266,13 @@ exports.obtenirStatistiques = async (req, res) => {
   }
 };
 
-// @route   POST /api/categories-boutique/initialiser
+// @route   POST /api/categories-boutique/admin/initialiser
 // @desc    Initialiser les catégories par défaut (Admin seulement)
 // @access  Private (Admin)
 exports.initialiserCategoriesDefaut = async (req, res) => {
   try {
+    console.log('🔧 Initialisation des catégories par défaut...');
+    
     const categoriesDefaut = [
       { nom: 'Restaurant', description: 'Restaurants et services de restauration', icone: '🍽️', couleur: '#ff6b6b' },
       { nom: 'Vêtements', description: 'Mode et vêtements', icone: '👗', couleur: '#4ecdc4' },
@@ -285,32 +287,43 @@ exports.initialiserCategoriesDefaut = async (req, res) => {
     const categoriesCreees = [];
     
     for (const categorieData of categoriesDefaut) {
-      // Vérifier si la catégorie existe déjà
-      const existante = await CategorieBoutique.findOne({ 
-        nom: { $regex: new RegExp(`^${categorieData.nom}$`, 'i') }
-      });
-      
-      if (!existante) {
-        const categorie = new CategorieBoutique({
-          ...categorieData,
-          isActive: true
+      try {
+        // Vérifier si la catégorie existe déjà
+        const existante = await CategorieBoutique.findOne({ 
+          nom: { $regex: new RegExp(`^${categorieData.nom}$`, 'i') }
         });
         
-        await categorie.save();
-        categoriesCreees.push(categorie);
-        console.log('➕ Catégorie par défaut créée:', categorie.nom);
+        if (!existante) {
+          const categorie = new CategorieBoutique({
+            ...categorieData,
+            isActive: true
+          });
+          
+          await categorie.save();
+          categoriesCreees.push(categorie);
+          console.log('➕ Catégorie par défaut créée:', categorie.nom);
+        } else {
+          console.log('⚠️ Catégorie déjà existante:', categorieData.nom);
+        }
+      } catch (catError) {
+        console.error(`❌ Erreur création catégorie ${categorieData.nom}:`, catError.message);
       }
     }
     
+    console.log(`✅ Initialisation terminée: ${categoriesCreees.length} catégories créées`);
+    
     res.json({
       message: `${categoriesCreees.length} catégories par défaut créées`,
-      categories: categoriesCreees
+      categories: categoriesCreees,
+      total: categoriesDefaut.length,
+      created: categoriesCreees.length
     });
     
   } catch (error) {
     console.error('❌ Erreur initialisation catégories:', error);
     res.status(500).json({
-      message: 'Erreur serveur lors de l\'initialisation des catégories'
+      message: 'Erreur serveur lors de l\'initialisation des catégories',
+      error: error.message
     });
   }
 };

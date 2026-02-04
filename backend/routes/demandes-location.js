@@ -38,6 +38,15 @@ router.post('/', [
 authorize([RoleEnum.Commercant, 'boutique']), 
 demandeLocationController.creerDemande);
 
+// Routes Admin - MUST BE BEFORE PARAMETERIZED ROUTES
+// @route   GET /api/demandes-location
+// @desc    Obtenir toutes les demandes (Admin)
+// @access  Private (Admin)
+router.get('/', 
+  authorize([RoleEnum.Admin, 'admin']), 
+  demandeLocationController.obtenirToutesDemandes
+);
+
 // @route   GET /api/demandes-location/me
 // @desc    Obtenir mes demandes de location
 // @access  Private (Commercant)
@@ -57,15 +66,6 @@ router.get('/:id', demandeLocationController.obtenirDemandeParId);
 router.delete('/:id', 
   authorize([RoleEnum.Commercant, 'boutique']), 
   demandeLocationController.annulerDemande
-);
-
-// Routes Admin
-// @route   GET /api/demandes-location
-// @desc    Obtenir toutes les demandes (Admin)
-// @access  Private (Admin)
-router.get('/', 
-  authorize([RoleEnum.Admin, 'admin']), 
-  demandeLocationController.obtenirToutesDemandes
 );
 
 // @route   PUT /api/demandes-location/:id/accepter

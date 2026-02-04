@@ -31,12 +31,17 @@ const validateCategorie = [
 // @access  Public
 router.get('/', categorieBoutiqueController.obtenirCategories);
 
-// @route   GET /api/categories-boutique/:id
-// @desc    Obtenir une catégorie par ID
-// @access  Public
-router.get('/:id', categorieBoutiqueController.obtenirCategorieParId);
+// Routes admin uniquement - MUST BE BEFORE PARAMETERIZED ROUTES
+// @route   GET /api/categories-boutique/admin/statistiques
+// @desc    Obtenir les statistiques des catégories
+// @access  Private (Admin)
+router.get('/admin/statistiques', adminAuth, categorieBoutiqueController.obtenirStatistiques);
 
-// Routes admin uniquement
+// @route   POST /api/categories-boutique/admin/initialiser
+// @desc    Initialiser les catégories par défaut
+// @access  Private (Admin)
+router.post('/admin/initialiser', adminAuth, categorieBoutiqueController.initialiserCategoriesDefaut);
+
 // @route   POST /api/categories-boutique
 // @desc    Créer une nouvelle catégorie
 // @access  Private (Admin)
@@ -52,14 +57,9 @@ router.put('/:id', adminAuth, validateCategorie, categorieBoutiqueController.met
 // @access  Private (Admin)
 router.delete('/:id', adminAuth, categorieBoutiqueController.supprimerCategorie);
 
-// @route   GET /api/categories-boutique/statistiques
-// @desc    Obtenir les statistiques des catégories
-// @access  Private (Admin)
-router.get('/admin/statistiques', adminAuth, categorieBoutiqueController.obtenirStatistiques);
-
-// @route   POST /api/categories-boutique/initialiser
-// @desc    Initialiser les catégories par défaut
-// @access  Private (Admin)
-router.post('/admin/initialiser', adminAuth, categorieBoutiqueController.initialiserCategoriesDefaut);
+// @route   GET /api/categories-boutique/:id
+// @desc    Obtenir une catégorie par ID
+// @access  Public
+router.get('/:id', categorieBoutiqueController.obtenirCategorieParId);
 
 module.exports = router;

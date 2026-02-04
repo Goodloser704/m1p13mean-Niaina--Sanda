@@ -108,32 +108,55 @@ userSchema.index({ role: 1, isActive: 1 });
 
 // Hash password avant sauvegarde
 userSchema.pre('save', async function(next) {
-  // Synchroniser mdp et password
-  if (this.isModified('password') && !this.isModified('mdp')) {
-    this.mdp = this.password;
-  } else if (this.isModified('mdp') && !this.isModified('password')) {
-    this.password = this.mdp;
+  try {
+    // Synchroniser mdp et password
+    if (this.isModified('password') && !this.isModified('mdp')) {
+      this.mdp = this.password;
+    } else if (this.isModified('mdp') && !this.isModified('password')) {
+      this.password = this.mdp;
+    }
+    
+    // Synchroniser prenoms et prenom
+    if (this.isModified('prenom') && !this.isModified('prenoms')) {
+      this.prenoms = this.prenom;
+    } else if (this.isModified('prenoms') && !this.isModified('prenom')) {
+      this.prenom = this.prenoms;
+    }
+    
+    // Si aucun mot de passe n'est modifié, continuer
+    if (!this.isModified('password') && !this.isModified('mdp')) {
+      return next();
+    }
+    
+    // Utiliser le mot de passe disponible
+    const passwordToHash = this.password || this.mdp;
+    if (!passwordToHash) {
+      return next(new Error('Mot de passe requis'));
+    }
+    
+    const hashedPassword = await bcrypt.hash(passwordToHash, 12);
+    this.password = hashedPassword;
+    this.mdp = hashedPassword;
+    next();
+  } catch (error) {
+    console.error('❌ Erreur pre-save User:', error);
+    next(error);
   }
-  
-  // Synchroniser prenoms et prenom
-  if (this.isModified('prenom') && !this.isModified('prenoms')) {
-    this.prenoms = this.prenom;
-  } else if (this.isModified('prenoms') && !this.isModified('prenom')) {
-    this.prenom = this.prenoms;
-  }
-  
-  if (!this.isModified('password') && !this.isModified('mdp')) return next();
-  
-  const passwordToHash = this.password || this.mdp;
-  const hashedPassword = await bcrypt.hash(passwordToHash, 12);
-  this.password = hashedPassword;
-  this.mdp = hashedPassword;
-  next();
 });
 
 // Méthode pour vérifier le mot de passe
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password || this.mdp);
+  try {
+    const passwordToCompare = this.password || this.mdp;
+    if (!passwordToCompare) {
+      console.error('❌ Aucun mot de passe trouvé pour la comparaison');
+      return false;
+    }
+    return await bcrypt.compare(candidatePassword, passwordToCompare);
+  } catch (error) {
+    console.error('❌ Erreur comparaison mot de passe:', error);
+    return false;
+  }
 };
 
 // Méthodes pour les boutiques
