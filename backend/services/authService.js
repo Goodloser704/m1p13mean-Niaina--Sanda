@@ -35,6 +35,7 @@ class AuthService {
     console.log('🔧 [SERVICE] Données reçues:', JSON.stringify(userData, null, 2));
     
     const { email, password, nom, prenom, role, telephone, adresse } = userData;
+    let user; // Déclarer user en dehors du try/catch
     
     try {
       console.log('🔧 [SERVICE] Étape 1: Vérification email existant...');
@@ -60,7 +61,7 @@ class AuthService {
       });
       
       // Créer l'utilisateur
-      const user = new User({
+      user = new User({
         email,
         password,
         nom,
