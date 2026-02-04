@@ -5,6 +5,12 @@ const categorieBoutiqueController = require('../controllers/categorieBoutiqueCon
 
 const router = express.Router();
 
+/**
+ * 🏪 Routes categories boutique
+ * Gestion des inscriptions, validations et opérations boutiques
+ * Architecture: Route → Controller → Service
+ */
+
 // Validation pour la création/mise à jour de catégorie
 const validateCategorie = [
   body('nom')

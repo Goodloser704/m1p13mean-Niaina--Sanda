@@ -2,12 +2,16 @@ const boutiqueService = require('../services/boutiqueService');
 
 /**
  * 🏪 Contrôleur des Boutiques
- * Gère les requêtes HTTP pour les boutiques
+ * Gestion des inscriptions, validations et opérations boutiques
  */
 class BoutiqueController {
 
   /**
-   * 📝 Créer une nouvelle inscription boutique
+   * @route   POST /api/boutique/register
+   * @desc    Créer une nouvelle inscription boutique
+   * @access  Private (Commercant)
+   * @body    { nom, description, categorie }
+   * @return  { message, boutique }
    */
   async createBoutique(req, res) {
     const timestamp = new Date().toISOString();
@@ -56,7 +60,10 @@ class BoutiqueController {
   }
 
   /**
-   * 🏪 Obtenir toutes les boutiques de l'utilisateur connecté
+   * @route   GET /api/boutique/my-boutiques
+   * @desc    Obtenir toutes les boutiques de l'utilisateur connecté
+   * @access  Private (Commercant)
+   * @return  { boutiques, count }
    */
   async getMyBoutiques(req, res) {
     const timestamp = new Date().toISOString();
@@ -80,7 +87,11 @@ class BoutiqueController {
   }
 
   /**
-   * 🏪 Obtenir une boutique spécifique de l'utilisateur connecté
+   * @route   GET /api/boutique/me/:boutiqueId?
+   * @desc    Obtenir une boutique spécifique de l'utilisateur connecté
+   * @access  Private (Commercant)
+   * @param   boutiqueId - ID de la boutique (optionnel, prend la première si omis)
+   * @return  { boutique }
    */
   async getMyBoutique(req, res) {
     const timestamp = new Date().toISOString();
@@ -111,7 +122,10 @@ class BoutiqueController {
   }
 
   /**
-   * 📋 Obtenir les boutiques en attente (Admin seulement)
+   * @route   GET /api/boutique/pending
+   * @desc    Obtenir les boutiques en attente de validation
+   * @access  Private (Admin)
+   * @return  { boutiques, count }
    */
   async getPendingBoutiques(req, res) {
     const timestamp = new Date().toISOString();

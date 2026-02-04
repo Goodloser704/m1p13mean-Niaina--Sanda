@@ -1,5 +1,11 @@
 const express = require('express');
 const router = express.Router();
+
+/**
+ * 📦 Routes types produit
+ * Gestion des produits et catalogue
+ * Architecture: Route → Controller → Service
+ */
 const typeProduitController = require('../controllers/typeProduitController');
 const { auth } = require('../middleware/auth');
 

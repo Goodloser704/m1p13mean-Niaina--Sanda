@@ -2,8 +2,19 @@ const etageService = require('../services/etageService');
 
 console.log('🏢 [CONTROLLER] Initialisation EtageController...');
 
+/**
+ * 🏢 Contrôleur des Étages
+ * Gestion des étages du centre commercial
+ */
 class EtageController {
-  // Créer un nouvel étage
+  
+  /**
+   * @route   POST /api/etages
+   * @desc    Créer un nouvel étage
+   * @access  Private (Admin)
+   * @body    { niveau }
+   * @return  { message, etage }
+   */
   async creerEtage(req, res) {
     const timestamp = new Date().toISOString();
     console.log(`🏢 [CONTROLLER] [${timestamp}] === DEBUT creerEtage ===`);
@@ -35,7 +46,13 @@ class EtageController {
     }
   }
 
-  // Obtenir tous les étages
+  /**
+   * @route   GET /api/etages
+   * @desc    Obtenir tous les étages
+   * @access  Private (Admin)
+   * @query   page, limit, actifSeulement
+   * @return  { etages, pagination }
+   */
   async obtenirEtages(req, res) {
     const timestamp = new Date().toISOString();
     console.log(`🏢 [CONTROLLER] [${timestamp}] === DEBUT obtenirEtages ===`);

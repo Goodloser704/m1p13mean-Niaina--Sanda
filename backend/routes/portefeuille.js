@@ -7,6 +7,12 @@ const { RoleEnum } = require('../utils/enums');
 const router = express.Router();
 
 /**
+ * 💰 Routes portefeuille
+ * Gestion des portefeuilles et transactions financières
+ * Architecture: Route → Controller → Service
+ */
+
+/**
  * 💰 Routes Portefeuille
  * Gestion des portefeuilles et transactions
  */

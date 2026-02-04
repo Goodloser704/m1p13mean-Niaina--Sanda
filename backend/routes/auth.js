@@ -6,13 +6,16 @@ const authController = require('../controllers/authController');
 const router = express.Router();
 
 /**
- * 🛣️ Routes d'Authentification
+ * 🔐 Routes d'Authentification
+ * Gestion de l'inscription, connexion et profils utilisateurs
  * Architecture: Route → Controller → Service
  */
 
 // @route   POST /api/auth/register
-// @desc    Inscription utilisateur
+// @desc    Inscription utilisateur (Commercant ou Acheteur)
 // @access  Public
+// @body    { email, mdp, nom, prenoms, role, telephone }
+// @return  { message, token, user, portefeuille }
 router.post('/register', [
   body('email').isEmail().normalizeEmail(),
   body('mdp').isLength({ min: 6 }), // Utiliser 'mdp' selon les spécifications
@@ -22,8 +25,10 @@ router.post('/register', [
 ], authController.register);
 
 // @route   POST /api/auth/login
-// @desc    Connexion utilisateur
+// @desc    Connexion utilisateur (Admin, Commercant ou Acheteur)
 // @access  Public
+// @body    { email, mdp }
+// @return  { message, token, user }
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
   body('mdp').exists() // Utiliser 'mdp' selon les spécifications
@@ -32,16 +37,20 @@ router.post('/login', [
 // @route   GET /api/auth/me
 // @desc    Obtenir les infos de l'utilisateur connecté
 // @access  Private
+// @return  { user }
 router.get('/me', auth, authController.getProfile);
 
 // @route   GET /api/auth/profile (alias pour /me)
 // @desc    Obtenir les infos de l'utilisateur connecté (alias)
 // @access  Private
+// @return  { user }
 router.get('/profile', auth, authController.getProfile);
 
 // @route   PUT /api/auth/profile
 // @desc    Mettre à jour le profil utilisateur
 // @access  Private
+// @body    { nom, prenoms, email, telephone, photo }
+// @return  { message, user }
 router.put('/profile', [
   // Champs obligatoires seulement s'ils sont présents
   body('nom').optional({ nullable: true, checkFalsy: true }).isLength({ min: 1 }).trim(),

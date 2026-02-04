@@ -6,6 +6,12 @@ const { RoleEnum, TypeAchatEnum } = require('../utils/enums');
 
 const router = express.Router();
 
+/**
+ * 🛒 Routes des Achats
+ * Gestion des achats, panier et commandes pour les acheteurs
+ * Architecture: Route → Controller → Service
+ */
+
 // Validation pour la validation du panier
 const validatePanier = [
   body('achats')
@@ -34,6 +40,7 @@ const acheteurAuth = [auth, authorize(RoleEnum.Acheteur)];
 // @route   GET /api/achats
 // @desc    Test de l'API achats (route publique pour tests)
 // @access  Public
+// @return  { message, endpoints, timestamp }
 router.get('/', (req, res) => {
   res.json({
     message: 'API Achats fonctionnelle',

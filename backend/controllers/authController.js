@@ -2,13 +2,17 @@ const { validationResult } = require('express-validator');
 const authService = require('../services/authService');
 
 /**
- * 🎮 Contrôleur d'Authentification
- * Gère les requêtes HTTP et appelle les services appropriés
+ * 🔐 Contrôleur d'Authentification
+ * Gestion de l'inscription, connexion et profils utilisateurs
  */
 class AuthController {
 
   /**
-   * 📝 Inscription d'un nouvel utilisateur
+   * @route   POST /api/auth/register
+   * @desc    Inscription d'un nouvel utilisateur (Commercant ou Acheteur)
+   * @access  Public
+   * @body    { email, mdp, nom, prenoms, role, telephone }
+   * @return  { message, token, user, portefeuille }
    */
   async register(req, res) {
     const timestamp = new Date().toISOString();
@@ -73,7 +77,11 @@ class AuthController {
   }
 
   /**
-   * 🔐 Connexion d'un utilisateur
+   * @route   POST /api/auth/login
+   * @desc    Connexion d'un utilisateur (Admin, Commercant ou Acheteur)
+   * @access  Public
+   * @body    { email, mdp }
+   * @return  { message, token, user }
    */
   async login(req, res) {
     const timestamp = new Date().toISOString();
@@ -118,7 +126,10 @@ class AuthController {
   }
 
   /**
-   * 👤 Obtenir le profil de l'utilisateur connecté
+   * @route   GET /api/auth/me
+   * @desc    Obtenir le profil de l'utilisateur connecté
+   * @access  Private
+   * @return  { user }
    */
   async getProfile(req, res) {
     const timestamp = new Date().toISOString();
@@ -143,7 +154,11 @@ class AuthController {
   }
 
   /**
-   * 📝 Mettre à jour le profil utilisateur
+   * @route   PUT /api/auth/profile
+   * @desc    Mettre à jour le profil utilisateur
+   * @access  Private
+   * @body    { nom, prenoms, email, telephone, photo }
+   * @return  { message, user }
    */
   async updateProfile(req, res) {
     const timestamp = new Date().toISOString();

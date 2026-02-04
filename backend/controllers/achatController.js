@@ -8,12 +8,14 @@ const { EtatAchatEnum, TypeAchatEnum, TypeTransactionEnum } = require('../utils/
 
 /**
  * 🛒 Contrôleur Achat
- * Gestion des achats et du panier pour les acheteurs
+ * Gestion des achats, panier et commandes pour les acheteurs
  */
 
 // @route   POST /api/achats/panier/valider
 // @desc    Valider un panier et créer les achats
 // @access  Private (Acheteur)
+// @body    { achats: Array<Achat>, montantTotal: Number }
+// @return  { message, facture, achats }
 exports.validerPanier = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -209,6 +211,7 @@ exports.validerPanier = async (req, res) => {
 // @route   GET /api/achats/en-cours
 // @desc    Obtenir mes achats en cours
 // @access  Private (Acheteur)
+// @return  { achats, count }
 exports.obtenirMesAchatsEnCours = async (req, res) => {
   try {
     const acheteurId = req.user._id;
@@ -248,6 +251,8 @@ exports.obtenirMesAchatsEnCours = async (req, res) => {
 // @route   GET /api/achats/historique
 // @desc    Obtenir mon historique d'achats
 // @access  Private (Acheteur)
+// @query   page, limit
+// @return  { achats, pagination }
 exports.obtenirMonHistoriqueAchats = async (req, res) => {
   try {
     const acheteurId = req.user._id;
@@ -307,6 +312,8 @@ exports.obtenirMonHistoriqueAchats = async (req, res) => {
 // @route   GET /api/achats/:id
 // @desc    Obtenir un achat par ID
 // @access  Private (Acheteur)
+// @param   id - ID de l'achat
+// @return  { achat }
 exports.obtenirAchatParId = async (req, res) => {
   try {
     const { id } = req.params;
@@ -346,6 +353,9 @@ exports.obtenirAchatParId = async (req, res) => {
 // @route   PUT /api/achats/:id/annuler
 // @desc    Annuler un achat (si possible)
 // @access  Private (Acheteur)
+// @param   id - ID de l'achat
+// @body    { raison }
+// @return  { message, achat }
 exports.annulerAchat = async (req, res) => {
   try {
     const { id } = req.params;
@@ -437,6 +447,8 @@ exports.annulerAchat = async (req, res) => {
 // @route   GET /api/achats/factures
 // @desc    Obtenir mes factures
 // @access  Private (Acheteur)
+// @query   page, limit
+// @return  { factures, pagination }
 exports.obtenirMesFactures = async (req, res) => {
   try {
     const acheteurId = req.user._id;
@@ -494,6 +506,8 @@ exports.obtenirMesFactures = async (req, res) => {
 // @route   GET /api/achats/factures/:id
 // @desc    Obtenir une facture par ID
 // @access  Private (Acheteur)
+// @param   id - ID de la facture
+// @return  { facture }
 exports.obtenirFactureParId = async (req, res) => {
   try {
     const { id } = req.params;
@@ -538,6 +552,7 @@ exports.obtenirFactureParId = async (req, res) => {
 // @route   GET /api/achats/statistiques
 // @desc    Obtenir les statistiques de mes achats
 // @access  Private (Acheteur)
+// @return  { statistiques }
 exports.obtenirStatistiquesAchats = async (req, res) => {
   try {
     const acheteurId = req.user._id;

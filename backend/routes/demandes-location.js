@@ -7,6 +7,12 @@ const { RoleEnum } = require('../utils/enums');
 const router = express.Router();
 
 /**
+ * 📄 Routes demandes location
+ * Gestion des opérations
+ * Architecture: Route → Controller → Service
+ */
+
+/**
  * 🏪 Routes Demandes de Location
  * Gestion des demandes de location d'espaces
  */

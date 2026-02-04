@@ -1,5 +1,11 @@
 const express = require('express');
 const router = express.Router();
+
+/**
+ * 📄 Routes centre commercial
+ * Gestion des opérations
+ * Architecture: Route → Controller → Service
+ */
 const centreCommercialController = require('../controllers/centreCommercialController');
 const { auth } = require('../middleware/auth');
 

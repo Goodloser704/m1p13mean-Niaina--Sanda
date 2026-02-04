@@ -1,5 +1,11 @@
 const express = require('express');
 const router = express.Router();
+
+/**
+ * 🏬 Routes espaces
+ * Gestion des espaces locatifs du centre commercial
+ * Architecture: Route → Controller → Service
+ */
 const espaceController = require('../controllers/espaceController');
 const { auth, authorize } = require('../middleware/auth');
 

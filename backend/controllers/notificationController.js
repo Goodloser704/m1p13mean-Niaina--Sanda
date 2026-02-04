@@ -2,12 +2,16 @@ const notificationService = require('../services/notificationService');
 
 /**
  * 🔔 Contrôleur des Notifications
- * Gère les requêtes HTTP pour les notifications
+ * Gestion des notifications utilisateurs et administrateurs
  */
 class NotificationController {
 
   /**
-   * 📋 Obtenir les notifications de l'utilisateur connecté
+   * @route   GET /api/notifications
+   * @desc    Obtenir les notifications de l'utilisateur connecté
+   * @access  Private
+   * @query   page, limit, includeRead, type
+   * @return  { notifications, unreadCount, pagination }
    */
   async getUserNotifications(req, res) {
     const timestamp = new Date().toISOString();

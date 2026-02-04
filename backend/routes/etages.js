@@ -1,5 +1,11 @@
 const express = require('express');
 const router = express.Router();
+
+/**
+ * 🏢 Routes etages
+ * Gestion des étages du centre commercial
+ * Architecture: Route → Controller → Service
+ */
 const etageController = require('../controllers/etageController');
 const { auth, authorize } = require('../middleware/auth');
 

@@ -6,12 +6,14 @@ const { EtatDemandeEnum } = require('../utils/enums');
 
 /**
  * 🏪 Contrôleur Demande de Location
- * Gestion des demandes de location d'espaces
+ * Gestion des demandes de location d'espaces pour les boutiques
  */
 
 // @route   POST /api/demandes-location
 // @desc    Créer une demande de location
 // @access  Private (Commercant)
+// @body    { boutiqueId, espaceId, dateDebutSouhaitee, dureeContrat, messageCommercant }
+// @return  { message, demande }
 exports.creerDemande = async (req, res) => {
   try {
     const errors = validationResult(req);
