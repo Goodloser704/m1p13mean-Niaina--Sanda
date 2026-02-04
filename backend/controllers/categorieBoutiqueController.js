@@ -39,6 +39,36 @@ exports.obtenirCategories = async (req, res) => {
   }
 };
 
+// @route   GET /api/categories-boutique/test
+// @desc    Test de la route catégories
+// @access  Public
+exports.testCategories = async (req, res) => {
+  try {
+    const stats = {
+      message: 'Route catégories boutiques fonctionnelle',
+      timestamp: new Date().toISOString(),
+      database: {
+        connected: require('mongoose').connection.readyState === 1,
+        name: require('mongoose').connection.name
+      },
+      counts: {
+        totalCategories: await CategorieBoutique.countDocuments(),
+        categoriesActives: await CategorieBoutique.countDocuments({ isActive: true }),
+        categoriesInactives: await CategorieBoutique.countDocuments({ isActive: false })
+      }
+    };
+    
+    console.log('🧪 Test catégories boutiques:', stats);
+    res.json(stats);
+  } catch (error) {
+    console.error('❌ Erreur test catégories:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors du test catégories',
+      error: error.message
+    });
+  }
+};
+
 // @route   GET /api/categories-boutique/:id
 // @desc    Obtenir une catégorie par ID
 // @access  Public

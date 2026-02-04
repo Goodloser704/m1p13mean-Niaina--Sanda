@@ -31,33 +31,33 @@ class AuthController {
       console.log(`✅ [CONTROLLER] Validation réussie`);
 
       console.log(`🔍 [CONTROLLER] Étape 2: Appel du service authService.createUser`);
-      // Appeler le service
-      console.log(`➕ [CONTROLLER] Création nouvel utilisateur: ${req.body.email}`);
-      const result = await authService.createUser(req.body);
+      // Appeler le service avec les bons noms de champs
+      const userData = {
+        email: req.body.email,
+        mdp: req.body.mdp, // Utiliser 'mdp' selon les spécifications
+        nom: req.body.nom,
+        prenoms: req.body.prenoms, // Utiliser 'prenoms' selon les spécifications
+        role: req.body.role,
+        telephone: req.body.telephone
+      };
+      
+      console.log(`➕ [CONTROLLER] Création nouvel utilisateur: ${userData.email}`);
+      const result = await authService.createUser(userData);
       
       console.log(`✅ [CONTROLLER] Utilisateur créé avec succès: ${result.user.id}`);
-      
-      // Message différent selon le rôle
-      if (req.body.role === 'Commercant' || req.body.role === 'boutique') {
-        console.log(`🔔 [CONTROLLER] Notification envoyée aux admins pour validation boutique`);
-      } else {
-        console.log(`🎫 [CONTROLLER] Token généré pour: ${result.user.id}`);
-      }
 
       console.log(`🔍 [CONTROLLER] Étape 3: Envoi de la réponse`);
       res.status(201).json({
         message: result.message,
         token: result.token,
-        user: result.user
+        user: result.user,
+        portefeuille: result.portefeuille
       });
       console.log(`✅ [CONTROLLER] === FIN INSCRIPTION RÉUSSIE ===`);
 
     } catch (error) {
       console.error(`❌ [CONTROLLER] === ERREUR INSCRIPTION ===`);
       console.error(`❌ [CONTROLLER] Message d'erreur:`, error.message);
-      console.error(`❌ [CONTROLLER] Stack trace:`, error.stack);
-      console.error(`❌ [CONTROLLER] Nom de l'erreur:`, error.name);
-      console.error(`❌ [CONTROLLER] Code d'erreur:`, error.code);
       
       if (error.message === 'Cet email est déjà utilisé') {
         console.log(`⚠️ [CONTROLLER] Erreur email existant - retour 400`);
@@ -67,12 +67,7 @@ class AuthController {
       console.error(`💥 [CONTROLLER] Erreur serveur 500 - retour erreur générique`);
       res.status(500).json({ 
         message: 'Erreur serveur',
-        debug: process.env.NODE_ENV === 'development' ? error.message : undefined,
-        errorDetails: {
-          name: error.name,
-          message: error.message,
-          code: error.code
-        }
+        debug: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }
   }
@@ -96,11 +91,11 @@ class AuthController {
         });
       }
 
-      const { email, password } = req.body;
+      const { email, mdp } = req.body; // Utiliser 'mdp' selon les spécifications
 
       // Appeler le service
       console.log(`🔍 Authentification utilisateur: ${email}`);
-      const result = await authService.authenticateUser(email, password);
+      const result = await authService.authenticateUser(email, mdp); // Utiliser 'mdp'
       
       console.log(`✅ Connexion réussie: ${result.user.id} (${result.user.role})`);
       console.log(`🎫 Token généré et envoyé`);

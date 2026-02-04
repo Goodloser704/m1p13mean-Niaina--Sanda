@@ -58,6 +58,36 @@ exports.obtenirProduits = async (req, res) => {
   }
 };
 
+// @route   GET /api/produits/test
+// @desc    Test de la route produits
+// @access  Public
+exports.testProduits = async (req, res) => {
+  try {
+    const stats = {
+      message: 'Route produits fonctionnelle',
+      timestamp: new Date().toISOString(),
+      database: {
+        connected: require('mongoose').connection.readyState === 1,
+        name: require('mongoose').connection.name
+      },
+      counts: {
+        totalProduits: await Produit.countDocuments(),
+        produitsActifs: await Produit.countDocuments({ isActive: true }),
+        produitsInactifs: await Produit.countDocuments({ isActive: false })
+      }
+    };
+    
+    console.log('🧪 Test produits:', stats);
+    res.json(stats);
+  } catch (error) {
+    console.error('❌ Erreur test produits:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors du test produits',
+      error: error.message
+    });
+  }
+};
+
 // @route   GET /api/produits/boutique/:boutiqueId
 // @desc    Obtenir les produits d'une boutique
 // @access  Public

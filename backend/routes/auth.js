@@ -15,10 +15,10 @@ const router = express.Router();
 // @access  Public
 router.post('/register', [
   body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 6 }),
+  body('mdp').isLength({ min: 6 }), // Utiliser 'mdp' selon les spécifications
   body('nom').notEmpty().trim(),
-  body('prenom').notEmpty().trim(),
-  body('role').isIn(['Commercant', 'Acheteur', 'boutique', 'client']) // Accept both old and new values
+  body('prenoms').notEmpty().trim(), // Utiliser 'prenoms' selon les spécifications
+  body('role').isIn(['Admin', 'Commercant', 'Acheteur']) // Enums selon spécifications
 ], authController.register);
 
 // @route   POST /api/auth/login
@@ -26,13 +26,18 @@ router.post('/register', [
 // @access  Public
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
-  body('password').exists()
+  body('mdp').exists() // Utiliser 'mdp' selon les spécifications
 ], authController.login);
 
 // @route   GET /api/auth/me
 // @desc    Obtenir les infos de l'utilisateur connecté
 // @access  Private
 router.get('/me', auth, authController.getProfile);
+
+// @route   GET /api/auth/profile (alias pour /me)
+// @desc    Obtenir les infos de l'utilisateur connecté (alias)
+// @access  Private
+router.get('/profile', auth, authController.getProfile);
 
 // @route   PUT /api/auth/profile
 // @desc    Mettre à jour le profil utilisateur

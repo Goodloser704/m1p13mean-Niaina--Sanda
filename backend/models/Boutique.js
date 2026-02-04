@@ -1,24 +1,23 @@
 const mongoose = require('mongoose');
 const { StatutBoutiqueEnum, JourSemaineEnum } = require('../utils/enums');
 
+/**
+ * 🏪 Modèle Boutique - CONFORME AUX SPÉCIFICATIONS
+ * Selon note/Models-de-données_version_copiable.txt
+ */
+
 const boutiqueSchema = new mongoose.Schema({
   nom: {
     type: String,
     required: true,
-    trim: true,
-    maxlength: 200
+    trim: true
   },
   description: {
     type: String,
-    trim: true,
-    maxlength: 1000
+    trim: true
+    // Optional selon spécifications
   },
-  commercant: { // Renommé selon les règles de gestion
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  proprietaire: { // Alias pour compatibilité
+  commercant: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
@@ -31,21 +30,17 @@ const boutiqueSchema = new mongoose.Schema({
   statutBoutique: {
     type: String,
     required: true,
-    enum: [StatutBoutiqueEnum.Actif, StatutBoutiqueEnum.Inactif, StatutBoutiqueEnum.EnAttente],
-    default: StatutBoutiqueEnum.EnAttente
-  },
-  statut: { // Alias pour compatibilité avec le code existant
-    type: String,
-    enum: ['en_attente', 'approuve', 'suspendu'],
-    default: 'en_attente'
+    enum: [StatutBoutiqueEnum.Actif, StatutBoutiqueEnum.Inactif],
+    default: StatutBoutiqueEnum.Inactif
   },
   photo: {
-    type: String,
-    trim: true
+    type: String
+    // Optional selon spécifications
   },
   espace: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Espace'
+    // Optional selon spécifications
   },
   horairesHebdo: [{
     jour: {
@@ -67,68 +62,19 @@ const boutiqueSchema = new mongoose.Schema({
       required: true,
       match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/ // Format HH:MM
     }
-  }],
-  // Informations de contact et emplacement (pour compatibilité)
-  emplacement: {
-    zone: String,
-    numeroLocal: String,
-    etage: Number
-  },
-  contact: {
-    telephone: String,
-    email: String,
-    siteWeb: String
-  },
-  horaires: {
-    lundi: { ouverture: String, fermeture: String },
-    mardi: { ouverture: String, fermeture: String },
-    mercredi: { ouverture: String, fermeture: String },
-    jeudi: { ouverture: String, fermeture: String },
-    vendredi: { ouverture: String, fermeture: String },
-    samedi: { ouverture: String, fermeture: String },
-    dimanche: { ouverture: String, fermeture: String }
-  },
-  images: [String],
-  logo: String,
-  note: {
-    moyenne: { type: Number, default: 0 },
-    nombreAvis: { type: Number, default: 0 }
-  },
-  dateCreation: {
-    type: Date,
-    default: Date.now
-  }
+  }]
 }, {
-  timestamps: true
+  timestamps: true // Ajoute createdAt et updatedAt automatiquement
 });
 
 // Index pour optimiser les requêtes
 boutiqueSchema.index({ commercant: 1 });
-boutiqueSchema.index({ proprietaire: 1 }); // Alias
 boutiqueSchema.index({ statutBoutique: 1 });
-boutiqueSchema.index({ statut: 1 }); // Alias
 boutiqueSchema.index({ categorie: 1 });
 boutiqueSchema.index({ espace: 1 });
 
-// Validation des contraintes logiques
+// Validation des contraintes logiques selon spécifications
 boutiqueSchema.pre('save', function(next) {
-  // Synchroniser commercant et proprietaire
-  if (this.isModified('commercant') && !this.isModified('proprietaire')) {
-    this.proprietaire = this.commercant;
-  } else if (this.isModified('proprietaire') && !this.isModified('commercant')) {
-    this.commercant = this.proprietaire;
-  }
-  
-  // Synchroniser statutBoutique et statut
-  if (this.isModified('statutBoutique') && !this.isModified('statut')) {
-    const mapping = {
-      [StatutBoutiqueEnum.Actif]: 'approuve',
-      [StatutBoutiqueEnum.Inactif]: 'suspendu',
-      [StatutBoutiqueEnum.EnAttente]: 'en_attente'
-    };
-    this.statut = mapping[this.statutBoutique] || 'en_attente';
-  }
-  
   // Validation des horaires hebdomadaires
   if (this.horairesHebdo && this.horairesHebdo.length > 0) {
     // Maximum 7 horaires
@@ -153,70 +99,5 @@ boutiqueSchema.pre('save', function(next) {
   
   next();
 });
-
-// Méthode pour vérifier si la boutique est ouverte maintenant
-boutiqueSchema.methods.estOuverte = function() {
-  const maintenant = new Date();
-  const jourActuel = maintenant.toLocaleDateString('fr-FR', { weekday: 'long' });
-  const heureActuelle = maintenant.toTimeString().slice(0, 5); // HH:MM
-  
-  // Mapper le jour français vers l'enum
-  const mappingJours = {
-    'lundi': JourSemaineEnum.Lundi,
-    'mardi': JourSemaineEnum.Mardi,
-    'mercredi': JourSemaineEnum.Mercredi,
-    'jeudi': JourSemaineEnum.Jeudi,
-    'vendredi': JourSemaineEnum.Vendredi,
-    'samedi': JourSemaineEnum.Samedi,
-    'dimanche': JourSemaineEnum.Dimanche
-  };
-  
-  const jourEnum = mappingJours[jourActuel.toLowerCase()];
-  const horaireAujourdhui = this.horairesHebdo.find(h => h.jour === jourEnum);
-  
-  if (!horaireAujourdhui) {
-    return false; // Fermé si pas d'horaire défini
-  }
-  
-  return heureActuelle >= horaireAujourdhui.debut && heureActuelle <= horaireAujourdhui.fin;
-};
-
-// Méthode pour fermer la boutique (libérer l'espace)
-boutiqueSchema.methods.fermer = async function() {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  
-  try {
-    // Changer le statut
-    this.statutBoutique = StatutBoutiqueEnum.Inactif;
-    this.statut = 'suspendu';
-    
-    // Libérer l'espace si occupé
-    if (this.espace) {
-      const Espace = mongoose.model('Espace');
-      await Espace.findByIdAndUpdate(
-        this.espace,
-        {
-          statut: 'Disponible',
-          boutique: null,
-          dateOccupation: null
-        },
-        { session }
-      );
-      
-      this.espace = null;
-    }
-    
-    await this.save({ session });
-    await session.commitTransaction();
-    
-    return this;
-  } catch (error) {
-    await session.abortTransaction();
-    throw error;
-  } finally {
-    session.endSession();
-  }
-};
 
 module.exports = mongoose.model('Boutique', boutiqueSchema);

@@ -5,6 +5,7 @@ const { auth } = require('../middleware/auth');
 
 // Routes publiques
 router.get('/', produitController.obtenirProduits);
+router.get('/test', produitController.testProduits);
 router.get('/boutique/:boutiqueId', produitController.obtenirProduitsParBoutique);
 router.get('/:id', produitController.obtenirProduitParId);
 

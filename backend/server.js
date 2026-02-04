@@ -94,38 +94,61 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes avec logging
 console.log('🛣️  Initialisation des routes...');
+
+// Routes d'authentification
 console.log('🛣️  Chargement route auth...');
 app.use('/api/auth', require('./routes/auth'));
+
+// Routes de notifications
 console.log('🛣️  Chargement route notifications...');
 app.use('/api/notifications', require('./routes/notifications'));
+
+// Routes d'administration
 console.log('🛣️  Chargement route admin...');
 app.use('/api/admin', require('./routes/admin'));
+
+// Routes de boutiques
 console.log('🛣️  Chargement route boutique...');
 app.use('/api/boutique', require('./routes/boutique'));
+
+// Routes client
 console.log('🛣️  Chargement route client...');
 app.use('/api/client', require('./routes/client'));
+
+// Routes de produits (deux versions)
 console.log('🛣️  Chargement route products...');
 app.use('/api/products', require('./routes/products'));
+console.log('🛣️  Chargement route produits...');
+app.use('/api/produits', require('./routes/produits'));
+
+// Routes de commandes
 console.log('🛣️  Chargement route orders...');
 app.use('/api/orders', require('./routes/orders'));
+
+// Routes d'infrastructure
 console.log('🛣️  Chargement route etages...');
 app.use('/api/etages', require('./routes/etages'));
 console.log('🛣️  Chargement route espaces...');
 app.use('/api/espaces', require('./routes/espaces'));
-console.log('🛣️  Chargement route portefeuille...');
-app.use('/api/portefeuille', require('./routes/portefeuille'));
-console.log('🛣️  Chargement route demandes-location...');
-app.use('/api/demandes-location', require('./routes/demandes-location'));
 console.log('🛣️  Chargement route centre-commercial...');
 app.use('/api/centre-commercial', require('./routes/centre-commercial'));
-console.log('🛣️  Chargement route produits...');
-app.use('/api/produits', require('./routes/produits'));
-console.log('🛣️  Chargement route types-produit...');
-app.use('/api/types-produit', require('./routes/types-produit'));
+
+// Routes de gestion financière
+console.log('🛣️  Chargement route portefeuille...');
+app.use('/api/portefeuille', require('./routes/portefeuille'));
 console.log('🛣️  Chargement route achats...');
 app.use('/api/achats', require('./routes/achats'));
+
+// Routes de demandes
+console.log('🛣️  Chargement route demandes-location...');
+app.use('/api/demandes-location', require('./routes/demandes-location'));
+
+// Routes de catégories
+console.log('🛣️  Chargement route types-produit...');
+app.use('/api/types-produit', require('./routes/types-produit'));
 console.log('🛣️  Chargement route categories-boutique...');
 app.use('/api/categories-boutique', require('./routes/categories-boutique'));
+
 console.log('✅ Routes initialisées avec succès');
 
 // 🗄️ Connexion MongoDB avec logs détaillés

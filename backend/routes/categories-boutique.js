@@ -31,6 +31,11 @@ const validateCategorie = [
 // @access  Public
 router.get('/', categorieBoutiqueController.obtenirCategories);
 
+// @route   GET /api/categories-boutique/test
+// @desc    Test de la route catégories
+// @access  Public
+router.get('/test', categorieBoutiqueController.testCategories);
+
 // Routes admin uniquement - MUST BE BEFORE PARAMETERIZED ROUTES
 // @route   GET /api/categories-boutique/admin/statistiques
 // @desc    Obtenir les statistiques des catégories
