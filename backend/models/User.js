@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   },
   mdp: { // Renommé selon les règles de gestion
     type: String,
-    required: true,
+    required: false, // Rendu optionnel car synchronisé avec password
     minlength: 6
   },
   password: { // Alias pour compatibilité
@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
   },
   prenoms: { // Renommé selon les règles de gestion
     type: String,
-    required: true
+    required: false // Rendu optionnel car synchronisé avec prenom
   },
   prenom: { // Alias pour compatibilité
     type: String,
@@ -105,6 +105,32 @@ const userSchema = new mongoose.Schema({
 userSchema.index({ email: 1 });
 userSchema.index({ role: 1, status: 1 });
 userSchema.index({ role: 1, isActive: 1 });
+
+// Synchronisation des champs avant validation
+userSchema.pre('validate', function(next) {
+  console.log('🔧 [USER-MODEL] === DEBUT pre(validate) - Synchronisation ===');
+  
+  // Synchroniser mdp et password
+  if (this.password && !this.mdp) {
+    console.log('🔧 [USER-MODEL] Copie password -> mdp (pre-validate)');
+    this.mdp = this.password;
+  } else if (this.mdp && !this.password) {
+    console.log('🔧 [USER-MODEL] Copie mdp -> password (pre-validate)');
+    this.password = this.mdp;
+  }
+  
+  // Synchroniser prenoms et prenom
+  if (this.prenom && !this.prenoms) {
+    console.log('🔧 [USER-MODEL] Copie prenom -> prenoms (pre-validate)');
+    this.prenoms = this.prenom;
+  } else if (this.prenoms && !this.prenom) {
+    console.log('🔧 [USER-MODEL] Copie prenoms -> prenom (pre-validate)');
+    this.prenom = this.prenoms;
+  }
+  
+  console.log('✅ [USER-MODEL] === FIN pre(validate) ===');
+  next();
+});
 
 // Hash password avant sauvegarde
 userSchema.pre('save', async function(next) {
