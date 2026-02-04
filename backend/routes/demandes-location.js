@@ -14,6 +14,23 @@ const router = express.Router();
 // Middleware d'authentification pour toutes les routes
 router.use(auth);
 
+// Routes Admin - MUST BE BEFORE PARAMETERIZED ROUTES
+// @route   GET /api/demandes-location
+// @desc    Obtenir toutes les demandes (Admin)
+// @access  Private (Admin)
+router.get('/', 
+  authorize(RoleEnum.Admin, 'admin'), 
+  demandeLocationController.obtenirToutesDemandes
+);
+
+// @route   GET /api/demandes-location/me
+// @desc    Obtenir mes demandes de location
+// @access  Private (Commercant)
+router.get('/me', 
+  authorize(RoleEnum.Commercant, 'boutique'), 
+  demandeLocationController.obtenirMesDemandes
+);
+
 // @route   POST /api/demandes-location
 // @desc    Créer une demande de location
 // @access  Private (Commercant)
@@ -35,25 +52,8 @@ router.post('/', [
     .isLength({ max: 1000 })
     .withMessage('Le message ne peut pas dépasser 1000 caractères')
 ], 
-authorize([RoleEnum.Commercant, 'boutique']), 
+authorize(RoleEnum.Commercant, 'boutique'), 
 demandeLocationController.creerDemande);
-
-// Routes Admin - MUST BE BEFORE PARAMETERIZED ROUTES
-// @route   GET /api/demandes-location
-// @desc    Obtenir toutes les demandes (Admin)
-// @access  Private (Admin)
-router.get('/', 
-  authorize([RoleEnum.Admin, 'admin']), 
-  demandeLocationController.obtenirToutesDemandes
-);
-
-// @route   GET /api/demandes-location/me
-// @desc    Obtenir mes demandes de location
-// @access  Private (Commercant)
-router.get('/me', 
-  authorize([RoleEnum.Commercant, 'boutique']), 
-  demandeLocationController.obtenirMesDemandes
-);
 
 // @route   GET /api/demandes-location/:id
 // @desc    Obtenir une demande par ID
@@ -64,7 +64,7 @@ router.get('/:id', demandeLocationController.obtenirDemandeParId);
 // @desc    Annuler une demande
 // @access  Private (Commercant propriétaire)
 router.delete('/:id', 
-  authorize([RoleEnum.Commercant, 'boutique']), 
+  authorize(RoleEnum.Commercant, 'boutique'), 
   demandeLocationController.annulerDemande
 );
 
@@ -95,7 +95,7 @@ router.put('/:id/accepter', [
     .isLength({ max: 1000 })
     .withMessage('Le message admin ne peut pas dépasser 1000 caractères')
 ], 
-authorize([RoleEnum.Admin, 'admin']), 
+authorize(RoleEnum.Admin, 'admin'), 
 demandeLocationController.accepterDemande);
 
 // @route   PUT /api/demandes-location/:id/refuser
@@ -112,7 +112,7 @@ router.put('/:id/refuser', [
     .isLength({ max: 1000 })
     .withMessage('Le message admin ne peut pas dépasser 1000 caractères')
 ], 
-authorize([RoleEnum.Admin, 'admin']), 
+authorize(RoleEnum.Admin, 'admin'), 
 demandeLocationController.refuserDemande);
 
 module.exports = router;
