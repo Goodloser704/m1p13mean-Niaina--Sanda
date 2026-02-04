@@ -18,7 +18,7 @@ router.post('/register', [
   body('password').isLength({ min: 6 }),
   body('nom').notEmpty().trim(),
   body('prenom').notEmpty().trim(),
-  body('role').isIn(['boutique', 'client'])
+  body('role').isIn(['Commercant', 'Acheteur', 'boutique', 'client']) // Accept both old and new values
 ], authController.register);
 
 // @route   POST /api/auth/login
