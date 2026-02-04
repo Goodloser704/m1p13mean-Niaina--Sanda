@@ -31,14 +31,19 @@ class AuthService {
    * ➕ Créer un nouvel utilisateur
    */
   async createUser(userData) {
+    console.log('🔧 [DEBUG] createUser appelé avec:', JSON.stringify(userData, null, 2));
+    
     const { email, password, nom, prenom, role, telephone, adresse } = userData;
     
+    console.log('🔧 [DEBUG] Vérification email existant...');
     // Vérifier si l'email existe déjà
     const emailExists = await this.checkEmailExists(email);
     if (emailExists) {
+      console.log('🔧 [DEBUG] Email déjà existant');
       throw new Error('Cet email est déjà utilisé');
     }
 
+    console.log('🔧 [DEBUG] Création objet User...');
     // Créer l'utilisateur
     const user = new User({
       email,
@@ -53,9 +58,13 @@ class AuthService {
       status: role === 'Commercant' ? 'pending' : 'active'
     });
 
+    console.log('🔧 [DEBUG] Sauvegarde User...');
     await user.save();
+    console.log('🔧 [DEBUG] User sauvegardé avec succès');
     
     // 🔔 Si c'est une boutique, créer une notification pour les admins
+    // Temporairement désactivé pour debug
+    /*
     if (role === 'Commercant') {
       try {
         await notificationService.createBoutiqueRegistrationNotification(user);
@@ -65,6 +74,7 @@ class AuthService {
         // Ne pas faire échouer l'inscription si la notification échoue
       }
     }
+    */
     
     // Générer le token seulement si le compte est actif
     let token = null;

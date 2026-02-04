@@ -48,12 +48,16 @@ class AuthController {
 
     } catch (error) {
       console.error(`❌ Erreur inscription:`, error.message);
+      console.error(`📊 Stack trace:`, error.stack);
       
       if (error.message === 'Cet email est déjà utilisé') {
         return res.status(400).json({ message: error.message });
       }
       
-      res.status(500).json({ message: 'Erreur serveur' });
+      res.status(500).json({ 
+        message: 'Erreur serveur',
+        debug: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   }
 
