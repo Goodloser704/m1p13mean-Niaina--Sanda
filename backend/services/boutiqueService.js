@@ -62,7 +62,7 @@ class BoutiqueService {
       const adminUsers = await User.find({ 
         role: 'admin', 
         isActive: true 
-      }).select('_id email nom prenom');
+      }).select('_id email nom prenoms'); // Utiliser 'prenoms' selon spécifications
 
       if (adminUsers.length === 0) {
         console.warn('⚠️ Aucun admin trouvé pour recevoir la notification');
@@ -75,7 +75,7 @@ class BoutiqueService {
           notificationService.createNotification({
             type: 'boutique_registration',
             title: '🏪 Nouvelle inscription boutique',
-            message: `${user.prenom} ${user.nom} a inscrit sa boutique "${boutique.nom}" et attend votre validation.`,
+            message: `${user.prenoms} ${user.nom} a inscrit sa boutique "${boutique.nom}" et attend votre validation.`,
             recipient: admin._id,
             recipientRole: 'admin',
             relatedEntity: {
@@ -85,7 +85,7 @@ class BoutiqueService {
             data: {
               boutiqueId: boutique._id,
               boutiqueName: boutique.nom,
-              ownerName: `${user.prenom} ${user.nom}`,
+              ownerName: `${user.prenoms} ${user.nom}`,
               ownerEmail: user.email,
               category: boutique.categorie,
               registrationDate: new Date()
@@ -112,8 +112,8 @@ class BoutiqueService {
    */
   async getPendingBoutiques() {
     try {
-      const boutiques = await Boutique.find({ statut: 'en_attente' })
-        .populate('proprietaire', 'nom prenom email telephone')
+      const boutiques = await Boutique.find({ statutBoutique: 'EnAttente' })
+        .populate('commercant', 'nom prenoms email telephone') // Utiliser 'prenoms' selon spécifications
         .sort({ dateCreation: -1 });
 
       return boutiques;
@@ -129,13 +129,13 @@ class BoutiqueService {
   async approveBoutique(boutiqueId, adminId) {
     try {
       const boutique = await Boutique.findById(boutiqueId)
-        .populate('proprietaire', 'nom prenom email');
+        .populate('commercant', 'nom prenoms email'); // Utiliser 'prenoms' selon spécifications
 
       if (!boutique) {
         throw new Error('Boutique non trouvée');
       }
 
-      if (boutique.statut !== 'en_attente') {
+      if (boutique.statutBoutique !== 'EnAttente') {
         throw new Error('Cette boutique a déjà été traitée');
       }
 
@@ -370,11 +370,11 @@ class BoutiqueService {
     try {
       console.log('🔍 Récupération de toutes les boutiques approuvées...');
       
-      const boutiques = await Boutique.find({ statut: 'approuve' })
-        .populate('proprietaire', 'nom prenom email telephone')
-        .sort({ dateCreation: -1 });
+      const boutiques = await Boutique.find({ statutBoutique: 'Actif' })
+        .populate('commercant', 'nom prenoms email telephone') // Utiliser 'prenoms' selon spécifications
+        .sort({ createdAt: -1 });
 
-      console.log(`✅ ${boutiques.length} boutiques approuvées trouvées`);
+      console.log(`✅ ${boutiques.length} boutiques actives trouvées`);
       return boutiques;
     } catch (error) {
       console.error('❌ Erreur récupération toutes boutiques:', error.message);
