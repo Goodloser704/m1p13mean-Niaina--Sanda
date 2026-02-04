@@ -22,6 +22,10 @@ export class Header implements OnInit, OnDestroy {
   isLoggedIn = false;
   unreadNotifications = 0;
   
+  // État des menus déroulants
+  showAdminMenu = false;
+  showBoutiqueMenu = false;
+  
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -108,5 +112,22 @@ export class Header implements OnInit, OnDestroy {
       case 'client': return '#007bff';
       default: return '#6c757d';
     }
+  }
+
+  // 📋 Gestion des menus déroulants
+  toggleAdminMenu() {
+    this.showAdminMenu = !this.showAdminMenu;
+    this.showBoutiqueMenu = false; // Fermer les autres menus
+  }
+
+  toggleBoutiqueMenu() {
+    this.showBoutiqueMenu = !this.showBoutiqueMenu;
+    this.showAdminMenu = false; // Fermer les autres menus
+  }
+
+  // Fermer tous les menus
+  closeAllMenus() {
+    this.showAdminMenu = false;
+    this.showBoutiqueMenu = false;
   }
 }

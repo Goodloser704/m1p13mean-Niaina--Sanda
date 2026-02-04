@@ -1,0 +1,289 @@
+<div class="admin-centre-commercial">
+  <!-- En-tête -->
+  <div class="page-header">
+    <h1>🏢 Gestion du Centre Commercial</h1>
+    <div class="header-actions">
+      <button class="btn btn-stats" (click)="toggleStats()">
+        📊 {{ showStats ? 'Masquer' : 'Afficher' }} Statistiques
+      </button>
+      <button class="btn btn-primary" (click)="toggleEditMode()" *ngIf="!editMode">
+        ✏️ Modifier
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages">
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading && !centreCommercial">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="stats-panel" *ngIf="showStats && stats">
+    <h3>📊 Statistiques du Centre Commercial</h3>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.statistiques.nombreEtages }}</div>
+        <div class="stat-label">Étages</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.statistiques.nombreEspaces }}</div>
+        <div class="stat-label">Espaces Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.statistiques.espacesDisponibles }}</div>
+        <div class="stat-label">Disponibles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.statistiques.espacesOccupes }}</div>
+        <div class="stat-label">Occupés</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.statistiques.tauxOccupation }}</div>
+        <div class="stat-label">Taux d'Occupation</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.statistiques.boutiquesActives }}</div>
+        <div class="stat-label">Boutiques Actives</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="centre-content" *ngIf="!loading">
+    
+    <!-- Mode Lecture -->
+    <div class="info-panel" *ngIf="!editMode && centreCommercial">
+      <div class="info-header">
+        <h2>{{ centreCommercial.nom }}</h2>
+        <p class="description" *ngIf="centreCommercial.description">{{ centreCommercial.description }}</p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-section">
+          <h3>📍 Informations de Contact</h3>
+          <div class="info-item">
+            <strong>Adresse:</strong> {{ centreCommercial.adresse }}
+          </div>
+          <div class="info-item" *ngIf="centreCommercial.email">
+            <strong>Email:</strong> {{ centreCommercial.email }}
+          </div>
+          <div class="info-item" *ngIf="centreCommercial.telephone">
+            <strong>Téléphone:</strong> {{ centreCommercial.telephone }}
+          </div>
+          <div class="info-item" *ngIf="centreCommercial.siteWeb">
+            <strong>Site Web:</strong> 
+            <a [href]="centreCommercial.siteWeb" target="_blank">{{ centreCommercial.siteWeb }}</a>
+          </div>
+        </div>
+
+        <div class="info-section" *ngIf="centreCommercial.horairesGeneraux && centreCommercial.horairesGeneraux.length > 0">
+          <h3>🕒 Horaires d'Ouverture</h3>
+          <div class="horaires-list">
+            <div class="horaire-item" *ngFor="let horaire of centreCommercial.horairesGeneraux">
+              <span class="jour">{{ horaire.jour }}:</span>
+              <span class="heures" *ngIf="!horaire.ferme">{{ horaire.debut }} - {{ horaire.fin }}</span>
+              <span class="ferme" *ngIf="horaire.ferme">Fermé</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section" *ngIf="centreCommercial.reseauxSociaux">
+          <h3>📱 Réseaux Sociaux</h3>
+          <div class="social-links">
+            <a *ngIf="centreCommercial.reseauxSociaux.facebook" 
+               [href]="centreCommercial.reseauxSociaux.facebook" 
+               target="_blank" class="social-link facebook">
+              📘 Facebook
+            </a>
+            <a *ngIf="centreCommercial.reseauxSociaux.instagram" 
+               [href]="centreCommercial.reseauxSociaux.instagram" 
+               target="_blank" class="social-link instagram">
+              📷 Instagram
+            </a>
+            <a *ngIf="centreCommercial.reseauxSociaux.twitter" 
+               [href]="centreCommercial.reseauxSociaux.twitter" 
+               target="_blank" class="social-link twitter">
+              🐦 Twitter
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode Édition -->
+    <form *ngIf="editMode" (ngSubmit)="sauvegarder()" class="edit-form">
+      <div class="form-sections">
+        
+        <!-- Informations de base -->
+        <div class="form-section">
+          <h3>📝 Informations de Base</h3>
+          
+          <div class="form-group">
+            <label for="nom">Nom du Centre Commercial *</label>
+            <input 
+              type="text" 
+              id="nom"
+              [(ngModel)]="centreForm.nom"
+              name="nom"
+              required
+              maxlength="200"
+              placeholder="Ex: Centre Commercial Moderne">
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea 
+              id="description"
+              [(ngModel)]="centreForm.description"
+              name="description"
+              maxlength="1000"
+              rows="3"
+              placeholder="Description du centre commercial..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="adresse">Adresse *</label>
+            <textarea 
+              id="adresse"
+              [(ngModel)]="centreForm.adresse"
+              name="adresse"
+              required
+              maxlength="500"
+              rows="2"
+              placeholder="Adresse complète du centre commercial"></textarea>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="form-section">
+          <h3>📞 Informations de Contact</h3>
+          
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input 
+              type="email" 
+              id="email"
+              [(ngModel)]="centreForm.email"
+              name="email"
+              placeholder="contact@centrecommercial.com">
+          </div>
+
+          <div class="form-group">
+            <label for="telephone">Téléphone</label>
+            <input 
+              type="tel" 
+              id="telephone"
+              [(ngModel)]="centreForm.telephone"
+              name="telephone"
+              placeholder="+261 34 12 345 67">
+          </div>
+
+          <div class="form-group">
+            <label for="siteWeb">Site Web</label>
+            <input 
+              type="url" 
+              id="siteWeb"
+              [(ngModel)]="centreForm.siteWeb"
+              name="siteWeb"
+              placeholder="https://www.centrecommercial.com">
+          </div>
+        </div>
+
+        <!-- Horaires -->
+        <div class="form-section">
+          <h3>🕒 Horaires d'Ouverture</h3>
+          
+          <div class="horaires-form" *ngIf="centreForm.horairesGeneraux">
+            <div class="horaire-row" *ngFor="let horaire of centreForm.horairesGeneraux; let i = index">
+              <div class="jour-label">{{ horaire.jour }}</div>
+              
+              <div class="horaire-controls">
+                <label class="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    [checked]="horaire.ferme"
+                    (change)="toggleJourFerme(i)">
+                  Fermé
+                </label>
+                
+                <div class="time-inputs" *ngIf="!horaire.ferme">
+                  <input 
+                    type="time" 
+                    [(ngModel)]="horaire.debut"
+                    [name]="'debut_' + i">
+                  <span>à</span>
+                  <input 
+                    type="time" 
+                    [(ngModel)]="horaire.fin"
+                    [name]="'fin_' + i">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Réseaux sociaux -->
+        <div class="form-section">
+          <h3>📱 Réseaux Sociaux</h3>
+          
+          <div class="form-group">
+            <label for="facebook">Facebook</label>
+            <input 
+              type="url" 
+              id="facebook"
+              [(ngModel)]="centreForm.reseauxSociaux!.facebook"
+              name="facebook"
+              placeholder="https://facebook.com/centrecommercial">
+          </div>
+
+          <div class="form-group">
+            <label for="instagram">Instagram</label>
+            <input 
+              type="url" 
+              id="instagram"
+              [(ngModel)]="centreForm.reseauxSociaux!.instagram"
+              name="instagram"
+              placeholder="https://instagram.com/centrecommercial">
+          </div>
+
+          <div class="form-group">
+            <label for="twitter">Twitter</label>
+            <input 
+              type="url" 
+              id="twitter"
+              [(ngModel)]="centreForm.reseauxSociaux!.twitter"
+              name="twitter"
+              placeholder="https://twitter.com/centrecommercial">
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions du formulaire -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="toggleEditMode()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="loading">
+          {{ loading ? 'Sauvegarde...' : 'Sauvegarder' }}
+        </button>
+      </div>
+    </form>
+
+    <!-- Message si aucun centre commercial -->
+    <div class="empty-state" *ngIf="!editMode && !centreCommercial && !loading">
+      <div class="empty-icon">🏢</div>
+      <h3>Aucun centre commercial configuré</h3>
+      <p>Commencez par configurer les informations de votre centre commercial</p>
+      <button class="btn btn-primary" (click)="toggleEditMode()">
+        ➕ Configurer le Centre Commercial
+      </button>
+    </div>
+  </div>
+</div>

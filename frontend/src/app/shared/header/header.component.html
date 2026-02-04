@@ -8,14 +8,68 @@
     <!-- Navigation principale -->
     <nav class="header-nav" *ngIf="isLoggedIn">
       <div class="nav-items">
+        <!-- Menu Admin -->
+        <div class="nav-item admin-menu" *ngIf="currentUser?.role === 'admin'">
+          <button class="nav-button dropdown-toggle" (click)="toggleAdminMenu()">
+            👨‍💼 Admin
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-menu" *ngIf="showAdminMenu">
+            <a routerLink="/admin-centre-commercial" class="dropdown-item">
+              🏢 Centre Commercial
+            </a>
+            <a routerLink="/admin-etages" class="dropdown-item">
+              🏢 Étages
+            </a>
+            <a routerLink="/admin-espaces" class="dropdown-item">
+              📍 Espaces
+            </a>
+            <a routerLink="/admin-boutiques" class="dropdown-item">
+              🏪 Boutiques
+            </a>
+          </div>
+        </div>
+
+        <!-- Menu Commerçant -->
+        <div class="nav-item boutique-menu" *ngIf="currentUser?.role === 'boutique'">
+          <button class="nav-button dropdown-toggle" (click)="toggleBoutiqueMenu()">
+            🏪 Ma Boutique
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-menu" *ngIf="showBoutiqueMenu">
+            <a routerLink="/my-boutiques" class="dropdown-item">
+              🏪 Mes Boutiques
+            </a>
+            <a routerLink="/boutique-registration" class="dropdown-item">
+              ➕ Nouvelle Boutique
+            </a>
+            <a routerLink="/portefeuille" class="dropdown-item">
+              💰 Portefeuille
+            </a>
+          </div>
+        </div>
+
+        <!-- Menu Client -->
+        <div class="nav-item client-menu" *ngIf="currentUser?.role === 'client'">
+          <a routerLink="/panier" class="nav-button">
+            🛒 Panier
+          </a>
+          <a routerLink="/mes-commandes" class="nav-button">
+            📦 Mes Commandes
+          </a>
+          <a routerLink="/portefeuille" class="nav-button">
+            💰 Portefeuille
+          </a>
+        </div>
+
         <!-- Notifications -->
         <div class="nav-item notifications" *ngIf="currentUser">
-          <button class="nav-button" title="Notifications">
+          <a routerLink="/notifications" class="nav-button" title="Notifications">
             🔔
             <span class="notification-badge" *ngIf="unreadNotifications > 0">
               {{ unreadNotifications }}
             </span>
-          </button>
+          </a>
         </div>
 
         <!-- Menu utilisateur -->

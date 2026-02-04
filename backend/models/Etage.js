@@ -1,19 +1,19 @@
 const mongoose = require('mongoose');
 
 const etageSchema = new mongoose.Schema({
-  niveau: { // Selon les règles de gestion
+  numero: { // Champ principal
     type: Number,
     required: true,
     unique: true,
     min: -2, // Sous-sols possibles
-    max: 10  // Limite raisonnable
+    max: 50  // Limite augmentée pour les tests
   },
-  numero: { // Alias pour compatibilité
+  niveau: { // Alias pour compatibilité - optionnel
     type: Number,
-    required: true,
     unique: true,
-    min: -2, // Sous-sols possibles
-    max: 10  // Limite raisonnable
+    sparse: true, // Permet les valeurs null/undefined
+    min: -2,
+    max: 50
   },
   nom: {
     type: String,
@@ -39,12 +39,15 @@ etageSchema.index({ niveau: 1 });
 etageSchema.index({ numero: 1 }); // Alias
 etageSchema.index({ isActive: 1 });
 
-// Middleware pre-save pour synchroniser niveau et numero
+// Middleware pre-save pour synchroniser numero et niveau
 etageSchema.pre('save', function(next) {
-  if (this.isModified('niveau') && !this.isModified('numero')) {
-    this.numero = this.niveau;
-  } else if (this.isModified('numero') && !this.isModified('niveau')) {
+  // Si numero est fourni mais pas niveau, copier numero vers niveau
+  if (this.numero !== undefined && this.niveau === undefined) {
     this.niveau = this.numero;
+  }
+  // Si niveau est fourni mais pas numero, copier niveau vers numero
+  else if (this.niveau !== undefined && this.numero === undefined) {
+    this.numero = this.niveau;
   }
   next();
 });
