@@ -109,37 +109,70 @@ userSchema.index({ role: 1, isActive: 1 });
 // Hash password avant sauvegarde
 userSchema.pre('save', async function(next) {
   try {
+    console.log('🔧 [USER-MODEL] === DEBUT pre(save) ===');
+    console.log('🔧 [USER-MODEL] Document avant traitement:', {
+      email: this.email,
+      nom: this.nom,
+      prenom: this.prenom,
+      prenoms: this.prenoms,
+      role: this.role,
+      hasPassword: !!this.password,
+      hasMdp: !!this.mdp,
+      isModifiedPassword: this.isModified('password'),
+      isModifiedMdp: this.isModified('mdp'),
+      isModifiedPrenom: this.isModified('prenom'),
+      isModifiedPrenoms: this.isModified('prenoms')
+    });
+    
+    console.log('🔧 [USER-MODEL] Étape 1: Synchronisation mdp et password');
     // Synchroniser mdp et password
     if (this.isModified('password') && !this.isModified('mdp')) {
+      console.log('🔧 [USER-MODEL] Copie password -> mdp');
       this.mdp = this.password;
     } else if (this.isModified('mdp') && !this.isModified('password')) {
+      console.log('🔧 [USER-MODEL] Copie mdp -> password');
       this.password = this.mdp;
     }
     
+    console.log('🔧 [USER-MODEL] Étape 2: Synchronisation prenoms et prenom');
     // Synchroniser prenoms et prenom
     if (this.isModified('prenom') && !this.isModified('prenoms')) {
+      console.log('🔧 [USER-MODEL] Copie prenom -> prenoms');
       this.prenoms = this.prenom;
     } else if (this.isModified('prenoms') && !this.isModified('prenom')) {
+      console.log('🔧 [USER-MODEL] Copie prenoms -> prenom');
       this.prenom = this.prenoms;
     }
     
+    console.log('🔧 [USER-MODEL] Étape 3: Vérification besoin de hachage');
     // Si aucun mot de passe n'est modifié, continuer
     if (!this.isModified('password') && !this.isModified('mdp')) {
+      console.log('✅ [USER-MODEL] Aucun mot de passe modifié - skip hachage');
       return next();
     }
     
+    console.log('🔧 [USER-MODEL] Étape 4: Hachage du mot de passe');
     // Utiliser le mot de passe disponible
     const passwordToHash = this.password || this.mdp;
     if (!passwordToHash) {
+      console.error('❌ [USER-MODEL] Aucun mot de passe à hacher');
       return next(new Error('Mot de passe requis'));
     }
     
+    console.log('🔧 [USER-MODEL] Hachage en cours...');
     const hashedPassword = await bcrypt.hash(passwordToHash, 12);
+    console.log('✅ [USER-MODEL] Mot de passe haché avec succès');
+    
     this.password = hashedPassword;
     this.mdp = hashedPassword;
+    
+    console.log('✅ [USER-MODEL] === FIN pre(save) RÉUSSI ===');
     next();
   } catch (error) {
-    console.error('❌ Erreur pre-save User:', error);
+    console.error('❌ [USER-MODEL] === ERREUR pre(save) ===');
+    console.error('❌ [USER-MODEL] Message:', error.message);
+    console.error('❌ [USER-MODEL] Name:', error.name);
+    console.error('❌ [USER-MODEL] Stack:', error.stack);
     next(error);
   }
 });
@@ -147,14 +180,18 @@ userSchema.pre('save', async function(next) {
 // Méthode pour vérifier le mot de passe
 userSchema.methods.comparePassword = async function(candidatePassword) {
   try {
+    console.log('🔧 [USER-MODEL] comparePassword appelé');
     const passwordToCompare = this.password || this.mdp;
     if (!passwordToCompare) {
-      console.error('❌ Aucun mot de passe trouvé pour la comparaison');
+      console.error('❌ [USER-MODEL] Aucun mot de passe trouvé pour la comparaison');
       return false;
     }
-    return await bcrypt.compare(candidatePassword, passwordToCompare);
+    console.log('✅ [USER-MODEL] Comparaison mot de passe en cours');
+    const result = await bcrypt.compare(candidatePassword, passwordToCompare);
+    console.log('✅ [USER-MODEL] Comparaison terminée:', result ? 'MATCH' : 'NO MATCH');
+    return result;
   } catch (error) {
-    console.error('❌ Erreur comparaison mot de passe:', error);
+    console.error('❌ [USER-MODEL] Erreur comparaison mot de passe:', error);
     return false;
   }
 };

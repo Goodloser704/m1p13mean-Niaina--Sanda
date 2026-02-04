@@ -12,51 +12,67 @@ class AuthController {
    */
   async register(req, res) {
     const timestamp = new Date().toISOString();
-    console.log(`🔐 [${timestamp}] Tentative d'inscription`);
+    console.log(`🔐 [${timestamp}] === DEBUT INSCRIPTION ===`);
     console.log(`   📧 Email: ${req.body.email}`);
     console.log(`   👤 Rôle: ${req.body.role}`);
+    console.log(`   📝 Données complètes:`, JSON.stringify(req.body, null, 2));
     
     try {
+      console.log(`🔍 [CONTROLLER] Étape 1: Validation des données`);
       // Validation des données
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        console.log(`❌ Validation échouée:`, errors.array());
+        console.log(`❌ [CONTROLLER] Validation échouée:`, errors.array());
         return res.status(400).json({ 
           message: 'Données invalides',
           errors: errors.array() 
         });
       }
+      console.log(`✅ [CONTROLLER] Validation réussie`);
 
+      console.log(`🔍 [CONTROLLER] Étape 2: Appel du service authService.createUser`);
       // Appeler le service
-      console.log(`➕ Création nouvel utilisateur: ${req.body.email}`);
+      console.log(`➕ [CONTROLLER] Création nouvel utilisateur: ${req.body.email}`);
       const result = await authService.createUser(req.body);
       
-      console.log(`✅ Utilisateur créé avec succès: ${result.user.id}`);
+      console.log(`✅ [CONTROLLER] Utilisateur créé avec succès: ${result.user.id}`);
       
       // Message différent selon le rôle
-      if (req.body.role === 'boutique') {
-        console.log(`🔔 Notification envoyée aux admins pour validation boutique`);
+      if (req.body.role === 'Commercant' || req.body.role === 'boutique') {
+        console.log(`🔔 [CONTROLLER] Notification envoyée aux admins pour validation boutique`);
       } else {
-        console.log(`🎫 Token généré pour: ${result.user.id}`);
+        console.log(`🎫 [CONTROLLER] Token généré pour: ${result.user.id}`);
       }
 
+      console.log(`🔍 [CONTROLLER] Étape 3: Envoi de la réponse`);
       res.status(201).json({
         message: result.message,
         token: result.token,
         user: result.user
       });
+      console.log(`✅ [CONTROLLER] === FIN INSCRIPTION RÉUSSIE ===`);
 
     } catch (error) {
-      console.error(`❌ Erreur inscription:`, error.message);
-      console.error(`📊 Stack trace:`, error.stack);
+      console.error(`❌ [CONTROLLER] === ERREUR INSCRIPTION ===`);
+      console.error(`❌ [CONTROLLER] Message d'erreur:`, error.message);
+      console.error(`❌ [CONTROLLER] Stack trace:`, error.stack);
+      console.error(`❌ [CONTROLLER] Nom de l'erreur:`, error.name);
+      console.error(`❌ [CONTROLLER] Code d'erreur:`, error.code);
       
       if (error.message === 'Cet email est déjà utilisé') {
+        console.log(`⚠️ [CONTROLLER] Erreur email existant - retour 400`);
         return res.status(400).json({ message: error.message });
       }
       
+      console.error(`💥 [CONTROLLER] Erreur serveur 500 - retour erreur générique`);
       res.status(500).json({ 
         message: 'Erreur serveur',
-        debug: process.env.NODE_ENV === 'development' ? error.message : undefined
+        debug: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        errorDetails: {
+          name: error.name,
+          message: error.message,
+          code: error.code
+        }
       });
     }
   }

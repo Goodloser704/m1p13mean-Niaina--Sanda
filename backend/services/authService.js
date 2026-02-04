@@ -31,37 +31,79 @@ class AuthService {
    * ➕ Créer un nouvel utilisateur
    */
   async createUser(userData) {
-    console.log('🔧 [DEBUG] createUser appelé avec:', JSON.stringify(userData, null, 2));
+    console.log('🔧 [SERVICE] === DEBUT createUser ===');
+    console.log('🔧 [SERVICE] Données reçues:', JSON.stringify(userData, null, 2));
     
     const { email, password, nom, prenom, role, telephone, adresse } = userData;
     
-    console.log('🔧 [DEBUG] Vérification email existant...');
-    // Vérifier si l'email existe déjà
-    const emailExists = await this.checkEmailExists(email);
-    if (emailExists) {
-      console.log('🔧 [DEBUG] Email déjà existant');
-      throw new Error('Cet email est déjà utilisé');
+    try {
+      console.log('🔧 [SERVICE] Étape 1: Vérification email existant...');
+      // Vérifier si l'email existe déjà
+      const emailExists = await this.checkEmailExists(email);
+      if (emailExists) {
+        console.log('🔧 [SERVICE] Email déjà existant - erreur');
+        throw new Error('Cet email est déjà utilisé');
+      }
+      console.log('✅ [SERVICE] Email disponible');
+
+      console.log('🔧 [SERVICE] Étape 2: Création objet User...');
+      console.log('🔧 [SERVICE] Paramètres User:', {
+        email,
+        password: password ? '[PRÉSENT]' : '[ABSENT]',
+        nom,
+        prenom,
+        role,
+        telephone,
+        adresse,
+        isActive: role === 'Acheteur' ? true : false,
+        status: role === 'Commercant' ? 'pending' : 'active'
+      });
+      
+      // Créer l'utilisateur
+      const user = new User({
+        email,
+        password,
+        nom,
+        prenom,
+        role,
+        telephone,
+        adresse,
+        // Les boutiques sont créées en attente de validation
+        isActive: role === 'Acheteur' ? true : false,
+        status: role === 'Commercant' ? 'pending' : 'active'
+      });
+
+      console.log('🔧 [SERVICE] Étape 3: Sauvegarde User en base...');
+      console.log('🔧 [SERVICE] User avant sauvegarde:', {
+        email: user.email,
+        nom: user.nom,
+        prenom: user.prenom,
+        role: user.role,
+        isActive: user.isActive,
+        status: user.status
+      });
+      
+      await user.save();
+      console.log('✅ [SERVICE] User sauvegardé avec succès - ID:', user._id);
+      
+    } catch (saveError) {
+      console.error('❌ [SERVICE] ERREUR lors de la sauvegarde User:');
+      console.error('❌ [SERVICE] Message:', saveError.message);
+      console.error('❌ [SERVICE] Name:', saveError.name);
+      console.error('❌ [SERVICE] Code:', saveError.code);
+      console.error('❌ [SERVICE] Stack:', saveError.stack);
+      
+      if (saveError.name === 'ValidationError') {
+        console.error('❌ [SERVICE] Erreurs de validation Mongoose:');
+        Object.keys(saveError.errors).forEach(key => {
+          console.error(`   - ${key}: ${saveError.errors[key].message}`);
+        });
+      }
+      
+      throw saveError; // Re-lancer l'erreur pour le controller
     }
-
-    console.log('🔧 [DEBUG] Création objet User...');
-    // Créer l'utilisateur
-    const user = new User({
-      email,
-      password,
-      nom,
-      prenom,
-      role,
-      telephone,
-      adresse,
-      // Les boutiques sont créées en attente de validation
-      isActive: role === 'Acheteur' ? true : false,
-      status: role === 'Commercant' ? 'pending' : 'active'
-    });
-
-    console.log('🔧 [DEBUG] Sauvegarde User...');
-    await user.save();
-    console.log('🔧 [DEBUG] User sauvegardé avec succès');
     
+    console.log('🔧 [SERVICE] Étape 4: Notifications et token...');
     // 🔔 Si c'est une boutique, créer une notification pour les admins
     // Temporairement désactivé pour debug
     /*
@@ -76,13 +118,19 @@ class AuthService {
     }
     */
     
+    console.log('🔧 [SERVICE] Étape 5: Génération token...');
     // Générer le token seulement si le compte est actif
     let token = null;
     if (user.isActive) {
+      console.log('🔧 [SERVICE] Compte actif - génération token');
       token = this.generateToken(user._id);
+      console.log('✅ [SERVICE] Token généré');
+    } else {
+      console.log('🔧 [SERVICE] Compte inactif - pas de token');
     }
     
-    return {
+    console.log('🔧 [SERVICE] Étape 6: Préparation réponse...');
+    const result = {
       token,
       user: {
         id: user._id,
@@ -97,6 +145,16 @@ class AuthService {
         ? 'Inscription réussie ! Votre demande est en attente de validation par un administrateur.'
         : 'Inscription réussie !'
     };
+    
+    console.log('✅ [SERVICE] === FIN createUser RÉUSSI ===');
+    console.log('✅ [SERVICE] Résultat:', {
+      userId: result.user.id,
+      email: result.user.email,
+      role: result.user.role,
+      hasToken: !!result.token
+    });
+    
+    return result;
   }
 
   /**
