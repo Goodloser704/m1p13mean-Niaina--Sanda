@@ -97,9 +97,9 @@ const authorize = (...roles) => {
 };
 
 // Middleware spécifique pour admin
-const adminAuth = [auth, authorize('admin')];
+const adminAuth = [auth, authorize('Admin', 'admin')];
 
 // Middleware spécifique pour boutique
-const boutiqueAuth = [auth, authorize('boutique', 'admin')];
+const boutiqueAuth = [auth, authorize('Commercant', 'boutique', 'Admin', 'admin')];
 
 module.exports = { auth, authorize, adminAuth, boutiqueAuth };

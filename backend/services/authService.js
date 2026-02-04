@@ -49,14 +49,14 @@ class AuthService {
       telephone,
       adresse,
       // Les boutiques sont créées en attente de validation
-      isActive: role === 'client' ? true : false,
-      status: role === 'boutique' ? 'pending' : 'active'
+      isActive: role === 'Acheteur' ? true : false,
+      status: role === 'Commercant' ? 'pending' : 'active'
     });
 
     await user.save();
     
     // 🔔 Si c'est une boutique, créer une notification pour les admins
-    if (role === 'boutique') {
+    if (role === 'Commercant') {
       try {
         await notificationService.createBoutiqueRegistrationNotification(user);
         console.log(`🔔 Notification d'inscription boutique envoyée pour ${email}`);
@@ -83,7 +83,7 @@ class AuthService {
         isActive: user.isActive,
         status: user.status
       },
-      message: role === 'boutique' 
+      message: role === 'Commercant' 
         ? 'Inscription réussie ! Votre demande est en attente de validation par un administrateur.'
         : 'Inscription réussie !'
     };
@@ -113,11 +113,11 @@ class AuthService {
     }
 
     // Vérifier le statut du compte
-    if (user.role === 'boutique' && user.status === 'pending') {
+    if (user.role === 'Commercant' && user.status === 'pending') {
       throw new Error('Votre compte boutique est en attente de validation par un administrateur');
     }
 
-    if (user.role === 'boutique' && user.status === 'rejected') {
+    if (user.role === 'Commercant' && user.status === 'rejected') {
       throw new Error('Votre demande d\'inscription boutique a été refusée');
     }
 
