@@ -4,7 +4,7 @@ const espaceService = require('../services/espaceService');
  * 🏬 Contrôleur espace
  * Gestion des espaces locatifs du centre commercial
  */
-class espaceController {
+class EspaceController {
   // Créer un nouvel espace
   async creerEspace(req, res) {
     const timestamp = new Date().toISOString();
