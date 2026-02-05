@@ -36,9 +36,9 @@ class AdminController {
         boutiquesEnAttente
       ] = await Promise.all([
         Boutique.countDocuments(),
-        Boutique.countDocuments({ statut: 'Actif' }),
-        Boutique.countDocuments({ statut: 'Inactif' }),
-        Boutique.countDocuments({ statut: 'En_attente' })
+        Boutique.countDocuments({ statutBoutique: 'Actif' }),
+        Boutique.countDocuments({ statutBoutique: 'Inactif' }),
+        Boutique.countDocuments({ statutBoutique: 'EnAttente' })
       ]);
 
       // Statistiques des espaces

@@ -50,6 +50,12 @@ const userSchema = new mongoose.Schema({
     required: true,
     enum: [RoleEnum.Admin, RoleEnum.Commercant, RoleEnum.Acheteur]
   },
+  
+  // Statut du compte
+  isActive: {
+    type: Boolean,
+    default: true
+  },
 }, {
   timestamps: true // Ajoute createdAt et updatedAt automatiquement
 });

@@ -52,13 +52,13 @@ class LoyerController {
         boutique = await Boutique.findOne({ 
           _id: boutiqueId, 
           proprietaire: req.user._id,
-          statut: 'Actif'
+          statutBoutique: 'Actif'
         }).populate('espace');
       } else {
         // Prendre la première boutique active du commerçant
         boutique = await Boutique.findOne({ 
           proprietaire: req.user._id,
-          statut: 'Actif'
+          statutBoutique: 'Actif'
         }).populate('espace');
       }
 

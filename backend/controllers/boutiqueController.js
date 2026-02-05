@@ -31,7 +31,7 @@ class BoutiqueController {
       const searchRegex = new RegExp(keyword.trim(), 'i');
       
       const query = {
-        statut: 'Actif',
+        statutBoutique: 'Actif',
         $or: [
           { nom: searchRegex },
           { description: searchRegex },
@@ -97,7 +97,7 @@ class BoutiqueController {
       // Vérifier que la boutique existe et est active
       const boutique = await require('../models/Boutique').findOne({
         _id: id,
-        statut: 'Actif'
+        statutBoutique: 'Actif'
       });
       
       if (!boutique) {

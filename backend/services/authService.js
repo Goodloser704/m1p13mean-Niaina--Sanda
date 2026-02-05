@@ -56,7 +56,8 @@ class AuthService {
         prenoms,
         role,
         telephone,
-        photo: null
+        photo: null,
+        isActive: true // Explicitly set to true to ensure account is active
       });
 
       console.log('🔧 [SERVICE] Étape 3: Sauvegarde User en base...');
