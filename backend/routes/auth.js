@@ -40,13 +40,44 @@ router.post('/login', [
 // @return  { user }
 router.get('/me', auth, authController.getProfile);
 
+// @route   GET /api/users/:id/me (conforme aux spécifications)
+// @desc    Obtenir le profil de l'utilisateur connecté
+// @access  Private
+// @return  { user }
+router.get('/users/:id/me', auth, authController.getProfile);
+
 // @route   GET /api/auth/profile (alias pour /me)
 // @desc    Obtenir les infos de l'utilisateur connecté (alias)
 // @access  Private
 // @return  { user }
 router.get('/profile', auth, authController.getProfile);
 
-// @route   PUT /api/auth/profile
+// @route   PUT /api/users/me (conforme aux spécifications)
+// @desc    Mettre à jour le profil utilisateur
+// @access  Private
+// @body    { nom, prenoms, email, telephone, photo }
+// @return  { message, user }
+router.put('/users/me', [
+  // Champs obligatoires seulement s'ils sont présents
+  body('nom').optional({ nullable: true, checkFalsy: true }).isLength({ min: 1 }).trim(),
+  body('prenom').optional({ nullable: true, checkFalsy: true }).isLength({ min: 1 }).trim(),
+  body('email').optional({ nullable: true, checkFalsy: true }).isEmail().normalizeEmail(),
+  
+  // Champs complètement optionnels
+  body('telephone').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('dateNaissance').optional({ nullable: true, checkFalsy: false }),
+  body('genre').optional({ nullable: true, checkFalsy: false }).isIn(['homme', 'femme', 'autre']),
+  body('adresse').optional({ nullable: true, checkFalsy: false }).trim(),
+  
+  // Champs boutique optionnels
+  body('nomBoutique').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('descriptionBoutique').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('categorieActivite').optional({ nullable: true, checkFalsy: false }).isIn(['mode', 'electronique', 'maison', 'beaute', 'sport', 'alimentation', 'autre']),
+  body('numeroSiret').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('adresseBoutique').optional({ nullable: true, checkFalsy: false }).trim()
+], auth, authController.updateProfile);
+
+// @route   PUT /api/auth/profile (maintenir la compatibilité)
 // @desc    Mettre à jour le profil utilisateur
 // @access  Private
 // @body    { nom, prenoms, email, telephone, photo }

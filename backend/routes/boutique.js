@@ -10,11 +10,40 @@ const router = express.Router();
  * Architecture: Route → Controller → Service
  */
 
+// Routes publiques pour les boutiques
+// @route   GET /api/boutiques (conforme aux spécifications)
+// @desc    Obtenir toutes les boutiques actives (publique)
+// @access  Public
+// @return  { boutiques, count }
+router.get('/boutiques', boutiqueController.getAllBoutiques);
+
+// @route   GET /api/boutiques/search/ (conforme aux spécifications)
+// @desc    Rechercher des boutiques par mot-clé
+// @access  Public
+// @query   keyword, page, limit
+// @return  { boutiques, count, pagination }
+router.get('/boutiques/search/', boutiqueController.searchBoutiques);
+
+// @route   GET /api/boutiques/:id/produits (conforme aux spécifications)
+// @desc    Obtenir les produits d'une boutique
+// @access  Public
+// @param   id - ID de la boutique
+// @return  { produits }
+router.get('/boutiques/:id/produits', boutiqueController.getBoutiqueProduits);
+
+// Routes de gestion boutique (anciennes, maintenues pour compatibilité)
 // @route   GET /api/boutique
 // @desc    Obtenir toutes les boutiques actives (publique)
 // @access  Public
 // @return  { boutiques, count }
 router.get('/', boutiqueController.getAllBoutiques);
+
+// @route   GET /api/boutiques/search
+// @desc    Rechercher des boutiques par mot-clé
+// @access  Public
+// @query   keyword, page, limit
+// @return  { boutiques, count, pagination }
+router.get('/search', boutiqueController.searchBoutiques);
 
 // @route   POST /api/boutique/register
 // @desc    Créer une nouvelle inscription boutique
@@ -23,11 +52,24 @@ router.get('/', boutiqueController.getAllBoutiques);
 // @return  { message, boutique }
 router.post('/register', auth, boutiqueController.createBoutique);
 
+// @route   POST /api/commercant/boutique (conforme aux spécifications)
+// @desc    Créer une nouvelle boutique
+// @access  Private (Commercant)
+// @body    { boutique }
+// @return  { boutique }
+router.post('/commercant/boutique', auth, boutiqueController.createBoutique);
+
 // @route   GET /api/boutique/my-boutiques
 // @desc    Obtenir toutes mes boutiques
 // @access  Private (Commercant)
 // @return  { boutiques, count }
 router.get('/my-boutiques', auth, boutiqueController.getMyBoutiques);
+
+// @route   GET /api/commercant/:id/boutiques (conforme aux spécifications)
+// @desc    Obtenir les boutiques d'un commerçant
+// @access  Private (Commercant)
+// @return  { boutiques }
+router.get('/commercant/:id/boutiques', auth, boutiqueController.getCommercantBoutiques);
 
 // @route   GET /api/boutique/me/:boutiqueId?
 // @desc    Obtenir une boutique spécifique (ou la première si pas d'ID)
@@ -35,6 +77,13 @@ router.get('/my-boutiques', auth, boutiqueController.getMyBoutiques);
 // @param   boutiqueId - ID de la boutique (optionnel)
 // @return  { boutique }
 router.get('/me/:boutiqueId?', auth, boutiqueController.getMyBoutique);
+
+// @route   GET /api/commercant/boutique/:id (conforme aux spécifications)
+// @desc    Obtenir une boutique spécifique
+// @access  Private (Commercant)
+// @param   id - ID de la boutique
+// @return  { boutique }
+router.get('/commercant/boutique/:id', auth, boutiqueController.getBoutiqueById);
 
 // @route   PUT /api/boutique/me/:boutiqueId
 // @desc    Mettre à jour une boutique

@@ -38,6 +38,69 @@ exports.obtenirMonPortefeuille = async (req, res) => {
   }
 };
 
+// @route   GET /api/users/:id/wallet (conforme aux spécifications)
+// @desc    Obtenir le portefeuille d'un utilisateur avec transactions
+// @access  Private
+// @return  { wallet, transactions }
+exports.obtenirPortefeuilleUtilisateur = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Vérifier les permissions
+    if (req.user._id.toString() !== id && req.user.role !== 'admin') {
+      return res.status(403).json({
+        message: 'Vous ne pouvez consulter que votre propre portefeuille'
+      });
+    }
+    
+    const portefeuille = await PorteFeuille.obtenirParUtilisateur(id);
+    
+    if (!portefeuille) {
+      return res.status(404).json({
+        message: 'Portefeuille non trouvé'
+      });
+    }
+    
+    // Récupérer les transactions récentes
+    const transactions = await PFTransaction.find({
+      $or: [
+        { fromWallet: portefeuille._id },
+        { toWallet: portefeuille._id }
+      ],
+      statut: 'Completee'
+    })
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .populate('fromWallet toWallet', 'owner')
+    .populate('fromWallet.owner toWallet.owner', 'nom prenoms');
+    
+    res.json({
+      wallet: {
+        _id: portefeuille._id,
+        balance: portefeuille.balance,
+        owner: portefeuille.owner,
+        derniereMiseAJour: portefeuille.derniereMiseAJour,
+        createdAt: portefeuille.createdAt,
+        updatedAt: portefeuille.updatedAt
+      },
+      transactions: transactions.map(transaction => ({
+        _id: transaction._id,
+        type: transaction.type,
+        amount: transaction.amount,
+        description: transaction.description,
+        statut: transaction.statut,
+        createdAt: transaction.createdAt,
+        typeForUser: transaction.fromWallet.toString() === portefeuille._id.toString() ? 'Sortie' : 'Entree'
+      }))
+    });
+  } catch (error) {
+    console.error('Erreur obtention portefeuille utilisateur:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la récupération du portefeuille'
+    });
+  }
+};
+
 // @route   GET /api/portefeuille/transactions
 // @desc    Obtenir l'historique de mes transactions
 // @access  Private

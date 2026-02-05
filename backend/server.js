@@ -99,9 +99,17 @@ console.log('🛣️  Initialisation des routes...');
 console.log('🛣️  Chargement route auth...');
 app.use('/api/auth', require('./routes/auth'));
 
+// Routes utilisateurs (conformes aux spécifications)
+console.log('🛣️  Chargement routes utilisateurs...');
+app.use('/api', require('./routes/auth')); // Pour /api/users/*
+
 // Routes de notifications
 console.log('🛣️  Chargement route notifications...');
 app.use('/api/notifications', require('./routes/notifications'));
+
+// Routes utilisateurs notifications (conformes aux spécifications)
+console.log('🛣️  Chargement routes notifications utilisateurs...');
+app.use('/api', require('./routes/notifications')); // Pour /api/users/:userId/notifications
 
 // Routes d'administration
 console.log('🛣️  Chargement route admin...');
@@ -110,6 +118,10 @@ app.use('/api/admin', require('./routes/admin'));
 // Routes de boutiques
 console.log('🛣️  Chargement route boutique...');
 app.use('/api/boutique', require('./routes/boutique'));
+
+// Routes publiques boutiques (conformes aux spécifications)
+console.log('🛣️  Chargement routes boutiques publiques...');
+app.use('/api', require('./routes/boutique')); // Pour /api/boutiques/*
 
 // Routes client
 console.log('🛣️  Chargement route client...');
@@ -136,8 +148,21 @@ app.use('/api/centre-commercial', require('./routes/centre-commercial'));
 // Routes de gestion financière
 console.log('🛣️  Chargement route portefeuille...');
 app.use('/api/portefeuille', require('./routes/portefeuille'));
+
+// Routes utilisateurs portefeuille (conformes aux spécifications)
+console.log('🛣️  Chargement routes portefeuille utilisateurs...');
+app.use('/api', require('./routes/portefeuille')); // Pour /api/users/:id/wallet
+
 console.log('🛣️  Chargement route achats...');
 app.use('/api/achats', require('./routes/achats'));
+
+// Routes de loyers (nouvelles)
+console.log('🛣️  Chargement route loyers...');
+app.use('/api/commercant/loyers', require('./routes/loyers'));
+
+// Routes de factures (nouvelles)
+console.log('🛣️  Chargement route factures...');
+app.use('/api/factures', require('./routes/factures'));
 
 // Routes de demandes
 console.log('🛣️  Chargement route demandes-location...');

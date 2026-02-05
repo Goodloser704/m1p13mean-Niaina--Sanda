@@ -7,6 +7,270 @@ const boutiqueService = require('../services/boutiqueService');
 class BoutiqueController {
 
   /**
+   * @route   GET /api/boutiques/search
+   * @desc    Rechercher des boutiques par mot-clé
+   * @access  Public
+   * @query   keyword, page, limit
+   * @return  { boutiques, count, pagination }
+   */
+  async searchBoutiques(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🔍 [${timestamp}] Recherche boutiques`);
+    console.log(`   🔎 Mot-clé: ${req.query.keyword}`);
+    
+    try {
+      const { keyword, page = 1, limit = 20 } = req.query;
+
+      if (!keyword || keyword.trim().length < 2) {
+        return res.status(400).json({ 
+          message: 'Le mot-clé doit contenir au moins 2 caractères' 
+        });
+      }
+
+      // Recherche dans nom, description et catégorie
+      const searchRegex = new RegExp(keyword.trim(), 'i');
+      
+      const query = {
+        statut: 'Actif',
+        $or: [
+          { nom: searchRegex },
+          { description: searchRegex },
+          { categorie: searchRegex }
+        ]
+      };
+
+      const boutiques = await require('../models/Boutique')
+        .find(query)
+        .populate('proprietaire', 'nom prenoms email')
+        .populate('categorie', 'nom')
+        .populate('espace', 'numero etage')
+        .sort({ nom: 1 })
+        .limit(parseInt(limit))
+        .skip((parseInt(page) - 1) * parseInt(limit));
+
+      const total = await require('../models/Boutique').countDocuments(query);
+
+      console.log(`✅ ${boutiques.length} boutiques trouvées pour "${keyword}"`);
+      
+      res.json({
+        boutiques: boutiques.map(b => ({
+          _id: b._id,
+          nom: b.nom,
+          description: b.description,
+          categorie: b.categorie,
+          photo: b.photo,
+          horairesHebdo: b.horairesHebdo,
+          espace: b.espace,
+          dateCreation: b.dateCreation
+        })),
+        count: boutiques.length,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur recherche boutiques:`, error.message);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * @route   GET /api/boutiques/:id/produits
+   * @desc    Obtenir les produits d'une boutique (conforme aux spécifications)
+   * @access  Public
+   * @param   id - ID de la boutique
+   * @return  { produits }
+   */
+  async getBoutiqueProduits(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🛍️ [${timestamp}] Récupération produits boutique`);
+    console.log(`   🏪 Boutique ID: ${req.params.id}`);
+    
+    try {
+      const { id } = req.params;
+      const { page = 1, limit = 20, disponibleOnly = 'true' } = req.query;
+      
+      // Vérifier que la boutique existe et est active
+      const boutique = await require('../models/Boutique').findOne({
+        _id: id,
+        statut: 'Actif'
+      });
+      
+      if (!boutique) {
+        console.log(`❌ Boutique non trouvée ou inactive: ${id}`);
+        return res.status(404).json({ message: 'Boutique non trouvée ou inactive' });
+      }
+      
+      // Construire la requête pour les produits
+      let query = { boutique: id };
+      
+      if (disponibleOnly === 'true') {
+        query.nombreDispo = { $gt: 0 };
+      }
+      
+      const produits = await require('../models/Produit')
+        .find(query)
+        .populate('boutique', 'nom')
+        .populate('typeProduit', 'nom')
+        .sort({ nom: 1 })
+        .limit(parseInt(limit))
+        .skip((parseInt(page) - 1) * parseInt(limit));
+      
+      const total = await require('../models/Produit').countDocuments(query);
+      
+      console.log(`✅ ${produits.length} produits récupérés pour la boutique ${boutique.nom}`);
+      
+      res.json({
+        produits: produits.map(p => ({
+          _id: p._id,
+          nom: p.nom,
+          description: p.description,
+          prix: p.prix,
+          nombreDispo: p.nombreDispo,
+          photo: p.photo,
+          typeProduit: p.typeProduit,
+          boutique: p.boutique,
+          dateCreation: p.dateCreation
+        })),
+        boutique: {
+          _id: boutique._id,
+          nom: boutique.nom,
+          description: boutique.description
+        },
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur récupération produits boutique:`, error.message);
+      
+      if (error.name === 'CastError') {
+        return res.status(400).json({ message: 'ID de boutique invalide' });
+      }
+      
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * @route   GET /api/commercant/:id/boutiques
+   * @desc    Obtenir les boutiques d'un commerçant (conforme aux spécifications)
+   * @access  Private (Commercant ou Admin)
+   * @param   id - ID du commerçant
+   * @return  { boutiques }
+   */
+  async getCommercantBoutiques(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🏪 [${timestamp}] Récupération boutiques commerçant`);
+    console.log(`   👤 User ID: ${req.user._id}`);
+    console.log(`   🎯 Target ID: ${req.params.id}`);
+    
+    try {
+      const { id } = req.params;
+      
+      // Vérifier les permissions
+      if (req.user._id.toString() !== id && req.user.role !== 'admin') {
+        console.log(`❌ Accès refusé - User: ${req.user._id}, Target: ${id}, Role: ${req.user.role}`);
+        return res.status(403).json({ 
+          message: 'Vous ne pouvez consulter que vos propres boutiques' 
+        });
+      }
+
+      const boutiques = await boutiqueService.getBoutiquesByOwner(id);
+      
+      console.log(`✅ ${boutiques.length} boutiques récupérées pour le commerçant ${id}`);
+      
+      res.json({
+        boutiques: boutiques.map(b => ({
+          _id: b._id,
+          nom: b.nom,
+          description: b.description,
+          categorie: b.categorie,
+          statut: b.statut,
+          photo: b.photo,
+          horairesHebdo: b.horairesHebdo,
+          espace: b.espace,
+          dateCreation: b.dateCreation,
+          dateValidation: b.dateValidation
+        }))
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur récupération boutiques commerçant:`, error.message);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * @route   GET /api/commercant/boutique/:id
+   * @desc    Obtenir une boutique spécifique (conforme aux spécifications)
+   * @access  Private (Commercant ou Admin)
+   * @param   id - ID de la boutique
+   * @return  { boutique }
+   */
+  async getBoutiqueById(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🏪 [${timestamp}] Récupération boutique par ID`);
+    console.log(`   👤 User ID: ${req.user._id}`);
+    console.log(`   🏪 Boutique ID: ${req.params.id}`);
+    
+    try {
+      const { id } = req.params;
+      
+      const boutique = await boutiqueService.getBoutiqueById(id);
+      
+      if (!boutique) {
+        console.log(`❌ Boutique non trouvée: ${id}`);
+        return res.status(404).json({ message: 'Boutique non trouvée' });
+      }
+
+      // Vérifier les permissions
+      if (req.user.role !== 'admin' && 
+          boutique.proprietaire.toString() !== req.user._id.toString()) {
+        console.log(`❌ Accès refusé - User: ${req.user._id}, Owner: ${boutique.proprietaire}`);
+        return res.status(403).json({ 
+          message: 'Vous ne pouvez consulter que vos propres boutiques' 
+        });
+      }
+
+      console.log(`✅ Boutique récupérée: ${boutique.nom}`);
+      
+      res.json({
+        boutique: {
+          _id: boutique._id,
+          nom: boutique.nom,
+          description: boutique.description,
+          categorie: boutique.categorie,
+          statut: boutique.statut,
+          photo: boutique.photo,
+          horairesHebdo: boutique.horairesHebdo,
+          espace: boutique.espace,
+          proprietaire: boutique.proprietaire,
+          dateCreation: boutique.dateCreation,
+          dateValidation: boutique.dateValidation
+        }
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur récupération boutique:`, error.message);
+      
+      if (error.name === 'CastError') {
+        return res.status(400).json({ message: 'ID de boutique invalide' });
+      }
+      
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
    * @route   POST /api/boutique/register
    * @desc    Créer une nouvelle inscription boutique
    * @access  Private (Commercant)

@@ -17,6 +17,13 @@ const router = express.Router();
 // @return  { notifications, unreadCount, pagination }
 router.get('/', auth, notificationController.getUserNotifications);
 
+// @route   GET /api/users/:userId/notifications (conforme aux spécifications)
+// @desc    Obtenir les notifications d'un utilisateur
+// @access  Private
+// @query   page, limit, includeRead, type
+// @return  { data, total, unreadCount }
+router.get('/users/:userId/notifications', auth, notificationController.getUserNotifications);
+
 // @route   GET /api/notifications/count
 // @desc    Obtenir le nombre de notifications non lues
 // @access  Private

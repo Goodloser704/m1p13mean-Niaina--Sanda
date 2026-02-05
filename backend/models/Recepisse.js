@@ -1,215 +1,229 @@
 const mongoose = require('mongoose');
 
+/**
+ * 📄 Modèle Reçu/Reçépissé
+ * Gestion des reçus de paiement (loyers, achats, etc.)
+ */
 const recepisseSchema = new mongoose.Schema({
+  // Informations de base
+  numeroRecepisse: {
+    type: String,
+    unique: true,
+    required: true
+  },
+  
+  // Parties impliquées (conformes aux spécifications)
   receveur: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
+  
   donneur: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  description: {
-    type: String,
-    required: true,
-    trim: true,
-    maxlength: 500
+  
+  // Alias pour compatibilité avec l'implémentation existante
+  emetteur: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   },
-  // Informations financières
+  
+  destinataire: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  
+  // Références
+  boutique: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Boutique',
+    required: false
+  },
+  
+  transaction: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PFTransaction',
+    required: true
+  },
+  
+  // Détails financiers
   montant: {
     type: Number,
     required: true,
     min: 0
   },
+  
+  // Type de reçu
   type: {
     type: String,
-    enum: ['Loyer', 'Caution', 'Frais', 'Remboursement', 'Autre'],
+    enum: ['Loyer', 'Achat', 'Commission', 'Remboursement', 'Autre'],
     required: true
   },
-  // Numéro de reçu unique
-  numeroRecepisse: {
-    type: String,
-    unique: true
-  },
-  // Références
-  transaction: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'PFTransaction'
-  },
-  boutique: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Boutique'
-  },
-  espace: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Espace'
-  },
-  // Période couverte (pour les loyers)
+  
+  // Période concernée (pour les loyers)
   periode: {
-    debut: Date,
-    fin: Date
+    type: String, // Format YYYY-MM
+    required: false
   },
-  // Statut du reçu
+  
+  // Description
+  description: {
+    type: String,
+    required: true,
+    maxlength: 500
+  },
+  
+  // Dates
+  dateEmission: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
+  
+  // Statut
   statut: {
     type: String,
-    enum: ['Emis', 'Envoye', 'Recu', 'Archive'],
+    enum: ['Emis', 'Annule'],
     default: 'Emis'
   },
-  // Informations de signature/validation
-  signature: {
-    donneur: {
-      nom: String,
-      date: Date,
-      signature: String // Base64 ou chemin vers l'image
-    },
-    receveur: {
-      nom: String,
-      date: Date,
-      signature: String
-    }
-  },
+  
   // Métadonnées
   metadata: {
-    type: mongoose.Schema.Types.Mixed,
-    default: {}
+    ipAddress: String,
+    userAgent: String
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  collection: 'recepisse'
 });
 
-// Index pour optimiser les requêtes
-recepisseSchema.index({ receveur: 1, createdAt: -1 });
-recepisseSchema.index({ donneur: 1, createdAt: -1 });
-recepisseSchema.index({ numeroRecepisse: 1 });
-recepisseSchema.index({ type: 1, createdAt: -1 });
-recepisseSchema.index({ boutique: 1 });
+// Index pour les recherches
+recepisseSchema.index({ destinataire: 1, dateEmission: -1 });
+recepisseSchema.index({ emetteur: 1, dateEmission: -1 });
 recepisseSchema.index({ transaction: 1 });
+recepisseSchema.index({ numeroRecepisse: 1 });
+recepisseSchema.index({ type: 1, periode: 1 });
 
-// Générer un numéro de reçu unique avant la sauvegarde
-recepisseSchema.pre('save', function(next) {
-  if (!this.numeroRecepisse) {
+// Middleware pour synchroniser les champs et générer le numéro de reçu
+recepisseSchema.pre('save', async function(next) {
+  // Synchroniser receveur/destinataire et donneur/emetteur
+  if (this.isModified('receveur') && !this.isModified('destinataire')) {
+    this.destinataire = this.receveur;
+  } else if (this.isModified('destinataire') && !this.isModified('receveur')) {
+    this.receveur = this.destinataire;
+  }
+  
+  if (this.isModified('donneur') && !this.isModified('emetteur')) {
+    this.emetteur = this.donneur;
+  } else if (this.isModified('emetteur') && !this.isModified('donneur')) {
+    this.donneur = this.emetteur;
+  }
+  
+  // Générer le numéro de reçu
+  if (this.isNew && !this.numeroRecepisse) {
+    const count = await this.constructor.countDocuments();
     const year = new Date().getFullYear();
     const month = String(new Date().getMonth() + 1).padStart(2, '0');
-    const timestamp = Date.now().toString(36).toUpperCase();
-    this.numeroRecepisse = `REC-${year}${month}-${timestamp}`;
+    this.numeroRecepisse = `REC-${year}${month}-${String(count + 1).padStart(6, '0')}`;
   }
   next();
 });
 
-// Méthode pour marquer comme envoyé
-recepisseSchema.methods.marquerEnvoye = function() {
-  this.statut = 'Envoye';
-  this.metadata.dateEnvoi = new Date();
-  return this.save();
-};
-
-// Méthode pour marquer comme reçu
-recepisseSchema.methods.marquerRecu = function() {
-  this.statut = 'Recu';
-  this.metadata.dateReception = new Date();
-  return this.save();
-};
-
-// Méthode pour ajouter une signature
-recepisseSchema.methods.ajouterSignature = function(role, nomSignataire, signatureData) {
-  if (role !== 'donneur' && role !== 'receveur') {
-    throw new Error('Le rôle doit être "donneur" ou "receveur"');
-  }
-  
-  this.signature[role] = {
-    nom: nomSignataire,
-    date: new Date(),
-    signature: signatureData
-  };
-  
-  return this.save();
-};
-
-// Méthode statique pour créer un reçu de loyer
-recepisseSchema.statics.creerRecuLoyer = async function(commercantId, adminId, montant, boutique, espace, periode) {
-  const recepisse = new this({
-    receveur: commercantId,
-    donneur: adminId,
-    description: `Paiement de loyer pour la période du ${periode.debut.toLocaleDateString()} au ${periode.fin.toLocaleDateString()}`,
-    montant,
-    type: 'Loyer',
-    boutique,
-    espace,
-    periode
-  });
-  
-  await recepisse.save();
-  return recepisse;
-};
-
-// Méthode statique pour obtenir les reçus d'un utilisateur
+// Méthodes statiques
 recepisseSchema.statics.obtenirParUtilisateur = function(userId, options = {}) {
-  const { type = null, page = 1, limit = 20, role = 'all' } = options;
+  const query = { receveur: userId, statut: 'Emis' };
   
-  let query = {};
-  
-  if (role === 'receveur') {
-    query.receveur = userId;
-  } else if (role === 'donneur') {
-    query.donneur = userId;
-  } else {
-    query.$or = [{ receveur: userId }, { donneur: userId }];
+  if (options.type) {
+    query.type = options.type;
   }
   
-  if (type) {
-    query.type = type;
+  if (options.periode) {
+    query.periode = options.periode;
+  }
+  
+  if (options.dateDebut || options.dateFin) {
+    query.dateEmission = {};
+    if (options.dateDebut) {
+      query.dateEmission.$gte = new Date(options.dateDebut);
+    }
+    if (options.dateFin) {
+      query.dateEmission.$lte = new Date(options.dateFin);
+    }
   }
   
   return this.find(query)
-    .populate('receveur', 'nom prenoms email')
     .populate('donneur', 'nom prenoms email')
+    .populate('receveur', 'nom prenoms email')
     .populate('boutique', 'nom')
-    .populate('espace', 'codeEspace')
     .populate('transaction')
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .skip((page - 1) * limit);
+    .sort({ dateEmission: -1 })
+    .limit(options.limit || 50)
+    .skip(options.skip || 0);
 };
 
-// Méthode statique pour obtenir les reçus de loyer d'une boutique
-recepisseSchema.statics.obtenirRecusLoyerBoutique = function(boutiqueId) {
-  return this.find({ boutique: boutiqueId, type: 'Loyer' })
-    .populate('receveur', 'nom prenoms')
-    .populate('donneur', 'nom prenoms')
-    .populate('espace', 'codeEspace loyer')
-    .sort({ createdAt: -1 });
+recepisseSchema.statics.obtenirParTransaction = function(transactionId) {
+  return this.findOne({ transaction: transactionId, statut: 'Emis' })
+    .populate('donneur', 'nom prenoms email')
+    .populate('receveur', 'nom prenoms email')
+    .populate('boutique', 'nom')
+    .populate('transaction');
 };
 
-// Méthode pour générer les données pour un PDF
-recepisseSchema.methods.genererDonneesPDF = function() {
-  return {
-    numeroRecepisse: this.numeroRecepisse,
-    dateEmission: this.createdAt,
-    receveur: {
-      nom: this.receveur.nom,
-      prenoms: this.receveur.prenoms,
-      email: this.receveur.email
-    },
-    donneur: {
-      nom: this.donneur.nom,
-      prenoms: this.donneur.prenoms,
-      email: this.donneur.email
-    },
-    description: this.description,
-    montant: this.montant,
-    type: this.type,
-    periode: this.periode,
-    boutique: this.boutique ? {
-      nom: this.boutique.nom
-    } : null,
-    espace: this.espace ? {
-      code: this.espace.codeEspace,
-      loyer: this.espace.loyer
-    } : null,
-    signatures: this.signature
+// Méthodes d'instance
+recepisseSchema.methods.annuler = function(raison) {
+  this.statut = 'Annule';
+  this.metadata = {
+    ...this.metadata,
+    raisonAnnulation: raison,
+    dateAnnulation: new Date()
   };
+  return this.save();
 };
+
+recepisseSchema.methods.toJSON = function() {
+  const obj = this.toObject();
+  
+  // Formater les montants
+  if (obj.montant) {
+    obj.montantFormate = `${obj.montant.toFixed(2)}€`;
+  }
+  
+  // Formater les dates
+  if (obj.dateEmission) {
+    obj.dateEmissionFormatee = obj.dateEmission.toLocaleDateString('fr-FR');
+  }
+  
+  return obj;
+};
+
+// Validation personnalisée
+recepisseSchema.pre('validate', function(next) {
+  // Vérifier que le donneur et le receveur sont différents
+  if (this.donneur && this.receveur && 
+      this.donneur.toString() === this.receveur.toString()) {
+    next(new Error('Le donneur et le receveur ne peuvent pas être identiques'));
+  }
+  
+  // Vérifier la période pour les loyers
+  if (this.type === 'Loyer' && !this.periode) {
+    next(new Error('La période est requise pour les reçus de loyer'));
+  }
+  
+  next();
+});
+
+// Logging
+recepisseSchema.post('save', function(doc) {
+  console.log(`📄 Reçu créé: ${doc.numeroRecepisse} - ${doc.montant}€ (${doc.type})`);
+});
+
+recepisseSchema.post('findOneAndUpdate', function(doc) {
+  if (doc) {
+    console.log(`📄 Reçu mis à jour: ${doc.numeroRecepisse}`);
+  }
+});
 
 module.exports = mongoose.model('Recepisse', recepisseSchema);
