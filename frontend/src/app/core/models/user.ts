@@ -12,7 +12,7 @@ export interface User {
   telephone?: string | null,
   mdp: string,
   photo?: string | null,
-  role: string,
+  role: UserRole,
   createdAt: string,
   updatedAt: string
 }
