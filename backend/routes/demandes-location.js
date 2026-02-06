@@ -29,6 +29,14 @@ router.get('/',
   demandeLocationController.obtenirToutesDemandes
 );
 
+// @route   GET /api/demandes-location/etat/:etat
+// @desc    Obtenir les demandes par état (Admin)
+// @access  Private (Admin)
+router.get('/etat/:etat', 
+  authorize(RoleEnum.Admin, 'admin'), 
+  demandeLocationController.obtenirDemandesParEtat
+);
+
 // @route   GET /api/demandes-location/me
 // @desc    Obtenir mes demandes de location
 // @access  Private (Commercant)

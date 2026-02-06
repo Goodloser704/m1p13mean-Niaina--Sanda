@@ -212,6 +212,62 @@ exports.obtenirToutesDemandes = async (req, res) => {
   }
 };
 
+// @route   GET /api/demandes-location/etat/:etat
+// @desc    Obtenir les demandes par état (Admin)
+// @access  Private (Admin)
+exports.obtenirDemandesParEtat = async (req, res) => {
+  try {
+    const { etat } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+    
+    // Valider l'état
+    const etatsValides = Object.values(EtatDemandeEnum);
+    if (!etatsValides.includes(etat)) {
+      return res.status(400).json({
+        message: 'État invalide',
+        etatsValides
+      });
+    }
+    
+    const query = { 
+      isActive: true,
+      etatDemande: etat
+    };
+    
+    const demandes = await DemandeLocation.find(query)
+      .populate({
+        path: 'boutique',
+        select: 'nom',
+        populate: {
+          path: 'commercant proprietaire',
+          select: 'nom prenoms email'
+        }
+      })
+      .populate('espace', 'codeEspace surface loyer etage')
+      .populate('adminRepondant', 'nom prenoms')
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit));
+    
+    const total = await DemandeLocation.countDocuments(query);
+    
+    res.json({
+      demandes,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Erreur obtention demandes par état:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la récupération des demandes'
+    });
+  }
+};
+
 // @route   PUT /api/demandes-location/:id/accepter
 // @desc    Accepter une demande de location
 // @access  Private (Admin)
