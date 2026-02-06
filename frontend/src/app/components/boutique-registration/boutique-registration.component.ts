@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
 import { BoutiqueService, BoutiqueRegistration } from '../../services/boutique.service';
+import { CategorieBoutiqueService, CategorieBoutique } from '../../services/categorie-boutique.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -15,11 +16,13 @@ import { Subscription } from 'rxjs';
 export class BoutiqueRegistrationComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   isSubmitting = false;
+  categories: CategorieBoutique[] = [];
+  isLoadingCategories = true;
   
-  boutiqueForm: BoutiqueRegistration = {
+  boutiqueForm: any = {
     nom: '',
     description: '',
-    categorie: 'Mode',
+    categorie: '', // Sera l'ID de la catégorie
     emplacement: {
       zone: '',
       numeroLocal: '',
@@ -40,15 +43,14 @@ export class BoutiqueRegistrationComponent implements OnInit, OnDestroy {
       dimanche: { ouverture: '10:00', fermeture: '17:00' }
     }
   };
-
-  categories = ['Mode', 'Électronique', 'Alimentation', 'Beauté', 'Sport', 'Maison', 'Autre'] as const;
   
   private subscriptions: Subscription[] = [];
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private boutiqueService: BoutiqueService
+    private boutiqueService: BoutiqueService,
+    private categorieService: CategorieBoutiqueService
   ) {}
 
   ngOnInit() {
@@ -61,6 +63,29 @@ export class BoutiqueRegistrationComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    // Charger les catégories
+    this.loadCategories();
+  }
+
+  loadCategories() {
+    this.isLoadingCategories = true;
+    this.categorieService.obtenirCategoriesActives().subscribe({
+      next: (response) => {
+        this.categories = response.categories;
+        // Sélectionner la première catégorie par défaut
+        if (this.categories.length > 0) {
+          this.boutiqueForm.categorie = this.categories[0]._id;
+        }
+        this.isLoadingCategories = false;
+        console.log('📋 Catégories chargées:', this.categories.length);
+      },
+      error: (error) => {
+        console.error('❌ Erreur chargement catégories:', error);
+        this.isLoadingCategories = false;
+        alert('Erreur lors du chargement des catégories');
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -92,7 +117,7 @@ export class BoutiqueRegistrationComponent implements OnInit, OnDestroy {
     this.boutiqueForm = {
       nom: '',
       description: '',
-      categorie: 'Mode',
+      categorie: this.categories.length > 0 ? this.categories[0]._id : '',
       emplacement: {
         zone: '',
         numeroLocal: '',
