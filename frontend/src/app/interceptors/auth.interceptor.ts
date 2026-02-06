@@ -14,11 +14,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const publicRoutes = [
     '/api/auth/login',
     '/api/auth/register',
-    '/health',
-    '/api/boutiques', // Liste publique des boutiques (avec 's')
-    '/api/produits',
-    '/api/categories-boutique', // Catégories publiques
-    '/api/types-produit'
+    '/health'
+    // Note: Les routes ci-dessous nécessitent l'authentification en production
+    // '/api/boutiques',
+    // '/api/produits',
+    // '/api/categories-boutique',
+    // '/api/types-produit'
   ];
   
   // Vérifier si la requête est vers une route publique
