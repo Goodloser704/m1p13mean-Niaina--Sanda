@@ -60,9 +60,9 @@ class BoutiqueService {
    */
   async createBoutiqueNotification(boutique, user) {
     try {
-      // Récupérer tous les admins actifs
+      // Récupérer tous les admins actifs (accepter Admin et admin)
       const adminUsers = await User.find({ 
-        role: 'admin', 
+        role: { $in: ['Admin', 'admin'] }, 
         isActive: true 
       }).select('_id email nom prenoms'); // Utiliser 'prenoms' selon spécifications
 
@@ -75,9 +75,10 @@ class BoutiqueService {
       const notifications = await Promise.all(
         adminUsers.map(admin => 
           notificationService.createNotification({
-            type: 'boutique_registration',
+            type: 'Paiement', // Type valide dans l'enum
             title: '🏪 Nouvelle inscription boutique',
             message: `${user.prenoms} ${user.nom} a inscrit sa boutique "${boutique.nom}" et attend votre validation.`,
+            receveur: admin._id, // Utiliser 'receveur' au lieu de 'recipient'
             recipient: admin._id,
             recipientRole: 'admin',
             relatedEntity: {

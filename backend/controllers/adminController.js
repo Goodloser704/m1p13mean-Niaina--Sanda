@@ -22,8 +22,8 @@ class AdminController {
     console.log(`   👤 Admin ID: ${req.user._id}`);
     
     try {
-      // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
+      // Vérifier les permissions admin (accepter Admin et admin)
+      if (req.user.role !== 'Admin' && req.user.role !== 'admin') {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
