@@ -37,38 +37,10 @@ export class LoginModal implements OnInit {
   demoProfiles = [
     {
       role: 'admin',
-      email: 'admin@mall.com',
+      email: 'admin@mallapp.com',
       password: 'admin123',
-      nom: 'Dubois',
-      prenom: 'Pierre'
-    },
-    {
-      role: 'boutique',
-      email: 'marie.leroy@boutique.com',
-      password: 'boutique123',
-      nom: 'Leroy',
-      prenom: 'Marie (3 boutiques)'
-    },
-    {
-      role: 'boutique',
-      email: 'jean.moreau@boutique.com',
-      password: 'boutique123',
-      nom: 'Moreau',
-      prenom: 'Jean (2 boutiques)'
-    },
-    {
-      role: 'boutique',
-      email: 'carmen.garcia@boutique.com',
-      password: 'boutique123',
-      nom: 'Garcia',
-      prenom: 'Carmen (2 boutiques)'
-    },
-    {
-      role: 'client',
-      email: 'paul.dupont@client.com',
-      password: 'client123',
-      nom: 'Dupont',
-      prenom: 'Paul'
+      nom: 'Admin',
+      prenom: 'Système'
     }
   ];
 
