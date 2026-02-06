@@ -12,7 +12,7 @@ const espaceSchema = new mongoose.Schema({
     unique: true,
     trim: true,
     uppercase: true,
-    match: /^[A-Z]\d{1,3}$/, // Format: A12, B5, etc.
+    match: /^[A-Z0-9]{1,10}$/, // Format flexible: lettres et chiffres
     maxlength: 10
   },
   codeEspace: { // Alias pour compatibilité
@@ -21,7 +21,7 @@ const espaceSchema = new mongoose.Schema({
     unique: true,
     trim: true,
     uppercase: true,
-    match: /^[A-Z]\d{1,3}$/, // Format: A12, B5, etc.
+    match: /^[A-Z0-9]{1,10}$/, // Format flexible: lettres et chiffres
     maxlength: 10
   },
   surface: {

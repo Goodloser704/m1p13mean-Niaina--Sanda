@@ -1,9 +1,47 @@
 const Espace = require('../models/Espace');
+const Etage = require('../models/Etage');
+const CentreCommercial = require('../models/CentreCommercial');
 
 class EspaceService {
   // Créer un nouvel espace
   async creerEspace(espaceData) {
     try {
+      // 1. Récupérer le centre commercial (prendre le premier actif)
+      if (!espaceData.centreCommercial) {
+        const centre = await CentreCommercial.findOne({ isActive: true });
+        if (!centre) {
+          throw new Error('Aucun centre commercial actif trouvé');
+        }
+        espaceData.centreCommercial = centre._id;
+      }
+
+      // 2. Convertir le numéro d'étage en ID si nécessaire
+      if (espaceData.etage) {
+        // Si etage est un nombre ou une string de nombre, chercher l'étage correspondant
+        if (typeof espaceData.etage === 'number' || !isNaN(espaceData.etage)) {
+          const numeroEtage = parseInt(espaceData.etage);
+          const etage = await Etage.findOne({ numero: numeroEtage, isActive: true });
+          if (!etage) {
+            throw new Error(`Aucun étage actif trouvé avec le numéro ${numeroEtage}`);
+          }
+          espaceData.etage = etage._id;
+        }
+      }
+
+      // 3. Générer le code si non fourni ou invalide
+      if (!espaceData.code || !espaceData.code.match(/^[A-Z]\d{1,3}$/)) {
+        espaceData.code = espaceData.codeEspace;
+      }
+      
+      // 4. Valider le format du codeEspace
+      if (!espaceData.codeEspace.match(/^[A-Z0-9]{1,10}$/)) {
+        // Essayer de corriger le format
+        espaceData.codeEspace = espaceData.codeEspace.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (!espaceData.codeEspace.match(/^[A-Z0-9]{1,10}$/)) {
+          throw new Error('Le code espace doit contenir uniquement des lettres et chiffres (ex: A12, AS, B5, ZONE1)');
+        }
+      }
+
       const espace = new Espace(espaceData);
       await espace.save();
       return espace;
