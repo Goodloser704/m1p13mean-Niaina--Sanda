@@ -13,14 +13,15 @@ class BoutiqueService {
    */
   async createBoutiqueRegistration(userId, boutiqueData) {
     try {
-      // Vérifier que l'utilisateur existe et a le rôle boutique
+      // Vérifier que l'utilisateur existe et a le rôle Commercant
       const user = await User.findById(userId);
       if (!user) {
         throw new Error('Utilisateur non trouvé');
       }
 
-      if (user.role !== 'boutique') {
-        throw new Error('Seuls les utilisateurs avec le rôle boutique peuvent créer une boutique');
+      // Accepter 'Commercant' ou 'boutique' pour compatibilité
+      if (user.role !== 'Commercant' && user.role !== 'boutique') {
+        throw new Error('Seuls les commerçants peuvent créer une boutique');
       }
 
       // Vérifier si une boutique avec le même nom existe déjà pour cet utilisateur
