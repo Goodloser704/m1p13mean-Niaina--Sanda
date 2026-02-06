@@ -667,3 +667,184 @@ exports.obtenirStatistiquesAchats = async (req, res) => {
     });
   }
 };
+
+
+// @route   GET /api/commercant/achats/en-cours
+// @desc    Obtenir les achats en cours pour le commercant
+// @access  Private (Commercant)
+exports.obtenirAchatsCommercantEnCours = async (req, res) => {
+  try {
+    const commercantId = req.user._id;
+    console.log('🛒 Récupération achats en cours pour commercant:', commercantId);
+
+    // Trouver les boutiques du commercant
+    const Boutique = require('../models/Boutique');
+    const boutiques = await Boutique.find({ commercant: commercantId }).select('_id');
+    const boutiqueIds = boutiques.map(b => b._id);
+
+    if (boutiqueIds.length === 0) {
+      return res.json({
+        achats: [],
+        count: 0,
+        message: 'Aucune boutique trouvée'
+      });
+    }
+
+    // Trouver les produits de ces boutiques
+    const produits = await Produit.find({ boutique: { $in: boutiqueIds } }).select('_id');
+    const produitIds = produits.map(p => p._id);
+
+    // Trouver les achats en cours pour ces produits
+    const achats = await Achat.find({
+      produit: { $in: produitIds },
+      etat: { $in: [EtatAchatEnum.EnAttente, EtatAchatEnum.EnPreparation] }
+    })
+    .populate('produit', 'nom prix photo')
+    .populate('acheteur', 'nom prenoms email telephone')
+    .populate('facture', 'description montantTotal')
+    .sort({ createdAt: -1 });
+
+    console.log(`✅ ${achats.length} achats en cours trouvés`);
+
+    res.json({
+      achats,
+      count: achats.length
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur récupération achats commercant:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la récupération des achats'
+    });
+  }
+};
+
+// @route   PUT /api/commercant/achats/:id/livraison
+// @desc    Valider la livraison d'un achat
+// @access  Private (Commercant)
+exports.validerLivraison = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        message: 'Données invalides',
+        errors: errors.array()
+      });
+    }
+
+    const { id } = req.params;
+    const { dureeLivraison } = req.body;
+    const commercantId = req.user._id;
+
+    console.log('🚚 Validation livraison achat:', id);
+    console.log('⏱️  Durée livraison:', dureeLivraison);
+
+    // Trouver l'achat
+    const achat = await Achat.findById(id)
+      .populate('produit')
+      .populate('acheteur', 'nom prenoms email');
+
+    if (!achat) {
+      return res.status(404).json({
+        message: 'Achat non trouvé'
+      });
+    }
+
+    // Vérifier que le produit appartient à une boutique du commercant
+    const Boutique = require('../models/Boutique');
+    const boutique = await Boutique.findOne({
+      _id: achat.produit.boutique,
+      commercant: commercantId
+    });
+
+    if (!boutique) {
+      return res.status(403).json({
+        message: 'Vous n\'êtes pas autorisé à valider cette livraison'
+      });
+    }
+
+    // Vérifier que l'achat est de type Livrer
+    if (achat.typeAchat.type !== TypeAchatEnum.Livrer) {
+      return res.status(400).json({
+        message: 'Cet achat n\'est pas une livraison'
+      });
+    }
+
+    // Vérifier que l'achat est en attente
+    if (achat.etat !== EtatAchatEnum.EnAttente) {
+      return res.status(400).json({
+        message: 'Cet achat ne peut plus être modifié',
+        etatActuel: achat.etat
+      });
+    }
+
+    // Calculer la date de fin
+    const [heures, minutes, secondes] = dureeLivraison.split(':').map(Number);
+    const dureeLivraisonMs = (heures * 3600 + minutes * 60 + secondes) * 1000;
+    const dateFin = new Date(achat.typeAchat.dateDebut.getTime() + dureeLivraisonMs);
+
+    // Mettre à jour l'achat
+    achat.typeAchat.dateFin = dateFin;
+    achat.etat = EtatAchatEnum.Validee;
+    await achat.save();
+
+    // Effectuer la transaction financière
+    const portefeuilleAcheteur = await PorteFeuille.findOne({ owner: achat.acheteur._id });
+    const portefeuilleCommercant = await PorteFeuille.findOne({ owner: commercantId });
+
+    if (!portefeuilleAcheteur || !portefeuilleCommercant) {
+      return res.status(404).json({
+        message: 'Portefeuille non trouvé'
+      });
+    }
+
+    // Créer la transaction
+    const transaction = new PFTransaction({
+      fromWallet: portefeuilleAcheteur._id,
+      toWallet: portefeuilleCommercant._id,
+      type: TypeTransactionEnum.Achat,
+      amount: achat.montantTotal,
+      description: `Achat de ${achat.produit.nom}`,
+      statut: 'Completee'
+    });
+    await transaction.save();
+
+    // Mettre à jour les balances
+    portefeuilleAcheteur.balance -= achat.montantTotal;
+    portefeuilleCommercant.balance += achat.montantTotal;
+    await portefeuilleAcheteur.save();
+    await portefeuilleCommercant.save();
+
+    // Créer une notification pour l'acheteur
+    const notificationService = require('../services/notificationService');
+    await notificationService.createNotification({
+      type: 'Achat',
+      message: `Votre commande de ${achat.produit.nom} a été validée et sera livrée`,
+      receveur: achat.acheteur._id,
+      urlRoute: `/achats/${achat._id}`
+    });
+
+    console.log('✅ Livraison validée avec succès');
+
+    res.json({
+      message: 'Livraison validée avec succès',
+      achat: {
+        _id: achat._id,
+        etat: achat.etat,
+        typeAchat: achat.typeAchat,
+        montantTotal: achat.montantTotal
+      },
+      transaction: {
+        _id: transaction._id,
+        amount: transaction.amount,
+        type: transaction.type
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur validation livraison:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la validation de la livraison'
+    });
+  }
+};

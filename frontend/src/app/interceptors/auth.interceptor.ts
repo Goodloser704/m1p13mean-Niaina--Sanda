@@ -9,18 +9,37 @@ import { AuthService } from '../services/auth.service';
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const token = authService.getToken();
-
-  // Si un token existe, l'ajouter aux headers
+  
+  // Routes qui ne nécessitent PAS de token
+  const publicRoutes = [
+    '/api/auth/login',
+    '/api/auth/register',
+    '/health',
+    '/api/boutique',
+    '/api/produits',
+    '/api/categories-boutique',
+    '/api/types-produit'
+  ];
+  
+  // Vérifier si la requête est vers une route publique
+  const isPublicRoute = publicRoutes.some(route => req.url.includes(route));
+  
   let authReq = req;
-  if (token) {
-    authReq = req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${token}`)
-    });
+  
+  // N'ajouter le token QUE si ce n'est PAS une route publique
+  if (!isPublicRoute) {
+    const token = authService.getToken();
     
-    console.log('🔐 Token ajouté à la requête:', req.url);
+    if (token) {
+      authReq = req.clone({
+        headers: req.headers.set('Authorization', `Bearer ${token}`)
+      });
+      console.log('🔐 Token ajouté à la requête:', req.url);
+    } else {
+      console.warn('⚠️ Aucun token disponible pour:', req.url);
+    }
   } else {
-    console.warn('⚠️ Aucun token disponible pour:', req.url);
+    console.log('🌐 Route publique (pas de token):', req.url);
   }
 
   return next(authReq).pipe(

@@ -156,6 +156,10 @@ app.use('/api', require('./routes/portefeuille')); // Pour /api/users/:id/wallet
 console.log('🛣️  Chargement route achats...');
 app.use('/api/achats', require('./routes/achats'));
 
+// Routes commercant
+console.log('🛣️  Chargement route commercant...');
+app.use('/api/commercant', require('./routes/commercant'));
+
 // Routes de loyers (nouvelles)
 console.log('🛣️  Chargement route loyers...');
 app.use('/api/commercant/loyers', require('./routes/loyers'));

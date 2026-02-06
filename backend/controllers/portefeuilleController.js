@@ -47,7 +47,7 @@ exports.obtenirPortefeuilleUtilisateur = async (req, res) => {
     const { id } = req.params;
     
     // Vérifier les permissions
-    if (req.user._id.toString() !== id && req.user.role !== 'admin') {
+    if (req.user._id.toString() !== id && req.user.role !== 'Admin') {
       return res.status(403).json({
         message: 'Vous ne pouvez consulter que votre propre portefeuille'
       });
