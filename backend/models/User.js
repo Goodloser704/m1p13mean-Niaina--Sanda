@@ -90,9 +90,19 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 
 // Méthode pour obtenir les informations publiques
 userSchema.methods.getPublicProfile = function() {
-  const user = this.toObject();
-  delete user.mdp;
-  return user;
+  return {
+    id: this._id.toString(),
+    email: this.email,
+    nom: this.nom,
+    prenom: this.prenoms, // Mapper prenoms -> prenom pour le frontend
+    prenoms: this.prenoms,
+    role: this.role,
+    telephone: this.telephone,
+    photo: this.photo,
+    isActive: this.isActive,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt
+  };
 };
 
 module.exports = mongoose.model('User', userSchema);
