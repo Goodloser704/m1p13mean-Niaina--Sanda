@@ -72,7 +72,7 @@ const auth = async (req, res, next) => {
   }
 };
 
-// Middleware pour vérifier le rôle
+// Middleware pour vérifier le rôle (insensible à la casse)
 const authorize = (...roles) => {
   return (req, res, next) => {
     const timestamp = new Date().toISOString();
@@ -80,7 +80,11 @@ const authorize = (...roles) => {
     console.log(`   👤 Utilisateur: ${req.user._id} (${req.user.role})`);
     console.log(`   🔑 Rôles requis: ${roles.join(', ')}`);
     
-    if (!roles.includes(req.user.role)) {
+    // Comparaison insensible à la casse
+    const userRoleLower = req.user.role.toLowerCase();
+    const rolesLower = roles.map(r => r.toLowerCase());
+    
+    if (!rolesLower.includes(userRoleLower)) {
       console.log(`❌ Accès refusé - Rôle insuffisant`);
       return res.status(403).json({ 
         message: 'Accès refusé - Permissions insuffisantes',
@@ -96,38 +100,10 @@ const authorize = (...roles) => {
   };
 };
 
-// Middleware spécifique pour admin
-const adminAuth = [auth, authorize('Admin', 'admin')];
+// Middleware spécifique pour admin (accepte Admin, admin, ADMIN)
+const adminAuth = [auth, authorize('Admin')];
 
-// Middleware spécifique pour boutique
-const boutiqueAuth = [auth, authorize('Commercant', 'boutique', 'Admin', 'admin')];
+// Middleware spécifique pour boutique (accepte toutes les casses)
+const boutiqueAuth = [auth, authorize('Commercant', 'Admin')];
 
-// Middleware de vérification admin avec logs détaillés
-const requireAdmin = (req, res, next) => {
-  console.log(`🛡️ [AUTH] Vérification admin détaillée`);
-  console.log(`   👤 User ID: ${req.user?._id}`);
-  console.log(`   📧 Email: ${req.user?.email}`);
-  console.log(`   🎭 Rôle: "${req.user?.role}"`);
-  console.log(`   📊 Type: ${typeof req.user?.role}`);
-  
-  if (!req.user) {
-    console.log(`❌ [AUTH] Utilisateur non authentifié`);
-    return res.status(401).json({ 
-      message: 'Authentification requise' 
-    });
-  }
-  
-  if (req.user.role !== 'Admin' && req.user.role !== 'admin') {
-    console.log(`❌ [AUTH] Accès refusé - Rôle: "${req.user.role}"`);
-    return res.status(403).json({ 
-      message: `Vous devez être connecté en tant qu'administrateur pour accéder à cette page. Votre rôle actuel: "${req.user.role}"`,
-      currentRole: req.user.role,
-      requiredRole: 'Admin'
-    });
-  }
-  
-  console.log(`✅ [AUTH] Accès admin autorisé`);
-  next();
-};
-
-module.exports = { auth, authorize, adminAuth, boutiqueAuth, requireAdmin };
+module.exports = { auth, authorize, adminAuth, boutiqueAuth };

@@ -67,6 +67,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
+  // 🔍 Vérifier le rôle (insensible à la casse)
+  hasRole(role: string): boolean {
+    if (!this.currentUser?.role) return false;
+    return this.currentUser.role.toLowerCase() === role.toLowerCase();
+  }
+
   // 🔔 Vérifier si l'utilisateur peut voir les notifications
   canViewNotifications(): boolean {
     return this.isLoggedIn;
@@ -74,16 +80,16 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // 🏪 Vérifier si l'utilisateur peut voir l'interface boutique
   canViewBoutiqueRegistration(): boolean {
-    return this.isLoggedIn && this.currentUser?.role === 'Commercant';
+    return this.isLoggedIn && this.hasRole('Commercant');
   }
 
   // 🏪 Vérifier si l'utilisateur peut voir ses boutiques
   canViewMyBoutiques(): boolean {
-    return this.isLoggedIn && this.currentUser?.role === 'Commercant';
+    return this.isLoggedIn && this.hasRole('Commercant');
   }
 
   // 👨‍💼 Vérifier si l'utilisateur peut voir l'interface admin
   canViewAdminBoutiques(): boolean {
-    return this.isLoggedIn && this.currentUser?.role === 'Admin';
+    return this.isLoggedIn && this.hasRole('Admin');
   }
 }

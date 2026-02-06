@@ -43,12 +43,7 @@ export class Header implements OnInit, OnDestroy {
       this.authService.currentUser$.subscribe(user => {
         this.currentUser = user;
         console.log('👤 Header - Utilisateur actuel:', user?.email || 'Non connecté');
-        console.log('🎭 Header - Rôle utilisateur:', user?.role || 'Aucun rôle');
-        console.log('📊 État actuel:', {
-          currentUser: user?.email,
-          role: user?.role,
-          isLoggedIn: this.isLoggedIn
-        });
+        console.log('🎭 Header - Rôle:', user?.role || 'N/A');
         
         // Charger les notifications si connecté
         if (user) {
@@ -70,6 +65,27 @@ export class Header implements OnInit, OnDestroy {
         this.unreadNotifications = count;
       })
     );
+  }
+
+  // 🔍 Vérifier le rôle (insensible à la casse)
+  hasRole(role: string): boolean {
+    if (!this.currentUser?.role) return false;
+    return this.currentUser.role.toLowerCase() === role.toLowerCase();
+  }
+
+  // 🔍 Vérifier si l'utilisateur est admin
+  isAdmin(): boolean {
+    return this.hasRole('Admin');
+  }
+
+  // 🔍 Vérifier si l'utilisateur est commerçant
+  isCommercant(): boolean {
+    return this.hasRole('Commercant');
+  }
+
+  // 🔍 Vérifier si l'utilisateur est acheteur
+  isAcheteur(): boolean {
+    return this.hasRole('Acheteur');
   }
 
   ngOnDestroy() {

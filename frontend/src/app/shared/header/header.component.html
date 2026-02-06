@@ -9,7 +9,7 @@
     <nav class="header-nav" *ngIf="isLoggedIn">
       <div class="nav-items">
         <!-- Menu Admin -->
-        <div class="nav-item admin-menu" *ngIf="currentUser?.role === 'Admin'">
+        <div class="nav-item admin-menu" *ngIf="isAdmin()">
           <button class="nav-button dropdown-toggle" (click)="toggleAdminMenu()">
             👨‍💼 Admin
             <span class="dropdown-arrow">▼</span>
@@ -31,7 +31,7 @@
         </div>
 
         <!-- Menu Commerçant -->
-        <div class="nav-item boutique-menu" *ngIf="currentUser?.role === 'Commercant'">
+        <div class="nav-item boutique-menu" *ngIf="isCommercant()">
           <button class="nav-button dropdown-toggle" (click)="toggleBoutiqueMenu()">
             🏪 Ma Boutique
             <span class="dropdown-arrow">▼</span>
@@ -50,7 +50,7 @@
         </div>
 
         <!-- Menu Client -->
-        <div class="nav-item client-menu" *ngIf="currentUser?.role === 'Acheteur'">
+        <div class="nav-item client-menu" *ngIf="isAcheteur()">
           <a routerLink="/panier" class="nav-button">
             🛒 Panier
           </a>
