@@ -10,37 +10,37 @@ const router = express.Router();
  * Architecture: Route → Controller → Service
  */
 
-// Routes publiques pour les boutiques
+// Routes publiques pour les boutiques - PAS D'AUTHENTIFICATION REQUISE
 // @route   GET /api/boutiques (conforme aux spécifications)
 // @desc    Obtenir toutes les boutiques actives (publique)
-// @access  Public
+// @access  Public (NO AUTH REQUIRED)
 // @return  { boutiques, count }
 router.get('/boutiques', boutiqueController.getAllBoutiques);
 
 // @route   GET /api/boutiques/search/ (conforme aux spécifications)
 // @desc    Rechercher des boutiques par mot-clé
-// @access  Public
+// @access  Public (NO AUTH REQUIRED)
 // @query   keyword, page, limit
 // @return  { boutiques, count, pagination }
 router.get('/boutiques/search/', boutiqueController.searchBoutiques);
 
 // @route   GET /api/boutiques/:id/produits (conforme aux spécifications)
 // @desc    Obtenir les produits d'une boutique
-// @access  Public
+// @access  Public (NO AUTH REQUIRED)
 // @param   id - ID de la boutique
 // @return  { produits }
 router.get('/boutiques/:id/produits', boutiqueController.getBoutiqueProduits);
 
-// Routes de gestion boutique (anciennes, maintenues pour compatibilité)
+// Routes de gestion boutique (anciennes, maintenues pour compatibilité) - PUBLIQUES
 // @route   GET /api/boutique
 // @desc    Obtenir toutes les boutiques actives (publique)
-// @access  Public
+// @access  Public (NO AUTH REQUIRED)
 // @return  { boutiques, count }
 router.get('/', boutiqueController.getAllBoutiques);
 
 // @route   GET /api/boutiques/search
 // @desc    Rechercher des boutiques par mot-clé
-// @access  Public
+// @access  Public (NO AUTH REQUIRED)
 // @query   keyword, page, limit
 // @return  { boutiques, count, pagination }
 router.get('/search', boutiqueController.searchBoutiques);

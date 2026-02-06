@@ -31,15 +31,15 @@ const validateCategorie = [
     .withMessage('La couleur doit être au format hexadécimal (#RRGGBB)')
 ];
 
-// Routes publiques
+// Routes publiques - PAS D'AUTHENTIFICATION REQUISE
 // @route   GET /api/categories-boutique
 // @desc    Obtenir toutes les catégories
-// @access  Public
+// @access  Public (NO AUTH REQUIRED)
 router.get('/', categorieBoutiqueController.obtenirCategories);
 
 // @route   GET /api/categories-boutique/test
 // @desc    Test de la route catégories
-// @access  Public
+// @access  Public (NO AUTH REQUIRED)
 router.get('/test', categorieBoutiqueController.testCategories);
 
 // Routes admin uniquement - MUST BE BEFORE PARAMETERIZED ROUTES
@@ -70,7 +70,7 @@ router.delete('/:id', adminAuth, categorieBoutiqueController.supprimerCategorie)
 
 // @route   GET /api/categories-boutique/:id
 // @desc    Obtenir une catégorie par ID
-// @access  Public
+// @access  Public (NO AUTH REQUIRED)
 router.get('/:id', categorieBoutiqueController.obtenirCategorieParId);
 
 module.exports = router;
