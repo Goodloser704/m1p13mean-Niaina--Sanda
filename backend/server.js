@@ -120,8 +120,10 @@ console.log('🛣️  Chargement route boutique...');
 app.use('/api/boutique', require('./routes/boutique'));
 
 // Routes publiques boutiques (conformes aux spécifications)
-console.log('🛣️  Chargement routes boutiques publiques...');
-app.use('/api', require('./routes/boutique')); // Pour /api/boutiques/*
+// Note: Les routes /api/boutiques/* sont déjà dans le fichier boutique.js
+// Ne PAS monter sur /api car cela capture toutes les routes comme /api/espaces
+// console.log('🛣️  Chargement routes boutiques publiques...');
+// app.use('/api', require('./routes/boutique')); // DÉSACTIVÉ - cause des conflits
 
 // Routes client
 console.log('🛣️  Chargement route client...');

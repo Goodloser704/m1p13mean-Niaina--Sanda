@@ -34,8 +34,7 @@ class BoutiqueController {
         statutBoutique: 'Actif',
         $or: [
           { nom: searchRegex },
-          { description: searchRegex },
-          { categorie: searchRegex }
+          { description: searchRegex }
         ]
       };
 

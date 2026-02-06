@@ -36,6 +36,7 @@ class BoutiqueService {
       // Créer la boutique
       const boutique = new Boutique({
         proprietaire: userId,
+        commercant: userId, // Ajouter commercant pour compatibilité avec le modèle
         ...boutiqueData,
         statut: 'en_attente'
       });
