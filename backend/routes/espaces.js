@@ -24,7 +24,7 @@ router.get('/test', (req, res) => {
 
 // Middleware de vérification du rôle admin
 const requireAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
+  if (req.user.role !== 'Admin' && req.user.role !== 'admin') {
     return res.status(403).json({ 
       message: 'Accès refusé. Seuls les administrateurs peuvent gérer les espaces.' 
     });

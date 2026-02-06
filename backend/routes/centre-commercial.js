@@ -7,13 +7,14 @@ const router = express.Router();
  * Architecture: Route → Controller → Service
  */
 const centreCommercialController = require('../controllers/centreCommercialController');
-const { auth } = require('../middleware/auth');
+const { auth, authorize } = require('../middleware/auth');
+const { RoleEnum } = require('../utils/enums');
 
 // Routes publiques
 router.get('/', centreCommercialController.obtenirCentreCommercial);
 
 // Routes admin uniquement
-router.put('/', auth, centreCommercialController.modifierCentreCommercial);
-router.get('/stats', auth, centreCommercialController.obtenirStatistiques);
+router.put('/', auth, authorize(RoleEnum.Admin, 'admin'), centreCommercialController.modifierCentreCommercial);
+router.get('/stats', auth, authorize(RoleEnum.Admin, 'admin'), centreCommercialController.obtenirStatistiques);
 
 module.exports = router;
