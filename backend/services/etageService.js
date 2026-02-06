@@ -9,6 +9,35 @@ class EtageService {
     console.log(`🏢 [SERVICE] Données reçues:`, JSON.stringify(etageData, null, 2));
     
     try {
+      // Vérifier si un étage actif avec ce numéro existe déjà
+      const etageExistant = await Etage.findOne({ 
+        numero: etageData.numero,
+        isActive: true 
+      });
+      
+      if (etageExistant) {
+        console.log(`❌ [SERVICE] Étage actif avec numéro ${etageData.numero} existe déjà`);
+        throw new Error('Un étage avec ce numéro existe déjà');
+      }
+      
+      // Vérifier s'il existe un étage inactif avec ce numéro
+      const etageInactif = await Etage.findOne({ 
+        numero: etageData.numero,
+        isActive: false 
+      });
+      
+      if (etageInactif) {
+        console.log(`♻️  [SERVICE] Réactivation de l'étage inactif ${etageData.numero}`);
+        // Réactiver et mettre à jour l'étage existant
+        etageInactif.nom = etageData.nom || etageInactif.nom;
+        etageInactif.description = etageData.description || etageInactif.description;
+        etageInactif.isActive = true;
+        await etageInactif.save();
+        console.log(`✅ [SERVICE] Étage réactivé`);
+        console.log(`🏢 [SERVICE] === FIN creerEtage (RÉACTIVATION) ===`);
+        return etageInactif;
+      }
+      
       console.log(`🏢 [SERVICE] Création instance Etage...`);
       const etage = new Etage(etageData);
       console.log(`🏢 [SERVICE] Instance créée:`, JSON.stringify(etage, null, 2));

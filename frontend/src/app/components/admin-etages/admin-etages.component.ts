@@ -250,8 +250,19 @@ export class AdminEtagesComponent implements OnInit {
 
   // Suppression
   async supprimerEtage(etage: Etage) {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer l'étage "${etage.nom}" ?`)) {
-      return;
+    // Vérifier si l'étage contient des espaces
+    if (etage.nombreEspaces && etage.nombreEspaces > 0) {
+      const confirmMsg = `⚠️ Attention ! L'étage "${etage.nom}" contient ${etage.nombreEspaces} espace(s).\n\n` +
+                        `Vous devez d'abord supprimer ou déplacer ces espaces avant de pouvoir supprimer l'étage.\n\n` +
+                        `Voulez-vous continuer quand même ?`;
+      
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+    } else {
+      if (!confirm(`Êtes-vous sûr de vouloir supprimer l'étage "${etage.nom}" ?`)) {
+        return;
+      }
     }
 
     this.loading = true;
@@ -268,7 +279,15 @@ export class AdminEtagesComponent implements OnInit {
       }, 3000);
 
     } catch (error: any) {
-      this.error = error.error?.message || 'Erreur lors de la suppression';
+      // Message d'erreur plus détaillé
+      const errorMessage = error.error?.message || error.message || 'Erreur lors de la suppression';
+      
+      if (errorMessage.includes('espaces')) {
+        this.error = `❌ ${errorMessage}\n\n💡 Conseil : Allez dans "Gestion Espaces" pour supprimer ou déplacer les espaces de cet étage.`;
+      } else {
+        this.error = `❌ ${errorMessage}`;
+      }
+      
       console.error('Erreur suppression étage:', error);
     } finally {
       this.loading = false;
