@@ -30,7 +30,8 @@
             [(ngModel)]="boutiqueForm.categorie" 
             name="categorie"
             required>
-            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+            <option value="" disabled>Sélectionnez une catégorie</option>
+            <option *ngFor="let cat of categories" [value]="cat._id">{{ cat.nom }}</option>
           </select>
         </div>
 
