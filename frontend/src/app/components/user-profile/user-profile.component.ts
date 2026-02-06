@@ -266,22 +266,22 @@ export class UserProfileComponent implements OnInit {
 
   // Méthodes utilitaires
   isProprietaire(): boolean {
-    return this.currentUser?.role === 'boutique';
+    return this.currentUser?.role === 'Commercant';
   }
 
   isAdmin(): boolean {
-    return this.currentUser?.role === 'admin';
+    return this.currentUser?.role === 'Admin';
   }
 
   isClient(): boolean {
-    return this.currentUser?.role === 'client';
+    return this.currentUser?.role === 'Acheteur';
   }
 
   getRoleLabel(): string {
     switch (this.currentUser?.role) {
-      case 'admin': return 'Administrateur';
-      case 'boutique': return 'Propriétaire de boutique';
-      case 'client': return 'Client';
+      case 'Admin': return 'Administrateur';
+      case 'Commercant': return 'Propriétaire de boutique';
+      case 'Acheteur': return 'Client';
       default: return 'Utilisateur';
     }
   }

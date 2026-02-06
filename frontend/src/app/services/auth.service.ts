@@ -9,7 +9,7 @@ export interface User {
   email: string;
   nom: string;
   prenom: string;
-  role: 'admin' | 'boutique' | 'client';
+  role: 'Admin' | 'Commercant' | 'Acheteur';
   telephone?: string;
   adresse?: string;
 }

@@ -97,9 +97,9 @@ export class Header implements OnInit, OnDestroy {
   // 📱 Obtenir l'icône du rôle
   getRoleIcon(role: string): string {
     switch (role) {
-      case 'admin': return '👨‍💼';
-      case 'boutique': return '🏪';
-      case 'client': return '🛍️';
+      case 'Admin': return '👨‍💼';
+      case 'Commercant': return '🏪';
+      case 'Acheteur': return '🛍️';
       default: return '👤';
     }
   }
@@ -107,9 +107,9 @@ export class Header implements OnInit, OnDestroy {
   // 🎨 Obtenir la couleur du rôle
   getRoleColor(role: string): string {
     switch (role) {
-      case 'admin': return '#dc3545';
-      case 'boutique': return '#28a745';
-      case 'client': return '#007bff';
+      case 'Admin': return '#dc3545';
+      case 'Commercant': return '#28a745';
+      case 'Acheteur': return '#007bff';
       default: return '#6c757d';
     }
   }

@@ -56,7 +56,7 @@ export class BoutiqueRegistrationComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.authService.currentUser$.subscribe(user => {
         this.currentUser = user;
-        if (user?.role !== 'boutique') {
+        if (user?.role !== 'Commercant') {
           this.router.navigate(['/']);
         }
       })

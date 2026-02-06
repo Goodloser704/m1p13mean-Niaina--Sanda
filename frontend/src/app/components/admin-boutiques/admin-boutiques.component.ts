@@ -37,7 +37,7 @@ export class AdminBoutiquesComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.authService.currentUser$.subscribe(user => {
         this.currentUser = user;
-        if (user?.role === 'admin') {
+        if (user?.role === 'Admin') {
           this.loadBoutiques();
         } else {
           this.router.navigate(['/']);

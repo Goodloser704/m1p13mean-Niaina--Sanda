@@ -15,7 +15,7 @@
       
       <div class="dashboard-actions">
         <!-- Actions pour les commerçants -->
-        <div *ngIf="currentUser.role === 'boutique'" class="role-actions">
+        <div *ngIf="currentUser.role === 'Commercant'" class="role-actions">
           <button class="action-btn boutique-btn" (click)="setView('my-boutiques')">
             🏪 Mes Boutiques
           </button>
@@ -25,7 +25,7 @@
         </div>
         
         <!-- Actions pour les admins -->
-        <div *ngIf="currentUser.role === 'admin'" class="role-actions">
+        <div *ngIf="currentUser.role === 'Admin'" class="role-actions">
           <button class="action-btn admin-btn" (click)="setView('admin-boutiques')">
             👨‍💼 Gestion Boutiques
           </button>

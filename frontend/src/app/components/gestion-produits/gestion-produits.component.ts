@@ -124,7 +124,7 @@ export class GestionProduitsComponent implements OnInit {
 
   private verifierAuthentification(): void {
     const user = this.authService.getCurrentUser();
-    if (!user || user.role !== 'boutique') {
+    if (!user || user.role !== 'Commercant') {
       this.router.navigate(['/']);
       return;
     }

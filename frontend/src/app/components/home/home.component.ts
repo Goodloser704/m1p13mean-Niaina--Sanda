@@ -74,16 +74,16 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // 🏪 Vérifier si l'utilisateur peut voir l'interface boutique
   canViewBoutiqueRegistration(): boolean {
-    return this.isLoggedIn && this.currentUser?.role === 'boutique';
+    return this.isLoggedIn && this.currentUser?.role === 'Commercant';
   }
 
   // 🏪 Vérifier si l'utilisateur peut voir ses boutiques
   canViewMyBoutiques(): boolean {
-    return this.isLoggedIn && this.currentUser?.role === 'boutique';
+    return this.isLoggedIn && this.currentUser?.role === 'Commercant';
   }
 
   // 👨‍💼 Vérifier si l'utilisateur peut voir l'interface admin
   canViewAdminBoutiques(): boolean {
-    return this.isLoggedIn && this.currentUser?.role === 'admin';
+    return this.isLoggedIn && this.currentUser?.role === 'Admin';
   }
 }

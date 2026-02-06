@@ -32,7 +32,7 @@ export interface PaginatedResponse<T> {
 // 👤 Modèle User (Utilisateur)
 // ============================================================================
 
-export type UserRole = 'admin' | 'boutique' | 'client';
+export type UserRole = 'Admin' | 'Commercant' | 'Acheteur';
 export type UserStatus = 'active' | 'pending' | 'approved' | 'rejected' | 'suspended';
 
 export interface UserAddress {

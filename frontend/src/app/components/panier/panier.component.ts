@@ -84,7 +84,7 @@ export class PanierComponent implements OnInit {
 
   private verifierAuthentification(): void {
     const user = this.authService.getCurrentUser();
-    if (!user || user.role !== 'client') {
+    if (!user || user.role !== 'Acheteur') {
       this.router.navigate(['/']);
       return;
     }
