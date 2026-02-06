@@ -60,12 +60,16 @@ class BoutiqueService {
    */
   async createBoutiqueNotification(boutique, user) {
     try {
+      console.log(`🔔 Création notification pour boutique: ${boutique.nom}`);
+      
       // Récupérer tous les admins actifs (accepter Admin et admin)
       const adminUsers = await User.find({ 
         role: { $in: ['Admin', 'admin'] }, 
         isActive: true 
       }).select('_id email nom prenoms'); // Utiliser 'prenoms' selon spécifications
 
+      console.log(`👥 Admins trouvés: ${adminUsers.length}`);
+      
       if (adminUsers.length === 0) {
         console.warn('⚠️ Aucun admin trouvé pour recevoir la notification');
         return [];
@@ -73,32 +77,43 @@ class BoutiqueService {
 
       // Créer les notifications pour tous les admins
       const notifications = await Promise.all(
-        adminUsers.map(admin => 
-          notificationService.createNotification({
-            type: 'Paiement', // Type valide dans l'enum
-            title: '🏪 Nouvelle inscription boutique',
-            message: `${user.prenoms} ${user.nom} a inscrit sa boutique "${boutique.nom}" et attend votre validation.`,
-            receveur: admin._id, // Utiliser 'receveur' au lieu de 'recipient'
-            recipient: admin._id,
-            recipientRole: 'admin',
-            relatedEntity: {
-              entityType: 'Boutique',
-              entityId: boutique._id
-            },
-            data: {
-              boutiqueId: boutique._id,
-              boutiqueName: boutique.nom,
-              ownerName: `${user.prenoms} ${user.nom}`,
-              ownerEmail: user.email,
-              category: boutique.categorie,
-              registrationDate: new Date()
-            },
-            priority: 'high',
-            actionRequired: true,
-            actionType: 'approve_boutique',
-            actionUrl: `/admin/boutiques/pending/${boutique._id}`
-          })
-        )
+        adminUsers.map(async (admin) => {
+          console.log(`📧 Création notification pour admin: ${admin.email}`);
+          
+          try {
+            const notif = await notificationService.createNotification({
+              type: 'Paiement', // Type valide dans l'enum
+              title: '🏪 Nouvelle inscription boutique',
+              message: `${user.prenoms} ${user.nom} a inscrit sa boutique "${boutique.nom}" et attend votre validation.`,
+              receveur: admin._id, // Utiliser 'receveur' au lieu de 'recipient'
+              recipient: admin._id,
+              recipientRole: 'admin',
+              relatedEntity: {
+                entityType: 'Boutique',
+                entityId: boutique._id
+              },
+              data: {
+                boutiqueId: boutique._id,
+                boutiqueName: boutique.nom,
+                ownerName: `${user.prenoms} ${user.nom}`,
+                ownerEmail: user.email,
+                category: boutique.categorie,
+                registrationDate: new Date()
+              },
+              priority: 'high',
+              actionRequired: true,
+              actionType: 'approve_boutique',
+              actionUrl: `/admin/boutiques/pending/${boutique._id}`
+            });
+            
+            console.log(`✅ Notification créée pour ${admin.email}: ${notif._id}`);
+            return notif;
+          } catch (notifError) {
+            console.error(`❌ Erreur création notification pour ${admin.email}:`, notifError.message);
+            console.error(`   Stack:`, notifError.stack);
+            throw notifError;
+          }
+        })
       );
 
       console.log(`✅ ${notifications.length} notifications créées pour la boutique ${boutique.nom}`);
@@ -106,6 +121,8 @@ class BoutiqueService {
 
     } catch (error) {
       console.error('❌ Erreur création notification boutique:', error.message);
+      console.error('   Stack:', error.stack);
+      // NE PAS catcher silencieusement - laisser l'erreur remonter
       throw error;
     }
   }
