@@ -155,8 +155,9 @@ export class CrudBoutiquesComponent implements OnInit {
       return;
     }
     
-    this.isAdmin = user.role === 'Admin';
-    this.isCommercant = user.role === 'Commercant';
+    // Comparaison insensible à la casse
+    this.isAdmin = user.role.toLowerCase() === 'admin';
+    this.isCommercant = user.role.toLowerCase() === 'commercant';
     
     if (!this.isAdmin && !this.isCommercant) {
       this.router.navigate(['/']);

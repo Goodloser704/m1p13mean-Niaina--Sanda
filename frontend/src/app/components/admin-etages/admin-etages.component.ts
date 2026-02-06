@@ -73,7 +73,8 @@ export class AdminEtagesComponent implements OnInit {
     
     try {
       const user = JSON.parse(userStr);
-      if (user.role !== 'admin') {
+      // Comparaison insensible à la casse
+      if (user.role.toLowerCase() !== 'admin') {
         console.log('🔐 [FRONTEND-COMPONENT] Utilisateur n\'est pas admin:', user.role);
         this.error = 'Seuls les administrateurs peuvent accéder à cette page.';
         return false;
