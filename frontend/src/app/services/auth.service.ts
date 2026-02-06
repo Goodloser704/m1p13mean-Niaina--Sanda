@@ -45,7 +45,8 @@ export class AuthService {
    * 🔐 Connexion utilisateur
    */
   login(email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/login`, { email, password })
+    // Le backend attend 'mdp' au lieu de 'password'
+    return this.http.post<AuthResponse>(`${this.API_URL}/login`, { email, mdp: password })
       .pipe(
         tap(response => {
           this.setSession(response.token, response.user);
@@ -57,7 +58,18 @@ export class AuthService {
    * 📝 Inscription utilisateur
    */
   register(userData: any): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/register`, userData)
+    // Transformer 'password' en 'mdp' pour le backend
+    const backendData = {
+      ...userData,
+      mdp: userData.password || userData.mdp,
+      prenoms: userData.prenom || userData.prenoms
+    };
+    
+    // Supprimer 'password' et 'prenom' si présents
+    delete backendData.password;
+    delete backendData.prenom;
+    
+    return this.http.post<AuthResponse>(`${this.API_URL}/register`, backendData)
       .pipe(
         tap(response => {
           this.setSession(response.token, response.user);
