@@ -41,6 +41,20 @@ export class LoginModal implements OnInit {
       password: 'admin123',
       nom: 'Admin',
       prenom: 'Système'
+    },
+    {
+      role: 'client',
+      email: 'client@test.com',
+      password: 'Client123456!',
+      nom: 'Test',
+      prenom: 'Client'
+    },
+    {
+      role: 'boutique',
+      email: 'commercant@test.com',
+      password: 'Commercant123456!',
+      nom: 'Test',
+      prenom: 'Commerçant'
     }
   ];
 
