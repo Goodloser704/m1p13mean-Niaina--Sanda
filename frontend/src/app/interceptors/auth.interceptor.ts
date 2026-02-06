@@ -15,14 +15,23 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     '/api/auth/login',
     '/api/auth/register',
     '/health',
-    '/api/boutique',
+    '/api/boutiques', // Liste publique des boutiques (avec 's')
     '/api/produits',
     '/api/categories-boutique',
     '/api/types-produit'
   ];
   
   // Vérifier si la requête est vers une route publique
-  const isPublicRoute = publicRoutes.some(route => req.url.includes(route));
+  // Utiliser une correspondance exacte ou de début de chemin
+  const isPublicRoute = publicRoutes.some(route => {
+    // Pour les routes avec paramètres, vérifier le début du chemin
+    if (route.endsWith('/')) {
+      return req.url.includes(route);
+    }
+    // Pour les routes exactes, vérifier correspondance exacte ou avec query params
+    const urlPath = req.url.split('?')[0]; // Retirer les query params
+    return urlPath.endsWith(route) || urlPath.includes(route + '/');
+  });
   
   let authReq = req;
   
