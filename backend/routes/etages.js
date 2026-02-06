@@ -7,14 +7,13 @@ const router = express.Router();
  * Architecture: Route → Controller → Service
  */
 const etageController = require('../controllers/etageController');
-const { auth, authorize } = require('../middleware/auth');
+const { auth, requireAdmin } = require('../middleware/auth');
 
 console.log('🏢 [ROUTES] Initialisation routes étages...');
 
 // Middleware d'authentification pour toutes les routes
 router.use((req, res, next) => {
   console.log(`🏢 [ROUTES] Requête étages: ${req.method} ${req.originalUrl}`);
-  console.log(`🏢 [ROUTES] Headers:`, req.headers);
   next();
 });
 
@@ -28,28 +27,17 @@ router.get('/test', (req, res) => {
   const response = { 
     message: 'Route étages fonctionnelle',
     timestamp: new Date().toISOString(),
-    user: req.user ? req.user._id : 'Non authentifié'
+    user: req.user ? {
+      id: req.user._id,
+      email: req.user.email,
+      role: req.user.role
+    } : 'Non authentifié'
   };
   
   console.log('🧪 [ROUTES] Réponse test:', response);
   res.json(response);
 });
 
-// Middleware de vérification du rôle admin
-const requireAdmin = (req, res, next) => {
-  console.log(`🛡️ [ROUTES] Vérification admin pour ${req.originalUrl}`);
-  console.log(`🛡️ [ROUTES] User role: ${req.user?.role}`);
-  
-  if (req.user.role !== 'Admin' && req.user.role !== 'admin') {
-    console.log(`❌ [ROUTES] Accès refusé - Rôle: ${req.user.role}`);
-    return res.status(403).json({ 
-      message: 'Accès refusé. Seuls les administrateurs peuvent gérer les étages.' 
-    });
-  }
-  
-  console.log(`✅ [ROUTES] Accès admin autorisé`);
-  next();
-};
 
 // @route   GET /api/etages
 // @desc    Obtenir tous les étages

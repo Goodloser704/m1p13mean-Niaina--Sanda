@@ -43,6 +43,12 @@ export class Header implements OnInit, OnDestroy {
       this.authService.currentUser$.subscribe(user => {
         this.currentUser = user;
         console.log('👤 Header - Utilisateur actuel:', user?.email || 'Non connecté');
+        console.log('🎭 Header - Rôle utilisateur:', user?.role || 'Aucun rôle');
+        console.log('📊 État actuel:', {
+          currentUser: user?.email,
+          role: user?.role,
+          isLoggedIn: this.isLoggedIn
+        });
         
         // Charger les notifications si connecté
         if (user) {

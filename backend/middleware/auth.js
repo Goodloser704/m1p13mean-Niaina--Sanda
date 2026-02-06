@@ -102,4 +102,32 @@ const adminAuth = [auth, authorize('Admin', 'admin')];
 // Middleware spécifique pour boutique
 const boutiqueAuth = [auth, authorize('Commercant', 'boutique', 'Admin', 'admin')];
 
-module.exports = { auth, authorize, adminAuth, boutiqueAuth };
+// Middleware de vérification admin avec logs détaillés
+const requireAdmin = (req, res, next) => {
+  console.log(`🛡️ [AUTH] Vérification admin détaillée`);
+  console.log(`   👤 User ID: ${req.user?._id}`);
+  console.log(`   📧 Email: ${req.user?.email}`);
+  console.log(`   🎭 Rôle: "${req.user?.role}"`);
+  console.log(`   📊 Type: ${typeof req.user?.role}`);
+  
+  if (!req.user) {
+    console.log(`❌ [AUTH] Utilisateur non authentifié`);
+    return res.status(401).json({ 
+      message: 'Authentification requise' 
+    });
+  }
+  
+  if (req.user.role !== 'Admin' && req.user.role !== 'admin') {
+    console.log(`❌ [AUTH] Accès refusé - Rôle: "${req.user.role}"`);
+    return res.status(403).json({ 
+      message: `Vous devez être connecté en tant qu'administrateur pour accéder à cette page. Votre rôle actuel: "${req.user.role}"`,
+      currentRole: req.user.role,
+      requiredRole: 'Admin'
+    });
+  }
+  
+  console.log(`✅ [AUTH] Accès admin autorisé`);
+  next();
+};
+
+module.exports = { auth, authorize, adminAuth, boutiqueAuth, requireAdmin };
