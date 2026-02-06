@@ -58,14 +58,26 @@ export class BoutiqueRegistrationComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.authService.currentUser$.subscribe(user => {
         this.currentUser = user;
-        if (user?.role !== 'Commercant') {
+        
+        // Vérifier si l'utilisateur est connecté ET est un Commerçant
+        if (!user) {
+          console.warn('⚠️ Utilisateur non connecté - Redirection vers accueil');
+          alert('Vous devez être connecté en tant que Commerçant pour créer une boutique');
           this.router.navigate(['/']);
+          return;
         }
+        
+        if (user.role !== 'Commercant') {
+          console.warn('⚠️ Utilisateur non autorisé - Redirection vers accueil');
+          alert('Seuls les Commerçants peuvent créer une boutique');
+          this.router.navigate(['/']);
+          return;
+        }
+        
+        // Charger les catégories seulement si l'utilisateur est un Commerçant connecté
+        this.loadCategories();
       })
     );
-
-    // Charger les catégories
-    this.loadCategories();
   }
 
   loadCategories() {
