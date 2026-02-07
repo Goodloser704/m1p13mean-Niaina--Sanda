@@ -394,14 +394,10 @@ class BoutiqueController {
     const timestamp = new Date().toISOString();
     console.log(`📋 [${timestamp}] Récupération boutiques en attente`);
     console.log(`   👤 Admin ID: ${req.user._id}`);
+    console.log(`   🔑 Rôle: ${req.user.role}`);
     
     try {
-      // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
-        console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
-        return res.status(403).json({ message: 'Accès refusé' });
-      }
-
+      // Le middleware adminAuth a déjà vérifié les permissions
       const boutiques = await boutiqueService.getPendingBoutiques();
 
       console.log(`✅ ${boutiques.length} boutiques en attente récupérées`);

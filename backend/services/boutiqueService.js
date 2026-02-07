@@ -33,11 +33,11 @@ class BoutiqueService {
         throw new Error('Vous avez déjà une boutique avec ce nom');
       }
 
-      // Créer la boutique
+      // Créer la boutique avec le statut EnAttente (en attente de validation admin)
       const boutique = new Boutique({
         commercant: userId,
         ...boutiqueData,
-        statutBoutique: 'Inactif' // Selon le modèle, c'est statutBoutique et non statut
+        statutBoutique: 'EnAttente' // Boutique en attente de validation
       });
 
       await boutique.save();
