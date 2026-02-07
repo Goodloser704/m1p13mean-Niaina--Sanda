@@ -1,0 +1,52 @@
+@use "../../../styles/shared/mixins" as m;
+@use "../../../styles/shared/variables" as v;
+
+.floating-card {
+  pointer-events: auto; // réactive les clics
+  background: rgba(255, 255, 255, 0.98);
+  width: 90%;
+  max-width: 500px;
+  height: fit-content;
+  border-radius: 13px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+
+  overflow-y: auto;
+  @include m.thin-scrollbar
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 13px;
+  cursor: pointer;
+  box-shadow: 0 3px 12px -5px rgba(0, 0, 0, 0.25);
+  font-weight: 500;
+
+  i {
+    font-weight: 500;
+    font-size: 300%;
+    color: v.$heading-color;
+  }
+
+  p {
+    font-size: 150%;
+    color: v.$accent-color;
+  }
+
+  &:hover {
+    box-shadow: 0 5px 17px -5px rgba(0, 0, 0, 0.3);
+
+    i {
+      color: darken(v.$heading-color, 10);
+    }
+
+    p {
+      color: darken(v.$accent-color, 10);
+    }
+  }
+}

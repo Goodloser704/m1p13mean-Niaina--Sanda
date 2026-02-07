@@ -1,63 +1,72 @@
-<div class="contact sectiond">
-  <div class="contact-form p-2 p-md-5 p-sm-4" data-aos="fade-up" data-aos-delay="300">
-    <h3>Login</h3>
-    <p class="mb-4">Bonjour ! Connectez-vous pour commencer</p>
-    
-    <form
-      class="php-email-form"
-      [formGroup]="form"
-      (ngSubmit)="login()"
-      data-aos="fade-up"
-      data-aos-delay="200"
-    >      
-      <div class="row gy-3">
-        <div class="col-12">
-          <select class="form-select" (change)="onSelectDefaultUser($event)">
-            <option value="" [selected]="true" [disabled]="true">Logins par défaut</option>
-            @for (user of defaultUsers; track user.role) {
-              <option [value]="user.role" >{{ user.role }}</option>
+<!-- floating overlay -->
+<div class="floating-container">
+  <div class="floating-card">
+    <div class="contact section">
+      <div class="contact-form p-2 p-md-5 p-sm-4" data-aos="fade-left" data-aos-delay="300">
+        <h3>Login</h3>
+        <p class="mb-4">Bonjour ! Connectez-vous pour commencer</p>
+        
+        <form
+          class="php-email-form"
+          [formGroup]="form"
+          (ngSubmit)="login()"
+          data-aos="fade-up"
+          data-aos-delay="200"
+        >      
+          <div class="row gy-3">
+            <div class="col-12">
+              <select class="form-select" (change)="onSelectDefaultUser($event)">
+                <option value="" [selected]="true" [disabled]="true">Logins par défaut</option>
+                @for (user of defaultUsers; track user.role) {
+                  <option [value]="user.role" >{{ user.role }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <input
+                type="email"
+                class="form-control"
+                placeholder="Email"
+                formControlName="email"
+              >
+            </div>
+
+            <div class="col-md-6">
+              <input
+                type="password"
+                class="form-control"
+                placeholder="Mot de passe"
+                formControlName="mdp"
+              >
+            </div>
+
+            @if (error()) {
+              <div class="col-12 text-danger text-center">
+                {{ error() }}
+              </div>
             }
-          </select>
-        </div>
 
-        <div class="col-md-6">
-          <input
-            type="email"
-            class="form-control"
-            placeholder="Email"
-            formControlName="email"
-          >
-        </div>
-
-        <div class="col-md-6">
-          <input
-            type="password"
-            class="form-control"
-            placeholder="Mot de passe"
-            formControlName="mdp"
-          >
-        </div>
-
-        @if (error()) {
-          <div class="col-12 text-danger text-center">
-            {{ error() }}
+            <div class="col-12 my-3 text-center">
+              <button
+                type="submit"
+                class="btn"
+                [disabled]="isLoading() || form.invalid"
+              >
+                Se connecter
+              </button>
+            </div>
           </div>
-        }
+        </form>
 
-        <div class="col-12 my-3 text-center">
-          <button
-            type="submit"
-            class="btn"
-            [disabled]="isLoading() || form.invalid"
-          >
-            Se connecter
-          </button>
+        <div class="w-100 text-center">
+          <p>Nouveau client ? <a class="s-inscrire" routerLink="/inscription-choix">S'inscrire</a></p>
         </div>
       </div>
-    </form>
-
-    <div class="w-100 text-center">
-      <a>Nouveau client ? <span class="s-inscrire">S'inscrire</span></a>
     </div>
   </div>
 </div>
+
+@if (isLoading()) {
+  <app-loader />
+}

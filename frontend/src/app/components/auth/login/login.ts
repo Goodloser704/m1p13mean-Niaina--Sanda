@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { UserRole } from '../../../core/models/user';
 import { AuthService } from '../../../core/services/auth.service';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from "@angular/router";
+import { Loader } from "../../shared/loader/loader";
 
 interface DefaultUser {
   role: UserRole,
@@ -11,7 +13,7 @@ interface DefaultUser {
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink, Loader],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })

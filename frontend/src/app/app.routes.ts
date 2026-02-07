@@ -9,6 +9,8 @@ import { authGuard } from './core/guards/auth-guard';
 import { roleGuard } from './core/guards/role-guard';
 import { UserRole } from './core/models/user';
 import { Dashboard } from './pages/admin/dashboard/dashboard';
+import { InscriptionChoice } from './components/auth/inscription-choice/inscription-choice';
+import { Inscription } from './components/auth/inscription/inscription';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -18,6 +20,8 @@ export const routes: Routes = [
     canActivate: [noAuthGuard],
     children: [
       { path: 'login', component: Login },
+      { path: 'inscription-choix', component: InscriptionChoice },
+      { path: 'inscription', component: Inscription },
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]
   },

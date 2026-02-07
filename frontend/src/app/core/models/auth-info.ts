@@ -5,7 +5,7 @@ export interface AuthInfo {
   mdp: string
 }
 
-export interface LoginResponse {
+export interface AuthResponse {
   token: string,
   user: User
 }

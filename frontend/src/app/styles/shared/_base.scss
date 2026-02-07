@@ -1,6 +1,18 @@
 @use "variables" as v;
 @use "mixins" as m;
 
+// ----- Default -----
+
+p {
+  margin-bottom: 0;
+}
+
+a {
+  cursor: pointer;
+}
+
+// -------------------
+
 .border-red {
   border: 1px solid red;
 }
@@ -52,20 +64,6 @@
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   background-color: rgba(0, 0, 0, 0.2);
-}
-
-/* Carte flottante */
-.floating-card {
-  pointer-events: auto; // réactive les clics
-  background: rgba(255, 255, 255, 0.98);
-  width: 100%;
-  max-width: 420px;
-  max-height: 85vh;
-  border-radius: 13px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
-
-  overflow-y: auto;
-  @include m.thin-scrollbar
 }
 
 /* Mobile */

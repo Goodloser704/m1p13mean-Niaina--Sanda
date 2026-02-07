@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { AuthInfo, LoginResponse } from '../models/auth-info';
+import { AuthInfo, AuthResponse } from '../models/auth-info';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { User, UserRole } from '../models/user';
@@ -10,21 +10,25 @@ import { User, UserRole } from '../models/user';
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly USER_KEY = 'auth_user';
-
   apiUrl: string = environment.apiUrl;
+  
+  private readonly USER_KEY = 'auth_user';
+  private readonly TOKEN_KEY = 'auth_token';
+
+  registrationRole = signal<UserRole | null>(null);
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  private setSession(res: LoginResponse) {
+  private setSession(res: AuthResponse) {
     localStorage.setItem(this.TOKEN_KEY, res.token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(res.user));
   }
 
-  login(authInfo: AuthInfo): Observable<LoginResponse> {
+  // --- Fonctions appel api ---
+
+  login(authInfo: AuthInfo): Observable<AuthResponse> {
     return this.http
-      .post<LoginResponse>(`${this.apiUrl}/api/auth/login`, authInfo)
+      .post<AuthResponse>(`${this.apiUrl}/api/auth/login`, authInfo)
       .pipe(
         tap(res => {
           this.setSession(res);
@@ -38,6 +42,19 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     this.router.navigate(['/login']);
   }
+
+  inscription(user: User) {
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/api/auth/register`, user)
+      .pipe(
+        tap(res => {
+          this.setSession(res);
+          this.redirectByRole(res.user.role);
+        })
+      );
+  }
+
+  // ----- End fonctions -----
 
   // ---- Getters ----
 
