@@ -11,7 +11,6 @@ import { UserRole } from './core/models/user';
 import { Dashboard } from './pages/admin/dashboard/dashboard';
 
 export const routes: Routes = [
-  { path: '**', redirectTo: '' }, // Url inconnue
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
     path: '', 
@@ -46,4 +45,6 @@ export const routes: Routes = [
     data: { roles: [UserRole.Acheteur] },
     children: []
   },
+  // Wildcard URL Inconnu (TOUJOURS A LA FIN)
+  { path: '**', redirectTo: 'login' }
 ];

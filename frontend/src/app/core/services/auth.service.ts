@@ -47,7 +47,14 @@ export class AuthService {
 
   getCurrentUser(): User | null {
     const user = localStorage.getItem(this.USER_KEY);
-    return user ? JSON.parse(user) : null;
+    if (user) {
+      const userObject = JSON.parse(user);
+      console.log(`User not null, role: ${userObject.role}`);
+      return userObject;
+    } else {
+      console.warn("User is null in local storage");
+      return null;
+    }
   }
 
   isLoggedIn(): boolean {
@@ -77,6 +84,7 @@ export class AuthService {
 
   // Redirection des roles
   redirectByRole(role: UserRole) {
+    console.log(`Redirect to ${role}`);
     this.router.navigate([this.getHomeByRole(role)]);
   }
 

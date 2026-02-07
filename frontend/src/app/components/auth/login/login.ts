@@ -19,9 +19,9 @@ export class Login {
   UserRole = UserRole;
 
   defaultUsers: DefaultUser[] = [
-    { role: UserRole.Admin, email: 'admin@gmail.com', mdp: 'admintest' },
-    { role: UserRole.Commercant, email: 'commercant@gmail.com', mdp: 'commercant' },
-    { role: UserRole.Acheteur, email: 'acheteur@gmail.com', mdp: 'acheteur' }
+    { role: UserRole.Admin, email: 'admin@mall.com', mdp: 'Admin123456!' },
+    { role: UserRole.Commercant, email: 'commercant@test.com', mdp: 'Commercant123456!' },
+    { role: UserRole.Acheteur, email: 'client@test.com', mdp: 'Client123456!' }
   ]
 
   isLoading = signal(false);
@@ -59,8 +59,9 @@ export class Login {
 
     this.authService.login(this.form.value)
       .subscribe({
-        error: () => {
+        error: (err) => {
           this.error.set('Identifiants invalides');
+          console.error(err);
           this.isLoading.set(false);
         },
         complete: () => this.isLoading.set(false)

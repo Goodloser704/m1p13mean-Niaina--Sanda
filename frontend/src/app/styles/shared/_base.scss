@@ -40,6 +40,20 @@
   z-index: 1000;
 }
 
+.floating-container-darker { // capable d'intercepter les clicks
+  position: fixed;
+  inset: 0; // top:0 right:0 bottom:0 left:0
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto; // laisse passer les events
+  z-index: 1000;
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
 /* Carte flottante */
 .floating-card {
   pointer-events: auto; // réactive les clics
@@ -86,3 +100,65 @@
 }
 
 // -- End Forms --
+
+// ---- Button ----
+
+.btn-primary {
+  background-color: v.$accent-color;
+  border-color: v.$accent-color;
+  color: v.$contrast-color;
+
+  &:hover {
+    background-color: darken(v.$accent-color, 10);
+    border-color: darken(v.$accent-color, 10);
+  }
+}
+
+.btn-outline-primary {
+  background-color: v.$contrast-color;
+  border-width: 2px;
+  border-color: v.$accent-color;
+  color: v.$accent-color;
+
+  &:hover {
+    background-color: darken(v.$contrast-color, 10);
+    color: darken(v.$accent-color, 10);
+    border-color: darken(v.$accent-color, 10);
+  }
+}
+
+.btn-secondary {
+  background-color: v.$heading-color;
+  border-color: v.$heading-color;
+  color: v.$contrast-color;
+
+  &:hover {
+    background-color: darken(v.$heading-color, 10);
+    border-color: darken(v.$heading-color, 10);
+  }
+}
+
+.btn-outline-secondary {
+  background-color: v.$contrast-color;
+  border-width: 2px;
+  border-color: v.$heading-color;
+  color: v.$heading-color;
+
+  &:hover {
+    background-color: darken(v.$contrast-color, 10);
+    color: darken(v.$heading-color, 10);
+    border-color: darken(v.$heading-color, 10);
+  }
+}
+
+// -- End Button --
+
+// --- Image avatar ---
+
+.navbar-nav .nav-item img {
+  object-fit: cover;
+  border: 2px solid #fff; // optionnel, contour blanc
+  cursor: pointer;
+}
+
+// - End Image avatar -

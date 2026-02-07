@@ -11,7 +11,7 @@
           <a class="navbar-brand brand-title" href="#">
             {{ centre().nom | titlecase }}
           </a>
-          <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0">
+          <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 d-flex align-items-lg-center">
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="#">Home</a>
             </li>
@@ -21,6 +21,39 @@
             <li class="nav-item">
               <a class="nav-link disabled" aria-disabled="true">Disabled</a>
             </li>
+
+            @if (currentUser(); as user) {
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle d-flex align-items-center"
+                  href="#"
+                  id="userDropdown"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <img
+                    [src]="user.photo ? user.photo : 'assets/img/user.png'"
+                    alt="Avatar"
+                    class="rounded-circle"
+                    width="30"
+                    height="30"
+                  />
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="userDropdown" style="min-width: 200px;">
+                  <li class="px-2 py-1"><strong>{{ user.prenoms }} {{ user.nom }}</strong></li>
+                  <li class="px-2 py-1 text-black-50">{{ user.email }}</li>
+                  <li class="px-2 py-1 text-muted">{{ user.role }}</li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li class="px-2 py-1 text-center">
+                    <button class="btn btn-sm btn-danger w-100" (click)="onClickLogout()">
+                      <i class="bi bi-home"></i>
+                      Log out
+                    </button>
+                  </li>
+                </ul>
+              </li>
+            }
           </ul>
           <!-- <form class="d-flex" role="search">
             <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
@@ -31,3 +64,11 @@
     </nav>
   </div>
 </header>
+
+@if (showLogoutDialog()) {
+  <app-dialog 
+    dialog="Voulez-vous vraiment vous déconnecter ?"
+    (dialogResponse)="onLogoutAnswer($event)"
+    (clickOutside)="showLogoutDialog.set(false)"
+  />
+}

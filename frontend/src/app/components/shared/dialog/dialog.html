@@ -1,0 +1,9 @@
+<div class="floating-container-darker" (click)="onClickOutside()">
+  <div class="dialog-card" (click)="$event.stopPropagation()">
+    <p class="dialog-title">{{ dialog }}</p>
+    <div class="w-100 d-flex justify-content-center">
+      <button class="btn btn-primary me-3" (click)="onChoose(true)">Yes</button>
+      <button class="btn btn-outline-primary" (click)="onChoose(false)">No</button>
+    </div>
+  </div>
+</div>
