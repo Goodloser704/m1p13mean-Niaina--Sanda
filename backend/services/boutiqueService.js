@@ -26,7 +26,7 @@ class BoutiqueService {
 
       // Vérifier si une boutique avec le même nom existe déjà pour cet utilisateur
       const existingBoutique = await Boutique.findOne({ 
-        proprietaire: userId, 
+        commercant: userId, 
         nom: boutiqueData.nom 
       });
       if (existingBoutique) {
@@ -35,10 +35,9 @@ class BoutiqueService {
 
       // Créer la boutique
       const boutique = new Boutique({
-        proprietaire: userId,
-        commercant: userId, // Ajouter commercant pour compatibilité avec le modèle
+        commercant: userId,
         ...boutiqueData,
-        statut: 'en_attente'
+        statutBoutique: 'Inactif' // Selon le modèle, c'est statutBoutique et non statut
       });
 
       await boutique.save();
@@ -265,8 +264,10 @@ class BoutiqueService {
    */
   async getUserBoutiques(userId) {
     try {
-      const boutiques = await Boutique.find({ proprietaire: userId })
-        .sort({ dateCreation: -1 });
+      const boutiques = await Boutique.find({ commercant: userId })
+        .populate('categorie', 'nom description')
+        .populate('espace', 'code surface')
+        .sort({ createdAt: -1 });
       return boutiques;
     } catch (error) {
       console.error('❌ Erreur récupération boutiques utilisateur:', error.message);
@@ -279,12 +280,14 @@ class BoutiqueService {
    */
   async getUserBoutique(userId, boutiqueId = null) {
     try {
-      let query = { proprietaire: userId };
+      let query = { commercant: userId };
       if (boutiqueId) {
         query._id = boutiqueId;
       }
       
-      const boutique = await Boutique.findOne(query);
+      const boutique = await Boutique.findOne(query)
+        .populate('categorie', 'nom description')
+        .populate('espace', 'code surface');
       return boutique;
     } catch (error) {
       console.error('❌ Erreur récupération boutique utilisateur:', error.message);

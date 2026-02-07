@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { BoutiqueService, Boutique } from '../../services/boutique.service';
 
 @Component({
@@ -18,7 +19,11 @@ export class MyBoutiquesComponent implements OnInit {
   selectedBoutique: Boutique | null = null;
   isDeleting = false;
 
-  constructor(private boutiqueService: BoutiqueService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private boutiqueService: BoutiqueService, 
+    private cdr: ChangeDetectorRef,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.loadBoutiques();
@@ -62,12 +67,8 @@ export class MyBoutiquesComponent implements OnInit {
   }
 
   goToRegistration() {
-    // Émettre un événement pour naviguer vers le formulaire d'inscription
-    // Ou utiliser le router si configuré
     console.log('Navigation vers formulaire inscription boutique');
-    // Pour l'instant, on ferme juste le formulaire de création
-    this.showCreateForm = false;
-    // TODO: Implémenter navigation
+    this.router.navigate(['/boutique-registration']);
   }
 
   viewBoutique(boutique: Boutique) {
