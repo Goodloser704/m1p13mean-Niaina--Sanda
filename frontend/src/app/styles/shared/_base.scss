@@ -101,6 +101,15 @@ a {
 
 // ---- Button ----
 
+.btn-sm {
+  height: fit-content;
+  padding: 0.2rem 0.6rem;
+  border: none;
+  border-radius: 10px;
+  font-size: small;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.2);
+}
+
 .btn-primary {
   background-color: v.$accent-color;
   border-color: v.$accent-color;

@@ -1,3 +1,5 @@
+@use "../../../styles/shared/variables" as v;
+
 :host .floating-container {
   backdrop-filter: blur(1px);
   -webkit-backdrop-filter: blur(1px);
@@ -13,9 +15,9 @@
   max-width: 200px;
   aspect-ratio: 1;
   
-  background: radial-gradient(circle, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 70%);
+  background: radial-gradient(circle, rgba(v.$accent-color, 0.6) 0%, rgba(v.$accent-color, 0.1) 70%);
   /* Optionnel: pour un effet plus intense */
-  box-shadow: 0 0 20px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 20px 10px rgba(v.$accent-color, 0.1);
 }
 
 .loader {

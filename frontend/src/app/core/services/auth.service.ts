@@ -15,7 +15,8 @@ export class AuthService {
   private readonly USER_KEY = 'auth_user';
   private readonly TOKEN_KEY = 'auth_token';
 
-  registrationRole = signal<UserRole | null>(null);
+  // registrationRole = signal<UserRole | null>(null);
+  registrationRole = signal<UserRole | null>(UserRole.Commercant); // Juste pour les test Ctrl + S
 
   constructor(private http: HttpClient, private router: Router) {}
 
