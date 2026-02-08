@@ -94,6 +94,12 @@ export enum CategorieBoutiqueEnum {
   Autres = 'Autres'
 }
 
+// Genre
+export enum GenreEnum {
+  Masculin = 'Masculin',
+  Feminin = 'Feminin'
+}
+
 // Statuts des factures
 export enum StatutFactureEnum {
   Brouillon = 'Brouillon',

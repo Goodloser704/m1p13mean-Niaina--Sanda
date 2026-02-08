@@ -67,7 +67,7 @@ export interface User {
   
   // Champs de profil personnel
   dateNaissance?: string;
-  genre?: 'homme' | 'femme' | 'autre';
+  genre?: 'Masculin' | 'Feminin'; // Enum Genre
   
   // Champs spécifiques aux propriétaires de boutique
   nomBoutique?: string;

@@ -155,6 +155,16 @@ export class AdminBoutiquesComponent implements OnInit, OnDestroy {
     return '';
   }
 
+  getCategoryName(categorie: any): string {
+    if (typeof categorie === 'object' && categorie?.nom) {
+      return categorie.nom;
+    }
+    if (typeof categorie === 'string') {
+      return categorie; // Fallback si c'est juste un ID
+    }
+    return 'Non spécifiée';
+  }
+
   goBack() {
     this.router.navigate(['/']);
   }

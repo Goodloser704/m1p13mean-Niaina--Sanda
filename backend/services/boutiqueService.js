@@ -133,6 +133,8 @@ class BoutiqueService {
     try {
       const boutiques = await Boutique.find({ statutBoutique: 'EnAttente' })
         .populate('commercant', 'nom prenoms email telephone') // Utiliser 'prenoms' selon spécifications
+        .populate('categorie', 'nom description') // Populate catégorie pour afficher le nom
+        .populate('espace', 'codeEspace etage') // Populate espace si présent
         .sort({ dateCreation: -1 });
 
       return boutiques;
@@ -148,7 +150,8 @@ class BoutiqueService {
   async approveBoutique(boutiqueId, adminId) {
     try {
       const boutique = await Boutique.findById(boutiqueId)
-        .populate('commercant', 'nom prenoms email'); // Utiliser 'prenoms' selon spécifications
+        .populate('commercant', 'nom prenoms email') // Utiliser 'prenoms' selon spécifications
+        .populate('categorie', 'nom description'); // Populate catégorie
 
       if (!boutique) {
         throw new Error('Boutique non trouvée');
@@ -395,6 +398,8 @@ class BoutiqueService {
       
       const boutiques = await Boutique.find({ statutBoutique: 'Actif' })
         .populate('commercant', 'nom prenoms email telephone') // Utiliser 'prenoms' selon spécifications
+        .populate('categorie', 'nom description') // Populate catégorie pour afficher le nom
+        .populate('espace', 'codeEspace etage') // Populate espace si présent
         .sort({ createdAt: -1 });
 
       console.log(`✅ ${boutiques.length} boutiques actives trouvées`);

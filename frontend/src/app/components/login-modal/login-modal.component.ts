@@ -30,7 +30,8 @@ export class LoginModal implements OnInit {
     prenom: '',
     role: 'client' as 'boutique' | 'client',
     telephone: '',
-    adresse: ''
+    adresse: '',
+    genre: '' as '' | 'Masculin' | 'Feminin'
   };
 
   // Profils de démonstration (conformes à la base de données)

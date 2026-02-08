@@ -79,6 +79,12 @@ const CategorieBoutiqueEnum = {
   Autres: 'Autres'
 };
 
+// Genre
+const GenreEnum = {
+  Masculin: 'Masculin',
+  Feminin: 'Feminin'
+};
+
 module.exports = {
   RoleEnum,
   StatutBoutiqueEnum,
@@ -89,5 +95,6 @@ module.exports = {
   TypeAchatEnum,
   EtatAchatEnum,
   JourSemaineEnum,
-  CategorieBoutiqueEnum
+  CategorieBoutiqueEnum,
+  GenreEnum
 };

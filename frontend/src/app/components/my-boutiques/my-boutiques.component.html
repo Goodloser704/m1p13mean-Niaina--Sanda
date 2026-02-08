@@ -39,7 +39,7 @@
         <div class="boutique-title">
           <h3>{{ boutique.nom }}</h3>
           <span class="category-badge">
-            {{ getCategoryIcon(boutique.categorie) }} {{ boutique.categorie }}
+            {{ getCategoryIcon(boutique.categorie) }} {{ getCategoryName(boutique.categorie) }}
           </span>
         </div>
         <div class="status-badge" [style.background-color]="getStatusColor(boutique.statut)">
@@ -154,7 +154,7 @@
       <div class="modal-body">
         <p><strong>Êtes-vous sûr de vouloir supprimer cette boutique ?</strong></p>
         <p><strong>Nom :</strong> {{ selectedBoutique?.nom }}</p>
-        <p><strong>Catégorie :</strong> {{ selectedBoutique?.categorie }}</p>
+        <p><strong>Catégorie :</strong> {{ getCategoryName(selectedBoutique?.categorie) }}</p>
         <p class="warning">⚠️ Cette action est irréversible.</p>
       </div>
       

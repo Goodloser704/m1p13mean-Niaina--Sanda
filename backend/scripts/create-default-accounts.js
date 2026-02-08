@@ -19,6 +19,7 @@ const defaultAccounts = [
     mdp: 'Admin123456!',
     role: 'Admin',
     telephone: '0340000001',
+    genre: 'Masculin',
     isActive: true
   },
   {
@@ -28,6 +29,7 @@ const defaultAccounts = [
     mdp: 'Client123456!',
     role: 'Acheteur',
     telephone: '0340000002',
+    genre: 'Masculin',
     isActive: true
   },
   {
@@ -37,6 +39,7 @@ const defaultAccounts = [
     mdp: 'Commercant123456!',
     role: 'Commercant',
     telephone: '0340000003',
+    genre: 'Masculin',
     isActive: true
   }
 ];

@@ -117,6 +117,20 @@
         </div>
 
         <div class="form-group">
+          <label for="genre">👤 Genre</label>
+          <select 
+            id="genre"
+            [(ngModel)]="registerForm.genre" 
+            name="genre">
+            <option value="">Sélectionner</option>
+            <option value="Masculin">Masculin</option>
+            <option value="Feminin">Féminin</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
           <label for="telephone">📞 Téléphone</label>
           <input 
             type="tel" 
@@ -125,16 +139,16 @@
             name="telephone"
             placeholder="01 23 45 67 89">
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="adresse">🏠 Adresse</label>
-        <input 
-          type="text" 
-          id="adresse"
-          [(ngModel)]="registerForm.adresse" 
-          name="adresse"
-          placeholder="Votre adresse complète">
+        <div class="form-group">
+          <label for="adresse">🏠 Adresse</label>
+          <input 
+            type="text" 
+            id="adresse"
+            [(ngModel)]="registerForm.adresse" 
+            name="adresse"
+            placeholder="Votre adresse complète">
+        </div>
       </div>
 
       <button type="submit" class="btn-primary">

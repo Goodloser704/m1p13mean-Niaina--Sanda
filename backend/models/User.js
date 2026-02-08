@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const { RoleEnum } = require('../utils/enums');
+const { RoleEnum, GenreEnum } = require('../utils/enums');
 
 /**
  * 👤 Modèle Utilisateur - CONFORME AUX SPÉCIFICATIONS
@@ -43,6 +43,12 @@ const userSchema = new mongoose.Schema({
   photo: {
     type: String
     // Optional selon spécifications
+  },
+  
+  genre: {
+    type: String,
+    enum: [GenreEnum.Masculin, GenreEnum.Feminin],
+    // Optional - peut être null
   },
   
   role: {
@@ -99,6 +105,7 @@ userSchema.methods.getPublicProfile = function() {
     role: this.role,
     telephone: this.telephone,
     photo: this.photo,
+    genre: this.genre,
     isActive: this.isActive,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt

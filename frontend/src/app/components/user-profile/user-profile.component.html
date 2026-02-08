@@ -77,28 +77,25 @@
           </div>
 
           <div class="form-group">
-            <label for="dateNaissance">Date de naissance</label>
-            <input 
-              type="date" 
-              id="dateNaissance" 
-              formControlName="dateNaissance"
-              [readonly]="!isEditing">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
             <label for="genre">Genre</label>
             <select 
               id="genre" 
               formControlName="genre"
               [disabled]="!isEditing">
               <option value="">Sélectionner</option>
-              <option value="homme">Homme</option>
-              <option value="femme">Femme</option>
-              <option value="autre">Autre</option>
+              <option value="Masculin">Masculin</option>
+              <option value="Feminin">Féminin</option>
             </select>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label for="dateNaissance">Date de naissance</label>
+          <input 
+            type="date" 
+            id="dateNaissance" 
+            formControlName="dateNaissance"
+            [readonly]="!isEditing">
         </div>
 
         <div class="form-group">

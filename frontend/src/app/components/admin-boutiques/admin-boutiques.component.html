@@ -28,7 +28,7 @@
 
       <div class="card-content">
         <div class="boutique-info">
-          <p><strong>📂 Catégorie:</strong> {{ boutique.categorie }}</p>
+          <p><strong>📂 Catégorie:</strong> {{ getCategoryName(boutique.categorie) }}</p>
           <p *ngIf="boutique.description"><strong>📝 Description:</strong> {{ boutique.description }}</p>
           
           <!-- Propriétaire -->
@@ -89,7 +89,7 @@
         <div class="detail-section">
           <h4>📋 Informations générales</h4>
           <p><strong>Nom:</strong> {{ selectedBoutique.nom }}</p>
-          <p><strong>Catégorie:</strong> {{ selectedBoutique.categorie }}</p>
+          <p><strong>Catégorie:</strong> {{ getCategoryName(selectedBoutique.categorie) }}</p>
           <p><strong>Statut:</strong> 
             <span [style.color]="getStatusColor(selectedBoutique.statut)">
               {{ getStatusIcon(selectedBoutique.statut) }} {{ selectedBoutique.statut | titlecase }}

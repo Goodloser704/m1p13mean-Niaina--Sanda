@@ -12,6 +12,7 @@ export interface User {
   role: 'Admin' | 'Commercant' | 'Acheteur';
   telephone?: string;
   adresse?: string;
+  genre?: 'Masculin' | 'Feminin';
 }
 
 export interface AuthResponse {
