@@ -55,7 +55,7 @@ router.get('/profile', auth, authController.getProfile);
 // @route   PUT /api/users/me (conforme aux spécifications)
 // @desc    Mettre à jour le profil utilisateur
 // @access  Private
-// @body    { nom, prenoms, email, telephone, photo }
+// @body    { nom, prenoms, email, telephone, photo, genre }
 // @return  { message, user }
 router.put('/users/me', [
   // Champs obligatoires seulement s'ils sont présents
@@ -66,7 +66,7 @@ router.put('/users/me', [
   // Champs complètement optionnels
   body('telephone').optional({ nullable: true, checkFalsy: false }).trim(),
   body('dateNaissance').optional({ nullable: true, checkFalsy: false }),
-  body('genre').optional({ nullable: true, checkFalsy: false }).isIn(['homme', 'femme', 'autre']),
+  body('genre').optional({ nullable: true, checkFalsy: false }).isIn(['Masculin', 'Feminin']),
   body('adresse').optional({ nullable: true, checkFalsy: false }).trim(),
   
   // Champs boutique optionnels
@@ -91,7 +91,7 @@ router.put('/profile', [
   // Champs complètement optionnels
   body('telephone').optional({ nullable: true, checkFalsy: false }).trim(),
   body('dateNaissance').optional({ nullable: true, checkFalsy: false }),
-  body('genre').optional({ nullable: true, checkFalsy: false }).isIn(['homme', 'femme', 'autre']),
+  body('genre').optional({ nullable: true, checkFalsy: false }).isIn(['Masculin', 'Feminin']),
   body('adresse').optional({ nullable: true, checkFalsy: false }).trim(),
   
   // Champs boutique optionnels

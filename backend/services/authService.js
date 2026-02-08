@@ -132,7 +132,7 @@ class AuthService {
    * 📝 Mettre à jour le profil utilisateur
    */
   async updateUserProfile(userId, profileData) {
-    const { nom, prenoms, email, telephone, photo } = profileData;
+    const { nom, prenoms, email, telephone, photo, genre } = profileData;
 
     // Vérifier si l'utilisateur existe
     const user = await User.findById(userId);
@@ -155,6 +155,7 @@ class AuthService {
     if (email) updateData.email = email;
     if (telephone !== undefined) updateData.telephone = telephone;
     if (photo !== undefined) updateData.photo = photo;
+    if (genre !== undefined) updateData.genre = genre;
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
