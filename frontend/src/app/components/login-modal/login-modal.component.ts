@@ -148,7 +148,7 @@ export class LoginModal implements OnInit {
     this.loginForm = { email: '', password: '', role: 'client' };
     this.registerForm = {
       email: '', password: '', nom: '', prenom: '',
-      role: 'client', telephone: '', adresse: ''
+      role: 'client', telephone: '', adresse: '', genre: ''
     };
   }
 
