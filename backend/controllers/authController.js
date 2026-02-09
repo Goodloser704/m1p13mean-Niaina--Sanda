@@ -42,7 +42,9 @@ class AuthController {
         nom: req.body.nom,
         prenoms: req.body.prenoms, // Utiliser 'prenoms' selon les spécifications
         role: req.body.role,
-        telephone: req.body.telephone
+        telephone: req.body.telephone,
+        photo: req.body.photo, // Inclure photo
+        genre: req.body.genre  // Inclure genre
       };
       
       console.log(`➕ [CONTROLLER] Création nouvel utilisateur: ${userData.email}`);

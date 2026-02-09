@@ -34,7 +34,7 @@ class AuthService {
     console.log('🔧 [SERVICE] === DEBUT createUser ===');
     console.log('🔧 [SERVICE] Données reçues:', JSON.stringify(userData, null, 2));
     
-    const { email, mdp, nom, prenoms, role, telephone } = userData;
+    const { email, mdp, nom, prenoms, role, telephone, photo, genre } = userData;
     let user;
     
     try {
@@ -56,7 +56,8 @@ class AuthService {
         prenoms,
         role,
         telephone,
-        photo: null,
+        photo: photo || undefined, // Utiliser la valeur fournie ou undefined (pas null)
+        genre: genre || undefined, // Utiliser la valeur fournie ou undefined (pas null)
         isActive: true // Explicitly set to true to ensure account is active
       });
 

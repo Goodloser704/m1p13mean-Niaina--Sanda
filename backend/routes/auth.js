@@ -14,14 +14,16 @@ const router = express.Router();
 // @route   POST /api/auth/register
 // @desc    Inscription utilisateur (Commercant ou Acheteur)
 // @access  Public
-// @body    { email, mdp, nom, prenoms, role, telephone }
+// @body    { email, mdp, nom, prenoms, role, telephone, photo?, genre? }
 // @return  { message, token, user, portefeuille }
 router.post('/register', [
   body('email').isEmail().normalizeEmail(),
   body('mdp').isLength({ min: 6 }), // Utiliser 'mdp' selon les spécifications
   body('nom').notEmpty().trim(),
   body('prenoms').notEmpty().trim(), // Utiliser 'prenoms' selon les spécifications
-  body('role').isIn(['Admin', 'Commercant', 'Acheteur']) // Enums selon spécifications
+  body('role').isIn(['Admin', 'Commercant', 'Acheteur']), // Enums selon spécifications
+  body('photo').optional({ nullable: true, checkFalsy: false }).isString().trim(), // Photo optionnelle
+  body('genre').optional({ nullable: true, checkFalsy: false }).isIn(['Masculin', 'Feminin']) // Genre optionnel
 ], authController.register);
 
 // @route   POST /api/auth/login
