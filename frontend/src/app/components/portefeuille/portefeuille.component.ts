@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PortefeuilleService, PorteFeuille, PFTransaction, PortefeuilleStats } from '../../services/portefeuille.service';
@@ -239,7 +239,8 @@ export class PortefeuilleComponent implements OnInit {
 
   constructor(
     public portefeuilleService: PortefeuilleService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -249,6 +250,7 @@ export class PortefeuilleComponent implements OnInit {
   async chargerDonneesInitiales(): Promise<void> {
     this.loading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges(); // Forcer la détection
     
     try {
       // Charger le portefeuille d'abord
@@ -274,12 +276,15 @@ export class PortefeuilleComponent implements OnInit {
       this.errorMessage = 'Erreur lors du chargement des données';
     } finally {
       this.loading = false;
+      this.cdr.detectChanges(); // Forcer la détection
+      console.log('🔄 Loading mis à false et detectChanges appelé');
     }
   }
 
   loadPortefeuille(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
     this.portefeuilleService.obtenirMonPortefeuille().subscribe({
       next: (response) => {
         this.portefeuille = response.portefeuille;
@@ -290,6 +295,7 @@ export class PortefeuilleComponent implements OnInit {
       },
       complete: () => {
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -297,6 +303,7 @@ export class PortefeuilleComponent implements OnInit {
   loadTransactions(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
     const options = {
       page: this.pagination.page,
       limit: this.pagination.limit,
@@ -314,6 +321,7 @@ export class PortefeuilleComponent implements OnInit {
       },
       complete: () => {
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -321,6 +329,7 @@ export class PortefeuilleComponent implements OnInit {
   loadStats(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
     this.portefeuilleService.obtenirStatistiques().subscribe({
       next: (response) => {
         this.stats = response;
@@ -331,6 +340,7 @@ export class PortefeuilleComponent implements OnInit {
       },
       complete: () => {
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

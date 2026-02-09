@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EspaceService } from '../../services/espace.service';
@@ -64,7 +64,8 @@ export class AdminEspacesComponent implements OnInit {
   constructor(
     private espaceService: EspaceService,
     private etageService: EtageService,
-    private boutiqueService: BoutiqueService
+    private boutiqueService: BoutiqueService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -87,6 +88,7 @@ export class AdminEspacesComponent implements OnInit {
   async chargerDonneesInitiales() {
     this.loading = true;
     this.error = '';
+    this.cdr.detectChanges(); // Forcer la détection
     
     try {
       await Promise.all([
@@ -100,6 +102,8 @@ export class AdminEspacesComponent implements OnInit {
       this.error = 'Erreur lors du chargement des données';
     } finally {
       this.loading = false;
+      this.cdr.detectChanges(); // Forcer la détection
+      console.log('🔄 Loading mis à false et detectChanges appelé');
     }
   }
 
@@ -169,10 +173,12 @@ export class AdminEspacesComponent implements OnInit {
   async appliquerFiltres() {
     this.currentPage = 1;
     this.loading = true;
+    this.cdr.detectChanges();
     try {
       await this.chargerEspaces();
     } finally {
       this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -183,10 +189,12 @@ export class AdminEspacesComponent implements OnInit {
     };
     this.currentPage = 1;
     this.loading = true;
+    this.cdr.detectChanges();
     try {
       await this.chargerEspaces();
     } finally {
       this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -343,10 +351,12 @@ export class AdminEspacesComponent implements OnInit {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
       this.loading = true;
+      this.cdr.detectChanges();
       try {
         await this.chargerEspaces();
       } finally {
         this.loading = false;
+        this.cdr.detectChanges();
       }
     }
   }

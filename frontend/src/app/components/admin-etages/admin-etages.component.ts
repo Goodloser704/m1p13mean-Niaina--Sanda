@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EtageService } from '../../services/etage.service';
@@ -39,7 +39,10 @@ export class AdminEtagesComponent implements OnInit {
   stats: any = null;
   showStats = false;
 
-  constructor(private etageService: EtageService) {}
+  constructor(
+    private etageService: EtageService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     console.log('🏢 [FRONTEND-COMPONENT] === DEBUT ngOnInit ===');
@@ -62,6 +65,7 @@ export class AdminEtagesComponent implements OnInit {
   async chargerDonneesInitiales() {
     this.loading = true;
     this.error = '';
+    this.cdr.detectChanges(); // Forcer la détection pour afficher le loading
     
     try {
       await Promise.all([
@@ -72,6 +76,8 @@ export class AdminEtagesComponent implements OnInit {
       console.error('❌ [FRONTEND-COMPONENT] Erreur chargement données initiales:', error);
     } finally {
       this.loading = false;
+      this.cdr.detectChanges(); // Forcer la détection pour masquer le loading
+      console.log('🔄 [FRONTEND-COMPONENT] Loading mis à false et detectChanges appelé');
     }
   }
 
@@ -329,10 +335,12 @@ export class AdminEtagesComponent implements OnInit {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
       this.loading = true;
+      this.cdr.detectChanges();
       try {
         await this.chargerEtages();
       } finally {
         this.loading = false;
+        this.cdr.detectChanges();
       }
     }
   }
