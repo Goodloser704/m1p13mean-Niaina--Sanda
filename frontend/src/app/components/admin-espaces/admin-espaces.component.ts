@@ -111,7 +111,7 @@ export class AdminEspacesComponent implements OnInit {
       }
     } catch (error: any) {
       console.error('❌ Erreur chargement espaces:', error);
-      this.error = 'Erreur lors du chargement des espaces';
+      this.error = error.error?.message || 'Erreur lors du chargement des espaces';
     } finally {
       this.loading = false;
     }
@@ -278,6 +278,9 @@ export class AdminEspacesComponent implements OnInit {
       return;
     }
 
+    this.loading = true;
+    this.error = '';
+
     try {
       await this.espaceService.libererEspace(espace._id).toPromise();
       this.success = 'Espace libéré avec succès';
@@ -291,6 +294,8 @@ export class AdminEspacesComponent implements OnInit {
     } catch (error: any) {
       this.error = error.error?.message || 'Erreur lors de la libération';
       console.error('Erreur libération espace:', error);
+    } finally {
+      this.loading = false;
     }
   }
 

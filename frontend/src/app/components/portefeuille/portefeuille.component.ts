@@ -249,14 +249,16 @@ export class PortefeuilleComponent implements OnInit {
 
   loadPortefeuille(): void {
     this.loading = true;
+    this.errorMessage = '';
     this.portefeuilleService.obtenirMonPortefeuille().subscribe({
       next: (response) => {
         this.portefeuille = response.portefeuille;
-        this.loading = false;
       },
       error: (error) => {
         console.error('Erreur chargement portefeuille:', error);
         this.errorMessage = 'Erreur lors du chargement du portefeuille';
+      },
+      complete: () => {
         this.loading = false;
       }
     });
@@ -264,6 +266,7 @@ export class PortefeuilleComponent implements OnInit {
 
   loadTransactions(): void {
     this.loading = true;
+    this.errorMessage = '';
     const options = {
       page: this.pagination.page,
       limit: this.pagination.limit,
@@ -274,17 +277,20 @@ export class PortefeuilleComponent implements OnInit {
       next: (response) => {
         this.transactions = response.transactions;
         this.pagination = response.pagination;
-        this.loading = false;
       },
       error: (error) => {
         console.error('Erreur chargement transactions:', error);
         this.errorMessage = 'Erreur lors du chargement des transactions';
+      },
+      complete: () => {
         this.loading = false;
       }
     });
   }
 
   loadStats(): void {
+    this.loading = true;
+    this.errorMessage = '';
     this.portefeuilleService.obtenirStatistiques().subscribe({
       next: (response) => {
         this.stats = response;
@@ -292,6 +298,9 @@ export class PortefeuilleComponent implements OnInit {
       error: (error) => {
         console.error('Erreur chargement statistiques:', error);
         this.errorMessage = 'Erreur lors du chargement des statistiques';
+      },
+      complete: () => {
+        this.loading = false;
       }
     });
   }
@@ -309,6 +318,7 @@ export class PortefeuilleComponent implements OnInit {
 
     this.rechargingInProgress = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
     this.portefeuilleService.rechargerPortefeuille(this.rechargeData).subscribe({
       next: (response) => {
@@ -316,7 +326,6 @@ export class PortefeuilleComponent implements OnInit {
         this.portefeuille = response.portefeuille;
         this.showRechargeModal = false;
         this.rechargeData.montant = 0;
-        this.rechargingInProgress = false;
         
         // Recharger les transactions pour voir la nouvelle transaction
         this.loadTransactions();
@@ -329,6 +338,8 @@ export class PortefeuilleComponent implements OnInit {
       error: (error) => {
         console.error('Erreur recharge:', error);
         this.errorMessage = error.error?.message || 'Erreur lors de la recharge';
+      },
+      complete: () => {
         this.rechargingInProgress = false;
       }
     });

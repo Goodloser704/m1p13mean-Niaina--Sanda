@@ -55,10 +55,11 @@ export class AdminBoutiquesComponent implements OnInit, OnDestroy {
     this.boutiqueService.getPendingBoutiques().subscribe({
       next: (response: any) => {
         this.boutiques = response.boutiques || [];
-        this.isLoading = false;
       },
       error: (error: any) => {
         console.error('Erreur lors du chargement des boutiques:', error);
+      },
+      complete: () => {
         this.isLoading = false;
       }
     });

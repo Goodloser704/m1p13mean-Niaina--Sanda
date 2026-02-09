@@ -40,11 +40,6 @@ export class MyBoutiquesComponent implements OnInit {
         this.boutiques = response.boutiques || [];
         console.log(`✅ ${response.count} boutiques chargées:`, this.boutiques);
         console.log('🔍 Boutiques assignées:', this.boutiques.length);
-        
-        // Mettre à jour l'état et forcer la détection
-        this.isLoading = false;
-        this.cdr.detectChanges(); // Forcer la détection de changement
-        console.log('🔄 isLoading mis à false et detectChanges appelé:', this.isLoading);
       },
       error: (error) => {
         console.error('❌ Erreur chargement boutiques:', error);
@@ -55,13 +50,15 @@ export class MyBoutiquesComponent implements OnInit {
           error: error.error
         });
         
-        this.isLoading = false;
-        this.cdr.detectChanges(); // Forcer la détection même en cas d'erreur
-        console.log('🔄 isLoading mis à false (erreur) et detectChanges appelé:', this.isLoading);
-        
         // Message d'erreur plus détaillé
         const errorMessage = error.error?.message || error.message || 'Erreur serveur';
         alert(`Erreur lors du chargement de vos boutiques:\n${errorMessage}\n\nStatut: ${error.status || 'Inconnu'}`);
+      },
+      complete: () => {
+        // Mettre à jour l'état et forcer la détection
+        this.isLoading = false;
+        this.cdr.detectChanges(); // Forcer la détection de changement
+        console.log('🔄 isLoading mis à false et detectChanges appelé:', this.isLoading);
       }
     });
   }
