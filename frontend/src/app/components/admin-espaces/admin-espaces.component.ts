@@ -85,18 +85,28 @@ export class AdminEspacesComponent implements OnInit {
   }
 
   async chargerDonneesInitiales() {
-    await Promise.all([
-      this.chargerEspaces(),
-      this.chargerEtages(),
-      this.chargerBoutiques(),
-      this.chargerStatistiques()
-    ]);
+    this.loading = true;
+    this.error = '';
+    
+    try {
+      await Promise.all([
+        this.chargerEspaces(),
+        this.chargerEtages(),
+        this.chargerBoutiques(),
+        this.chargerStatistiques()
+      ]);
+    } catch (error) {
+      console.error('❌ Erreur chargement données initiales:', error);
+      this.error = 'Erreur lors du chargement des données';
+    } finally {
+      this.loading = false;
+    }
   }
 
   // Chargement des données
   async chargerEspaces() {
     console.log('🏪 Chargement des espaces - Page:', this.currentPage, 'Filtres:', this.filters);
-    this.loading = true;
+    // Ne pas gérer loading ici car c'est géré par chargerDonneesInitiales
     this.error = '';
 
     try {
@@ -112,8 +122,7 @@ export class AdminEspacesComponent implements OnInit {
     } catch (error: any) {
       console.error('❌ Erreur chargement espaces:', error);
       this.error = error.error?.message || 'Erreur lors du chargement des espaces';
-    } finally {
-      this.loading = false;
+      throw error; // Propager l'erreur pour que Promise.all la capture
     }
   }
 
@@ -157,18 +166,28 @@ export class AdminEspacesComponent implements OnInit {
   }
 
   // Filtrage
-  appliquerFiltres() {
+  async appliquerFiltres() {
     this.currentPage = 1;
-    this.chargerEspaces();
+    this.loading = true;
+    try {
+      await this.chargerEspaces();
+    } finally {
+      this.loading = false;
+    }
   }
 
-  reinitialiserFiltres() {
+  async reinitialiserFiltres() {
     this.filters = {
       page: 1,
       limit: 20
     };
     this.currentPage = 1;
-    this.chargerEspaces();
+    this.loading = true;
+    try {
+      await this.chargerEspaces();
+    } finally {
+      this.loading = false;
+    }
   }
 
   // Gestion du modal
@@ -320,10 +339,15 @@ export class AdminEspacesComponent implements OnInit {
   }
 
   // Pagination
-  changerPage(page: number) {
+  async changerPage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
-      this.chargerEspaces();
+      this.loading = true;
+      try {
+        await this.chargerEspaces();
+      } finally {
+        this.loading = false;
+      }
     }
   }
 

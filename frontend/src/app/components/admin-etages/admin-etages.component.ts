@@ -53,10 +53,26 @@ export class AdminEtagesComponent implements OnInit {
     
     // Test de connectivité d'abord
     this.testerConnectivite();
-    this.chargerEtages();
-    this.chargerStatistiques();
+    this.chargerDonneesInitiales();
     
     console.log('🏢 [FRONTEND-COMPONENT] === FIN ngOnInit ===');
+  }
+
+  // Charger toutes les données initiales
+  async chargerDonneesInitiales() {
+    this.loading = true;
+    this.error = '';
+    
+    try {
+      await Promise.all([
+        this.chargerEtages(),
+        this.chargerStatistiques()
+      ]);
+    } catch (error) {
+      console.error('❌ [FRONTEND-COMPONENT] Erreur chargement données initiales:', error);
+    } finally {
+      this.loading = false;
+    }
   }
 
   // Vérifier l'authentification et les permissions
@@ -120,7 +136,7 @@ export class AdminEtagesComponent implements OnInit {
   async chargerEtages() {
     console.log('🏢 [FRONTEND-COMPONENT] === DEBUT chargerEtages ===');
     console.log('🏢 [FRONTEND-COMPONENT] Page courante:', this.currentPage);
-    this.loading = true;
+    // Ne pas gérer loading ici si appelé depuis chargerDonneesInitiales
     this.error = '';
 
     try {
@@ -153,8 +169,7 @@ export class AdminEtagesComponent implements OnInit {
       
       this.error = friendlyMessage;
       console.log('🏢 [FRONTEND-COMPONENT] === FIN chargerEtages (ERROR) ===');
-    } finally {
-      this.loading = false;
+      throw error; // Propager l'erreur
     }
   }
 
@@ -310,10 +325,15 @@ export class AdminEtagesComponent implements OnInit {
   }
 
   // Pagination
-  changerPage(page: number) {
+  async changerPage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
-      this.chargerEtages();
+      this.loading = true;
+      try {
+        await this.chargerEtages();
+      } finally {
+        this.loading = false;
+      }
     }
   }
 

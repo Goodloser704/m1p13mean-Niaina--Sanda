@@ -243,8 +243,38 @@ export class PortefeuilleComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadPortefeuille();
-    this.loadTransactions();
+    this.chargerDonneesInitiales();
+  }
+
+  async chargerDonneesInitiales(): Promise<void> {
+    this.loading = true;
+    this.errorMessage = '';
+    
+    try {
+      // Charger le portefeuille d'abord
+      const portefeuilleResponse = await this.portefeuilleService.obtenirMonPortefeuille().toPromise();
+      if (portefeuilleResponse) {
+        this.portefeuille = portefeuilleResponse.portefeuille;
+      }
+      
+      // Puis charger les transactions
+      const options = {
+        page: this.pagination.page,
+        limit: this.pagination.limit,
+        ...(this.selectedType && { type: this.selectedType })
+      };
+      const transactionsResponse = await this.portefeuilleService.obtenirMesTransactions(options).toPromise();
+      if (transactionsResponse) {
+        this.transactions = transactionsResponse.transactions;
+        this.pagination = transactionsResponse.pagination;
+      }
+      
+    } catch (error: any) {
+      console.error('Erreur chargement données:', error);
+      this.errorMessage = 'Erreur lors du chargement des données';
+    } finally {
+      this.loading = false;
+    }
   }
 
   loadPortefeuille(): void {
