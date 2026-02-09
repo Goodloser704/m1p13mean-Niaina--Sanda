@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -42,7 +42,8 @@ export class MesCommandesComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private achatService: AchatService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -62,6 +63,7 @@ export class MesCommandesComponent implements OnInit {
   async chargerAchatsEnCours(): Promise<void> {
     try {
       this.chargement = true;
+      this.cdr.detectChanges();
       this.erreur = '';
       
       const response = await this.achatService.obtenirMesAchatsEnCours().toPromise();
@@ -74,12 +76,14 @@ export class MesCommandesComponent implements OnInit {
       this.erreur = 'Erreur lors du chargement des commandes en cours';
     } finally {
       this.chargement = false;
+      this.cdr.detectChanges();
     }
   }
 
   async chargerHistorique(): Promise<void> {
     try {
       this.chargement = true;
+      this.cdr.detectChanges();
       this.erreur = '';
       
       const options = {
@@ -99,6 +103,7 @@ export class MesCommandesComponent implements OnInit {
       this.erreur = 'Erreur lors du chargement de l\'historique';
     } finally {
       this.chargement = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -147,6 +152,7 @@ export class MesCommandesComponent implements OnInit {
     
     try {
       this.chargement = true;
+      this.cdr.detectChanges();
       
       await this.achatService.annulerAchat(this.achatAnnuler._id, this.raisonAnnulation).toPromise();
       
@@ -165,6 +171,7 @@ export class MesCommandesComponent implements OnInit {
       this.erreur = error.error?.message || 'Erreur lors de l\'annulation';
     } finally {
       this.chargement = false;
+      this.cdr.detectChanges();
     }
   }
 

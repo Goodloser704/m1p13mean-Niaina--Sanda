@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -26,7 +26,8 @@ export class UserProfileComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.profileForm = this.createProfileForm();
     this.passwordForm = this.createPasswordForm();
@@ -134,6 +135,7 @@ export class UserProfileComponent implements OnInit {
   onSubmitProfile(): void {
     if (this.profileForm.valid && this.currentUser) {
       this.isLoading = true;
+      this.cdr.detectChanges();
       
       // Nettoyer les données - ne garder que les champs non vides
       const formData = this.profileForm.value;
@@ -160,12 +162,14 @@ export class UserProfileComponent implements OnInit {
       this.authService.updateProfile(updatedData).subscribe({
         next: (response) => {
           this.isLoading = false;
+          this.cdr.detectChanges();
           this.isEditing = false;
           console.log('✅ Profil mis à jour avec succès');
           this.authService.refreshCurrentUser();
         },
         error: (error) => {
           this.isLoading = false;
+          this.cdr.detectChanges();
           console.group('❌ ERROR - Échec mise à jour profil');
           console.log('🔴 Erreur complète:', error);
           console.log('📊 Status:', error.status);
@@ -192,6 +196,7 @@ export class UserProfileComponent implements OnInit {
   onSubmitPassword(): void {
     if (this.passwordForm.valid) {
       this.isLoading = true;
+      this.cdr.detectChanges();
       
       const passwordData = {
         currentPassword: this.passwordForm.value.currentPassword,
@@ -201,12 +206,14 @@ export class UserProfileComponent implements OnInit {
       this.authService.changePassword(passwordData).subscribe({
         next: () => {
           this.isLoading = false;
+          this.cdr.detectChanges();
           this.showPasswordForm = false;
           this.passwordForm.reset();
           console.log('Mot de passe modifié avec succès');
         },
         error: (error) => {
           this.isLoading = false;
+          this.cdr.detectChanges();
           console.error('Erreur lors du changement de mot de passe:', error.error?.message || 'Erreur lors du changement de mot de passe');
         }
       });
@@ -216,6 +223,7 @@ export class UserProfileComponent implements OnInit {
   deleteAccount(): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
       this.isLoading = true;
+      this.cdr.detectChanges();
       
       this.authService.deleteAccount().subscribe({
         next: () => {
@@ -225,6 +233,7 @@ export class UserProfileComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
+          this.cdr.detectChanges();
           console.error('Erreur lors de la suppression du compte:', error.error?.message || 'Erreur lors de la suppression du compte');
         }
       });
