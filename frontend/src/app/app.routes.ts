@@ -11,6 +11,9 @@ import { UserRole } from './core/models/user';
 import { Dashboard } from './pages/admin/dashboard/dashboard';
 import { InscriptionChoice } from './components/auth/inscription-choice/inscription-choice';
 import { Inscription } from './components/auth/inscription/inscription';
+import { MesBoutiques } from './pages/commercant/mes-boutiques/mes-boutiques';
+import { AllBoutiques } from './pages/acheteur/all-boutiques/all-boutiques';
+import { TemplateLayout } from './pages/shared/layout/template-layout/template-layout';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -40,14 +43,25 @@ export const routes: Routes = [
     component: CommercantLayout,
     canActivate: [authGuard, roleGuard],
     data: { roles: [UserRole.Commercant] }, 
-    children: []
+    children: [
+      { path: 'mes-boutiques', component: MesBoutiques },
+      { path: '', redirectTo: 'mes-boutiques', pathMatch: 'full' }
+    ]
   },
   {
     path: 'acheteur',
     component: AcheteurLayout,
     canActivate: [authGuard, roleGuard],
     data: { roles: [UserRole.Acheteur] },
-    children: []
+    children: [
+      { path: 'all-boutiques', component: AllBoutiques },
+      { path: '', redirectTo: 'all-boutiques', pathMatch: 'full' }
+    ]
+  },
+  // Juste pour voir l'adaptation du template sur angular
+  {
+    path: 'template',
+    component: TemplateLayout
   },
   // Wildcard URL Inconnu (TOUJOURS A LA FIN)
   { path: '**', redirectTo: 'login' }

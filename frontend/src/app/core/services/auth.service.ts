@@ -67,7 +67,7 @@ export class AuthService {
     const user = localStorage.getItem(this.USER_KEY);
     if (user) {
       const userObject = JSON.parse(user);
-      console.log(`User not null, role: ${userObject.role}`);
+      console.log(`User not null: ${JSON.stringify(userObject)} \n UserRole: ${userObject.role}`);
       return userObject;
     } else {
       console.warn("User is null in local storage");
@@ -109,11 +109,11 @@ export class AuthService {
   getHomeByRole(role: UserRole): string {
     switch (role) {
       case UserRole.Admin:
-        return '/admin/dashboard';
+        return '/admin';
       case UserRole.Commercant:
-        return '/commercant/home';
+        return '/commercant';
       case UserRole.Acheteur:
-        return '/acheteur/home';
+        return '/acheteur';
       default:
         return '/login';
     }

@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { Footer } from "../../footer/footer";
 import { AcheteurHeader } from "../../acheteur-header/acheteur-header";
-import { SwiperSlide } from "../../../../components/shared/swiper-slide/swiper-slide";
+import { RouterOutlet } from "@angular/router";
 
 @Component({
   selector: 'app-acheteur-layout',
-  imports: [Footer, AcheteurHeader, SwiperSlide],
+  imports: [Footer, AcheteurHeader, RouterOutlet],
   templateUrl: './acheteur-layout.html',
   styleUrl: './acheteur-layout.scss',
 })

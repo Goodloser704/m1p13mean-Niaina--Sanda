@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Genre, User, UserRole } from '../../../core/models/user';
 import { Router, RouterLink } from '@angular/router';
 import { Loader } from "../../shared/loader/loader";
+import { compressImage } from '../../../core/functions/images-function';
 
 @Component({
   selector: 'app-inscription',
@@ -13,11 +14,11 @@ import { Loader } from "../../shared/loader/loader";
 })
 export class Inscription implements OnInit {
   isLoading = signal(false);
-  error = signal<String | null>(null);
+  error = signal<string | null>(null);
 
   genres = Object.values(Genre);
 
-  photoPreview = signal<String | null>(null);
+  photoPreview = signal<string | null>(null);
   photoSizeError = signal(false);
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -52,36 +53,26 @@ export class Inscription implements OnInit {
 
   // --- Fonctions de traitements ---
 
-  onFileSelected(event: Event) {
+  async onPhotoSelected(event: Event) {
     this.photoSizeError.set(false);
 
     const input = event.target as HTMLInputElement;
-
     if (!input.files || input.files.length === 0) return;
 
     const file = input.files[0];
+    console.log(file);
 
     if (file.size > 2 * (1024 * 1024)) {
       this.photoSizeError.set(true);
-      input.value = ''; // vider le champ (enleve le nom et le fichier de l'input)
-      this.form.patchValue({ photo: '' });
-      this.photoPreview.set(null);
+      input.value = "";
 
       return;
     }
 
-    const reader = new FileReader();
+    const compressed = await compressImage(file, 800, 0.7);
 
-    reader.onload = () => {
-      const base64 = reader.result as string;
-
-      this.form.patchValue({ photo: base64 });
-
-      console.log(`Photo: ${this.form.value.photo}`);
-      this.photoPreview.set(base64);
-    };
-
-    reader.readAsDataURL(file);
+    this.form.patchValue({ photo: compressed });
+    this.photoPreview.set(compressed);
   }
 
   clearPhoto() {
@@ -123,8 +114,14 @@ export class Inscription implements OnInit {
 
     console.log(`New User: ${JSON.stringify(newUser)}`);
 
-    setTimeout(() => {
-      this.isLoading.set(false);
-    }, 2000);
+    this.authService.inscription(newUser as User)
+      .subscribe({
+        error: (err) => {
+          this.isLoading.set(false);
+          console.error(err);
+          this.error.set(`${err.error.message}`);
+        },
+        complete: () => this.isLoading.set(false)
+      })
   }
 }

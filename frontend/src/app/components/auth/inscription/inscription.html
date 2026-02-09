@@ -84,7 +84,7 @@
                 #fileInput
                 id="formFile"
                 class="form-control"
-                (change)="onFileSelected($event)"
+                (change)="onPhotoSelected($event)"
                 accept="image/*"
               >
               @if (photoSizeError()) {
@@ -96,7 +96,7 @@
               @if (photoPreview()) {
                 <div class="d-flex align-items-center">
                   <img [src]="photoPreview()" class="photo-preview me-3">
-                  <button class="btn-sm btn-secondary" (click)="clearPhoto()">Effacer</button>
+                  <button type="button" class="btn-sm btn-secondary" (click)="clearPhoto()">Effacer</button>
                 </div>
               }
             </div>
@@ -137,7 +137,7 @@
                 class="btn"
                 [disabled]="isLoading() || form.invalid"
               >
-                Se connecter
+                Valider
               </button>
             </div>
           </div>

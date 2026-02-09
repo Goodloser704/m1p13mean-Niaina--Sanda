@@ -13,7 +13,7 @@ export interface User {
   _id: string,
   nom: string,
   prenoms: string,
-  genre: Genre,
+  genre: Genre | null,
   email: string,
   telephone?: string | null,
   mdp: string,
