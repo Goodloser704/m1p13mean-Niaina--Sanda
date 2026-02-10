@@ -1,0 +1,27 @@
+@use "../../../styles/shared/variables" as v;
+
+.profile-name {
+  font-weight: 700;
+}
+
+.user-info {
+  border: 1px solid transparent;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+
+  i {
+    color: v.$accent-color;
+    font-size: larger;
+  }
+}
+
+.info-label {
+  color: color-mix(in srgb, var(--default-color), transparent 30%);
+}
+
+.info-value {
+  color: v.$accent-color;
+  font-weight: 700;
+}

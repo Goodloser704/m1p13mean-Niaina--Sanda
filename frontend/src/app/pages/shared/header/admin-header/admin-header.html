@@ -3,7 +3,15 @@
 
     <nav class="navbar w-100 navbar-expand-lg">
       <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+        <button
+          class="navbar-toggler" 
+          type="button" 
+          data-bs-toggle="collapse" 
+          data-bs-target="#navbarTogglerDemo01" 
+          aria-controls="navbarTogglerDemo01" 
+          aria-expanded="false" 
+          aria-label="Toggle navigation"
+        >
           <span class="bi bi-list"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
@@ -11,15 +19,18 @@
           <a class="navbar-brand brand-title" href="#">
             {{ centre().nom | titlecase }}
           </a>
-          <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 d-flex align-items-lg-center">
+          <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 gap-2 d-flex align-items-lg-center">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
+              <a class="nav-link active" aria-current="page" routerLink="user-profil">Home</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#">Link</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+              <a class="nav-link position-relative notification-link">
+                <i class="bi bi-bell bi-bolder notification-icon"></i>
+                <span class="notification-dot"></span>
+              </a>
             </li>
 
             @if (currentUser(); as user) {
@@ -40,12 +51,18 @@
                     height="30"
                   />
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="userDropdown" style="min-width: 200px;">
-                  <li class="px-2 py-1"><strong>{{ user.prenoms }} {{ user.nom }}</strong></li>
+                <ul 
+                  class="dropdown-menu dropdown-menu-end p-2" 
+                  aria-labelledby="userDropdown" 
+                  style="width: fit-content; min-width: 200px;"
+                >
+                  <li class="px-2 py-1" style="cursor: pointer;" routerLink="user-profil">
+                    <strong>{{ user.prenoms }} {{ user.nom }}</strong>
+                  </li>
                   <li class="px-2 py-1 text-black-50">{{ user.email }}</li>
                   <li class="px-2 py-1 text-muted">{{ user.role }}</li>
                   <li><hr class="dropdown-divider"></li>
-                  <li class="px-2 py-1 text-center">
+                  <li class="px-2 py-1 text-lg-center text-start">
                     <button class="btn btn-sm btn-danger w-100" (click)="onClickLogout()">
                       <i class="bi bi-home"></i>
                       Log out

@@ -14,6 +14,7 @@ import { Inscription } from './components/auth/inscription/inscription';
 import { MesBoutiques } from './pages/commercant/mes-boutiques/mes-boutiques';
 import { AllBoutiques } from './pages/acheteur/all-boutiques/all-boutiques';
 import { TemplateLayout } from './pages/shared/layout/template-layout/template-layout';
+import { UserProfil } from './pages/shared/user-profil/user-profil';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -35,6 +36,7 @@ export const routes: Routes = [
     data: { roles: [UserRole.Admin] },
     children: [
       { path: 'dashboard', component: Dashboard },
+      { path: 'user-profil', component: UserProfil },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

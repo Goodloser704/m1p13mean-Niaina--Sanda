@@ -40,12 +40,16 @@
                     height="30"
                   />
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="userDropdown" style="min-width: 200px;">
+                <ul 
+                  class="dropdown-menu dropdown-menu-end p-2" 
+                  aria-labelledby="userDropdown" 
+                  style="width: fit-content; min-width: 200px;"
+                >
                   <li class="px-2 py-1"><strong>{{ user.prenoms }} {{ user.nom }}</strong></li>
                   <li class="px-2 py-1 text-black-50">{{ user.email }}</li>
                   <li class="px-2 py-1 text-muted">{{ user.role }}</li>
                   <li><hr class="dropdown-divider"></li>
-                  <li class="px-2 py-1 text-center">
+                  <li class="px-2 py-1 text-lg-center text-start">
                     <button class="btn btn-sm btn-danger w-100" (click)="onClickLogout()">
                       <i class="bi bi-home"></i>
                       Log out

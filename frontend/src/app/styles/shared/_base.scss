@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "variables" as v;
 @use "mixins" as m;
 
@@ -116,8 +117,8 @@ a {
   color: v.$contrast-color;
 
   &:hover {
-    background-color: darken(v.$accent-color, 10);
-    border-color: darken(v.$accent-color, 10);
+    background-color: color.scale(v.$accent-color, $lightness: -10%);
+    border-color: color.scale(v.$accent-color, $lightness: -10%);
   }
 }
 
@@ -128,9 +129,9 @@ a {
   color: v.$accent-color;
 
   &:hover {
-    background-color: darken(v.$contrast-color, 10);
-    color: darken(v.$accent-color, 10);
-    border-color: darken(v.$accent-color, 10);
+    background-color: color.scale(v.$contrast-color, $lightness: -10%);
+    color: color.scale(v.$accent-color, $lightness: -10%);
+    border-color: color.scale(v.$accent-color, $lightness: -10%);
   }
 }
 
@@ -140,8 +141,8 @@ a {
   color: v.$contrast-color;
 
   &:hover {
-    background-color: darken(v.$heading-color, 10);
-    border-color: darken(v.$heading-color, 10);
+    background-color: color.scale(v.$heading-color, $lightness: -10%);
+    border-color: color.scale(v.$heading-color, $lightness: -10%);
   }
 }
 
@@ -152,9 +153,9 @@ a {
   color: v.$heading-color;
 
   &:hover {
-    background-color: darken(v.$contrast-color, 10);
-    color: darken(v.$heading-color, 10);
-    border-color: darken(v.$heading-color, 10);
+    background-color: color.scale(v.$contrast-color, $lightness: -10%);
+    color: color.scale(v.$heading-color, $lightness: -10%);
+    border-color: color.scale(v.$heading-color, $lightness: -10%);
   }
 }
 
@@ -168,6 +169,11 @@ a {
   cursor: pointer;
 }
 
+.profile-image {
+  width: 90%;
+  aspect-ratio: 1;
+}
+
 // - End Image avatar -
 
 // ---- Template ----
@@ -175,6 +181,43 @@ a {
 .hero {
   height: fit-content;
   min-height: 100vh;
+  padding-bottom: 5rem;
 }
 
 // -- End Template --
+
+// ---- Notifications ----
+
+.notification-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-icon {
+  font-weight: 400;
+  font-size: 1.1rem; /* icône légèrement plus épaisse */
+}
+
+.notification-dot {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background: #dc3545;
+  border-radius: 50%;
+  border: 1px solid white;
+}
+
+// -- End Notifications --
+
+// ---- Bootstrap ----
+
+.bi-bolder {
+  -webkit-text-stroke-width: 1px; /* Adjust the pixel value for desired thickness */
+  /* For compatibility, though it's a non-standard property */
+  text-stroke-width: 1px; 
+}
+
+// -- End Bootstrap --

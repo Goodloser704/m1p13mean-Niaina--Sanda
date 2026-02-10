@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommercantHeader } from "../../commercant-header/commercant-header";
+import { CommercantHeader } from "../../header/commercant-header/commercant-header";
 import { RouterOutlet } from "@angular/router";
 import { Footer } from "../../footer/footer";
 

@@ -1,13 +1,15 @@
 import { Component, computed, signal } from '@angular/core';
-import { CentreCommercialService } from '../../../core/services/admin/centre-commercial.service';
+import { CentreCommercialService } from '../../../../core/services/admin/centre-commercial.service';
 import { TitleCasePipe } from "@angular/common";
-import { User } from '../../../core/models/user';
-import { AuthService } from '../../../core/services/auth.service';
-import { Dialog } from "../../../components/shared/dialog/dialog";
+import { User } from '../../../../core/models/user';
+import { AuthService } from '../../../../core/services/auth.service';
+import { Dialog } from "../../../../components/shared/dialog/dialog";
+import { RouterLink } from "@angular/router";
+import { Dashboard } from "../../../admin/dashboard/dashboard";
 
 @Component({
   selector: 'app-admin-header',
-  imports: [TitleCasePipe, Dialog],
+  imports: [TitleCasePipe, Dialog, RouterLink, Dashboard],
   templateUrl: './admin-header.html',
   styleUrl: './admin-header.scss',
 })

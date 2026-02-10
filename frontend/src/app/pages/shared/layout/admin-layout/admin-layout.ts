@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Footer } from "../../footer/footer";
 import { RouterOutlet } from "@angular/router";
-import { AdminHeader } from "../../admin-header/admin-header";
+import { AdminHeader } from "../../header/admin-header/admin-header";
 
 @Component({
   selector: 'app-admin-layout',

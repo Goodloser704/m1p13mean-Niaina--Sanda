@@ -29,6 +29,7 @@ ng serve --configuration production (utilisera environment.prod.ts)
 Installation dependencies:
 _ Vendors du template iLanding Bootstrap:
 npm install bootstrap bootstrap-icons aos glightbox swiper
+npm install --save-dev @types/bootstrap
 
 _ Configuration dans angular.json:
 "styles": [

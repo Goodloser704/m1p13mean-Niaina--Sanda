@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AcheteurHeader } from "../../acheteur-header/acheteur-header";
+import { AcheteurHeader } from "../../header/acheteur-header/acheteur-header";
 import { SwiperSlide } from "../../../../components/shared/swiper-slide/swiper-slide";
 import { Footer } from "../../footer/footer";
 

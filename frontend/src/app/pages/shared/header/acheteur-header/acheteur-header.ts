@@ -1,17 +1,18 @@
-import { Component, computed, signal } from '@angular/core';
+import { CentreCommercialService } from '../../../../core/services/admin/centre-commercial.service';
+import { Component, computed, OnInit, signal, WritableSignal } from '@angular/core';
+import { CentreCommercial } from '../../../../core/models/centre-commercial';
 import { TitleCasePipe } from "@angular/common";
-import { CentreCommercialService } from '../../../core/services/admin/centre-commercial.service';
-import { User } from '../../../core/models/user';
-import { AuthService } from '../../../core/services/auth.service';
-import { Dialog } from "../../../components/shared/dialog/dialog";
+import { User } from '../../../../core/models/user';
+import { AuthService } from '../../../../core/services/auth.service';
+import { Dialog } from "../../../../components/shared/dialog/dialog";
 
 @Component({
-  selector: 'app-commercant-header',
-  imports: [TitleCasePipe, Dialog],
-  templateUrl: './commercant-header.html',
-  styleUrl: './commercant-header.scss',
+  selector: 'app-acheteur-header',
+  templateUrl: './acheteur-header.html',
+  styleUrl: './acheteur-header.scss',
+    imports: [TitleCasePipe, Dialog]
 })
-export class CommercantHeader {
+export class AcheteurHeader {
   centre = computed(() =>
     this.centreCommercialService.centreCommercial()
       ?? this.centreCommercialService.getDefault()

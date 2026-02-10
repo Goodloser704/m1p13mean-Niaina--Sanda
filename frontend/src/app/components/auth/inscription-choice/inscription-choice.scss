@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "../../../styles/shared/mixins" as m;
 @use "../../../styles/shared/variables" as v;
 
@@ -42,11 +43,11 @@
     box-shadow: 0 5px 17px -5px rgba(0, 0, 0, 0.3);
 
     i {
-      color: darken(v.$heading-color, 10);
+      color: color.scale(v.$heading-color, $lightness: -10%);
     }
 
     p {
-      color: darken(v.$accent-color, 10);
+      color: color.scale(v.$accent-color, $lightness: -10%);
     }
   }
 }
