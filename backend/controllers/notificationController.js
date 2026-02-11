@@ -44,21 +44,29 @@ class NotificationController {
         type: type || null
       };
 
+      // Récupérer les notifications paginées
       const notifications = await notificationService.getUserNotifications(
         userId, 
         options
       );
 
+      // Récupérer le nombre total de notifications (avec les mêmes filtres)
+      const totalCount = await notificationService.getTotalCount(userId, {
+        includeRead: options.includeRead,
+        type: options.type
+      });
+
+      // Récupérer le nombre de notifications non lues
       const unreadCount = await notificationService.getUnreadCount(userId);
 
-      console.log(`✅ ${notifications.length} notifications récupérées`);
+      console.log(`✅ ${notifications.length} notifications récupérées sur ${totalCount} au total`);
       
       // Format de réponse selon l'endpoint utilisé
       if (req.params.userId) {
         // Format conforme aux spécifications pour /api/users/:userId/notifications
         res.json({
           data: notifications,
-          total: notifications.length,
+          total: totalCount,  // ✅ CORRIGÉ : total réel, pas juste la longueur du tableau
           unreadCount
         });
       } else {
@@ -69,6 +77,7 @@ class NotificationController {
           pagination: {
             page: parseInt(page),
             limit: parseInt(limit),
+            total: totalCount,  // ✅ AJOUTÉ : total pour la pagination
             hasMore: notifications.length === parseInt(limit)
           }
         });

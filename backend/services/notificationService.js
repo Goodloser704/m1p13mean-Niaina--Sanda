@@ -65,6 +65,38 @@ class NotificationService {
   }
 
   /**
+   * 🔢 Obtenir le nombre TOTAL de notifications d'un utilisateur
+   */
+  async getTotalCount(userId, options = {}) {
+    try {
+      const {
+        includeRead = true,
+        includeArchived = false,
+        type = null
+      } = options;
+
+      const query = {
+        recipient: userId,
+        isArchived: includeArchived
+      };
+
+      if (!includeRead) {
+        query.isRead = false;
+      }
+
+      if (type) {
+        query.type = type;
+      }
+
+      const count = await Notification.countDocuments(query);
+      return count;
+    } catch (error) {
+      console.error('❌ Erreur comptage total notifications:', error.message);
+      throw new Error('Erreur lors du comptage total des notifications');
+    }
+  }
+
+  /**
    * ✅ Marquer une notification comme lue
    */
   async markAsRead(notificationId, userId) {
