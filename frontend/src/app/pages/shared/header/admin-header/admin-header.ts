@@ -9,7 +9,7 @@ import { Dashboard } from "../../../admin/dashboard/dashboard";
 
 @Component({
   selector: 'app-admin-header',
-  imports: [TitleCasePipe, Dialog, RouterLink, Dashboard],
+  imports: [TitleCasePipe, Dialog, RouterLink],
   templateUrl: './admin-header.html',
   styleUrl: './admin-header.scss',
 })

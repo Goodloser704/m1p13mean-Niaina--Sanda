@@ -15,6 +15,7 @@ import { MesBoutiques } from './pages/commercant/mes-boutiques/mes-boutiques';
 import { AllBoutiques } from './pages/acheteur/all-boutiques/all-boutiques';
 import { TemplateLayout } from './pages/shared/layout/template-layout/template-layout';
 import { UserProfil } from './pages/shared/user-profil/user-profil';
+import { Notifications } from './pages/shared/notifications/notifications';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -37,6 +38,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: Dashboard },
       { path: 'user-profil', component: UserProfil },
+      { path: 'notifications', component: Notifications },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

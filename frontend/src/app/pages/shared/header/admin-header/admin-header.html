@@ -1,6 +1,16 @@
 <header id="header" class="header d-flex align-items-center fixed-top">
-  <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between p-0">
-
+  <div 
+    class="
+      header-container
+      container-fluid 
+      container-xl
+      position-relative 
+      d-flex 
+      align-items-center 
+      justify-content-between 
+      p-0
+    "
+  >
     <nav class="navbar w-100 navbar-expand-lg">
       <div class="container-fluid">
         <button
@@ -16,10 +26,15 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
           <div class="d-block d-lg-none p-2"></div>
-          <a class="navbar-brand brand-title" href="#">
-            {{ centre().nom | titlecase }}
-          </a>
-          <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 gap-2 d-flex align-items-lg-center">
+          <div style="width: fit-content; max-width: 100%; height: fit-content;">
+            <a class="d-none d-sm-block navbar-brand brand-title" href="#">
+              {{ centre().nom | titlecase }}
+            </a>
+            <a class="d-block d-sm-none navbar-brand brand-title text-wrap" href="#">
+              {{ centre().nom | titlecase }}
+            </a>
+          </div>
+          <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 d-flex align-items-lg-center gap-0 gap-lg-2">
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" routerLink="user-profil">Home</a>
             </li>
@@ -27,9 +42,9 @@
               <a class="nav-link" href="#">Link</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link position-relative notification-link">
+              <a class="nav-link position-relative notification-link" routerLink="notifications">
                 <i class="bi bi-bell bi-bolder notification-icon"></i>
-                <span class="notification-dot"></span>
+                <!-- <span class="notification-dot"></span> -->
               </a>
             </li>
 

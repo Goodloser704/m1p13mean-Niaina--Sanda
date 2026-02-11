@@ -189,6 +189,9 @@ a {
 // ---- Notifications ----
 
 .notification-link {
+  border: 1px solid transparent;
+  width: fit-content;
+  min-width: 2.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -210,9 +213,41 @@ a {
   border: 1px solid white;
 }
 
+.notification-items {
+  border: 1px solid transparent;
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  justify-content: space-between;
+
+  p {
+    font-size: 0.8rem;
+  }
+}
+
+.unread-dot {
+  width: 10px;
+  aspect-ratio: 1;
+  background-color: #dc3545;
+  border-radius: 50%;
+}
+
+.mark-as-read {
+  font-size: 1.5rem;
+  cursor: pointer;
+
+  &:hover {
+    color: v.$heading-color;
+  }
+}
+
 // -- End Notifications --
 
 // ---- Bootstrap ----
+
+.nav-item {
+  border: 1px solid transparent;
+}
 
 .bi-bolder {
   -webkit-text-stroke-width: 1px; /* Adjust the pixel value for desired thickness */
@@ -221,3 +256,12 @@ a {
 }
 
 // -- End Bootstrap --
+
+.info-label {
+  color: color-mix(in srgb, var(--default-color), transparent 30%);
+}
+
+.info-value {
+  color: v.$accent-color;
+  font-weight: 700;
+}

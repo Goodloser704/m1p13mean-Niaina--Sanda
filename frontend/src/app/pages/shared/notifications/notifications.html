@@ -1,1 +1,65 @@
-<p>notifications works!</p>
+<section id="hero" class="hero section">
+  <div class="container px-4 gy-3" data-aos="fade-up" data-aos-delay="100">
+    <div class="row">
+      <div class="col-12">
+        <h2>
+          Notifications
+          @if (unreadCount() > 0) {
+            <span class="badge bg-danger ms-2">
+              {{ unreadCount() }}
+            </span>
+          }
+        </h2>
+        <hr>
+      </div>
+    </div>
+
+    <div class="row mt-3 gy-2">
+      @for (notification of notifications(); track notification._id) {
+        <div class="col-12 shadow-sm rounded-3 py-2">
+          <div class="notification-items">
+            <div class="d-flex flex-column justify-content-between">
+              <p class="info-label">{{ notification.type }}</p>
+              <p class="info-value">{{ notification.message }}</p>
+            </div>
+            <div class="d-flex flex-column align-items-end">
+              <div class="ms-2 d-flex align-items-center">
+                <p>{{ timeAgo(notification.createdAt) }}</p>
+                
+                @if (!notification.estLu) {
+                  <div class="unread-dot ms-2"></div>
+                }
+              </div>
+
+              @if (!notification.estLu) {
+                <i class="mark-as-read bi bi-check" role="button" (click)="markAsRead(notification)"></i>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <hr>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-start mt-4 gap-2">
+      <button 
+        class="btn btn-outline-secondary"
+        (click)="prevPage()"
+        [disabled]="page() === 1"
+      >
+        Précédent
+      </button>
+
+      <button 
+        class="btn btn-outline-secondary"
+        (click)="nextPage()"
+        [disabled]="notifications().length < limit"
+      >
+        Suivant
+      </button>
+    </div>
+  </div>
+</section>

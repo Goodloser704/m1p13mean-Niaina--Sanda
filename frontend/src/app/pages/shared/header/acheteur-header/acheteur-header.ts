@@ -1,6 +1,6 @@
 import { CentreCommercialService } from '../../../../core/services/admin/centre-commercial.service';
 import { Component, computed, OnInit, signal, WritableSignal } from '@angular/core';
-import { CentreCommercial } from '../../../../core/models/centre-commercial';
+import { CentreCommercial } from '../../../../core/models/admin/centre-commercial';
 import { TitleCasePipe } from "@angular/common";
 import { User } from '../../../../core/models/user';
 import { AuthService } from '../../../../core/services/auth.service';
