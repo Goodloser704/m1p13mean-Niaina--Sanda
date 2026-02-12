@@ -180,6 +180,11 @@ app.use('/api/types-produit', require('./routes/types-produit'));
 console.log('🛣️  Chargement route categories-boutique...');
 app.use('/api/categories-boutique', require('./routes/categories-boutique'));
 
+// 🧪 Routes de test (pour développement)
+console.log('🛣️  Chargement route test-items...');
+app.use('/api/test-items', require('./routes/test-items'));
+app.use('/api/categories-boutique', require('./routes/categories-boutique'));
+
 console.log('✅ Routes initialisées avec succès');
 
 // 🗄️ Connexion MongoDB avec logs détaillés
