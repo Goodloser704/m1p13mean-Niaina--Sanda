@@ -1,10 +1,11 @@
-import { Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Genre, User, UserRole } from '../../../core/models/user';
 import { Router, RouterLink } from '@angular/router';
 import { Loader } from "../../shared/loader/loader";
 import { compressImage } from '../../../core/functions/images-function';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-inscription',
@@ -25,6 +26,7 @@ export class Inscription implements OnInit {
   registrationRole: UserRole | null = null;
   form: any;
 
+  location = inject(Location);
 
   constructor(
     private authService: AuthService,

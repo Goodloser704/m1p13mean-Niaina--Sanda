@@ -2,10 +2,11 @@ import { Component, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../core/models/user';
 import { TitleCasePipe, DatePipe } from "@angular/common";
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-user-profil',
-  imports: [TitleCasePipe, DatePipe],
+  imports: [TitleCasePipe, DatePipe, RouterLink],
   templateUrl: './user-profil.html',
   styleUrl: './user-profil.scss',
 })

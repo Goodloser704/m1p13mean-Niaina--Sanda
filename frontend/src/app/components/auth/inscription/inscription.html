@@ -3,6 +3,12 @@
   <div class="floating-card">
     <div class="contact section">
       <div class="contact-form p-2 p-md-5 p-sm-4" data-aos="fade-left" data-aos-delay="300">
+        <div class="position-absolute top-0 start-0 w-100 d-flex justify-content-end pt-2 pe-3">
+          <a (click)="location.back()">
+            <i class="bi bi-arrow-left fs-3"></i>
+          </a>
+        </div>
+
         <h3>Nouveau(lle) <b>{{ registrationRole }}</b></h3>
         <p>Veuillez remplir les champs ci-dessous</p>
         <p class="mb-4">(*): champs sont obligatoires</p>

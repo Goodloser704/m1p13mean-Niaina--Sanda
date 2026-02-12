@@ -16,6 +16,7 @@ import { AllBoutiques } from './pages/acheteur/all-boutiques/all-boutiques';
 import { TemplateLayout } from './pages/shared/layout/template-layout/template-layout';
 import { UserProfil } from './pages/shared/user-profil/user-profil';
 import { Notifications } from './pages/shared/notifications/notifications';
+import { PorteFeuille } from './pages/shared/porte-feuille/porte-feuille';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -39,6 +40,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: Dashboard },
       { path: 'user-profil', component: UserProfil },
       { path: 'notifications', component: Notifications },
+      { path: 'porte-feuille', component: PorteFeuille },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
@@ -49,6 +51,9 @@ export const routes: Routes = [
     data: { roles: [UserRole.Commercant] }, 
     children: [
       { path: 'mes-boutiques', component: MesBoutiques },
+      { path: 'user-profil', component: UserProfil },
+      { path: 'notifications', component: Notifications },
+      { path: 'porte-feuille', component: PorteFeuille },
       { path: '', redirectTo: 'mes-boutiques', pathMatch: 'full' }
     ]
   },
@@ -59,6 +64,9 @@ export const routes: Routes = [
     data: { roles: [UserRole.Acheteur] },
     children: [
       { path: 'all-boutiques', component: AllBoutiques },
+      { path: 'user-profil', component: UserProfil },
+      { path: 'notifications', component: Notifications },
+      { path: 'porte-feuille', component: PorteFeuille },
       { path: '', redirectTo: 'all-boutiques', pathMatch: 'full' }
     ]
   },
