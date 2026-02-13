@@ -12,6 +12,7 @@ import { User, UserRole } from '../models/user';
 export class AuthService {
   apiUrl: string = environment.apiUrl;
   
+  private readonly USER_ID_KEY = "auth_user_id";
   private readonly USER_KEY = 'auth_user';
   private readonly TOKEN_KEY = 'auth_token';
 
@@ -21,7 +22,9 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {}
 
   private setSession(res: AuthResponse) {
+    console.log(`User ID: ${res.user.id}`);
     localStorage.setItem(this.TOKEN_KEY, res.token);
+    localStorage.setItem(this.USER_ID_KEY, res.user.id);
     localStorage.setItem(this.USER_KEY, JSON.stringify(res.user));
   }
 
@@ -40,6 +43,7 @@ export class AuthService {
   
   logOut() {
     localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_ID_KEY);
     localStorage.removeItem(this.USER_KEY);
     this.router.navigate(['/login']);
   }
@@ -71,6 +75,16 @@ export class AuthService {
       return userObject;
     } else {
       console.warn("User is null in local storage");
+      return null;
+    }
+  }
+
+  getCurrentUserId(): string | null {
+    const userId = localStorage.getItem(this.USER_ID_KEY);
+    if (userId) {
+      return userId;
+    } else {
+      console.warn("User ID is null in local storage");
       return null;
     }
   }
@@ -116,6 +130,24 @@ export class AuthService {
         return '/acheteur';
       default:
         return '/login';
+    }
+  }
+
+  getCurrentUserHomeByRole(): string {
+    const role = this.getCurrentUser()?.role;
+    if (role) {
+      switch (role) {
+        case UserRole.Admin:
+          return '/admin';
+        case UserRole.Commercant:
+          return '/commercant';
+        case UserRole.Acheteur:
+          return '/acheteur';
+        default:
+          return '/login';
+      }
+    } else {
+      return '/login'
     }
   }
 }

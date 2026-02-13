@@ -26,4 +26,8 @@ export class NotificationsService {
   markAsRead(notificationId: string): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/notifications/${notificationId}/read`, {});
   }
+
+  markAllAsRead(): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/notifications/read-all`, {});
+  }
 }

@@ -5,7 +5,6 @@ import { User } from '../../../../core/models/user';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Dialog } from "../../../../components/shared/dialog/dialog";
 import { RouterLink } from "@angular/router";
-import { Dashboard } from "../../../admin/dashboard/dashboard";
 
 @Component({
   selector: 'app-admin-header',

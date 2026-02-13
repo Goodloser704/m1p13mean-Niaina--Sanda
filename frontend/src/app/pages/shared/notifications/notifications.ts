@@ -30,13 +30,13 @@ export class Notifications implements OnInit {
   }
 
   loadNotifications() {
-    const user = this.authService.getCurrentUser();
-    if (!user) return;
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) return;
 
     this.isLoading.set(true);
 
     this.notificationsService
-      .getNotifications(user._id, this.page(), this.limit)
+      .getNotifications(userId, this.page(), this.limit)
       .subscribe({
         next: (res) => {
           // tri récent en haut
@@ -51,8 +51,9 @@ export class Notifications implements OnInit {
           this.unreadCount.set(res.unreadCount);
           this.isLoading.set(false);
         },
-        error: () => {
+        error: (err) => {
           this.isLoading.set(false);
+          console.error(err);
         }
       });
   }
@@ -62,9 +63,34 @@ export class Notifications implements OnInit {
 
     this.notificationsService
       .markAsRead(notification._id)
-      .subscribe(() => {
-        notification.estLu = true;
-        this.unreadCount.update(v => v - 1);
+      .subscribe({
+        next: () => {
+          notification.estLu = true;
+          this.unreadCount.update(v => v - 1);
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
+  }
+
+  markAllAsRead() {
+    this.notificationsService
+      .markAllAsRead()
+      .subscribe({
+        next: () => {
+          this.notifications.update((notifications) => 
+            notifications.map(n => ({
+              ...n,
+              estLu: true
+            }))
+          );
+
+          this.unreadCount.set(0);
+        },
+        error: (err) => {
+          console.error(err);
+        }
       });
   }
 

@@ -716,7 +716,7 @@ section,
 --------------------------------------------------------------*/
 .hero {
   position: relative;
-  padding-top: 160px;
+  padding-top: 120px;
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent-color), transparent 95%) 50%, color-mix(in srgb, var(--accent-color), transparent 98%) 25%, transparent 50%);
 }
 
@@ -1270,7 +1270,7 @@ section,
 }
 
 .features-cards .feature-box {
-  height: 100%;
+  height: fit-content;
   padding: 40px 30px;
   border-radius: 10px;
 }

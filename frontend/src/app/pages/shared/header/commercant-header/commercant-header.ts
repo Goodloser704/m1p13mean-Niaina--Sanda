@@ -4,10 +4,11 @@ import { User } from '../../../../core/models/user';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Dialog } from "../../../../components/shared/dialog/dialog";
 import { CentreCommercialService } from '../../../../core/services/admin/centre-commercial.service';
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-commercant-header',
-  imports: [TitleCasePipe, Dialog],
+  imports: [TitleCasePipe, Dialog, RouterLink],
   templateUrl: './commercant-header.html',
   styleUrl: './commercant-header.scss',
 })
