@@ -1,8 +1,8 @@
 import { CentreCommercialService } from '../../../../core/services/admin/centre-commercial.service';
 import { Component, computed, signal } from '@angular/core';
-import { CentreCommercial } from '../../../../core/models/admin/centre-commercial';
+import { CentreCommercial } from '../../../../core/models/admin/centre-commercial.model';
 import { TitleCasePipe } from "@angular/common";
-import { User } from '../../../../core/models/user';
+import { User } from '../../../../core/models/user.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Dialog } from "../../../../components/shared/dialog/dialog";
 import { RouterLink } from "@angular/router";

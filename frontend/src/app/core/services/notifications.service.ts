@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
-import { Notification, NotificationResponse } from '../models/notification';
+import { Notification, NotificationResponse } from '../models/notification.model';
 
 @Injectable({
   providedIn: 'root',

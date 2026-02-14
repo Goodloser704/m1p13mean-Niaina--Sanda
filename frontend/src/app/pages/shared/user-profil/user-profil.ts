@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
-import { User } from '../../../core/models/user';
+import { User } from '../../../core/models/user.model';
 import { TitleCasePipe, DatePipe } from "@angular/common";
 import { Router } from "@angular/router";
 

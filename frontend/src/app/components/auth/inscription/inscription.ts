@@ -1,7 +1,7 @@
 import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Genre, User, UserRole } from '../../../core/models/user';
+import { Genre, User, UserRole } from '../../../core/models/user.model';
 import { Router, RouterLink } from '@angular/router';
 import { Loader } from "../../shared/loader/loader";
 import { compressImage } from '../../../core/functions/images-function';
@@ -106,8 +106,6 @@ export class Inscription implements OnInit {
   register() {
     this.isLoading.set(true);
     this.error.set(null);
-
-    console.log(this.form.get('mdp').value);
 
     const newUser: Partial<User> = {
       ...this.form.getRawValue(),

@@ -1,5 +1,5 @@
 import { timeAgo } from '../../../core/functions/date-function';
-import { Notification } from '../../../core/models/notification';
+import { Notification } from '../../../core/models/notification.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationsService } from './../../../core/services/notifications.service';
 import { Component, OnInit, signal } from '@angular/core';

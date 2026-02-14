@@ -36,11 +36,34 @@
           </div>
           <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 d-flex align-items-lg-center gap-0 gap-lg-2">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" routerLink="user-profil">Home</a>
+              <a class="nav-link active" aria-current="page" routerLink="dashboard">Dashboard</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
+
+            <li class="nav-item dropdown">
+              <a 
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+                Gestion
+              </a>
+
+              <div class="dropdown-menu custom-dropdown shadow border-0">
+
+                <a class="dropdown-menu-item" routerLink="espaces">
+                  <i class="bi bi-grid-1x2 me-2"></i>
+                  <div class="item-title">Espaces (Locaux)</div>
+                </a>
+
+                <a class="dropdown-menu-item" routerLink="boutiques">
+                  <i class="bi bi-shop me-2"></i>
+                  <div class="item-title">Boutiques</div>
+                </a>
+
+              </div>
             </li>
+
             <li class="nav-item">
               <a class="nav-link position-relative notification-link" routerLink="notifications">
                 <i class="bi bi-bell bi-bolder notification-icon"></i>

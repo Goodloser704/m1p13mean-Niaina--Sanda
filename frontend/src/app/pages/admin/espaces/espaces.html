@@ -1,0 +1,91 @@
+<section id="hero" class="hero section">
+  <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
+    <div class="row liquid-glass">
+      <div class="col-md-6">
+        <h4>Ajouter une nouvelle étage:</h4>
+        <hr>
+        
+        <form
+          class="php-email-form"
+          [formGroup]="etageForm"
+          (ngSubmit)="onSubmit()"
+          data-aos="fade-up"
+          data-aos-delay="200"
+        >      
+          <div class="row gy-3">
+            <div class="col-12">
+              <input
+                id="etage-niveau"
+                type="number"
+                min="-2"
+                step="1"
+                class="form-control"
+                placeholder="Niveau"
+                formControlName="niveau"
+              >
+            </div>
+
+            <div class="col-12 my-3 text-center">
+              @if (!floorEditMode()) {
+                <button
+                  type="submit"
+                  class="btn-sm btn-primary"
+                  [disabled]="isLoading() || etageForm.invalid"
+                >
+                  Ajouter
+                </button>
+              } @else {
+                <div class="w-100 d-flex flex-row flex-wrap justify-content-center align-items-center gap-2">
+                  <button
+                    type="submit"
+                    class="btn-sm btn-primary"
+                  >
+                    Valider
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary rounded-5"
+                    (click)="discardEditFloor()"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-md-6">
+        <h4>Etage actuel:</h4>
+        <hr>
+
+        @for (etage of etages(); track etage._id) {
+          <div class="liquid-glass-item row-list-item mb-2">
+            <p>{{ etage.nom | titlecase }}</p>
+            <div class="d-flex flex-row align-items-center gap-2">
+              <button class="btn btn-outline-primary px-2 py-1" (click)="editFloor(etage)">
+                <i class="bi bi-pen-fill"></i>
+              </button>
+              <button class="btn btn-danger px-2 py-1" (click)="toggleDeleteFloorDialog(etage._id)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+@if (showFloorDeleteDialog()) {
+  <app-dialog 
+    dialog="Confirmer la suppression ?"
+    (dialogResponse)="onDeleteFloor($event)"
+    (clickOutside)="discardDeleteFloor()"
+  />
+}
+
+@if (isLoading()) {
+  <app-loader />
+}

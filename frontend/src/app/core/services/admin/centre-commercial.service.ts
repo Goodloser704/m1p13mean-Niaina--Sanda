@@ -1,4 +1,4 @@
-import { CentreCommercial } from '../../models/admin/centre-commercial';
+import { CentreCommercial } from '../../models/admin/centre-commercial.model';
 import { HttpClient } from '@angular/common/http';
 import { computed, Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';

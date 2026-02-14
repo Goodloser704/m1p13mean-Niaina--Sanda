@@ -12,7 +12,7 @@ export class Dialog {
   @Output() dialogResponse = new EventEmitter<boolean>();
   @Output() clickOutside = new EventEmitter<void>();
 
-   onChoose(value: boolean) {
+  onChoose(value: boolean) {
     this.dialogResponse.emit(value);
   }
 

@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { AuthInfo, AuthResponse } from '../models/auth-info';
+import { AuthInfo, AuthResponse } from '../models/auth-info.model';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
-import { User, UserRole } from '../models/user';
+import { User, UserRole } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root',

@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { UserRole } from '../../../core/models/user';
+import { UserRole } from '../../../core/models/user.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from "@angular/router";

@@ -186,6 +186,74 @@ a {
 
 // -- End Template --
 
+// ---- Surface ----
+
+.liquid-glass {
+  background: rgba(v.$accent-color, 0.075);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  border-radius: 20px;
+
+  border: 1px solid rgba(v.$contrast-color, 0.7);
+
+  box-shadow: 
+    0 8px 32px rgba(v.$accent-color, 0.08),
+    inset 0 1px 0 rgba(v.$contrast-color, 0.4);
+
+  padding: 1.5rem;
+
+  transition: all 0.3s ease;
+}
+
+.liquid-glass:hover {
+  box-shadow: 
+    0 12px 40px rgba(v.$accent-color, 0.12),
+    inset 0 1px 0 rgba(v.$contrast-color, 0.6);
+
+  transform: translateY(-1px);
+}
+
+.liquid-glass-item {
+  background: rgba(v.$accent-color, 0.12);
+
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+
+  border-radius: 14px;
+
+  border: 1px solid rgba(v.$contrast-color, 0.5);
+
+  box-shadow:
+    0 4px 12px rgba(v.$accent-color, 0.06),
+    inset 0 1px 0 rgba(v.$contrast-color, 0.3);
+
+  transition: all 0.25s ease;
+}
+
+.liquid-glass-item:hover {
+  background: rgba(v.$accent-color, 0.15);
+  box-shadow:
+    0 6px 18px rgba(v.$accent-color, 0.1),
+    inset 0 1px 0 rgba(v.$contrast-color, 0.5);
+
+  // transform: translateY(-1px);
+}
+
+.row-list-item {
+  padding: 0.7rem;
+  width: 100%;
+  height: fit-content;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  row-gap: 10px;
+}
+
+// -- End Surface --
+
 // ---- Notifications ----
 
 .notification-link {
@@ -275,3 +343,49 @@ a {
   color: v.$accent-color;
   font-weight: 700;
 }
+
+// ---- Navbar ----
+
+.custom-dropdown {
+  width: 99%;
+  min-width: 200px;
+  max-width: 400px;
+  height: fit-content;
+  max-height: 230px;
+  padding: 0.5rem;
+  border-radius: 12px;
+  overflow-y: auto;
+  @include m.thin-scrollbar;
+}
+
+.dropdown-menu-item {
+  border: 1px solid transparent;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.dropdown-menu-item i {
+  font-size: 1.2rem;
+  color: v.$accent-color;
+}
+
+.dropdown-menu-item:hover {
+  color: color.scale($color: v.$accent-color, $lightness: -20%);
+  background-color: #f1f3f5;
+  transform: translateX(3px);
+}
+
+.item-title {
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+// -- End Navbar --

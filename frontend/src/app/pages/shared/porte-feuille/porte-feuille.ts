@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { Router } from "@angular/router";
 import { AuthService } from '../../../core/services/auth.service';
-import { PorteFeuille as PF, PFTransaction } from '../../../core/models/porte-feuille';
+import { PorteFeuille as PF, PFTransaction } from '../../../core/models/porte-feuille.model';
 import { Loader } from "../../../components/shared/loader/loader";
 import { PorteFeuilleService } from '../../../core/services/porte-feuille.service';
 import { CurrencyPipe, DatePipe } from "@angular/common";

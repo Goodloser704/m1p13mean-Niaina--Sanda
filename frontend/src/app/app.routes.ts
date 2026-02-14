@@ -7,7 +7,7 @@ import { CommercantLayout } from './pages/shared/layout/commercant-layout/commer
 import { noAuthGuard } from './core/guards/no-auth-guard';
 import { authGuard } from './core/guards/auth-guard';
 import { roleGuard } from './core/guards/role-guard';
-import { UserRole } from './core/models/user';
+import { UserRole } from './core/models/user.model';
 import { Dashboard } from './pages/admin/dashboard/dashboard';
 import { InscriptionChoice } from './components/auth/inscription-choice/inscription-choice';
 import { Inscription } from './components/auth/inscription/inscription';
@@ -17,6 +17,7 @@ import { TemplateLayout } from './pages/shared/layout/template-layout/template-l
 import { UserProfil } from './pages/shared/user-profil/user-profil';
 import { Notifications } from './pages/shared/notifications/notifications';
 import { PorteFeuille } from './pages/shared/porte-feuille/porte-feuille';
+import { Espaces } from './pages/admin/espaces/espaces';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -38,6 +39,8 @@ export const routes: Routes = [
     data: { roles: [UserRole.Admin] },
     children: [
       { path: 'dashboard', component: Dashboard },
+      { path: 'espaces', component: Espaces },
+
       { path: 'user-profil', component: UserProfil },
       { path: 'notifications', component: Notifications },
       { path: 'porte-feuille', component: PorteFeuille },
@@ -51,6 +54,8 @@ export const routes: Routes = [
     data: { roles: [UserRole.Commercant] }, 
     children: [
       { path: 'mes-boutiques', component: MesBoutiques },
+
+
       { path: 'user-profil', component: UserProfil },
       { path: 'notifications', component: Notifications },
       { path: 'porte-feuille', component: PorteFeuille },
@@ -64,6 +69,8 @@ export const routes: Routes = [
     data: { roles: [UserRole.Acheteur] },
     children: [
       { path: 'all-boutiques', component: AllBoutiques },
+
+
       { path: 'user-profil', component: UserProfil },
       { path: 'notifications', component: Notifications },
       { path: 'porte-feuille', component: PorteFeuille },
