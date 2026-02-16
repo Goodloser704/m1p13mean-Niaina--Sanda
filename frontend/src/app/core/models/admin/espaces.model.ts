@@ -18,7 +18,7 @@ export enum EspaceStatut {
 export interface Espace {
   _id: string,
   centreCommercial: CentreCommercial | string,
-  code: string,
+  codeEspace: string,
   surface: number,
   etage: Etage | string,
   loyer: number,
@@ -26,4 +26,32 @@ export interface Espace {
   boutique: Boutique | string | null,
   createdAt: string,
   updatedAt: string
+}
+
+export interface EspaceQueryParams {
+  page?: number;
+  limit?: number;
+  etage?: string;
+  statut?: EspaceStatut;
+  surfaceMin?: number;
+  surfaceMax?: number;
+  loyerMax?: number;
+  search?: string;
+  actifSeulement?: boolean;
+}
+
+export interface EspacesResponse {
+  espaces: Espace[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export function getEspaceEtage(espace: Espace): number {
+  const etage = espace.etage;
+
+  if (typeof etage === 'object' && etage !== null) {
+    return etage.niveau;
+  }
+  return 0;
 }

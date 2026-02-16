@@ -1,11 +1,13 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { EspaceQueryParams, EspaceStatut, getEspaceEtage } from './../../../core/models/admin/espaces.model';
+import { Component, effect, OnInit, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Loader } from "../../../components/shared/loader/loader";
-import { Etage } from '../../../core/models/admin/espaces.model';
+import { Espace, Etage } from '../../../core/models/admin/espaces.model';
 import { finalize, forkJoin } from 'rxjs';
 import { EspacesService } from '../../../core/services/admin/espaces.service';
 import { TitleCasePipe } from "@angular/common";
 import { Dialog } from "../../../components/shared/dialog/dialog";
+import { createPagination } from '../../../core/functions/pagination-function';
 
 @Component({
   selector: 'app-espaces',
@@ -20,37 +22,47 @@ export class Espaces implements OnInit {
     private fb: FormBuilder,
     private espacesService: EspacesService
   ) {
-    this.etageForm = this.fb.nonNullable.group({
-      niveau: [
-        '', 
-        [
-          Validators.required, 
-          Validators.min(-2),
-          Validators.pattern("^-?[0-9]+$") // Chiffre entier relatif uniquement
-        ]
-      ]
-    });
+    this.setEtageForm();
+    this.setEspaceForm();
   }
 
   ngOnInit() {
     this.load();
+    
+    // effect observera les changements des signals a l'interieur de lui 
+    // et reexecute son contenu a chaque fois
+    effect(() => {
+      this.getSpaces();
+
+      // Liste des dependances:
+      this.espacePagination.currentPage(); // observer ceci
+    });
   }
 
   load() {
-    this.isLoading()
+    this.isLoading.set(true);
 
     forkJoin({
-      etages: this.espacesService.getAllFloor()
-    }).subscribe({
-      next: (res) => {
-        this.etages.set(res.etages.etages.sort((a,b) => a.niveau - b.niveau));
-      },
-      error: (err) => {
-        console.error(err);
-        this.isLoading.set(false);
-      },
-      complete: () => this.isLoading.set(false)
+      etages: this.espacesService.getAllFloor(),
+      espaces: this.espacesService.getAllSpaces({ page: this.espacePagination.currentPage(), limit: this.espacePagination.limit })
     })
+      .pipe(
+        finalize(() => this.isLoading.set(false))
+      )
+      .subscribe({
+        next: (res) => {
+          this.etages.set(
+            res.etages.etages.sort((a,b) => a.niveau - b.niveau)
+          );
+          this.espaces.set(
+            res.espaces.espaces.sort((a,b) => getEspaceEtage(a) - getEspaceEtage(b))
+          )
+          this.espacePagination.setTotal(res.espaces.totalPages);
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
     
   }
 
@@ -64,6 +76,19 @@ export class Espaces implements OnInit {
 
   showFloorDeleteDialog = signal(false);
   deletingFloorId = signal<string | null>(null);
+
+  setEtageForm() {
+    this.etageForm = this.fb.nonNullable.group({
+      niveau: [
+        '', 
+        [
+          Validators.required, 
+          Validators.min(-2),
+          Validators.pattern("^-?[0-9]+$") // Chiffre entier relatif uniquement
+        ]
+      ]
+    });
+  }
 
   createNewFloor() {
     if (this.etageForm.invalid) return;
@@ -85,9 +110,7 @@ export class Espaces implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          this.etages.update(etages => 
-            [...etages, res.etage].sort((a, b) => a.niveau - b.niveau)
-          );
+          this.etages.update(etages =>  [res.etage, ...etages]);
           console.log(res.message);
 
           this.etageForm.reset();
@@ -147,7 +170,7 @@ export class Espaces implements OnInit {
       });
   }
 
-  onSubmit() {
+  onSubmitEtage() {
     if (this.floorEditMode()) {
       this.saveEditedFloor()
     } else {
@@ -191,4 +214,221 @@ export class Espaces implements OnInit {
   }
 
   // --- END ETAGE SECTION ---
+
+  // ---- ESPACES SECTION ----
+
+  espaceForm: any;
+  espaces = signal<Espace[]>([]);
+
+  spaceEditMode = signal(false);
+  editingSpaceId = signal<string | null>(null);
+
+  showSpaceDeleteDialog = signal(false);
+  deletingSpaceId = signal<string | null>(null);
+
+  showLibererDialog = signal(false);
+  libererSpaceId = signal<string | null>(null);
+
+  espacePagination = createPagination(10);
+
+  setEspaceForm() {
+    this.espaceForm = this.fb.nonNullable.group({
+      codeEspace: ['', [Validators.required, Validators.minLength(1)]],
+      surface: ['', [Validators.required, Validators.min(1)]],
+      etage: ['', [Validators.required, Validators.minLength(1)]],
+      loyer: ['', [Validators.required, Validators.min(0)]]
+    })
+  }
+
+  creerEspace() {
+    if (this.espaceForm.invalid) return;
+
+    this.isLoading.set(true);
+    const newSpace: Partial<Espace> = {
+      ...this.espaceForm.getRawValue(),
+      statut: EspaceStatut.Disponible,
+      boutique: null
+    }
+
+    this.espacesService.createNewSpace(newSpace as Espace)
+      .pipe(
+        finalize(() => this.isLoading.set(false))
+      )
+      .subscribe({
+        next: (res) => {
+          if (this.espaces().length == this.espacePagination.limit) {
+            this.espaces.update(e => e.slice(0, -1)); // 0 jusqu'a l'avant dernier element
+          }
+          this.espaces.update(e => [res.espace, ...e]);
+        },
+        error: console.error
+      });
+  }
+
+  editEspace(espace: Espace) {
+    this.spaceEditMode.set(true);
+    this.editingSpaceId.set(espace._id);
+
+    this.espaceForm.patchValue({
+      codeEspace: espace.codeEspace,
+      surface: espace.surface,
+      etage: espace.etage,
+      loyer: espace.loyer,
+    });
+  }
+
+  discardEditEspace() {
+    this.spaceEditMode.set(false);
+    this.editingSpaceId.set(null);
+    this.espaceForm.reset();
+  }
+
+  saveEditedEspace() {
+    if (this.espaceForm.invalid || !this.editingSpaceId()) return;
+
+    this.isLoading.set(true);
+
+    const currentSpace = this.espaces()
+      .find(e => e._id === this.editingSpaceId());
+
+    if (!currentSpace) return;
+
+    const updatedSpace: Espace = {
+      ...currentSpace,
+      ...this.espaceForm.getRawValue() // ecraser les champs modifiees
+    };
+
+    this.espacesService.editSpace(updatedSpace as Espace)
+      .pipe(
+        finalize(() => this.isLoading.set(false))
+      )
+      .subscribe({
+        next: (res) => {
+          this.espaces.update(current =>
+            current.map(e =>
+              e._id === res.espace._id ? res.espace : e
+            )
+          );
+
+          this.discardEditEspace();
+        },
+        error: console.error
+      });
+  }
+
+
+  onSubmitEspace() {
+    if (this.spaceEditMode()) {
+      this.saveEditedEspace()
+    } else {
+      this.creerEspace();
+    }
+  }
+
+  toggleDeleteEspaceDialog(espaceId: string) {
+    this.deletingSpaceId.set(espaceId);
+    this.showSpaceDeleteDialog.set(true);
+  }
+
+  discardDeleteEspace() {
+    this.deletingSpaceId.set(null);
+    this.showSpaceDeleteDialog.set(false);
+  }
+
+
+  onDeleteEspace(answer: boolean) {
+    const espaceId = this.deletingSpaceId();
+
+    if (!espaceId || !answer) {
+      this.discardDeleteEspace();
+      return;
+    }
+
+    this.isLoading.set(true);
+
+    this.espacesService.deleteSpace(espaceId)
+      .pipe(
+        finalize(() => this.isLoading.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.espaces.update(current =>
+            current.filter(e => e._id !== espaceId)
+          );
+
+          // Revenir a la page precedent si la page actuel n'a plus d'element
+          if (this.espaces().length === 0 && this.espacePagination.currentPage() > 1) {
+            this.espacePagination.previous();
+          }
+
+          this.discardDeleteEspace();
+        },
+        error: console.error
+      });
+  }
+
+  toggleLibererDialog(espaceId: string) {
+    this.libererSpaceId.set(espaceId);
+    this.showLibererDialog.set(true);
+  }
+
+  discardLibererDialog() {
+    this.libererSpaceId.set(null);
+    this.showLibererDialog.set(false);
+  }
+
+  onLibererEspace(answer: boolean) {
+    const espaceId = this.libererSpaceId();
+
+    if (!espaceId || !answer) {
+      this.discardLibererDialog();
+      return;
+    }
+
+    this.isLoading.set(true);
+
+    this.espacesService.libererUneEspace(espaceId)
+      .pipe(
+        finalize(() => this.isLoading.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.espaces.update(current =>
+            current.map(e =>
+              e._id === espaceId
+                ? { ...e, statut: EspaceStatut.Disponible, boutique: null }
+                : e
+            )
+          );
+
+          this.discardLibererDialog();
+        },
+        error: console.error
+      });
+  }
+
+  getSpaces() {
+    this.isLoading.set(true);
+
+    const params: EspaceQueryParams = {
+      page: this.espacePagination.currentPage(),
+      limit: this.espacePagination.limit
+    };
+
+    this.espacesService.getAllSpaces(params)
+      .pipe(
+        finalize(() => this.isLoading.set(false))
+      )
+      .subscribe({
+        next: (res) => {
+          this.espaces.set(res.espaces.sort((a,b) => getEspaceEtage(a) - getEspaceEtage(b)));
+          this.espacePagination.setTotal(res.totalPages);
+
+          console.log(`Espaces res: ${JSON.stringify(res)}`);
+        },
+        error: console.error
+      })
+  }
+
+  // -- END ESPACES SECTION --
 }
