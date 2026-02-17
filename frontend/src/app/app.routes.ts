@@ -18,6 +18,7 @@ import { UserProfil } from './pages/shared/user-profil/user-profil';
 import { Notifications } from './pages/shared/notifications/notifications';
 import { PorteFeuille } from './pages/shared/porte-feuille/porte-feuille';
 import { Espaces } from './pages/admin/espaces/espaces';
+import { DemandesLocation } from './pages/admin/demandes-location/demandes-location';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -40,6 +41,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: Dashboard },
       { path: 'espaces', component: Espaces },
+      { path: 'demandes-location', component: DemandesLocation },
 
       { path: 'user-profil', component: UserProfil },
       { path: 'notifications', component: Notifications },

@@ -15,7 +15,6 @@
           <div class="row gy-3">
             <div class="col-12">
               <input
-                id="etage-niveau"
                 type="number"
                 min="-2"
                 step="1"
@@ -67,7 +66,7 @@
               <button class="btn btn-outline-primary px-2 py-1" (click)="editFloor(etage)">
                 <i class="bi bi-pen-fill"></i>
               </button>
-              <button class="btn btn-danger px-2 py-1" (click)="toggleDeleteFloorDialog(etage._id)">
+              <button class="btn btn-secondary px-2 py-1" (click)="toggleDeleteFloorDialog(etage._id)">
                 <i class="bi bi-trash"></i>
               </button>
             </div>
@@ -75,8 +74,225 @@
         }
       </div>
     </div>
+
+
+    <div class="row liquid-glass mt-4">
+      <div class="col-lg-6">
+        <h4>Ajouter un nouveau espace:</h4>
+        <hr>
+        
+        <form
+          class="php-email-form"
+          [formGroup]="espaceForm"
+          (ngSubmit)="onSubmitEspace()"
+          data-aos="fade-up"
+          data-aos-delay="200"
+        >      
+          <div class="row gy-3">
+            <div class="col-sm-6">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Code"
+                formControlName="codeEspace"
+              >
+            </div>
+
+            <div class="col-sm-6">
+              <select class="form-control" formControlName="etage">
+                <option value="" disabled selected>Etage</option>
+                @for (etage of etages(); track etage._id) {
+                  <option [value]="etage._id">{{ etage.nom }}</option>
+                } 
+              </select>
+            </div>
+
+            <div class="col-sm-6">
+              <input
+                type="number"
+                min="1"
+                step="0.1"
+                class="form-control"
+                placeholder="Surface (m²)"
+                formControlName="surface"
+              >
+            </div>
+
+            <div class="col-sm-6">
+              <input
+                type="number"
+                min="1"
+                step="0.01"
+                class="form-control"
+                placeholder="Loyer (Ar/mois)"
+                formControlName="loyer"
+              >
+            </div>
+
+            <div class="col-12 my-3 text-center">
+              @if (!spaceEditMode()) {
+                <button
+                  type="submit"
+                  class="btn-sm btn-primary"
+                  [disabled]="isLoading() || espaceForm.invalid"
+                >
+                  Ajouter
+                </button>
+              } @else {
+                <div class="w-100 d-flex flex-row flex-wrap justify-content-center align-items-center gap-2">
+                  <button
+                    type="submit"
+                    class="btn-sm btn-primary"
+                  >
+                    Valider
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary rounded-5"
+                    (click)="discardEditEspace()"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-lg-6">
+        <h4>Espace actuel:</h4>
+        <hr>
+
+        <div class="row">
+          @for (espace of espaces(); track espace._id) {
+            <div class="col-12 col-sm-6 mb-4">
+              <div class="card h-100 liquid-glass-item">
+                <div class="card-body d-flex flex-column">
+                  <!-- Header -->
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0 fw-bold">
+                      {{ espace.codeEspace | uppercase }}
+                    </h5>
+                    <div class="d-flex flex-row align-content-center gap-1">
+                      <span 
+                        class="badge d-flex align-items-center"
+                        [ngClass]="espace.statut === EspaceStatut.Occupee ? 'bg-danger' : 'bg-success'"
+                      >
+                        {{ espace.statut === EspaceStatut.Occupee ? 'Occupé' : 'Libre' }}
+                      </span>
+                      <button 
+                        class="btn btn-sm btn-outline-primary rounded-2"
+                        (click)="editEspace(espace)"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        title="Modifier"
+                      >
+                        <i class="bi bi-pen"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Infos principales -->
+                  <div class="d-flex justify-content-between align-items-center mb-1 small">
+                    <p>Surface:</p>
+                    <b>{{ espace.surface }} m²</b>
+                  </div>
+
+                  <div class="d-flex justify-content-between align-items-center mb-1 small">
+                    <p>Loyer:</p>
+                    <b class="text-wrap">{{ espace.loyer | currency:'MGA':'Ar':'1.0-0' }}/mois</b>
+                  </div>
+
+                  @if (espace.boutique) {
+                    <div class="d-flex justify-content-between align-items-center mb-1 small">
+                      <p>Boutique:</p>
+                      <b>{{ nomBoutique(espace.boutique) }}</b>
+                    </div>
+                  }
+
+                  <div class="d-flex justify-content-between align-items-end mt-2">
+                    <p class="text-primary small">Etage {{ nomEtage(espace) }}</p>
+
+                    <!-- Actions -->
+                    <div class="mt-auto d-flex justify-content-end gap-2">
+
+                      @if (espace.statut === EspaceStatut.Occupee) {
+                        <button 
+                          class="btn btn-sm btn-outline-warning rounded-2"
+                          (click)="toggleLibererDialog(espace._id)"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          title="Libérer l’espace"
+                        >
+                          <i class="bi bi-unlock"></i>
+                        </button>
+                      }
+
+                      <button 
+                        class="btn btn-sm btn-outline-danger rounded-2"
+                        (click)="toggleDeleteEspaceDialog(espace._id)"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        title="Supprimer l’espace"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </button>
+
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          }
+
+          <div class="col-12 d-flex justify-content-end align-items-center">
+            <nav aria-label="Page navigation">
+              <ul class="pagination">
+                <li class="page-item">
+                  <button 
+                    role="button" 
+                    class="page-link"  
+                    aria-label="Previous" 
+                    (click)="espacePagination.previous()"
+                  >
+                    <span aria-hidden="true">&laquo;</span>
+                  </button>
+                </li>
+                
+                @for(page of espacePagination.pagesArray(); track page) {
+                  <li 
+                    class="page-item" 
+                    [ngClass]="page == espacePagination.currentPage() ? 'active' : ''"
+                  >
+                    <button role="button" class="page-link" (click)="espacePagination.goTo(page)">
+                      {{ page }}
+                    </button>
+                  </li>
+                }
+
+                <li class="page-item">
+                  <button
+                    role="button"
+                    class="page-link"
+                    aria-label="Next"
+                    (click)="espacePagination.next()"
+                  >
+                    <span aria-hidden="true">&raquo;</span>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
+
+<!----- Etage ----->
 
 @if (showFloorDeleteDialog()) {
   <app-dialog 
@@ -85,6 +301,28 @@
     (clickOutside)="discardDeleteFloor()"
   />
 }
+
+<!--- End Etage --->
+
+<!----- Espace ----->
+
+@if (showLibererDialog()) {
+  <app-dialog 
+    dialog="Liberer l'espace ?"
+    (dialogResponse)="onLibererEspace($event)"
+    (clickOutside)="discardLibererDialog()"
+  />
+}
+
+@if(showSpaceDeleteDialog()) {
+  <app-dialog
+    dialog="Confirmer la suppression ?"
+    (dialogResponse)="onDeleteEspace($event)"
+    (clickOutside)="discardDeleteEspace()"
+  />
+}
+
+<!--- End Espace --->
 
 @if (isLoading()) {
   <app-loader />

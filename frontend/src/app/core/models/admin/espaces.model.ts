@@ -53,5 +53,15 @@ export function getEspaceEtage(espace: Espace): number {
   if (typeof etage === 'object' && etage !== null) {
     return etage.niveau;
   }
-  return 0;
+  return -111;
+}
+
+export function getEspaceBoutiqueNames(espaceBoutique: Boutique | string | null): string {
+  if (!espaceBoutique) return '';
+
+  if (typeof espaceBoutique === 'object') {
+    return espaceBoutique.nom;
+  }
+
+  return `Ref ${espaceBoutique.slice(0, 4)}...`;
 }

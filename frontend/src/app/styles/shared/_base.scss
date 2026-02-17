@@ -333,6 +333,26 @@ a {
   text-stroke-width: 1px; 
 }
 
+.text-primary {
+  color: v.$accent-color !important;
+}
+
+.text-secondary {
+  color: v.$heading-color !important;
+}
+
+.pagination .active {
+  .page-link {
+    font-weight: bold;
+    border-color: rgba(v.$accent-color, 0.12);
+    background-color: rgba(v.$accent-color, 0.12);
+  }
+}
+
+.page-link {
+  color: v.$accent-color !important;
+}
+
 // -- End Bootstrap --
 
 .info-label {

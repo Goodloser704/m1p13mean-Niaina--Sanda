@@ -1,9 +1,10 @@
-import { signal } from "@angular/core";
+import { computed, signal } from "@angular/core";
 
 export function createPagination(initialLimit = 10) {
   const currentPage = signal(1);
   const totalPages = signal(1);
   const limit = initialLimit;
+  const pagesArray = computed(() => Array.from({ length: totalPages() }, (_, i) => i + 1));
 
   function next() {
     if (currentPage() < totalPages()) {
@@ -27,10 +28,15 @@ export function createPagination(initialLimit = 10) {
     totalPages.set(total);
   }
 
+  function getPageNumbers() {
+
+  }
+
   return {
     currentPage,
     totalPages,
     limit,
+    pagesArray,
     next,
     previous,
     goTo,

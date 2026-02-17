@@ -1,17 +1,17 @@
-import { EspaceQueryParams, EspaceStatut, getEspaceEtage } from './../../../core/models/admin/espaces.model';
+import { EspaceQueryParams, EspaceStatut, getEspaceBoutiqueNames, getEspaceEtage } from './../../../core/models/admin/espaces.model';
 import { Component, effect, OnInit, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Loader } from "../../../components/shared/loader/loader";
 import { Espace, Etage } from '../../../core/models/admin/espaces.model';
 import { finalize, forkJoin } from 'rxjs';
 import { EspacesService } from '../../../core/services/admin/espaces.service';
-import { TitleCasePipe } from "@angular/common";
+import { TitleCasePipe, UpperCasePipe, CurrencyPipe, NgClass } from "@angular/common";
 import { Dialog } from "../../../components/shared/dialog/dialog";
 import { createPagination } from '../../../core/functions/pagination-function';
 
 @Component({
   selector: 'app-espaces',
-  imports: [ReactiveFormsModule, Loader, TitleCasePipe, Dialog],
+  imports: [ReactiveFormsModule, Loader, TitleCasePipe, Dialog, UpperCasePipe, CurrencyPipe, NgClass],
   templateUrl: './espaces.html',
   styleUrl: './espaces.scss',
 })
@@ -24,46 +24,30 @@ export class Espaces implements OnInit {
   ) {
     this.setEtageForm();
     this.setEspaceForm();
+
+    // effect observera les changements des signals a l'interieur de lui 
+    // et reexecute son contenu a chaque fois
+    effect(() => {
+      // Liste des dependances:
+      const page = this.espacePagination.currentPage(); // observer ceci
+
+      this.getSpaces(page);
+    });
   }
 
   ngOnInit() {
     this.load();
-    
-    // effect observera les changements des signals a l'interieur de lui 
-    // et reexecute son contenu a chaque fois
-    effect(() => {
-      this.getSpaces();
-
-      // Liste des dependances:
-      this.espacePagination.currentPage(); // observer ceci
-    });
   }
 
   load() {
     this.isLoading.set(true);
 
-    forkJoin({
-      etages: this.espacesService.getAllFloor(),
-      espaces: this.espacesService.getAllSpaces({ page: this.espacePagination.currentPage(), limit: this.espacePagination.limit })
-    })
-      .pipe(
-        finalize(() => this.isLoading.set(false))
-      )
+    this.espacesService.getAllFloor()
+      .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
-        next: (res) => {
-          this.etages.set(
-            res.etages.etages.sort((a,b) => a.niveau - b.niveau)
-          );
-          this.espaces.set(
-            res.espaces.espaces.sort((a,b) => getEspaceEtage(a) - getEspaceEtage(b))
-          )
-          this.espacePagination.setTotal(res.espaces.totalPages);
-        },
-        error: (err) => {
-          console.error(err);
-        }
+        next: (res) => this.etages.set(res.etages),
+        error: console.error
       });
-    
   }
 
   // ----- ETAGE SECTION -----
@@ -231,11 +215,15 @@ export class Espaces implements OnInit {
 
   espacePagination = createPagination(10);
 
+  nomEtage = getEspaceEtage;
+  nomBoutique = getEspaceBoutiqueNames;
+  EspaceStatut = EspaceStatut;
+
   setEspaceForm() {
     this.espaceForm = this.fb.nonNullable.group({
       codeEspace: ['', [Validators.required, Validators.minLength(1)]],
       surface: ['', [Validators.required, Validators.min(1)]],
-      etage: ['', [Validators.required, Validators.minLength(1)]],
+      etage: ['', [Validators.required]],
       loyer: ['', [Validators.required, Validators.min(0)]]
     })
   }
@@ -407,11 +395,11 @@ export class Espaces implements OnInit {
       });
   }
 
-  getSpaces() {
+  getSpaces(page: number) {
     this.isLoading.set(true);
 
     const params: EspaceQueryParams = {
-      page: this.espacePagination.currentPage(),
+      page,
       limit: this.espacePagination.limit
     };
 

@@ -11,7 +11,7 @@
       p-0
     "
   >
-    <nav class="navbar w-100 navbar-expand-lg">
+    <nav class="navbar w-100 navbar-expand-md">
       <div class="container-fluid">
         <button
           class="navbar-toggler" 
@@ -24,8 +24,9 @@
         >
           <span class="bi bi-list"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-          <div class="d-block d-lg-none p-2"></div>
+          <div class="d-block d-md-none p-2"></div>
           <div style="width: fit-content; max-width: 100%; height: fit-content;">
             <a class="d-none d-sm-block navbar-brand brand-title" href="#">
               {{ centre().nom | titlecase }}
@@ -34,7 +35,8 @@
               {{ centre().nom | titlecase }}
             </a>
           </div>
-          <ul class="navbar-nav ms-lg-auto mb-2 mb-lg-0 d-flex align-items-lg-center gap-0 gap-lg-2">
+
+          <ul class="navbar-nav ms-md-auto mb-2 mb-md-0 d-flex align-items-md-center gap-0 gap-md-2">
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" routerLink="user-profil">Home</a>
             </li>
