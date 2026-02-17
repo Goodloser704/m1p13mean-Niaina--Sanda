@@ -53,7 +53,12 @@ class EspaceService {
 
       const espace = new Espace(espaceData);
       await espace.save();
-      return espace;
+      
+      // Recharger l'espace avec populate
+      const espacePopulated = await Espace.findById(espace._id)
+        .populate('etage', 'nom numero niveau');
+      
+      return espacePopulated;
     } catch (error) {
       if (error.code === 11000) {
         throw new Error('Un espace avec ce code existe déjà');
@@ -97,6 +102,7 @@ class EspaceService {
       }
 
       const espaces = await Espace.find(query)
+        .populate('etage', 'nom numero niveau')
         .populate('boutique', 'nom proprietaire')
         .sort({ etage: 1, codeEspace: 1 })
         .skip(skip)
@@ -119,6 +125,7 @@ class EspaceService {
   async obtenirEspaceParId(id) {
     try {
       const espace = await Espace.findById(id)
+        .populate('etage', 'nom numero niveau')
         .populate('boutique', 'nom proprietaire contact');
       
       if (!espace) {
@@ -135,6 +142,7 @@ class EspaceService {
   async obtenirEspaceParCode(codeEspace) {
     try {
       const espace = await Espace.findOne({ codeEspace: codeEspace.toUpperCase() })
+        .populate('etage', 'nom numero niveau')
         .populate('boutique', 'nom proprietaire contact');
       
       if (!espace) {
@@ -181,7 +189,9 @@ class EspaceService {
         id,
         updateData,
         { new: true, runValidators: true }
-      ).populate('boutique', 'nom proprietaire');
+      )
+        .populate('etage', 'nom numero niveau')
+        .populate('boutique', 'nom proprietaire');
       
       if (!espace) {
         throw new Error('Espace non trouvé');
@@ -243,7 +253,10 @@ class EspaceService {
       
       await espace.save();
       
-      return await espace.populate('boutique', 'nom proprietaire');
+      return await espace.populate([
+        { path: 'etage', select: 'nom numero niveau' },
+        { path: 'boutique', select: 'nom proprietaire' }
+      ]);
     } catch (error) {
       throw error;
     }
@@ -272,9 +285,15 @@ class EspaceService {
   // Rechercher des espaces disponibles
   async rechercherEspacesDisponibles(criteres = {}) {
     try {
-      return await Espace.rechercherEspaces({
+      const espaces = await Espace.rechercherEspaces({
         ...criteres,
         statut: 'Disponible'
+      });
+      
+      // Populate etage pour les espaces trouvés
+      return await Espace.populate(espaces, { 
+        path: 'etage', 
+        select: 'nom numero niveau' 
       });
     } catch (error) {
       throw error;
