@@ -566,7 +566,7 @@ export interface Espace {
 export interface EspaceRequest {
   codeEspace: string;
   surface: number;
-  etage: number;
+  etage: number | string; // Accepte numero (number) ou _id (string)
   loyer: number;
   statut?: EspaceStatut;
   description?: string;

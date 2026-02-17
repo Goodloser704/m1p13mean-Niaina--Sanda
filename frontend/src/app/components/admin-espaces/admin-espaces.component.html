@@ -320,7 +320,7 @@
               [(ngModel)]="espaceForm.etage"
               name="etage"
               required>
-              <option *ngFor="let etage of etages" [value]="etage.numero">
+              <option *ngFor="let etage of etages" [value]="etage._id">
                 {{ etage.nom }}
               </option>
             </select>

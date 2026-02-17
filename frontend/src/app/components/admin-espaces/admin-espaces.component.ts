@@ -16,7 +16,7 @@ import { Espace, EspaceRequest, EspaceFilters, Boutique } from '../../models/api
 export class AdminEspacesComponent implements OnInit {
   // État des données
   espaces: Espace[] = [];
-  etages: Array<{ numero: number; nom: string }> = [];
+  etages: Array<{ _id: string; numero: number; nom: string }> = [];
   boutiques: Boutique[] = [];
   loading = false;
   error = '';
@@ -42,7 +42,7 @@ export class AdminEspacesComponent implements OnInit {
   espaceForm: EspaceRequest = {
     codeEspace: '',
     surface: 0,
-    etage: 0,
+    etage: '',
     loyer: 0,
     statut: 'Disponible',
     description: '',
@@ -207,7 +207,7 @@ export class AdminEspacesComponent implements OnInit {
       this.espaceForm = {
         codeEspace: '',
         surface: 0,
-        etage: this.etages.length > 0 ? this.etages[0].numero : 0,
+        etage: this.etages.length > 0 ? this.etages[0]._id : '',
         loyer: 0,
         statut: 'Disponible',
         description: '',

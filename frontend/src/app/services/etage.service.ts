@@ -177,11 +177,12 @@ export class EtageService {
   }
 
   // Obtenir la liste simple des étages (pour les selects)
-  obtenirListeEtages(): Observable<Array<{ numero: number; nom: string }>> {
+  obtenirListeEtages(): Observable<Array<{ _id: string; numero: number; nom: string }>> {
     return new Observable(observer => {
       this.obtenirEtages({ actifSeulement: true }).subscribe({
         next: (response) => {
           const listeSimple = response.etages.map(etage => ({
+            _id: etage._id,
             numero: etage.numero,
             nom: etage.nom
           }));

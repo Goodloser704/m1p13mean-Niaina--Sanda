@@ -17,8 +17,17 @@ class EspaceService {
 
       // 2. Convertir le numéro d'étage en ID si nécessaire
       if (espaceData.etage) {
-        // Si etage est un nombre ou une string de nombre, chercher l'étage correspondant
-        if (typeof espaceData.etage === 'number' || !isNaN(espaceData.etage)) {
+        const mongoose = require('mongoose');
+        
+        // Si etage est un ObjectId valide, le garder tel quel
+        if (mongoose.Types.ObjectId.isValid(espaceData.etage) && String(espaceData.etage).length === 24) {
+          // C'est déjà un ObjectId, vérifier qu'il existe
+          const etage = await Etage.findById(espaceData.etage);
+          if (!etage || !etage.isActive) {
+            throw new Error(`Aucun étage actif trouvé avec cet ID`);
+          }
+        } else {
+          // Si etage est un nombre ou une string de nombre, chercher l'étage correspondant
           const numeroEtage = parseInt(espaceData.etage);
           const etage = await Etage.findOne({ numero: numeroEtage, isActive: true });
           if (!etage) {
@@ -87,12 +96,21 @@ class EspaceService {
         ];
       }
 
-      const espaces = await Espace.find(query)
+      const espacesRaw = await Espace.find(query)
         .populate('boutique', 'nom proprietaire')
-        .populate('etage', 'numero niveau nom')
+        .populate('etage', 'numero nom')
         .sort({ etage: 1, codeEspace: 1 })
         .skip(skip)
         .limit(limit);
+
+      // Transformer les espaces pour retourner le numero de l'étage
+      const espaces = espacesRaw.map(espace => {
+        const espaceObj = espace.toObject();
+        if (espaceObj.etage && espaceObj.etage.numero !== undefined) {
+          espaceObj.etage = espaceObj.etage.numero;
+        }
+        return espaceObj;
+      });
 
       const total = await Espace.countDocuments(query);
 
@@ -111,13 +129,20 @@ class EspaceService {
   async obtenirEspaceParId(id) {
     try {
       const espace = await Espace.findById(id)
-        .populate('boutique', 'nom proprietaire contact');
+        .populate('boutique', 'nom proprietaire contact')
+        .populate('etage', 'numero nom');
       
       if (!espace) {
         throw new Error('Espace non trouvé');
       }
       
-      return espace;
+      // Transformer pour retourner le numero de l'étage
+      const espaceObj = espace.toObject();
+      if (espaceObj.etage && espaceObj.etage.numero !== undefined) {
+        espaceObj.etage = espaceObj.etage.numero;
+      }
+      
+      return espaceObj;
     } catch (error) {
       throw error;
     }
@@ -127,13 +152,20 @@ class EspaceService {
   async obtenirEspaceParCode(codeEspace) {
     try {
       const espace = await Espace.findOne({ codeEspace: codeEspace.toUpperCase() })
-        .populate('boutique', 'nom proprietaire contact');
+        .populate('boutique', 'nom proprietaire contact')
+        .populate('etage', 'numero nom');
       
       if (!espace) {
         throw new Error('Espace non trouvé');
       }
       
-      return espace;
+      // Transformer pour retourner le numero de l'étage
+      const espaceObj = espace.toObject();
+      if (espaceObj.etage && espaceObj.etage.numero !== undefined) {
+        espaceObj.etage = espaceObj.etage.numero;
+      }
+      
+      return espaceObj;
     } catch (error) {
       throw error;
     }
@@ -142,12 +174,27 @@ class EspaceService {
   // Mettre à jour un espace
   async mettreAJourEspace(id, updateData) {
     try {
-      // Si on change l'étage, vérifier qu'il existe
-      if (updateData.etage) {
-        const etageExiste = await Etage.findOne({ 
-          numero: updateData.etage, 
-          isActive: true 
-        });
+      // Si on change l'étage, vérifier qu'il existe et convertir en ObjectId si nécessaire
+      if (updateData.etage !== undefined) {
+        const mongoose = require('mongoose');
+        let etageExiste;
+        
+        // Vérifier si c'est un ObjectId ou un numero
+        if (mongoose.Types.ObjectId.isValid(updateData.etage) && String(updateData.etage).length === 24) {
+          // C'est un ObjectId
+          etageExiste = await Etage.findById(updateData.etage);
+        } else {
+          // C'est un numero
+          etageExiste = await Etage.findOne({ 
+            numero: updateData.etage, 
+            isActive: true 
+          });
+          
+          // Si trouvé, utiliser son _id
+          if (etageExiste) {
+            updateData.etage = etageExiste._id;
+          }
+        }
         
         if (!etageExiste) {
           throw new Error('L\'étage spécifié n\'existe pas');
@@ -158,13 +205,21 @@ class EspaceService {
         id,
         updateData,
         { new: true, runValidators: true }
-      ).populate('boutique', 'nom proprietaire');
+      )
+        .populate('boutique', 'nom proprietaire')
+        .populate('etage', 'numero nom');
       
       if (!espace) {
         throw new Error('Espace non trouvé');
       }
       
-      return espace;
+      // Transformer pour retourner le numero de l'étage
+      const espaceObj = espace.toObject();
+      if (espaceObj.etage && espaceObj.etage.numero !== undefined) {
+        espaceObj.etage = espaceObj.etage.numero;
+      }
+      
+      return espaceObj;
     } catch (error) {
       if (error.code === 11000) {
         throw new Error('Un espace avec ce code existe déjà');
