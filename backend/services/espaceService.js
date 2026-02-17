@@ -96,21 +96,11 @@ class EspaceService {
         ];
       }
 
-      const espacesRaw = await Espace.find(query)
+      const espaces = await Espace.find(query)
         .populate('boutique', 'nom proprietaire')
-        .populate('etage', 'numero nom')
         .sort({ etage: 1, codeEspace: 1 })
         .skip(skip)
         .limit(limit);
-
-      // Transformer les espaces pour retourner le numero de l'étage
-      const espaces = espacesRaw.map(espace => {
-        const espaceObj = espace.toObject();
-        if (espaceObj.etage && espaceObj.etage.numero !== undefined) {
-          espaceObj.etage = espaceObj.etage.numero;
-        }
-        return espaceObj;
-      });
 
       const total = await Espace.countDocuments(query);
 
@@ -129,20 +119,13 @@ class EspaceService {
   async obtenirEspaceParId(id) {
     try {
       const espace = await Espace.findById(id)
-        .populate('boutique', 'nom proprietaire contact')
-        .populate('etage', 'numero nom');
+        .populate('boutique', 'nom proprietaire contact');
       
       if (!espace) {
         throw new Error('Espace non trouvé');
       }
       
-      // Transformer pour retourner le numero de l'étage
-      const espaceObj = espace.toObject();
-      if (espaceObj.etage && espaceObj.etage.numero !== undefined) {
-        espaceObj.etage = espaceObj.etage.numero;
-      }
-      
-      return espaceObj;
+      return espace;
     } catch (error) {
       throw error;
     }
@@ -152,20 +135,13 @@ class EspaceService {
   async obtenirEspaceParCode(codeEspace) {
     try {
       const espace = await Espace.findOne({ codeEspace: codeEspace.toUpperCase() })
-        .populate('boutique', 'nom proprietaire contact')
-        .populate('etage', 'numero nom');
+        .populate('boutique', 'nom proprietaire contact');
       
       if (!espace) {
         throw new Error('Espace non trouvé');
       }
       
-      // Transformer pour retourner le numero de l'étage
-      const espaceObj = espace.toObject();
-      if (espaceObj.etage && espaceObj.etage.numero !== undefined) {
-        espaceObj.etage = espaceObj.etage.numero;
-      }
-      
-      return espaceObj;
+      return espace;
     } catch (error) {
       throw error;
     }
@@ -205,21 +181,13 @@ class EspaceService {
         id,
         updateData,
         { new: true, runValidators: true }
-      )
-        .populate('boutique', 'nom proprietaire')
-        .populate('etage', 'numero nom');
+      ).populate('boutique', 'nom proprietaire');
       
       if (!espace) {
         throw new Error('Espace non trouvé');
       }
       
-      // Transformer pour retourner le numero de l'étage
-      const espaceObj = espace.toObject();
-      if (espaceObj.etage && espaceObj.etage.numero !== undefined) {
-        espaceObj.etage = espaceObj.etage.numero;
-      }
-      
-      return espaceObj;
+      return espace;
     } catch (error) {
       if (error.code === 11000) {
         throw new Error('Un espace avec ce code existe déjà');

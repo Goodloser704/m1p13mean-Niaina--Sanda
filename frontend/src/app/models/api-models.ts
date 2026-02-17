@@ -551,7 +551,7 @@ export interface Espace {
   _id: ObjectId;
   codeEspace: string;
   surface: number;
-  etage: number;
+  etage: ObjectId | number; // Peut être ObjectId (depuis backend) ou number (numero)
   loyer: number;
   statut: EspaceStatut;
   boutique?: ObjectId | Boutique;
@@ -566,7 +566,7 @@ export interface Espace {
 export interface EspaceRequest {
   codeEspace: string;
   surface: number;
-  etage: number | string; // Accepte numero (number) ou _id (string)
+  etage: string; // ObjectId de l'étage
   loyer: number;
   statut?: EspaceStatut;
   description?: string;

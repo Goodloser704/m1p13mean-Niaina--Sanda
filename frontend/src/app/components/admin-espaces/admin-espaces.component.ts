@@ -219,10 +219,21 @@ export class AdminEspacesComponent implements OnInit {
         }
       };
     } else if (espace) {
+      // En mode édition, convertir le numero d'étage en _id si nécessaire
+      let etageId = '';
+      if (typeof espace.etage === 'string') {
+        // C'est déjà un ObjectId
+        etageId = espace.etage;
+      } else if (typeof espace.etage === 'number') {
+        // C'est un numero, trouver l'_id correspondant
+        const etage = this.etages.find(e => e.numero === espace.etage);
+        etageId = etage ? etage._id : '';
+      }
+      
       this.espaceForm = {
         codeEspace: espace.codeEspace,
         surface: espace.surface,
-        etage: espace.etage,
+        etage: etageId,
         loyer: espace.loyer,
         statut: espace.statut,
         description: espace.description || '',
@@ -394,9 +405,15 @@ export class AdminEspacesComponent implements OnInit {
     return this.espaceService.obtenirIconeStatut(statut);
   }
 
-  obtenirNomEtage(numeroEtage: number): string {
-    const etage = this.etages.find(e => e.numero === numeroEtage);
-    return etage ? etage.nom : `Étage ${numeroEtage}`;
+  obtenirNomEtage(etageIdOrNumero: string | number): string {
+    // Si c'est un ObjectId (string), trouver l'étage par _id
+    if (typeof etageIdOrNumero === 'string') {
+      const etage = this.etages.find(e => e._id === etageIdOrNumero);
+      return etage ? etage.nom : 'Étage inconnu';
+    }
+    // Si c'est un numero, trouver l'étage par numero
+    const etage = this.etages.find(e => e.numero === etageIdOrNumero);
+    return etage ? etage.nom : `Étage ${etageIdOrNumero}`;
   }
 
   obtenirNomBoutique(espace: Espace): string {
