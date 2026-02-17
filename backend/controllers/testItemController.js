@@ -15,10 +15,33 @@ class TestItemController {
     console.log(`📋 Récupération items pour user: ${req.user._id}`);
     
     try {
-      const { statut, limit = 20 } = req.query;
+      const { statut, limit = 20, minValeur, maxValeur, tags, search } = req.query;
       
       const query = { createur: req.user._id };
+      
+      // Filtre par statut
       if (statut) query.statut = statut;
+      
+      // Filtre par valeur min/max
+      if (minValeur || maxValeur) {
+        query.valeur = {};
+        if (minValeur) query.valeur.$gte = parseInt(minValeur);
+        if (maxValeur) query.valeur.$lte = parseInt(maxValeur);
+      }
+      
+      // Filtre par tags
+      if (tags) {
+        const tagArray = tags.split(',').map(t => t.trim());
+        query.tags = { $in: tagArray };
+      }
+      
+      // Recherche textuelle (titre ou description)
+      if (search) {
+        query.$or = [
+          { titre: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } }
+        ];
+      }
       
       const items = await TestItem.find(query)
         .sort({ createdAt: -1 })
@@ -74,7 +97,7 @@ class TestItemController {
     console.log(`➕ Création item pour user: ${req.user._id}`);
     
     try {
-      const { titre, description, valeur, tags } = req.body;
+      const { titre, description, valeur,priorité, tags } = req.body;
       
       if (!titre) {
         return res.status(400).json({ message: 'Le titre est requis' });
@@ -85,9 +108,11 @@ class TestItemController {
         description,
         valeur: valeur || 0,
         tags: tags || [],
+        priorité : priorité,
         createur: req.user._id
       });
-      
+      item.titre = item.titre.toUpperCase();
+      if(item.valeur<0){item.valeur=0};
       await item.save();
       
       console.log(`✅ Item créé: ${item._id}`);
@@ -111,7 +136,7 @@ class TestItemController {
     console.log(`✏️ Mise à jour item: ${req.params.id}`);
     
     try {
-      const { titre, description, statut, valeur, tags } = req.body;
+      const { titre, description, statut, valeur,priorité, tags } = req.body;
       
       const item = await TestItem.findOne({
         _id: req.params.id,
@@ -126,6 +151,7 @@ class TestItemController {
       if (description !== undefined) item.description = description;
       if (statut) item.statut = statut;
       if (valeur !== undefined) item.valeur = valeur;
+      if (priorité) item.priorité =priorité
       if (tags) item.tags = tags;
       
       await item.save();
@@ -230,6 +256,103 @@ class TestItemController {
       });
     } catch (error) {
       console.error(`❌ Erreur stats:`, error.message);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+  /**
+   * @route   POST /api/test-items/:id/rate
+   * @desc    Noter un item (1-5 étoiles)
+   * @access  Private
+   */
+  async rateItem(req, res) {
+    console.log(`⭐ Notation item: ${req.params.id}`);
+    
+    try {
+      const { note } = req.body;
+      
+      // Validation
+      if (!note || note < 1 || note > 5) {
+        return res.status(400).json({ 
+          message: 'La note doit être entre 1 et 5' 
+        });
+      }
+      
+      // Trouver l'item
+      const item = await TestItem.findOne({
+        _id: req.params.id,
+        createur: req.user._id
+      });
+      
+      if (!item) {
+        return res.status(404).json({ message: 'Item non trouvé' });
+      }
+      
+      // Ajouter la note
+      item.notes.push(note);
+      
+      // Calculer la moyenne
+      const somme = item.notes.reduce((acc, n) => acc + n, 0);
+      item.noteMoyenne = Math.round((somme / item.notes.length) * 100) / 100;
+      
+      await item.save();
+      
+      console.log(`✅ Note ajoutée: ${note}/5 (moyenne: ${item.noteMoyenne})`);
+      
+      res.json({
+        message: 'Note ajoutée avec succès',
+        item,
+        noteMoyenne: item.noteMoyenne,
+        totalNotes: item.notes.length
+      });
+    } catch (error) {
+      console.error(`❌ Erreur notation:`, error.message);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+  
+  /**
+   * @route   POST /api/test-items/:id/duplicate
+   * @desc    Dupliquer un item
+   * @access  Private
+   */
+  async duplicate(req, res) {
+    console.log(`📋 Duplication item: ${req.params.id}`);
+    
+    try {
+      // 1. Trouver l'item original
+      const itemOriginal = await TestItem.findOne({
+        _id: req.params.id,
+        createur: req.user._id
+      });
+      
+      if (!itemOriginal) {
+        return res.status(404).json({ message: 'Item non trouvé' });
+      }
+      
+      // 2. Créer une copie
+      const itemCopie = new TestItem({
+        titre: `${itemOriginal.titre} (Copie)`,
+        description: itemOriginal.description,
+        valeur: itemOriginal.valeur,
+        statut: itemOriginal.statut,
+        tags: itemOriginal.tags,
+        priorité: itemOriginal.priorité,
+        createur: req.user._id
+      });
+      
+      // 3. Sauvegarder la copie
+      await itemCopie.save();
+      
+      console.log(`✅ Item dupliqué: ${itemCopie._id}`);
+      
+      res.status(201).json({
+        message: 'Item dupliqué avec succès',
+        item: itemCopie,
+        original: itemOriginal._id
+      });
+      
+    } catch (error) {
+      console.error(`❌ Erreur duplication:`, error.message);
       res.status(500).json({ message: 'Erreur serveur' });
     }
   }

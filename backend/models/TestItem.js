@@ -21,7 +21,9 @@ const testItemSchema = new mongoose.Schema({
   },
   valeur: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
+
   },
   createur: {
     type: mongoose.Schema.Types.ObjectId,
@@ -30,6 +32,32 @@ const testItemSchema = new mongoose.Schema({
   },
   tags: [{
     type: String
+  }],
+  notes: [{
+    type: Number,
+    min: 1,
+    max: 5
+  }],
+  noteMoyenne: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  priorité:{
+     type:String,
+     enum:['🟢','🟡','🔴','🔥'],
+  },
+  historique: [{
+    date: {
+      type: Date,
+      default: Date.now
+    },
+    champsModifies: [String],
+    anciennesValeurs: {
+      type: Map,
+      of: mongoose.Schema.Types.Mixed
+    }
   }]
 }, {
   timestamps: true
@@ -60,5 +88,51 @@ testItemSchema.statics.getStats = async function(userId) {
   
   return stats;
 };
+
+testItemSchema.pre('save', function(next) {
+  if (this.tags && this.tags.length > 0) {
+    // 1. Convertir tous les tags en minuscules
+    const tagsMinuscules = this.tags.map(tag => tag.toLowerCase());
+    
+    // 2. Enlever les doublons avec Set
+    const tagsUniques = [...new Set(tagsMinuscules)];
+    
+    // 3. Remplacer les tags
+    this.tags = tagsUniques;
+    
+    console.log(`🏷️ Tags nettoyés: ${this.tags.join(', ')}`);
+  }
+  
+  // 📜 Historique: Sauvegarder les modifications
+  if (!this.isNew && this.isModified()) {
+    const modifiedFields = this.modifiedPaths();
+    
+    // Ignorer certains champs automatiques
+    const fieldsToIgnore = ['updatedAt', 'historique', '__v'];
+    const relevantFields = modifiedFields.filter(field => !fieldsToIgnore.includes(field));
+    
+    if (relevantFields.length > 0) {
+      const anciennesValeurs = new Map();
+      
+      // Sauvegarder les anciennes valeurs
+      relevantFields.forEach(field => {
+        // Récupérer la valeur originale depuis la base de données
+        const oldValue = this._doc[field];
+        anciennesValeurs.set(field, oldValue);
+      });
+      
+      // Ajouter à l'historique
+      this.historique.push({
+        date: new Date(),
+        champsModifies: relevantFields,
+        anciennesValeurs: anciennesValeurs
+      });
+      
+      console.log(`📜 Historique ajouté: ${relevantFields.join(', ')}`);
+    }
+  }
+  
+  next();
+});
 
 module.exports = mongoose.model('TestItem', testItemSchema);

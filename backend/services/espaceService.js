@@ -89,6 +89,7 @@ class EspaceService {
 
       const espaces = await Espace.find(query)
         .populate('boutique', 'nom proprietaire')
+        .populate('etage', 'numero niveau nom')
         .sort({ etage: 1, codeEspace: 1 })
         .skip(skip)
         .limit(limit);

@@ -42,6 +42,18 @@ router.put('/:id', auth, testItemController.update);
 // @access  Private
 router.put('/:id/toggle', auth, testItemController.toggle);
 
+
+// @route   POST /api/test-items/:id/rate
+// @desc    Noter un item (1-5 étoiles)
+// @access  Private
+// @body    { note: 1-5 }
+router.post('/:id/rate', auth, testItemController.rateItem);
+
+// @route   POST /api/test-items/:id/duplicate
+// @desc    Dupliquer un item
+// @access  Private
+router.post('/:id/duplicate', auth, testItemController.duplicate);
+
 // @route   DELETE /api/test-items/:id
 // @desc    Supprimer un item
 // @access  Private
