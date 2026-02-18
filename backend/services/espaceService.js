@@ -1,6 +1,7 @@
 const Espace = require('../models/Espace');
 const Etage = require('../models/Etage');
 const CentreCommercial = require('../models/CentreCommercial');
+const Boutique = require('../models/Boutique');
 
 class EspaceService {
   // Créer un nouvel espace

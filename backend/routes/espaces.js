@@ -75,15 +75,17 @@ router.put('/:id', espaceController.mettreAJourEspace);
 // @access  Admin
 router.patch('/:id', espaceController.mettreAJourEspace);
 
-// @route   PUT /api/espaces/:id/occuper
+// @route   PUT/POST /api/espaces/:id/occuper
 // @desc    Occuper un espace
 // @access  Admin
 router.put('/:id/occuper', espaceController.occuperEspace);
+router.post('/:id/occuper', espaceController.occuperEspace);
 
-// @route   PUT /api/espaces/:id/liberer
+// @route   PUT/POST /api/espaces/:id/liberer
 // @desc    Libérer un espace
 // @access  Admin
 router.put('/:id/liberer', espaceController.libererEspace);
+router.post('/:id/liberer', espaceController.libererEspace);
 
 // @route   DELETE /api/espaces/:id
 // @desc    Supprimer un espace (soft delete)
