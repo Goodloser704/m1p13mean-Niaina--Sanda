@@ -56,9 +56,10 @@ class EspaceService {
         throw new Error('Le numéro d\'espace ne peut pas dépasser 20 caractères');
       }
 
-      // Assigner le numéro nettoyé
+      // Assigner le numéro nettoyé à tous les champs
       espaceData.codeEspace = numeroNettoye;
       espaceData.numero = numeroNettoye;
+      espaceData.code = numeroNettoye;
 
       // 4. Vérifier l'unicité du numéro sur cet étage
       const espaceExistant = await Espace.findOne({

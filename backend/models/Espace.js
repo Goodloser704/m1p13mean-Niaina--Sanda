@@ -9,26 +9,30 @@ const espaceSchema = new mongoose.Schema({
   code: { // Renommé selon les règles de gestion
     type: String,
     required: true,
-    unique: true,
     trim: true,
-    uppercase: true,
-    match: /^[A-Z0-9]{1,10}$/, // Format flexible: lettres et chiffres
-    maxlength: 10
+    maxlength: 20
   },
   codeEspace: { // Alias pour compatibilité
     type: String,
     required: true,
-    unique: true,
     trim: true,
-    uppercase: true,
-    match: /^[A-Z0-9]{1,10}$/, // Format flexible: lettres et chiffres
-    maxlength: 10
+    maxlength: 20
+  },
+  numero: { // Alias supplémentaire pour compatibilité
+    type: String,
+    trim: true,
+    maxlength: 20
   },
   surface: {
     type: Number,
     required: true,
     min: 1,
     max: 10000 // Surface max en m²
+  },
+  superficie: { // Alias pour compatibilité
+    type: Number,
+    min: 1,
+    max: 10000
   },
   etage: {
     type: mongoose.Schema.Types.ObjectId,
@@ -38,6 +42,10 @@ const espaceSchema = new mongoose.Schema({
   loyer: {
     type: Number,
     required: true,
+    min: 0
+  },
+  prixLoyer: { // Alias pour compatibilité
+    type: Number,
     min: 0
   },
   statut: {
