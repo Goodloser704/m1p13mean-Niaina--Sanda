@@ -1,5 +1,6 @@
 const Boutique = require('../models/Boutique');
 const User = require('../models/User');
+const CategorieBoutique = require('../models/CategorieBoutique');
 const notificationService = require('./notificationService');
 
 /**
@@ -22,6 +23,20 @@ class BoutiqueService {
       // Accepter 'Commercant' ou 'boutique' pour compatibilité
       if (user.role !== 'Commercant' && user.role !== 'boutique') {
         throw new Error('Seuls les commerçants peuvent créer une boutique');
+      }
+
+      // Vérifier que la catégorie existe et est active
+      if (!boutiqueData.categorie) {
+        throw new Error('La catégorie est requise');
+      }
+
+      const categorie = await CategorieBoutique.findById(boutiqueData.categorie);
+      if (!categorie) {
+        throw new Error('Catégorie non trouvée');
+      }
+
+      if (!categorie.isActive) {
+        throw new Error('Cette catégorie n\'est plus disponible');
       }
 
       // Vérifier si une boutique avec le même nom existe déjà pour cet utilisateur

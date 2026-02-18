@@ -1,5 +1,5 @@
 const express = require('express');
-const { auth, adminAuth } = require('../middleware/auth');
+const { auth, adminAuth, authorize } = require('../middleware/auth');
 const boutiqueController = require('../controllers/boutiqueController');
 
 const router = express.Router();
@@ -40,10 +40,10 @@ router.get('/', boutiqueController.getAllBoutiques);
 
 // @route   POST /api/boutique
 // @desc    Créer une nouvelle boutique (alias de /register)
-// @access  Private (Commercant)
+// @access  Private (Commercant ONLY)
 // @body    { nom, description, categorie }
 // @return  { message, boutique }
-router.post('/', auth, boutiqueController.createBoutique);
+router.post('/', auth, authorize('Commercant'), boutiqueController.createBoutique);
 
 // @route   GET /api/boutiques/search
 // @desc    Rechercher des boutiques par mot-clé
@@ -54,17 +54,17 @@ router.get('/search', boutiqueController.searchBoutiques);
 
 // @route   POST /api/boutique/register
 // @desc    Créer une nouvelle inscription boutique
-// @access  Private (Commercant)
+// @access  Private (Commercant ONLY)
 // @body    { nom, description, categorie }
 // @return  { message, boutique }
-router.post('/register', auth, boutiqueController.createBoutique);
+router.post('/register', auth, authorize('Commercant'), boutiqueController.createBoutique);
 
 // @route   POST /api/commercant/boutique (conforme aux spécifications)
 // @desc    Créer une nouvelle boutique
-// @access  Private (Commercant)
+// @access  Private (Commercant ONLY)
 // @body    { boutique }
 // @return  { boutique }
-router.post('/commercant/boutique', auth, boutiqueController.createBoutique);
+router.post('/commercant/boutique', auth, authorize('Commercant'), boutiqueController.createBoutique);
 
 // @route   GET /api/boutique/my-boutiques
 // @desc    Obtenir toutes mes boutiques

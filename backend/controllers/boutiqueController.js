@@ -272,17 +272,26 @@ class BoutiqueController {
   /**
    * @route   POST /api/boutique/register
    * @desc    Créer une nouvelle inscription boutique
-   * @access  Private (Commercant)
+   * @access  Private (Commercant ONLY)
    * @body    { nom, description, categorie }
    * @return  { message, boutique }
    */
   async createBoutique(req, res) {
     const timestamp = new Date().toISOString();
     console.log(`🏪 [${timestamp}] Création nouvelle boutique`);
-    console.log(`   👤 User ID: ${req.user._id}`);
+    console.log(`   👤 User ID: ${req.user._id} (${req.user.role})`);
     console.log(`   📝 Données:`, req.body);
     
     try {
+      // Vérification supplémentaire du rôle (défense en profondeur)
+      if (req.user.role !== 'Commercant' && req.user.role !== 'boutique') {
+        console.log(`❌ Tentative création boutique par ${req.user.role}`);
+        return res.status(403).json({ 
+          message: 'Seuls les commerçants peuvent créer des boutiques',
+          code: 'INSUFFICIENT_PERMISSIONS'
+        });
+      }
+
       const boutiqueData = req.body;
       
       // Validation des champs requis
@@ -313,8 +322,17 @@ class BoutiqueController {
     } catch (error) {
       console.error(`❌ Erreur création boutique:`, error.message);
       
+      // Gestion spécifique des erreurs
+      if (error.message.includes('Catégorie non trouvée')) {
+        return res.status(404).json({ message: error.message });
+      }
+      
+      if (error.message.includes('n\'est plus disponible')) {
+        return res.status(400).json({ message: error.message });
+      }
+      
       if (error.message.includes('déjà une boutique') || 
-          error.message.includes('rôle boutique')) {
+          error.message.includes('commerçants peuvent')) {
         return res.status(400).json({ message: error.message });
       }
       
