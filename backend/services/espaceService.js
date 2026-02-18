@@ -46,27 +46,30 @@ class EspaceService {
       }
 
       // Nettoyer et valider le numéro
-      const numeroNettoye = String(numeroEspace).trim();
+      let numeroNettoye = String(numeroEspace).trim().toUpperCase();
       
       if (numeroNettoye.length === 0) {
         throw new Error('Le numéro d\'espace ne peut pas être vide');
       }
 
-      if (numeroNettoye.length > 20) {
-        throw new Error('Le numéro d\'espace ne peut pas dépasser 20 caractères');
+      // Supprimer les caractères non alphanumériques pour respecter le format du modèle
+      numeroNettoye = numeroNettoye.replace(/[^A-Z0-9]/g, '');
+      
+      if (numeroNettoye.length === 0) {
+        throw new Error('Le numéro d\'espace doit contenir au moins un caractère alphanumérique');
       }
 
-      // Assigner le numéro nettoyé à tous les champs
-      espaceData.codeEspace = numeroNettoye;
-      espaceData.numero = numeroNettoye;
+      if (numeroNettoye.length > 10) {
+        throw new Error('Le numéro d\'espace ne peut pas dépasser 10 caractères alphanumériques');
+      }
+
+      // Assigner le numéro nettoyé aux deux champs requis par le modèle
       espaceData.code = numeroNettoye;
+      espaceData.codeEspace = numeroNettoye;
 
       // 4. Vérifier l'unicité du numéro sur cet étage
       const espaceExistant = await Espace.findOne({
-        $or: [
-          { codeEspace: numeroNettoye },
-          { numero: numeroNettoye }
-        ],
+        codeEspace: numeroNettoye,
         etage: espaceData.etage,
         isActive: true
       });
@@ -75,7 +78,7 @@ class EspaceService {
         throw new Error(`Le numéro "${numeroNettoye}" existe déjà sur cet étage`);
       }
 
-      // 5. Valider la superficie
+      // 5. Valider et assigner la superficie
       if (espaceData.superficie !== undefined) {
         const superficie = parseFloat(espaceData.superficie);
         if (isNaN(superficie) || superficie <= 0) {
@@ -84,11 +87,21 @@ class EspaceService {
         if (superficie > 10000) {
           throw new Error('La superficie ne peut pas dépasser 10000 m²');
         }
-        espaceData.superficie = superficie;
-        espaceData.surface = superficie; // Compatibilité
+        espaceData.surface = superficie; // Le modèle utilise 'surface'
+      } else if (espaceData.surface !== undefined) {
+        const superficie = parseFloat(espaceData.surface);
+        if (isNaN(superficie) || superficie <= 0) {
+          throw new Error('La superficie doit être un nombre positif');
+        }
+        if (superficie > 10000) {
+          throw new Error('La superficie ne peut pas dépasser 10000 m²');
+        }
+        espaceData.surface = superficie;
+      } else {
+        throw new Error('La superficie est requise');
       }
 
-      // 6. Valider le prix du loyer
+      // 6. Valider et assigner le prix du loyer
       if (espaceData.prixLoyer !== undefined) {
         const prixLoyer = parseFloat(espaceData.prixLoyer);
         if (isNaN(prixLoyer) || prixLoyer < 0) {
@@ -97,8 +110,18 @@ class EspaceService {
         if (prixLoyer > 1000000) {
           throw new Error('Le prix du loyer ne peut pas dépasser 1 000 000');
         }
-        espaceData.prixLoyer = prixLoyer;
-        espaceData.loyer = prixLoyer; // Compatibilité
+        espaceData.loyer = prixLoyer; // Le modèle utilise 'loyer'
+      } else if (espaceData.loyer !== undefined) {
+        const prixLoyer = parseFloat(espaceData.loyer);
+        if (isNaN(prixLoyer) || prixLoyer < 0) {
+          throw new Error('Le prix du loyer doit être un nombre positif ou zéro');
+        }
+        if (prixLoyer > 1000000) {
+          throw new Error('Le prix du loyer ne peut pas dépasser 1 000 000');
+        }
+        espaceData.loyer = prixLoyer;
+      } else {
+        throw new Error('Le prix du loyer est requis');
       }
 
       const espace = new Espace(espaceData);
@@ -208,6 +231,96 @@ class EspaceService {
   // Mettre à jour un espace
   async mettreAJourEspace(id, updateData) {
     try {
+      // Validation du numéro si fourni
+      if (updateData.numero || updateData.codeEspace) {
+        const numeroEspace = updateData.numero || updateData.codeEspace;
+        let numeroNettoye = String(numeroEspace).trim().toUpperCase();
+        numeroNettoye = numeroNettoye.replace(/[^A-Z0-9]/g, '');
+        
+        if (numeroNettoye.length === 0) {
+          throw new Error('Le numéro d\'espace doit contenir au moins un caractère alphanumérique');
+        }
+        
+        if (numeroNettoye.length > 10) {
+          throw new Error('Le numéro d\'espace ne peut pas dépasser 10 caractères alphanumériques');
+        }
+
+        // Récupérer l'espace actuel pour vérifier l'unicité
+        const espaceActuel = await Espace.findById(id);
+        if (!espaceActuel) {
+          throw new Error('Espace non trouvé');
+        }
+
+        // Vérifier l'unicité (sauf pour l'espace actuel)
+        const espaceExistant = await Espace.findOne({
+          codeEspace: numeroNettoye,
+          etage: espaceActuel.etage,
+          _id: { $ne: id },
+          isActive: true
+        });
+
+        if (espaceExistant) {
+          throw new Error(`Le numéro "${numeroNettoye}" existe déjà sur cet étage`);
+        }
+
+        updateData.code = numeroNettoye;
+        updateData.codeEspace = numeroNettoye;
+        delete updateData.numero;
+      }
+
+      // Validation superficie
+      if (updateData.superficie !== undefined) {
+        const superficie = parseFloat(updateData.superficie);
+        if (isNaN(superficie) || superficie <= 0) {
+          throw new Error('La superficie doit être un nombre positif');
+        }
+        if (superficie > 10000) {
+          throw new Error('La superficie ne peut pas dépasser 10000 m²');
+        }
+        updateData.surface = superficie;
+        delete updateData.superficie;
+      }
+
+      if (updateData.surface !== undefined) {
+        const superficie = parseFloat(updateData.surface);
+        if (isNaN(superficie) || superficie <= 0) {
+          throw new Error('La superficie doit être un nombre positif');
+        }
+        if (superficie > 10000) {
+          throw new Error('La superficie ne peut pas dépasser 10000 m²');
+        }
+        updateData.surface = superficie;
+      }
+
+      // Validation prix loyer
+      if (updateData.prixLoyer !== undefined) {
+        const prixLoyer = parseFloat(updateData.prixLoyer);
+        if (isNaN(prixLoyer) || prixLoyer < 0) {
+          throw new Error('Le prix du loyer doit être un nombre positif ou zéro');
+        }
+        if (prixLoyer > 1000000) {
+          throw new Error('Le prix du loyer ne peut pas dépasser 1 000 000');
+        }
+        updateData.loyer = prixLoyer;
+        delete updateData.prixLoyer;
+      }
+
+      if (updateData.loyer !== undefined) {
+        const prixLoyer = parseFloat(updateData.loyer);
+        if (isNaN(prixLoyer) || prixLoyer < 0) {
+          throw new Error('Le prix du loyer doit être un nombre positif ou zéro');
+        }
+        if (prixLoyer > 1000000) {
+          throw new Error('Le prix du loyer ne peut pas dépasser 1 000 000');
+        }
+        updateData.loyer = prixLoyer;
+      }
+
+      // Validation statut
+      if (updateData.statut && !['Disponible', 'Occupee'].includes(updateData.statut)) {
+        throw new Error('Le statut doit être "Disponible" ou "Occupee"');
+      }
+
       // Si on change l'étage, vérifier qu'il existe et convertir en ObjectId si nécessaire
       if (updateData.etage !== undefined) {
         const mongoose = require('mongoose');

@@ -103,17 +103,35 @@ class EspaceController {
 
   // Mettre à jour un espace
   async mettreAJourEspace(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`📝 [${timestamp}] Mise à jour espace`);
+    console.log(`   👤 User ID: ${req.user._id} (${req.user.role})`);
+    console.log(`   🎯 Espace ID: ${req.params.id}`);
+    console.log(`   📝 Données:`, req.body);
+    
     try {
       const espace = await espaceService.mettreAJourEspace(req.params.id, req.body);
+      console.log(`✅ Espace mis à jour: ${espace.codeEspace}`);
+      
       res.json({
         message: 'Espace mis à jour avec succès',
         espace
       });
     } catch (error) {
-      console.error('Erreur mise à jour espace:', error);
-      const status = error.message === 'Espace non trouvé' ? 404 : 400;
-      res.status(status).json({
-        message: error.message || 'Erreur lors de la mise à jour de l\'espace'
+      console.error('❌ Erreur mise à jour espace:', error.message);
+      console.error('❌ Stack:', error.stack);
+      
+      // Déterminer le code de statut approprié
+      let statusCode = 400;
+      if (error.message.includes('non trouvé')) {
+        statusCode = 404;
+      } else if (error.message.includes('existe déjà')) {
+        statusCode = 409; // Conflict
+      }
+      
+      res.status(statusCode).json({
+        message: error.message || 'Erreur lors de la mise à jour de l\'espace',
+        error: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
