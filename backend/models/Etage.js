@@ -55,14 +55,18 @@ etageSchema.pre('save', function(next) {
 // Méthode pour obtenir le nombre d'espaces par étage
 etageSchema.methods.getNombreEspaces = async function() {
   const Espace = mongoose.model('Espace');
-  return await Espace.countDocuments({ etage: this._id });
+  return await Espace.countDocuments({ 
+    etage: this._id,
+    isActive: true 
+  });
 };
 
 // Méthode pour obtenir les espaces disponibles
 etageSchema.methods.getEspacesDisponibles = async function() {
   const Espace = mongoose.model('Espace');
   return await Espace.countDocuments({ 
-    etage: this._id, 
+    etage: this._id,
+    isActive: true,
     statut: 'Disponible' 
   });
 };
