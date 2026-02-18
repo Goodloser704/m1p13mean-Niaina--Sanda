@@ -47,13 +47,23 @@ export interface EspacesResponse {
   totalPages: number;
 }
 
-export function getEspaceEtage(espace: Espace): number {
+export function getEspaceEtageNiveau(espace: Espace): number {
   const etage = espace.etage;
 
   if (typeof etage === 'object' && etage !== null) {
     return etage.niveau;
   }
   return -111;
+}
+
+export function getEtage(espace: Espace ): Etage {
+  const etage = espace.etage;
+  if (typeof etage === 'object' && etage !== null) {
+    return etage;
+  }
+
+  const partialEtage: Partial<Etage> = { _id: etage };
+  return partialEtage as Etage;
 }
 
 export function getEspaceBoutiqueNames(espaceBoutique: Boutique | string | null): string {

@@ -19,6 +19,7 @@ import { Notifications } from './pages/shared/notifications/notifications';
 import { PorteFeuille } from './pages/shared/porte-feuille/porte-feuille';
 import { Espaces } from './pages/admin/espaces/espaces';
 import { DemandesLocation } from './pages/admin/demandes-location/demandes-location';
+import { BoutiquesAdmin } from './pages/admin/boutiques-admin/boutiques-admin';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -42,6 +43,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: Dashboard },
       { path: 'espaces', component: Espaces },
       { path: 'demandes-location', component: DemandesLocation },
+      { path: 'boutiques-admin', component: BoutiquesAdmin },
 
       { path: 'user-profil', component: UserProfil },
       { path: 'notifications', component: Notifications },

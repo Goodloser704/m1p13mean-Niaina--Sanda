@@ -1,4 +1,5 @@
 export interface CategorieBoutique {
   _id: string,
-  categorie: string
+  nom: string,
+  isActive: boolean
 }

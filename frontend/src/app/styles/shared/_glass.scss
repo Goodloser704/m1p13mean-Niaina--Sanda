@@ -1,0 +1,109 @@
+@use "./variables" as v;
+
+.liquid-glass {
+  background: rgba(v.$accent-color, 0.075);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  border-radius: 20px;
+
+  border: 1px solid rgba(v.$contrast-color, 0.7);
+
+  box-shadow: 
+    0 8px 32px rgba(v.$accent-color, 0.08),
+    inset 0 1px 0 rgba(v.$contrast-color, 0.4);
+
+  padding: 1.5rem;
+
+  transition: all 0.3s ease;
+}
+
+.liquid-glass:hover {
+  box-shadow: 
+    0 12px 40px rgba(v.$accent-color, 0.12),
+    inset 0 1px 0 rgba(v.$contrast-color, 0.6);
+
+  transform: translateY(-1px);
+}
+
+.liquid-glass-item {
+  background: rgba(v.$accent-color, 0.12);
+
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+
+  border-radius: 14px;
+
+  border: 1px solid rgba(v.$contrast-color, 0.5);
+
+  box-shadow:
+    0 4px 12px rgba(v.$accent-color, 0.06),
+    inset 0 1px 0 rgba(v.$contrast-color, 0.3);
+
+  transition: all 0.25s ease;
+}
+
+.liquid-glass-item:hover {
+  background: rgba(v.$accent-color, 0.15);
+  box-shadow:
+    0 6px 18px rgba(v.$accent-color, 0.1),
+    inset 0 1px 0 rgba(v.$contrast-color, 0.5);
+
+  // transform: translateY(-1px);
+}
+
+.glass {
+  position: relative;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(2px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 13px;
+  box-shadow: 0 3px 32px rgba(v.$accent-color, 0.2), 
+              inset 0 4px 20px rgba(255, 255, 255, 0.3);
+
+  p {
+    color: v.$default-color;
+  }
+
+  b {
+    color: v.$default-color;
+  }
+}
+
+.glass::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(v.$contrast-color, 0.1);
+  border-radius: 13px;
+  backdrop-filter: blur(1px);
+  box-shadow: inset -10px -8px 0px -11px rgba(255, 255, 255, 1),
+              inset 0px -9px 0px -8px rgba(255, 255, 255, 1);
+  opacity: 0.6;
+  z-index: -1;
+  filter: blur(1px) drop-shadow(2px 2px 6px black) brightness(115%);
+}
+
+.btn-glass {
+  position: relative;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.9375rem;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.btn-glass::after {
+  border-radius: 0.75rem;
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}

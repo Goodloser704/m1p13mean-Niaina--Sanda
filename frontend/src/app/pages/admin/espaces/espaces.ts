@@ -1,4 +1,10 @@
-import { EspaceQueryParams, EspaceStatut, getEspaceBoutiqueNames, getEspaceEtage } from './../../../core/models/admin/espaces.model';
+import {
+  EspaceQueryParams,
+  EspaceStatut,
+  getEspaceBoutiqueNames,
+  getEspaceEtageNiveau,
+  getEtage
+} from "./../../../core/models/admin/espaces.model";
 import { Component, effect, OnInit, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Loader } from "../../../components/shared/loader/loader";
@@ -8,10 +14,12 @@ import { EspacesService } from '../../../core/services/admin/espaces.service';
 import { TitleCasePipe, UpperCasePipe, CurrencyPipe, NgClass } from "@angular/common";
 import { Dialog } from "../../../components/shared/dialog/dialog";
 import { createPagination } from '../../../core/functions/pagination-function';
+import { EmptyRowList } from "../../../components/shared/empty-row-list/empty-row-list";
+import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
 
 @Component({
   selector: 'app-espaces',
-  imports: [ReactiveFormsModule, Loader, TitleCasePipe, Dialog, UpperCasePipe, CurrencyPipe, NgClass],
+  imports: [ReactiveFormsModule, Loader, TitleCasePipe, Dialog, UpperCasePipe, CurrencyPipe, NgClass, EmptyRowList, EmptyGridList],
   templateUrl: './espaces.html',
   styleUrl: './espaces.scss',
 })
@@ -215,7 +223,7 @@ export class Espaces implements OnInit {
 
   espacePagination = createPagination(10);
 
-  nomEtage = getEspaceEtage;
+  nomEtage = getEspaceEtageNiveau;
   nomBoutique = getEspaceBoutiqueNames;
   EspaceStatut = EspaceStatut;
 
@@ -260,7 +268,7 @@ export class Espaces implements OnInit {
     this.espaceForm.patchValue({
       codeEspace: espace.codeEspace,
       surface: espace.surface,
-      etage: espace.etage,
+      etage: getEtage(espace)._id,
       loyer: espace.loyer,
     });
   }
@@ -409,7 +417,7 @@ export class Espaces implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          this.espaces.set(res.espaces.sort((a,b) => getEspaceEtage(a) - getEspaceEtage(b)));
+          this.espaces.set(res.espaces.sort((a,b) => getEspaceEtageNiveau(a) - getEspaceEtageNiveau(b)));
           this.espacePagination.setTotal(res.totalPages);
 
           console.log(`Espaces res: ${JSON.stringify(res)}`);
