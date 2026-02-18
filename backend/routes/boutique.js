@@ -38,6 +38,13 @@ router.get('/boutiques/:id/produits', boutiqueController.getBoutiqueProduits);
 // @return  { boutiques, count }
 router.get('/', boutiqueController.getAllBoutiques);
 
+// @route   POST /api/boutique
+// @desc    Créer une nouvelle boutique (alias de /register)
+// @access  Private (Commercant)
+// @body    { nom, description, categorie }
+// @return  { message, boutique }
+router.post('/', auth, boutiqueController.createBoutique);
+
 // @route   GET /api/boutiques/search
 // @desc    Rechercher des boutiques par mot-clé
 // @access  Public (NO AUTH REQUIRED)

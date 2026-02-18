@@ -70,6 +70,11 @@ router.post('/', espaceController.creerEspace);
 // @access  Admin
 router.put('/:id', espaceController.mettreAJourEspace);
 
+// @route   PATCH /api/espaces/:id
+// @desc    Mettre à jour partiellement un espace (alias de PUT)
+// @access  Admin
+router.patch('/:id', espaceController.mettreAJourEspace);
+
 // @route   PUT /api/espaces/:id/occuper
 // @desc    Occuper un espace
 // @access  Admin

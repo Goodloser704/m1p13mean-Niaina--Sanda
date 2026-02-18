@@ -37,18 +37,67 @@ class EspaceService {
         }
       }
 
-      // 3. Générer le code si non fourni ou invalide
-      if (!espaceData.code || !espaceData.code.match(/^[A-Z]\d{1,3}$/)) {
-        espaceData.code = espaceData.codeEspace;
-      }
+      // 3. Validation et traitement du numéro d'espace
+      // Accepter 'numero' ou 'codeEspace' comme champ
+      const numeroEspace = espaceData.numero || espaceData.codeEspace;
       
-      // 4. Valider le format du codeEspace
-      if (!espaceData.codeEspace.match(/^[A-Z0-9]{1,10}$/)) {
-        // Essayer de corriger le format
-        espaceData.codeEspace = espaceData.codeEspace.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        if (!espaceData.codeEspace.match(/^[A-Z0-9]{1,10}$/)) {
-          throw new Error('Le code espace doit contenir uniquement des lettres et chiffres (ex: A12, AS, B5, ZONE1)');
+      if (!numeroEspace) {
+        throw new Error('Le numéro d\'espace est requis (champ "numero" ou "codeEspace")');
+      }
+
+      // Nettoyer et valider le numéro
+      const numeroNettoye = String(numeroEspace).trim();
+      
+      if (numeroNettoye.length === 0) {
+        throw new Error('Le numéro d\'espace ne peut pas être vide');
+      }
+
+      if (numeroNettoye.length > 20) {
+        throw new Error('Le numéro d\'espace ne peut pas dépasser 20 caractères');
+      }
+
+      // Assigner le numéro nettoyé
+      espaceData.codeEspace = numeroNettoye;
+      espaceData.numero = numeroNettoye;
+
+      // 4. Vérifier l'unicité du numéro sur cet étage
+      const espaceExistant = await Espace.findOne({
+        $or: [
+          { codeEspace: numeroNettoye },
+          { numero: numeroNettoye }
+        ],
+        etage: espaceData.etage,
+        isActive: true
+      });
+
+      if (espaceExistant) {
+        throw new Error(`Le numéro "${numeroNettoye}" existe déjà sur cet étage`);
+      }
+
+      // 5. Valider la superficie
+      if (espaceData.superficie !== undefined) {
+        const superficie = parseFloat(espaceData.superficie);
+        if (isNaN(superficie) || superficie <= 0) {
+          throw new Error('La superficie doit être un nombre positif');
         }
+        if (superficie > 10000) {
+          throw new Error('La superficie ne peut pas dépasser 10000 m²');
+        }
+        espaceData.superficie = superficie;
+        espaceData.surface = superficie; // Compatibilité
+      }
+
+      // 6. Valider le prix du loyer
+      if (espaceData.prixLoyer !== undefined) {
+        const prixLoyer = parseFloat(espaceData.prixLoyer);
+        if (isNaN(prixLoyer) || prixLoyer < 0) {
+          throw new Error('Le prix du loyer doit être un nombre positif ou zéro');
+        }
+        if (prixLoyer > 1000000) {
+          throw new Error('Le prix du loyer ne peut pas dépasser 1 000 000');
+        }
+        espaceData.prixLoyer = prixLoyer;
+        espaceData.loyer = prixLoyer; // Compatibilité
       }
 
       const espace = new Espace(espaceData);

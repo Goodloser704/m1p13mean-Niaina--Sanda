@@ -22,8 +22,19 @@ class EspaceController {
       });
     } catch (error) {
       console.error('❌ Erreur création espace:', error.message);
-      res.status(400).json({
-        message: error.message || 'Erreur lors de la création de l\'espace'
+      console.error('❌ Stack:', error.stack);
+      
+      // Déterminer le code de statut approprié
+      let statusCode = 400;
+      if (error.message.includes('non trouvé')) {
+        statusCode = 404;
+      } else if (error.message.includes('existe déjà')) {
+        statusCode = 409; // Conflict
+      }
+      
+      res.status(statusCode).json({
+        message: error.message || 'Erreur lors de la création de l\'espace',
+        error: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
