@@ -11,46 +11,33 @@ const router = express.Router();
  */
 
 // Routes publiques pour les boutiques - PAS D'AUTHENTIFICATION REQUISE
-// @route   GET /api/boutiques (conforme aux spécifications)
-// @desc    Obtenir toutes les boutiques actives (publique)
+// @route   GET /api/boutique (conforme aux spécifications)
+// @desc    Obtenir toutes les boutiques actives avec pagination
 // @access  Public (NO AUTH REQUIRED)
-// @return  { boutiques, count }
-router.get('/boutiques', boutiqueController.getAllBoutiques);
-
-// @route   GET /api/boutiques/search/ (conforme aux spécifications)
-// @desc    Rechercher des boutiques par mot-clé
-// @access  Public (NO AUTH REQUIRED)
-// @query   keyword, page, limit
-// @return  { boutiques, count, pagination }
-router.get('/boutiques/search/', boutiqueController.searchBoutiques);
-
-// @route   GET /api/boutiques/:id/produits (conforme aux spécifications)
-// @desc    Obtenir les produits d'une boutique
-// @access  Public (NO AUTH REQUIRED)
-// @param   id - ID de la boutique
-// @return  { produits }
-router.get('/boutiques/:id/produits', boutiqueController.getBoutiqueProduits);
-
-// Routes de gestion boutique (anciennes, maintenues pour compatibilité) - PUBLIQUES
-// @route   GET /api/boutique
-// @desc    Obtenir toutes les boutiques actives (publique)
-// @access  Public (NO AUTH REQUIRED)
-// @return  { boutiques, count }
+// @query   page, limit
+// @return  { boutiques, count, page, limit, totalPages }
 router.get('/', boutiqueController.getAllBoutiques);
 
-// @route   POST /api/boutique
-// @desc    Créer une nouvelle boutique (alias de /register)
-// @access  Private (Commercant ONLY)
-// @body    { nom, description, categorie }
-// @return  { message, boutique }
-router.post('/', auth, authorize('Commercant'), boutiqueController.createBoutique);
+// @route   GET /api/boutique/by-statut (nouvelle route)
+// @desc    Obtenir toutes les boutiques par statut avec pagination
+// @access  Public (NO AUTH REQUIRED)
+// @query   statut, page, limit
+// @return  { boutiques, count, page, limit, totalPages }
+router.get('/by-statut', boutiqueController.getAllBoutiquesByStatut);
 
-// @route   GET /api/boutiques/search
+// @route   GET /api/boutique/search (conforme aux spécifications)
 // @desc    Rechercher des boutiques par mot-clé
 // @access  Public (NO AUTH REQUIRED)
 // @query   keyword, page, limit
 // @return  { boutiques, count, pagination }
 router.get('/search', boutiqueController.searchBoutiques);
+
+// @route   GET /api/boutique/:id/produits (conforme aux spécifications)
+// @desc    Obtenir les produits d'une boutique
+// @access  Public (NO AUTH REQUIRED)
+// @param   id - ID de la boutique
+// @return  { produits }
+router.get('/:id/produits', boutiqueController.getBoutiqueProduits);
 
 // @route   POST /api/boutique/register
 // @desc    Créer une nouvelle inscription boutique

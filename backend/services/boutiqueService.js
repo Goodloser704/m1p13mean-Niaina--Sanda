@@ -405,22 +405,80 @@ class BoutiqueService {
   }
 
   /**
-   * 🏪 Obtenir toutes les boutiques (Admin seulement)
+   * 🏪 Obtenir toutes les boutiques avec pagination
    */
-  async getAllBoutiques() {
+  async getAllBoutiques(page = 1, limit = 20) {
     try {
-      console.log('🔍 Récupération de toutes les boutiques approuvées...');
+      console.log(`🔍 Récupération de toutes les boutiques approuvées (page ${page}, limit ${limit})...`);
+      
+      const skip = (parseInt(page) - 1) * parseInt(limit);
       
       const boutiques = await Boutique.find({ statutBoutique: 'Actif' })
-        .populate('commercant', 'nom prenoms email telephone') // Utiliser 'prenoms' selon spécifications
-        .populate('categorie', 'nom description') // Populate catégorie pour afficher le nom
-        .populate('espace', 'codeEspace etage') // Populate espace si présent
-        .sort({ createdAt: -1 });
+        .populate('commercant', 'nom prenoms email telephone')
+        .populate('categorie', 'nom description')
+        .populate('espace', 'codeEspace etage')
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip);
 
-      console.log(`✅ ${boutiques.length} boutiques actives trouvées`);
-      return boutiques;
+      const total = await Boutique.countDocuments({ statutBoutique: 'Actif' });
+
+      console.log(`✅ ${boutiques.length} boutiques actives trouvées (total: ${total})`);
+      
+      return {
+        boutiques,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
     } catch (error) {
       console.error('❌ Erreur récupération toutes boutiques:', error.message);
+      console.error('❌ Stack trace:', error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * 🏪 Obtenir toutes les boutiques par statut avec pagination
+   */
+  async getAllBoutiquesByStatut(statut, page = 1, limit = 20) {
+    try {
+      console.log(`🔍 Récupération boutiques par statut: ${statut} (page ${page}, limit ${limit})...`);
+      
+      const skip = (parseInt(page) - 1) * parseInt(limit);
+      
+      // Valider le statut
+      const statutsValides = ['Actif', 'EnAttente', 'Inactif', 'Rejete'];
+      if (!statutsValides.includes(statut)) {
+        throw new Error(`Statut invalide. Valeurs acceptées: ${statutsValides.join(', ')}`);
+      }
+      
+      const boutiques = await Boutique.find({ statutBoutique: statut })
+        .populate('commercant', 'nom prenoms email telephone')
+        .populate('categorie', 'nom description')
+        .populate('espace', 'codeEspace etage')
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip);
+
+      const total = await Boutique.countDocuments({ statutBoutique: statut });
+
+      console.log(`✅ ${boutiques.length} boutiques trouvées avec statut ${statut} (total: ${total})`);
+      
+      return {
+        boutiques,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
+    } catch (error) {
+      console.error('❌ Erreur récupération boutiques par statut:', error.message);
       console.error('❌ Stack trace:', error.stack);
       throw error;
     }

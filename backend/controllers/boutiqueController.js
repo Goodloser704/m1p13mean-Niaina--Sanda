@@ -653,24 +653,72 @@ class BoutiqueController {
   }
 
   /**
-   * 🏪 Obtenir toutes les boutiques (Public)
+   * 🏪 Obtenir toutes les boutiques avec pagination
    */
   async getAllBoutiques(req, res) {
     const timestamp = new Date().toISOString();
     console.log(`🏪 [${timestamp}] Récupération toutes boutiques`);
     
     try {
-      const boutiques = await boutiqueService.getAllBoutiques();
+      const { page = 1, limit = 20 } = req.query;
+      
+      const result = await boutiqueService.getAllBoutiques(page, limit);
 
-      console.log(`✅ ${boutiques.length} boutiques récupérées`);
+      console.log(`✅ ${result.boutiques.length} boutiques récupérées`);
       
       res.json({
-        boutiques,
-        count: boutiques.length
+        boutiques: result.boutiques,
+        count: result.boutiques.length,
+        page: result.pagination.page,
+        limit: result.pagination.limit,
+        totalPages: result.pagination.totalPages,
+        total: result.pagination.total
       });
 
     } catch (error) {
       console.error(`❌ Erreur récupération boutiques:`, error.message);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * 🏪 Obtenir toutes les boutiques par statut avec pagination
+   */
+  async getAllBoutiquesByStatut(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🏪 [${timestamp}] Récupération boutiques par statut`);
+    console.log(`   📊 Statut: ${req.query.statut}`);
+    
+    try {
+      const { statut, page = 1, limit = 20 } = req.query;
+      
+      if (!statut) {
+        return res.status(400).json({ 
+          message: 'Le paramètre "statut" est requis',
+          statutsValides: ['Actif', 'EnAttente', 'Inactif', 'Rejete']
+        });
+      }
+      
+      const result = await boutiqueService.getAllBoutiquesByStatut(statut, page, limit);
+
+      console.log(`✅ ${result.boutiques.length} boutiques récupérées avec statut ${statut}`);
+      
+      res.json({
+        boutiques: result.boutiques,
+        count: result.boutiques.length,
+        page: result.pagination.page,
+        limit: result.pagination.limit,
+        totalPages: result.pagination.totalPages,
+        total: result.pagination.total
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur récupération boutiques par statut:`, error.message);
+      
+      if (error.message.includes('Statut invalide')) {
+        return res.status(400).json({ message: error.message });
+      }
+      
       res.status(500).json({ message: 'Erreur serveur' });
     }
   }
