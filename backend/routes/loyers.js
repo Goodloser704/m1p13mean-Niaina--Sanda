@@ -55,4 +55,11 @@ router.get('/historique-par-periode', loyerController.getHistoriqueParPeriode);
 // @return  { boutiquesImpayees, statistiques }
 router.get('/boutiques-impayees', loyerController.getBoutiquesImpayees);
 
+// @route   GET /api/admin/loyers/boutiques-payees
+// @desc    Obtenir la liste des boutiques qui ont payé le loyer
+// @access  Private (Admin)
+// @query   mois (YYYY-MM, optionnel)
+// @return  { boutiquesPayees, statistiques }
+router.get('/boutiques-payees', loyerController.getBoutiquesPayees);
+
 module.exports = router;
