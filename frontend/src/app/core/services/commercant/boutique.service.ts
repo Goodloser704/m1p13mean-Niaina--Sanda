@@ -110,4 +110,12 @@ export class BoutiqueService {
       }
     );
   }
+
+  getActiveBoutiques(page = 1, limit = 10) {
+    return this.getAllBoutiqueByStatut(StatutBoutique.Actif, page, limit);
+  }
+
+  getInactiveBoutiques(page = 1, limit = 10) {
+    return this.getAllBoutiqueByStatut(StatutBoutique.Inactif, page, limit);
+  }
 }

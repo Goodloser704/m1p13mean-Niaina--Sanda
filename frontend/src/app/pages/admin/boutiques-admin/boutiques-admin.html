@@ -1,24 +1,24 @@
 <section id="hero" class="hero section">
   <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
-    <h2 class="mb-4">Gestion des Catégories de Boutiques</h2>
+    <h2 class="mb-4">Gestion des Categories de Boutiques</h2>
     <div class="row liquid-glass">
       <div class="col-md-6">
-        <h4>Nouvelle catégorie:</h4>
+        <h4>Nouvelle categorie:</h4>
         <hr>
-        
+
         <form
           class="php-email-form"
           [formGroup]="categorieForm"
           (ngSubmit)="onSubmitCategorie()"
           data-aos="fade-up"
           data-aos-delay="200"
-        >      
+        >
           <div class="row gy-3">
             <div class="col-12">
               <input
                 type="text"
                 class="form-control"
-                placeholder="Catégorie"
+                placeholder="Categorie"
                 formControlName="nom"
               >
             </div>
@@ -78,14 +78,208 @@
       </div>
     </div>
 
-    
+    <h2 class="my-4">List des boutiques actives</h2>
+    <div class="row liquid-glass mt-4">
+      <div class="col-12">
+        <h4>Boutiques actives:</h4>
+        <hr>
+
+        <div class="row">
+          @if (activeBoutiques().length === 0) {
+            <app-empty-grid-list [label]="'Aucune boutique active'" />
+          }
+
+          @for (boutique of activeBoutiques(); track boutique._id) {
+            <div class="col-12 col-sm-6 col-lg-4 mb-4">
+              <div class="card h-100 glass">
+                <img
+                  [src]="boutique.photo ? boutique.photo : 'assets/img/user.png'"
+                  class="card-img-top"
+                  [alt]="boutique.nom"
+                >
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0 fw-bold">{{ boutique.nom | titlecase }}</h5>
+                    <span class="badge bg-success">{{ StatutBoutique.Actif }}</span>
+                  </div>
+
+                  @if (boutique.description) {
+                    <p class="small mb-2">{{ boutique.description }}</p>
+                  }
+
+                  <div class="d-flex justify-content-between align-items-center mb-1 small">
+                    <p>Categorie:</p>
+                    <b>{{ getBoutiqueCategorieLabel(boutique) }}</b>
+                  </div>
+
+                  <div class="d-flex justify-content-between align-items-center mb-1 small gap-2">
+                    <p>Commercant:</p>
+                    <b class="text-end">{{ getBoutiqueCommercantLabel(boutique) }}</b>
+                  </div>
+
+                  @if (boutique.espace) {
+                    <div class="d-flex justify-content-between align-items-center mt-2 small">
+                      <p>Espace:</p>
+                      <b>{{ getBoutiqueEspaceCode(boutique) }}</b>
+                    </div>
+
+                    @if (getBoutiqueEspaceEtageNiveau(boutique) > -111) {
+                      <p class="text-primary small mb-0 text-end">
+                        Etage {{ getBoutiqueEspaceEtageNiveau(boutique) }}
+                      </p>
+                    }
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="col-12 d-flex justify-content-end align-items-center">
+            <nav aria-label="Pagination boutiques actives">
+              <ul class="pagination">
+                <li class="page-item">
+                  <button
+                    role="button"
+                    class="page-link"
+                    aria-label="Previous"
+                    (click)="activeBoutiquesPagination.previous()"
+                  >
+                    <span aria-hidden="true">&laquo;</span>
+                  </button>
+                </li>
+
+                @for(page of activeBoutiquesPagination.pagesArray(); track page) {
+                  <li
+                    class="page-item"
+                    [ngClass]="page == activeBoutiquesPagination.currentPage() ? 'active' : ''"
+                  >
+                    <button role="button" class="page-link" (click)="activeBoutiquesPagination.goTo(page)">
+                      {{ page }}
+                    </button>
+                  </li>
+                }
+
+                <li class="page-item">
+                  <button
+                    role="button"
+                    class="page-link"
+                    aria-label="Next"
+                    (click)="activeBoutiquesPagination.next()"
+                  >
+                    <span aria-hidden="true">&raquo;</span>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="my-4">List des boutiques inactives</h2>
+    <div class="row liquid-glass mt-4">
+      <div class="col-12">
+        <h4>Boutiques inactives:</h4>
+        <hr>
+
+        <div class="row">
+          @if (inactiveBoutiques().length === 0) {
+            <app-empty-grid-list [label]="'Aucune boutique inactive'" />
+          }
+
+          @for (boutique of inactiveBoutiques(); track boutique._id) {
+            <div class="col-12 col-sm-6 col-lg-4 mb-4">
+              <div class="card h-100 glass">
+                <img
+                  [src]="boutique.photo ? boutique.photo : 'assets/img/user.png'"
+                  class="card-img-top"
+                  [alt]="boutique.nom"
+                >
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0 fw-bold">{{ boutique.nom | titlecase }}</h5>
+                    <span class="badge bg-danger">{{ StatutBoutique.Inactif }}</span>
+                  </div>
+
+                  @if (boutique.description) {
+                    <p class="small mb-2">{{ boutique.description }}</p>
+                  }
+
+                  <div class="d-flex justify-content-between align-items-center mb-1 small">
+                    <p>Categorie:</p>
+                    <b>{{ getBoutiqueCategorieLabel(boutique) }}</b>
+                  </div>
+
+                  <div class="d-flex justify-content-between align-items-center mb-1 small gap-2">
+                    <p>Commercant:</p>
+                    <b class="text-end">{{ getBoutiqueCommercantLabel(boutique) }}</b>
+                  </div>
+
+                  @if (boutique.espace) {
+                    <div class="d-flex justify-content-between align-items-center mt-2 small">
+                      <p>Espace:</p>
+                      <b>{{ getBoutiqueEspaceCode(boutique) }}</b>
+                    </div>
+
+                    @if (getBoutiqueEspaceEtageNiveau(boutique) > -111) {
+                      <p class="text-primary small mb-0 text-end">
+                        Etage {{ getBoutiqueEspaceEtageNiveau(boutique) }}
+                      </p>
+                    }
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="col-12 d-flex justify-content-end align-items-center">
+            <nav aria-label="Pagination boutiques inactives">
+              <ul class="pagination">
+                <li class="page-item">
+                  <button
+                    role="button"
+                    class="page-link"
+                    aria-label="Previous"
+                    (click)="inactiveBoutiquesPagination.previous()"
+                  >
+                    <span aria-hidden="true">&laquo;</span>
+                  </button>
+                </li>
+
+                @for(page of inactiveBoutiquesPagination.pagesArray(); track page) {
+                  <li
+                    class="page-item"
+                    [ngClass]="page == inactiveBoutiquesPagination.currentPage() ? 'active' : ''"
+                  >
+                    <button role="button" class="page-link" (click)="inactiveBoutiquesPagination.goTo(page)">
+                      {{ page }}
+                    </button>
+                  </li>
+                }
+
+                <li class="page-item">
+                  <button
+                    role="button"
+                    class="page-link"
+                    aria-label="Next"
+                    (click)="inactiveBoutiquesPagination.next()"
+                  >
+                    <span aria-hidden="true">&raquo;</span>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <!----- Categorie boutique ----->
 
 @if (showCategorieDeleteDialog()) {
-  <app-dialog 
+  <app-dialog
     dialog="Confirmer la suppression ?"
     (dialogResponse)="onDeleteCategorie($event)"
     (clickOutside)="discardDeleteCategorie()"

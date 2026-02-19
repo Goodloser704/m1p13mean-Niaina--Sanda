@@ -1,27 +1,45 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, effect, OnInit, signal } from '@angular/core';
 import { CategorieBoutique } from '../../../core/models/admin/categorie-boutique.model';
 import { CategorieBoutiqueService } from '../../../core/services/admin/categorie-boutique.service';
 import { finalize } from 'rxjs';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { TitleCasePipe } from "@angular/common";
+import { NgClass, TitleCasePipe } from "@angular/common";
 import { Dialog } from "../../../components/shared/dialog/dialog";
 import { Loader } from "../../../components/shared/loader/loader";
 import { EmptyRowList } from "../../../components/shared/empty-row-list/empty-row-list";
+import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
+import { Boutique, getBoutiqueCategorieLabel, getBoutiqueCommercantLabel, getBoutiqueEspaceCode, getBoutiqueEspaceEtageNiveau, StatutBoutique } from '../../../core/models/commercant/boutique.model';
+import { BoutiqueService } from '../../../core/services/commercant/boutique.service';
+import { createPagination } from '../../../core/functions/pagination-function';
+import { Espace, getEspaceEtageNiveau } from '../../../core/models/admin/espaces.model';
+import { User } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-boutiques-admin',
-  imports: [ReactiveFormsModule, TitleCasePipe, Dialog, Loader, EmptyRowList],
+  imports: [ReactiveFormsModule, TitleCasePipe, Dialog, Loader, EmptyRowList, EmptyGridList, NgClass],
   templateUrl: './boutiques-admin.html',
   styleUrl: './boutiques-admin.scss',
 })
 export class BoutiquesAdmin implements OnInit {
   isLoading = signal(false);
+  private pendingRequests = 0;
 
   constructor(
     private fb: FormBuilder,
-    private categorieBoutiqueService: CategorieBoutiqueService
+    private categorieBoutiqueService: CategorieBoutiqueService,
+    private boutiqueService: BoutiqueService
   ) {
-    this.setEtageForm();
+    this.setCategorieForm();
+
+    effect(() => {
+      const page = this.activeBoutiquesPagination.currentPage();
+      this.getBoutiquesActives(page);
+    });
+
+    effect(() => {
+      const page = this.inactiveBoutiquesPagination.currentPage();
+      this.getBoutiquesInactives(page);
+    });
   }
 
   ngOnInit(): void {
@@ -40,10 +58,10 @@ export class BoutiquesAdmin implements OnInit {
   deletingCategorieId = signal<string | null>(null);
 
   getAllCategories() {
-    this.isLoading.set(true);
+    this.startLoading();
 
     this.categorieBoutiqueService.obtenirCategories()
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.stopLoading()))
       .subscribe({
         next: (res) => {
           this.categories.set(res.categories);
@@ -52,7 +70,7 @@ export class BoutiquesAdmin implements OnInit {
       });
   }
 
-  setEtageForm() {
+  setCategorieForm() {
     this.categorieForm = this.fb.nonNullable.group({
       nom: ['', [Validators.required]]
     });
@@ -60,7 +78,7 @@ export class BoutiquesAdmin implements OnInit {
 
   createNewCategory() {
     if (this.categorieForm.invalid) return;
-    this.isLoading.set(true);
+    this.startLoading();
 
     const categorie: Partial<CategorieBoutique> = { 
       ...this.categorieForm.getRawValue(),
@@ -69,7 +87,7 @@ export class BoutiquesAdmin implements OnInit {
 
     this.categorieBoutiqueService.creerCategorie(categorie as CategorieBoutique)
       .pipe(
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.stopLoading())
       )
       .subscribe({
         next: (res) => {
@@ -97,7 +115,7 @@ export class BoutiquesAdmin implements OnInit {
 
   saveEditedCategorie() {
     if (this.categorieForm.invalid || !this.editingCategorieId()) return;
-    this.isLoading.set(true);
+    this.startLoading();
     
     const updatedCategorie: Partial<CategorieBoutique> = { 
       ...this.categorieForm.getRawValue(),
@@ -105,15 +123,12 @@ export class BoutiquesAdmin implements OnInit {
       isActive: true
     };
 
-    console.log(`Updated categorie: ${JSON.stringify(updatedCategorie)}`);
-
     this.categorieBoutiqueService.updateCategorie(updatedCategorie as CategorieBoutique)
       .pipe(
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.stopLoading())
       )
       .subscribe({
         next: (res) => {
-          console.log(`Result: ${JSON.stringify(res)}`)
           this.categories.update(current => 
             current.map(e => 
               e._id == res.categorie._id ? res.categorie : e 
@@ -151,11 +166,11 @@ export class BoutiquesAdmin implements OnInit {
       return;
     };
 
-    this.isLoading.set(true);
+    this.startLoading();
 
     this.categorieBoutiqueService.deleteCategorie(idCategorie!)
       .pipe(
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.stopLoading())
       )
       .subscribe({
         next: () => {
@@ -173,6 +188,60 @@ export class BoutiquesAdmin implements OnInit {
 
   // ---- Liste des boutiques ----
 
+  activeBoutiques = signal<Boutique[]>([]);
+  inactiveBoutiques = signal<Boutique[]>([]);
+
+  activeBoutiquesPagination = createPagination(6);
+  inactiveBoutiquesPagination = createPagination(6);
+
+  StatutBoutique = StatutBoutique;
+
+  getBoutiqueCategorieLabel = getBoutiqueCategorieLabel;
+  getBoutiqueCommercantLabel = getBoutiqueCommercantLabel;
+  getBoutiqueEspaceCode = getBoutiqueEspaceCode;
+  getBoutiqueEspaceEtageNiveau = getBoutiqueEspaceEtageNiveau;
+
+  getBoutiquesActives(page: number) {
+    this.startLoading();
+
+    this.boutiqueService.getActiveBoutiques(page, this.activeBoutiquesPagination.limit)
+      .pipe(finalize(() => this.stopLoading()))
+      .subscribe({
+        next: (res) => {
+          this.activeBoutiques.set(res.boutiques);
+          this.activeBoutiquesPagination.setTotal(res.pagination.totalPages);
+        },
+        error: console.error
+      });
+  }
+
+  getBoutiquesInactives(page: number) {
+    this.startLoading();
+
+    this.boutiqueService.getInactiveBoutiques(page, this.inactiveBoutiquesPagination.limit)
+      .pipe(finalize(() => this.stopLoading()))
+      .subscribe({
+        next: (res) => {
+          this.inactiveBoutiques.set(res.boutiques);
+          this.inactiveBoutiquesPagination.setTotal(res.pagination.totalPages);
+        },
+        error: console.error
+      });
+  }
+
   // -- End Liste des boutiques --
+
+  private startLoading() {
+    this.pendingRequests += 1;
+    this.isLoading.set(true);
+  }
+
+  private stopLoading() {
+    this.pendingRequests = Math.max(0, this.pendingRequests - 1);
+
+    if (this.pendingRequests === 0) {
+      this.isLoading.set(false);
+    }
+  }
 
 }
