@@ -38,45 +38,47 @@ class EspaceService {
         }
       }
 
-      // 3. Validation et traitement du numéro d'espace
-      // Accepter 'numero' ou 'codeEspace' comme champ
-      const numeroEspace = espaceData.numero || espaceData.codeEspace;
+      // 3. Validation et traitement du code d'espace
+      // Accepter 'numero', 'codeEspace' ou 'code' comme champ (pour compatibilité)
+      const codeEspace = espaceData.code || espaceData.numero || espaceData.codeEspace;
       
-      if (!numeroEspace) {
-        throw new Error('Le numéro d\'espace est requis (champ "numero" ou "codeEspace")');
+      if (!codeEspace) {
+        throw new Error('Le code d\'espace est requis (champ "code", "numero" ou "codeEspace")');
       }
 
-      // Nettoyer et valider le numéro
-      let numeroNettoye = String(numeroEspace).trim().toUpperCase();
+      // Nettoyer et valider le code
+      let codeNettoye = String(codeEspace).trim().toUpperCase();
       
-      if (numeroNettoye.length === 0) {
-        throw new Error('Le numéro d\'espace ne peut pas être vide');
+      if (codeNettoye.length === 0) {
+        throw new Error('Le code d\'espace ne peut pas être vide');
       }
 
       // Supprimer les caractères non alphanumériques pour respecter le format du modèle
-      numeroNettoye = numeroNettoye.replace(/[^A-Z0-9]/g, '');
+      codeNettoye = codeNettoye.replace(/[^A-Z0-9]/g, '');
       
-      if (numeroNettoye.length === 0) {
-        throw new Error('Le numéro d\'espace doit contenir au moins un caractère alphanumérique');
+      if (codeNettoye.length === 0) {
+        throw new Error('Le code d\'espace doit contenir au moins un caractère alphanumérique');
       }
 
-      if (numeroNettoye.length > 10) {
-        throw new Error('Le numéro d\'espace ne peut pas dépasser 10 caractères alphanumériques');
+      if (codeNettoye.length > 10) {
+        throw new Error('Le code d\'espace ne peut pas dépasser 10 caractères alphanumériques');
       }
 
-      // Assigner le numéro nettoyé aux deux champs requis par le modèle
-      espaceData.code = numeroNettoye;
-      espaceData.codeEspace = numeroNettoye;
+      // Assigner le code nettoyé
+      espaceData.code = codeNettoye;
+      // Supprimer les alias pour éviter les conflits
+      delete espaceData.numero;
+      delete espaceData.codeEspace;
 
-      // 4. Vérifier l'unicité du numéro sur cet étage
+      // 4. Vérifier l'unicité du code sur cet étage
       const espaceExistant = await Espace.findOne({
-        codeEspace: numeroNettoye,
+        code: codeNettoye,
         etage: espaceData.etage,
         isActive: true
       });
 
       if (espaceExistant) {
-        throw new Error(`Le numéro "${numeroNettoye}" existe déjà sur cet étage`);
+        throw new Error(`Le code "${codeNettoye}" existe déjà sur cet étage`);
       }
 
       // 5. Valider et assigner la superficie
@@ -130,7 +132,7 @@ class EspaceService {
       
       // Recharger l'espace avec populate
       const espacePopulated = await Espace.findById(espace._id)
-        .populate('etage', 'nom numero niveau');
+        .populate('etage', 'nom niveau');
       
       return espacePopulated;
     } catch (error) {
@@ -170,15 +172,15 @@ class EspaceService {
       if (loyerMax) query.loyer = { $lte: loyerMax };
       if (search) {
         query.$or = [
-          { codeEspace: { $regex: search, $options: 'i' } },
+          { code: { $regex: search, $options: 'i' } },
           { description: { $regex: search, $options: 'i' } }
         ];
       }
 
       const espaces = await Espace.find(query)
-        .populate('etage', 'nom numero niveau')
+        .populate('etage', 'nom niveau')
         .populate('boutique', 'nom proprietaire')
-        .sort({ etage: 1, codeEspace: 1 })
+        .sort({ etage: 1, code: 1 })
         .skip(skip)
         .limit(limit);
 
@@ -199,7 +201,7 @@ class EspaceService {
   async obtenirEspaceParId(id) {
     try {
       const espace = await Espace.findById(id)
-        .populate('etage', 'nom numero niveau')
+        .populate('etage', 'nom niveau')
         .populate('boutique', 'nom proprietaire contact');
       
       if (!espace) {
@@ -213,10 +215,10 @@ class EspaceService {
   }
 
   // Obtenir un espace par code
-  async obtenirEspaceParCode(codeEspace) {
+  async obtenirEspaceParCode(code) {
     try {
-      const espace = await Espace.findOne({ codeEspace: codeEspace.toUpperCase() })
-        .populate('etage', 'nom numero niveau')
+      const espace = await Espace.findOne({ code: code.toUpperCase() })
+        .populate('etage', 'nom niveau')
         .populate('boutique', 'nom proprietaire contact');
       
       if (!espace) {
@@ -232,18 +234,18 @@ class EspaceService {
   // Mettre à jour un espace
   async mettreAJourEspace(id, updateData) {
     try {
-      // Validation du numéro si fourni
-      if (updateData.numero || updateData.codeEspace) {
-        const numeroEspace = updateData.numero || updateData.codeEspace;
-        let numeroNettoye = String(numeroEspace).trim().toUpperCase();
-        numeroNettoye = numeroNettoye.replace(/[^A-Z0-9]/g, '');
+      // Validation du code si fourni
+      if (updateData.code || updateData.numero || updateData.codeEspace) {
+        const codeEspace = updateData.code || updateData.numero || updateData.codeEspace;
+        let codeNettoye = String(codeEspace).trim().toUpperCase();
+        codeNettoye = codeNettoye.replace(/[^A-Z0-9]/g, '');
         
-        if (numeroNettoye.length === 0) {
-          throw new Error('Le numéro d\'espace doit contenir au moins un caractère alphanumérique');
+        if (codeNettoye.length === 0) {
+          throw new Error('Le code d\'espace doit contenir au moins un caractère alphanumérique');
         }
         
-        if (numeroNettoye.length > 10) {
-          throw new Error('Le numéro d\'espace ne peut pas dépasser 10 caractères alphanumériques');
+        if (codeNettoye.length > 10) {
+          throw new Error('Le code d\'espace ne peut pas dépasser 10 caractères alphanumériques');
         }
 
         // Récupérer l'espace actuel pour vérifier l'unicité
@@ -254,19 +256,19 @@ class EspaceService {
 
         // Vérifier l'unicité (sauf pour l'espace actuel)
         const espaceExistant = await Espace.findOne({
-          codeEspace: numeroNettoye,
+          code: codeNettoye,
           etage: espaceActuel.etage,
           _id: { $ne: id },
           isActive: true
         });
 
         if (espaceExistant) {
-          throw new Error(`Le numéro "${numeroNettoye}" existe déjà sur cet étage`);
+          throw new Error(`Le code "${codeNettoye}" existe déjà sur cet étage`);
         }
 
-        updateData.code = numeroNettoye;
-        updateData.codeEspace = numeroNettoye;
+        updateData.code = codeNettoye;
         delete updateData.numero;
+        delete updateData.codeEspace;
       }
 
       // Validation superficie
@@ -327,14 +329,14 @@ class EspaceService {
         const mongoose = require('mongoose');
         let etageExiste;
         
-        // Vérifier si c'est un ObjectId ou un numero
+        // Vérifier si c'est un ObjectId ou un niveau
         if (mongoose.Types.ObjectId.isValid(updateData.etage) && String(updateData.etage).length === 24) {
           // C'est un ObjectId
           etageExiste = await Etage.findById(updateData.etage);
         } else {
-          // C'est un numero
+          // C'est un niveau
           etageExiste = await Etage.findOne({ 
-            numero: updateData.etage, 
+            niveau: updateData.etage, 
             isActive: true 
           });
           
@@ -354,7 +356,7 @@ class EspaceService {
         updateData,
         { new: true, runValidators: true }
       )
-        .populate('etage', 'nom numero niveau')
+        .populate('etage', 'nom niveau')
         .populate('boutique', 'nom proprietaire');
       
       if (!espace) {
@@ -418,7 +420,7 @@ class EspaceService {
       await espace.save();
       
       return await espace.populate([
-        { path: 'etage', select: 'nom numero niveau' },
+        { path: 'etage', select: 'nom niveau' },
         { path: 'boutique', select: 'nom proprietaire' }
       ]);
     } catch (error) {
@@ -457,7 +459,7 @@ class EspaceService {
       // Populate etage pour les espaces trouvés
       return await Espace.populate(espaces, { 
         path: 'etage', 
-        select: 'nom numero niveau' 
+        select: 'nom niveau' 
       });
     } catch (error) {
       throw error;

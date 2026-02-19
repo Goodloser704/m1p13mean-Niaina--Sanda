@@ -147,7 +147,7 @@ class BoutiqueService {
       const boutiques = await Boutique.find({ statutBoutique: 'Inactif' })
         .populate('commercant', 'nom prenoms email telephone')
         .populate('categorie', 'nom description')
-        .populate('espace', 'codeEspace etage')
+        .populate('espace', 'code etage')
         .sort({ dateCreation: -1 });
 
       return boutiques;
@@ -411,7 +411,7 @@ class BoutiqueService {
       const boutiques = await Boutique.find({ statutBoutique: 'Actif' })
         .populate('commercant', 'nom prenoms email telephone')
         .populate('categorie', 'nom description')
-        .populate('espace', 'codeEspace etage')
+        .populate('espace', 'code etage')
         .sort({ createdAt: -1 })
         .limit(parseInt(limit))
         .skip(skip);
@@ -454,7 +454,7 @@ class BoutiqueService {
       const boutiques = await Boutique.find({ statutBoutique: statut })
         .populate('commercant', 'nom prenoms email telephone')
         .populate('categorie', 'nom description')
-        .populate('espace', 'codeEspace etage')
+        .populate('espace', 'code etage')
         .sort({ createdAt: -1 })
         .limit(parseInt(limit))
         .skip(skip);

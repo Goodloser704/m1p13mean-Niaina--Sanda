@@ -6,16 +6,7 @@ const espaceSchema = new mongoose.Schema({
     ref: 'CentreCommercial',
     required: true
   },
-  code: { // Renommé selon les règles de gestion
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    uppercase: true,
-    match: /^[A-Z0-9]{1,10}$/, // Format flexible: lettres et chiffres
-    maxlength: 10
-  },
-  codeEspace: { // Alias pour compatibilité
+  code: { // Champ principal selon spécifications
     type: String,
     required: true,
     unique: true,
@@ -89,7 +80,7 @@ const espaceSchema = new mongoose.Schema({
 });
 
 // Index pour optimiser les requêtes
-espaceSchema.index({ codeEspace: 1 });
+espaceSchema.index({ code: 1 });
 espaceSchema.index({ etage: 1 });
 espaceSchema.index({ statut: 1 });
 espaceSchema.index({ surface: 1 });

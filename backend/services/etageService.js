@@ -9,25 +9,36 @@ class EtageService {
     console.log(`🏢 [SERVICE] Données reçues:`, JSON.stringify(etageData, null, 2));
     
     try {
-      // Vérifier si un étage actif avec ce numéro existe déjà
+      // Accepter 'numero' ou 'niveau' comme champ (pour compatibilité)
+      const niveauEtage = etageData.niveau !== undefined ? etageData.niveau : etageData.numero;
+      
+      if (niveauEtage === undefined) {
+        throw new Error('Le niveau de l\'étage est requis (champ "niveau" ou "numero")');
+      }
+      
+      // Assigner le niveau
+      etageData.niveau = niveauEtage;
+      delete etageData.numero; // Supprimer l'alias
+      
+      // Vérifier si un étage actif avec ce niveau existe déjà
       const etageExistant = await Etage.findOne({ 
-        numero: etageData.numero,
+        niveau: etageData.niveau,
         isActive: true 
       });
       
       if (etageExistant) {
-        console.log(`❌ [SERVICE] Étage actif avec numéro ${etageData.numero} existe déjà`);
-        throw new Error('Un étage avec ce numéro existe déjà');
+        console.log(`❌ [SERVICE] Étage actif avec niveau ${etageData.niveau} existe déjà`);
+        throw new Error('Un étage avec ce niveau existe déjà');
       }
       
-      // Vérifier s'il existe un étage inactif avec ce numéro
+      // Vérifier s'il existe un étage inactif avec ce niveau
       const etageInactif = await Etage.findOne({ 
-        numero: etageData.numero,
+        niveau: etageData.niveau,
         isActive: false 
       });
       
       if (etageInactif) {
-        console.log(`♻️  [SERVICE] Réactivation de l'étage inactif ${etageData.numero}`);
+        console.log(`♻️  [SERVICE] Réactivation de l'étage inactif ${etageData.niveau}`);
         // Réactiver et mettre à jour l'étage existant
         etageInactif.nom = etageData.nom || etageInactif.nom;
         etageInactif.description = etageData.description || etageInactif.description;
@@ -54,7 +65,7 @@ class EtageService {
       console.log(`🏢 [SERVICE] === FIN creerEtage (ERREUR) ===`);
       
       if (error.code === 11000) {
-        throw new Error('Un étage avec ce numéro existe déjà');
+        throw new Error('Un étage avec ce niveau existe déjà');
       }
       throw error;
     }
@@ -75,7 +86,7 @@ class EtageService {
       
       console.log(`🏢 [SERVICE] Recherche étages en base...`);
       const etages = await Etage.find(query)
-        .sort({ numero: 1 })
+        .sort({ niveau: 1 })
         .skip(skip)
         .limit(limit);
       

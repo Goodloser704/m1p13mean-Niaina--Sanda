@@ -1,19 +1,12 @@
 const mongoose = require('mongoose');
 
 const etageSchema = new mongoose.Schema({
-  numero: { // Champ principal
+  niveau: { // Champ principal selon spécifications
     type: Number,
     required: true,
     unique: true,
     min: -2, // Sous-sols possibles
     max: 50  // Limite augmentée pour les tests
-  },
-  niveau: { // Alias pour compatibilité - optionnel
-    type: Number,
-    unique: true,
-    sparse: true, // Permet les valeurs null/undefined
-    min: -2,
-    max: 50
   },
   nom: {
     type: String,
@@ -36,21 +29,7 @@ const etageSchema = new mongoose.Schema({
 
 // Index pour optimiser les requêtes
 etageSchema.index({ niveau: 1 });
-etageSchema.index({ numero: 1 }); // Alias
 etageSchema.index({ isActive: 1 });
-
-// Middleware pre-save pour synchroniser numero et niveau
-etageSchema.pre('save', function(next) {
-  // Si numero est fourni mais pas niveau, copier numero vers niveau
-  if (this.numero !== undefined && this.niveau === undefined) {
-    this.niveau = this.numero;
-  }
-  // Si niveau est fourni mais pas numero, copier niveau vers numero
-  else if (this.niveau !== undefined && this.numero === undefined) {
-    this.numero = this.niveau;
-  }
-  next();
-});
 
 // Méthode pour obtenir le nombre d'espaces par étage
 etageSchema.methods.getNombreEspaces = async function() {
