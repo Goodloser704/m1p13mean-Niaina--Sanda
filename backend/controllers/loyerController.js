@@ -1,376 +1,538 @@
-const Loyer = require('../models/Loyer');
-const Boutique = require('../models/Boutique');
+const { validationResult } = require('express-validator');
 const PorteFeuille = require('../models/PorteFeuille');
+const PFTransaction = require('../models/PFTransaction');
+const Recepisse = require('../models/Recepisse');
+const Boutique = require('../models/Boutique');
+const Espace = require('../models/Espace');
+const notificationService = require('../services/notificationService');
 
 /**
- * 💰 Contrôleur Loyers
- * Gestion des paiements de loyer et historique
+ * 💰 Contrôleur Paiement Loyer
+ * Gestion des paiements de loyer des commerçants
  */
+class LoyerController {
 
-/**
- * @route   GET /api/loyers/historique
- * @desc    Obtenir l'historique des paiements de loyer (filtrable par mois/année)
- * @access  Private (Admin)
- * @query   mois, annee, page, limit
- * @return  { loyers, pagination, statistiques }
- */
-exports.obtenirHistorique = async (req, res) => {
-  try {
-    const { mois, annee, page = 1, limit = 20 } = req.query;
+  /**
+   * @route   POST /api/commercant/loyers/pay
+   * @desc    Effectuer le paiement du loyer
+   * @access  Private (Commercant)
+   * @body    { boutiqueId?, montant?, periode? }
+   * @return  { recepisse, transaction }
+   */
+  async payLoyer(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`💰 [${timestamp}] Paiement loyer`);
+    console.log(`   👤 Commercant ID: ${req.user._id}`);
+    console.log(`   📝 Données:`, JSON.stringify(req.body, null, 2));
     
-    const query = {};
-    if (annee) query.annee = parseInt(annee);
-    if (mois) query.mois = parseInt(mois);
-    
-    const loyers = await Loyer.find(query)
-      .populate({
-        path: 'boutique',
-        select: 'nom commercant',
-        populate: {
-          path: 'commercant',
-          select: 'nom prenoms email'
-        }
-      })
-      .populate('espace', 'code surface')
-      .sort({ annee: -1, mois: -1, createdAt: -1 })
-      .limit(parseInt(limit))
-      .skip((parseInt(page) - 1) * parseInt(limit));
-    
-    const total = await Loyer.countDocuments(query);
-    
-    // Statistiques
-    const stats = await Loyer.aggregate([
-      { $match: query },
-      {
-        $group: {
-          _id: null,
-          totalLoyers: { $sum: 1 },
-          montantTotal: { $sum: '$montant' },
-          totalPaye: {
-            $sum: { $cond: [{ $eq: ['$statutPaiement', 'Paye'] }, 1, 0] }
-          },
-          montantPaye: {
-            $sum: { $cond: [{ $eq: ['$statutPaiement', 'Paye'] }, '$montant', 0] }
-          },
-          totalEnAttente: {
-            $sum: { $cond: [{ $eq: ['$statutPaiement', 'EnAttente'] }, 1, 0] }
-          },
-          totalEnRetard: {
-            $sum: { $cond: [{ $eq: ['$statutPaiement', 'EnRetard'] }, 1, 0] }
-          }
-        }
-      }
-    ]);
-    
-    res.json({
-      loyers,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        totalPages: Math.ceil(total / limit)
-      },
-      statistiques: stats[0] || {
-        totalLoyers: 0,
-        montantTotal: 0,
-        totalPaye: 0,
-        montantPaye: 0,
-        totalEnAttente: 0,
-        totalEnRetard: 0
-      }
-    });
-  } catch (error) {
-    console.error('Erreur obtention historique loyers:', error);
-    res.status(500).json({
-      message: 'Erreur serveur lors de la récupération de l\'historique'
-    });
-  }
-};
-
-/**
- * @route   GET /api/loyers/boutiques/impayees
- * @desc    Obtenir les boutiques n'ayant pas payé le loyer du mois en cours
- * @access  Private (Admin)
- * @query   mois, annee
- * @return  { boutiques, total }
- */
-exports.obtenirBoutiquesImpayees = async (req, res) => {
-  try {
-    const { mois, annee } = req.query;
-    
-    const loyers = await Loyer.obtenirBoutiquesImpayees(
-      mois ? parseInt(mois) : null,
-      annee ? parseInt(annee) : null
-    );
-    
-    const now = new Date();
-    const moisCourant = mois ? parseInt(mois) : now.getMonth() + 1;
-    const anneeCourante = annee ? parseInt(annee) : now.getFullYear();
-    
-    res.json({
-      boutiques: loyers.map(loyer => ({
-        _id: loyer._id,
-        boutique: loyer.boutique,
-        espace: loyer.espace,
-        montant: loyer.montant,
-        mois: loyer.mois,
-        annee: loyer.annee,
-        statutPaiement: loyer.statutPaiement,
-        dateEcheance: loyer.dateEcheance,
-        joursRetard: loyer.estEnRetard() 
-          ? Math.floor((now - loyer.dateEcheance) / (1000 * 60 * 60 * 24))
-          : 0
-      })),
-      total: loyers.length,
-      periode: {
-        mois: moisCourant,
-        annee: anneeCourante
-      }
-    });
-  } catch (error) {
-    console.error('Erreur obtention boutiques impayées:', error);
-    res.status(500).json({
-      message: 'Erreur serveur lors de la récupération des boutiques impayées'
-    });
-  }
-};
-
-/**
- * @route   GET /api/loyers/boutiques/payees
- * @desc    Obtenir les boutiques ayant payé le loyer du mois en cours
- * @access  Private (Admin)
- * @query   mois, annee
- * @return  { boutiques, total }
- */
-exports.obtenirBoutiquesPayees = async (req, res) => {
-  try {
-    const { mois, annee } = req.query;
-    
-    const loyers = await Loyer.obtenirBoutiquesPayees(
-      mois ? parseInt(mois) : null,
-      annee ? parseInt(annee) : null
-    );
-    
-    const now = new Date();
-    const moisCourant = mois ? parseInt(mois) : now.getMonth() + 1;
-    const anneeCourante = annee ? parseInt(annee) : now.getFullYear();
-    
-    res.json({
-      boutiques: loyers.map(loyer => ({
-        _id: loyer._id,
-        boutique: loyer.boutique,
-        espace: loyer.espace,
-        montant: loyer.montant,
-        mois: loyer.mois,
-        annee: loyer.annee,
-        statutPaiement: loyer.statutPaiement,
-        datePaiement: loyer.datePaiement,
-        modePaiement: loyer.modePaiement,
-        numeroTransaction: loyer.numeroTransaction
-      })),
-      total: loyers.length,
-      periode: {
-        mois: moisCourant,
-        annee: anneeCourante
-      }
-    });
-  } catch (error) {
-    console.error('Erreur obtention boutiques payées:', error);
-    res.status(500).json({
-      message: 'Erreur serveur lors de la récupération des boutiques payées'
-    });
-  }
-};
-
-/**
- * @route   GET /api/loyers/statistiques
- * @desc    Obtenir les statistiques des loyers par année
- * @access  Private (Admin)
- * @query   annee
- * @return  { statistiques }
- */
-exports.obtenirStatistiques = async (req, res) => {
-  try {
-    const { annee } = req.query;
-    const anneeCourante = annee ? parseInt(annee) : new Date().getFullYear();
-    
-    const stats = await Loyer.obtenirStatistiques(anneeCourante);
-    
-    // Formater les statistiques par mois
-    const statsMois = Array.from({ length: 12 }, (_, i) => {
-      const mois = i + 1;
-      const statMois = stats.find(s => s._id === mois);
-      
-      return {
-        mois,
-        nomMois: new Date(anneeCourante, i, 1).toLocaleDateString('fr-FR', { month: 'long' }),
-        totalLoyers: statMois?.totalLoyers || 0,
-        montantTotal: statMois?.montantTotal || 0,
-        totalPaye: statMois?.totalPaye || 0,
-        montantPaye: statMois?.montantPaye || 0,
-        totalEnAttente: statMois?.totalEnAttente || 0,
-        totalEnRetard: statMois?.totalEnRetard || 0,
-        tauxPaiement: statMois?.totalLoyers 
-          ? Math.round((statMois.totalPaye / statMois.totalLoyers) * 100)
-          : 0
-      };
-    });
-    
-    // Statistiques globales de l'année
-    const statsGlobales = stats.reduce((acc, stat) => ({
-      totalLoyers: acc.totalLoyers + stat.totalLoyers,
-      montantTotal: acc.montantTotal + stat.montantTotal,
-      totalPaye: acc.totalPaye + stat.totalPaye,
-      montantPaye: acc.montantPaye + stat.montantPaye,
-      totalEnAttente: acc.totalEnAttente + stat.totalEnAttente,
-      totalEnRetard: acc.totalEnRetard + stat.totalEnRetard
-    }), {
-      totalLoyers: 0,
-      montantTotal: 0,
-      totalPaye: 0,
-      montantPaye: 0,
-      totalEnAttente: 0,
-      totalEnRetard: 0
-    });
-    
-    statsGlobales.tauxPaiement = statsGlobales.totalLoyers
-      ? Math.round((statsGlobales.totalPaye / statsGlobales.totalLoyers) * 100)
-      : 0;
-    
-    res.json({
-      annee: anneeCourante,
-      parMois: statsMois,
-      global: statsGlobales
-    });
-  } catch (error) {
-    console.error('Erreur obtention statistiques loyers:', error);
-    res.status(500).json({
-      message: 'Erreur serveur lors de la récupération des statistiques'
-    });
-  }
-};
-
-/**
- * @route   GET /api/commercant/loyers/historique
- * @desc    Obtenir l'historique des loyers d'un commercant
- * @access  Private (Commercant)
- * @query   mois, annee, page, limit
- * @return  { loyers, pagination }
- */
-exports.obtenirHistoriqueCommercant = async (req, res) => {
-  try {
-    const { mois, annee, page = 1, limit = 20 } = req.query;
-    
-    // Récupérer les boutiques du commercant
-    const boutiques = await Boutique.find({ commercant: req.user._id });
-    const boutiqueIds = boutiques.map(b => b._id);
-    
-    if (boutiqueIds.length === 0) {
-      return res.json({
-        loyers: [],
-        pagination: { page: 1, limit: 20, total: 0, totalPages: 0 }
-      });
-    }
-    
-    const query = { boutique: { $in: boutiqueIds } };
-    if (annee) query.annee = parseInt(annee);
-    if (mois) query.mois = parseInt(mois);
-    
-    const loyers = await Loyer.find(query)
-      .populate('boutique', 'nom')
-      .populate('espace', 'code surface')
-      .sort({ annee: -1, mois: -1 })
-      .limit(parseInt(limit))
-      .skip((parseInt(page) - 1) * parseInt(limit));
-    
-    const total = await Loyer.countDocuments(query);
-    
-    res.json({
-      loyers,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        totalPages: Math.ceil(total / limit)
-      }
-    });
-  } catch (error) {
-    console.error('Erreur obtention historique commercant:', error);
-    res.status(500).json({
-      message: 'Erreur serveur lors de la récupération de l\'historique'
-    });
-  }
-};
-
-/**
- * @route   POST /api/commercant/loyers/:loyerId/payer
- * @desc    Payer un loyer
- * @access  Private (Commercant)
- * @param   loyerId - ID du loyer
- * @body    { modePaiement }
- * @return  { message, loyer }
- */
-exports.payerLoyer = async (req, res) => {
-  try {
-    const { loyerId } = req.params;
-    const { modePaiement = 'Portefeuille' } = req.body;
-    
-    const loyer = await Loyer.findById(loyerId)
-      .populate('boutique');
-    
-    if (!loyer) {
-      return res.status(404).json({ message: 'Loyer non trouvé' });
-    }
-    
-    // Vérifier que la boutique appartient au commercant
-    if (loyer.boutique.commercant.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Non autorisé' });
-    }
-    
-    // Vérifier que le loyer n'est pas déjà payé
-    if (loyer.statutPaiement === 'Paye') {
-      return res.status(400).json({ message: 'Ce loyer est déjà payé' });
-    }
-    
-    // Si paiement par portefeuille, vérifier le solde
-    if (modePaiement === 'Portefeuille') {
-      const portefeuille = await PorteFeuille.findOne({ owner: req.user._id });
-      
-      if (!portefeuille || portefeuille.balance < loyer.montant) {
+    try {
+      // Validation des données
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(`❌ Validation échouée:`, errors.array());
         return res.status(400).json({ 
-          message: 'Solde insuffisant',
-          soldeActuel: portefeuille?.balance || 0,
-          montantRequis: loyer.montant
+          message: 'Données invalides',
+          errors: errors.array() 
         });
       }
-      
-      // Débiter le portefeuille
-      portefeuille.balance -= loyer.montant;
-      await portefeuille.save();
-    }
-    
-    // Marquer le loyer comme payé
-    await loyer.marquerPaye(modePaiement);
-    
-    res.json({
-      message: 'Loyer payé avec succès',
-      loyer: {
-        _id: loyer._id,
-        montant: loyer.montant,
-        mois: loyer.mois,
-        annee: loyer.annee,
-        statutPaiement: loyer.statutPaiement,
-        datePaiement: loyer.datePaiement,
-        modePaiement: loyer.modePaiement,
-        numeroTransaction: loyer.numeroTransaction
-      }
-    });
-  } catch (error) {
-    console.error('Erreur paiement loyer:', error);
-    res.status(500).json({
-      message: 'Erreur serveur lors du paiement'
-    });
-  }
-};
 
-module.exports = exports;
+      // Vérifier que l'utilisateur est un commerçant
+      if (req.user.role !== 'Commercant') {
+        console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
+        return res.status(403).json({ 
+          message: 'Seuls les commerçants peuvent payer des loyers' 
+        });
+      }
+
+      const { boutiqueId, montant, periode } = req.body;
+
+      // Récupérer la boutique du commerçant
+      let boutique;
+      if (boutiqueId) {
+        boutique = await Boutique.findOne({ 
+          _id: boutiqueId, 
+          proprietaire: req.user._id,
+          statutBoutique: 'Actif'
+        }).populate('espace');
+      } else {
+        // Prendre la première boutique active du commerçant
+        boutique = await Boutique.findOne({ 
+          proprietaire: req.user._id,
+          statutBoutique: 'Actif'
+        }).populate('espace');
+      }
+
+      if (!boutique) {
+        console.log(`❌ Boutique non trouvée ou inactive`);
+        return res.status(404).json({ 
+          message: 'Boutique non trouvée ou inactive' 
+        });
+      }
+
+      if (!boutique.espace) {
+        console.log(`❌ Espace non assigné à la boutique`);
+        return res.status(400).json({ 
+          message: 'Aucun espace assigné à cette boutique' 
+        });
+      }
+
+      // Calculer le montant du loyer si non fourni
+      const montantLoyer = montant || boutique.espace.prixLocation || 500; // Montant par défaut
+      const periodeLoyer = periode || new Date().toISOString().slice(0, 7); // YYYY-MM
+
+      console.log(`💰 Montant loyer: ${montantLoyer}€ pour la période ${periodeLoyer}`);
+
+      // Vérifier si le loyer n'a pas déjà été payé pour cette période
+      const loyerExistant = await PFTransaction.findOne({
+        type: 'Loyer',
+        description: { $regex: `Boutique ${boutique._id}.*${periodeLoyer}` },
+        statut: 'Completee'
+      });
+
+      if (loyerExistant) {
+        console.log(`⚠️ Loyer déjà payé pour cette période`);
+        return res.status(400).json({ 
+          message: `Le loyer pour la période ${periodeLoyer} a déjà été payé` 
+        });
+      }
+
+      // Récupérer le portefeuille du commerçant
+      const portefeuilleCommercant = await PorteFeuille.obtenirParUtilisateur(req.user._id);
+      if (!portefeuilleCommercant) {
+        console.log(`❌ Portefeuille commerçant non trouvé`);
+        return res.status(404).json({ 
+          message: 'Portefeuille non trouvé' 
+        });
+      }
+
+      // Vérifier le solde
+      if (portefeuilleCommercant.balance < montantLoyer) {
+        console.log(`❌ Solde insuffisant: ${portefeuilleCommercant.balance}€ < ${montantLoyer}€`);
+        return res.status(400).json({ 
+          message: 'Solde insuffisant pour payer le loyer',
+          soldeActuel: portefeuilleCommercant.balance,
+          montantRequis: montantLoyer
+        });
+      }
+
+      // Récupérer le portefeuille admin (destinataire des loyers)
+      const adminUser = await require('../models/User').findOne({ role: 'admin' });
+      if (!adminUser) {
+        console.log(`❌ Compte admin non trouvé`);
+        return res.status(500).json({ 
+          message: 'Erreur système: compte administrateur non trouvé' 
+        });
+      }
+
+      const portefeuilleAdmin = await PorteFeuille.obtenirParUtilisateur(adminUser._id);
+      if (!portefeuilleAdmin) {
+        console.log(`❌ Portefeuille admin non trouvé`);
+        return res.status(500).json({ 
+          message: 'Erreur système: portefeuille administrateur non trouvé' 
+        });
+      }
+
+      // Effectuer la transaction
+      const descriptionTransaction = `Loyer boutique ${boutique.nom} - Période ${periodeLoyer} - Espace ${boutique.espace.numero}`;
+      
+      const transaction = await PFTransaction.creerTransaction({
+        fromWallet: portefeuilleCommercant._id,
+        toWallet: portefeuilleAdmin._id,
+        type: 'Loyer',
+        amount: montantLoyer,
+        description: descriptionTransaction
+      });
+
+      console.log(`✅ Transaction créée: ${transaction._id}`);
+
+      // Créer le reçu
+      const recepisse = await Recepisse.create({
+        donneur: adminUser._id,
+        receveur: req.user._id,
+        boutique: boutique._id,
+        transaction: transaction._id,
+        montant: montantLoyer,
+        periode: periodeLoyer,
+        type: 'Loyer',
+        description: descriptionTransaction,
+        dateEmission: new Date()
+      });
+
+      console.log(`📄 Reçu créé: ${recepisse._id}`);
+
+      // Envoyer une notification au commerçant
+      await notificationService.createNotification({
+        type: 'Paiement',
+        title: 'Paiement de loyer effectué',
+        message: `Votre loyer de ${montantLoyer}€ pour la période ${periodeLoyer} a été payé avec succès.`,
+        receveur: req.user._id,
+        urlRoute: `/mes-boutiques/${boutique._id}`
+      });
+
+      // Envoyer une notification à l'admin
+      await notificationService.createNotification({
+        type: 'Paiement',
+        title: 'Nouveau paiement de loyer',
+        message: `${req.user.nom} ${req.user.prenoms} a payé le loyer de ${montantLoyer}€ pour ${boutique.nom}.`,
+        receveur: adminUser._id,
+        urlRoute: `/admin/dashboard`
+      });
+
+      console.log(`✅ Paiement loyer terminé avec succès`);
+      
+      res.json({
+        message: 'Loyer payé avec succès',
+        recepisse: {
+          _id: recepisse._id,
+          montant: recepisse.montant,
+          periode: recepisse.periode,
+          dateEmission: recepisse.dateEmission,
+          boutique: {
+            _id: boutique._id,
+            nom: boutique.nom,
+            espace: {
+              numero: boutique.espace.numero,
+              etage: boutique.espace.etage
+            }
+          }
+        },
+        transaction: {
+          _id: transaction._id,
+          montant: transaction.amount,
+          statut: transaction.statut,
+          dateTransaction: transaction.createdAt
+        },
+        nouveauSolde: portefeuilleCommercant.balance - montantLoyer
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur paiement loyer:`, error.message);
+      console.error(`   📊 Stack:`, error.stack);
+      
+      if (error.message.includes('Solde insuffisant')) {
+        return res.status(400).json({ message: error.message });
+      }
+      
+      res.status(500).json({ message: 'Erreur serveur lors du paiement' });
+    }
+  }
+
+  /**
+   * @route   GET /api/commercant/loyers/historique
+   * @desc    Obtenir l'historique des paiements de loyer
+   * @access  Private (Commercant)
+   * @return  { loyers, pagination }
+   */
+  async getHistoriqueLoyers(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`📋 [${timestamp}] Historique loyers`);
+    console.log(`   👤 Commercant ID: ${req.user._id}`);
+    
+    try {
+      const { page = 1, limit = 20 } = req.query;
+
+      // Récupérer le portefeuille du commerçant
+      const portefeuille = await PorteFeuille.obtenirParUtilisateur(req.user._id);
+      if (!portefeuille) {
+        return res.status(404).json({ message: 'Portefeuille non trouvé' });
+      }
+
+      // Récupérer les transactions de loyer
+      const loyers = await PFTransaction.find({
+        fromWallet: portefeuille._id,
+        type: 'Loyer',
+        statut: 'Completee'
+      })
+      .populate('toWallet', 'owner')
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit));
+
+      const total = await PFTransaction.countDocuments({
+        fromWallet: portefeuille._id,
+        type: 'Loyer',
+        statut: 'Completee'
+      });
+
+      console.log(`✅ ${loyers.length} paiements de loyer récupérés`);
+      
+      res.json({
+        loyers: loyers.map(loyer => ({
+          _id: loyer._id,
+          montant: loyer.amount,
+          description: loyer.description,
+          dateTransaction: loyer.createdAt,
+          statut: loyer.statut
+        })),
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur historique loyers:`, error.message);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * @route   GET /api/admin/loyers/historique-par-periode
+   * @desc    Obtenir l'historique des paiements de loyer par mois/année
+   * @access  Private (Admin)
+   * @query   mois (YYYY-MM), annee (YYYY), page, limit
+   * @return  { loyers, statistiques, pagination }
+   */
+  async getHistoriqueParPeriode(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`📊 [${timestamp}] Historique loyers par période`);
+    console.log(`   👤 Admin ID: ${req.user._id}`);
+    
+    try {
+      // Vérifier que l'utilisateur est admin
+      if (req.user.role !== 'Admin') {
+        console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
+        return res.status(403).json({ 
+          message: 'Accès réservé aux administrateurs' 
+        });
+      }
+
+      const { mois, annee, page = 1, limit = 50 } = req.query;
+
+      // Construire le filtre de période
+      let periodeFilter = {};
+      if (mois) {
+        // Format YYYY-MM
+        if (!/^\d{4}-\d{2}$/.test(mois)) {
+          return res.status(400).json({ 
+            message: 'Format de mois invalide. Utilisez YYYY-MM' 
+          });
+        }
+        periodeFilter.periode = mois;
+      } else if (annee) {
+        // Format YYYY
+        if (!/^\d{4}$/.test(annee)) {
+          return res.status(400).json({ 
+            message: 'Format d\'année invalide. Utilisez YYYY' 
+          });
+        }
+        periodeFilter.periode = { $regex: `^${annee}` };
+      }
+
+      // Récupérer les reçus de loyer
+      const loyers = await Recepisse.find({
+        type: 'Loyer',
+        statut: 'Emis',
+        ...periodeFilter
+      })
+      .populate('receveur', 'nom prenoms email')
+      .populate('boutique', 'nom')
+      .populate('transaction')
+      .sort({ periode: -1, dateEmission: -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit));
+
+      const total = await Recepisse.countDocuments({
+        type: 'Loyer',
+        statut: 'Emis',
+        ...periodeFilter
+      });
+
+      // Calculer les statistiques
+      const statistiques = await Recepisse.aggregate([
+        {
+          $match: {
+            type: 'Loyer',
+            statut: 'Emis',
+            ...periodeFilter
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalMontant: { $sum: '$montant' },
+            nombrePaiements: { $sum: 1 },
+            montantMoyen: { $avg: '$montant' },
+            montantMin: { $min: '$montant' },
+            montantMax: { $max: '$montant' }
+          }
+        }
+      ]);
+
+      console.log(`✅ ${loyers.length} paiements de loyer récupérés`);
+      
+      res.json({
+        loyers: loyers.map(loyer => ({
+          _id: loyer._id,
+          numeroRecepisse: loyer.numeroRecepisse,
+          montant: loyer.montant,
+          periode: loyer.periode,
+          dateEmission: loyer.dateEmission,
+          receveur: loyer.receveur ? {
+            _id: loyer.receveur._id,
+            nom: loyer.receveur.nom,
+            prenoms: loyer.receveur.prenoms,
+            email: loyer.receveur.email
+          } : null,
+          boutique: loyer.boutique ? {
+            _id: loyer.boutique._id,
+            nom: loyer.boutique.nom
+          } : null,
+          description: loyer.description
+        })),
+        statistiques: statistiques.length > 0 ? {
+          totalMontant: statistiques[0].totalMontant,
+          nombrePaiements: statistiques[0].nombrePaiements,
+          montantMoyen: Math.round(statistiques[0].montantMoyen * 100) / 100,
+          montantMin: statistiques[0].montantMin,
+          montantMax: statistiques[0].montantMax
+        } : {
+          totalMontant: 0,
+          nombrePaiements: 0,
+          montantMoyen: 0,
+          montantMin: 0,
+          montantMax: 0
+        },
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur historique par période:`, error.message);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * @route   GET /api/admin/loyers/boutiques-impayees
+   * @desc    Obtenir la liste des boutiques avec loyer impayé pour le mois en cours
+   * @access  Private (Admin)
+   * @query   mois (YYYY-MM, optionnel - par défaut mois en cours)
+   * @return  { boutiquesImpayees, statistiques }
+   */
+  async getBoutiquesImpayees(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🚨 [${timestamp}] Boutiques avec loyer impayé`);
+    console.log(`   👤 Admin ID: ${req.user._id}`);
+    
+    try {
+      // Vérifier que l'utilisateur est admin
+      if (req.user.role !== 'Admin') {
+        console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
+        return res.status(403).json({ 
+          message: 'Accès réservé aux administrateurs' 
+        });
+      }
+
+      // Déterminer la période à vérifier
+      const { mois } = req.query;
+      let periodeRecherche;
+      
+      if (mois) {
+        if (!/^\d{4}-\d{2}$/.test(mois)) {
+          return res.status(400).json({ 
+            message: 'Format de mois invalide. Utilisez YYYY-MM' 
+          });
+        }
+        periodeRecherche = mois;
+      } else {
+        // Mois en cours par défaut
+        const now = new Date();
+        periodeRecherche = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      }
+
+      console.log(`📅 Période recherchée: ${periodeRecherche}`);
+
+      // Récupérer toutes les boutiques actives avec espace
+      const boutiquesActives = await Boutique.find({
+        statutBoutique: 'Actif',
+        espace: { $ne: null }
+      })
+      .populate('commercant', 'nom prenoms email telephone')
+      .populate({
+        path: 'espace',
+        select: 'code loyer etage',
+        populate: {
+          path: 'etage',
+          select: 'numero nom'
+        }
+      });
+
+      console.log(`🏪 ${boutiquesActives.length} boutiques actives trouvées`);
+
+      // Récupérer les paiements de loyer pour la période
+      const paiementsEffectues = await Recepisse.find({
+        type: 'Loyer',
+        statut: 'Emis',
+        periode: periodeRecherche
+      }).select('boutique');
+
+      const boutiquesPayees = new Set(
+        paiementsEffectues.map(p => p.boutique?.toString()).filter(Boolean)
+      );
+
+      console.log(`✅ ${boutiquesPayees.size} boutiques ont payé`);
+
+      // Identifier les boutiques impayées
+      const boutiquesImpayees = boutiquesActives
+        .filter(boutique => !boutiquesPayees.has(boutique._id.toString()))
+        .map(boutique => ({
+          _id: boutique._id,
+          nom: boutique.nom,
+          commercant: boutique.commercant ? {
+            _id: boutique.commercant._id,
+            nom: boutique.commercant.nom,
+            prenoms: boutique.commercant.prenoms,
+            email: boutique.commercant.email,
+            telephone: boutique.commercant.telephone
+          } : null,
+          espace: boutique.espace ? {
+            _id: boutique.espace._id,
+            code: boutique.espace.code,
+            loyer: boutique.espace.loyer,
+            etage: boutique.espace.etage ? {
+              numero: boutique.espace.etage.numero,
+              nom: boutique.espace.etage.nom
+            } : null
+          } : null,
+          montantDu: boutique.espace?.loyer || 0,
+          periode: periodeRecherche
+        }));
+
+      // Calculer les statistiques
+      const totalMontantDu = boutiquesImpayees.reduce(
+        (sum, b) => sum + (b.montantDu || 0), 
+        0
+      );
+
+      console.log(`🚨 ${boutiquesImpayees.length} boutiques n'ont pas payé`);
+      
+      res.json({
+        periode: periodeRecherche,
+        boutiquesImpayees,
+        statistiques: {
+          nombreBoutiquesActives: boutiquesActives.length,
+          nombreBoutiquesPayees: boutiquesPayees.size,
+          nombreBoutiquesImpayees: boutiquesImpayees.length,
+          totalMontantDu: Math.round(totalMontantDu * 100) / 100,
+          tauxPaiement: boutiquesActives.length > 0 
+            ? Math.round((boutiquesPayees.size / boutiquesActives.length) * 100) 
+            : 0
+        }
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur boutiques impayées:`, error.message);
+      console.error(`   📊 Stack:`, error.stack);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+}
+
+module.exports = new LoyerController();

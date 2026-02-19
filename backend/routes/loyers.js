@@ -1,73 +1,58 @@
 const express = require('express');
-const router = express.Router();
-const { auth, authorize, adminAuth } = require('../middleware/auth');
+const { body } = require('express-validator');
+const { auth } = require('../middleware/auth');
 const loyerController = require('../controllers/loyerController');
-const { RoleEnum } = require('../utils/enums');
+
+const router = express.Router();
 
 /**
- * 💰 Routes Loyers
- * Gestion des paiements de loyer et historique
+ * 💰 Routes Paiement Loyer
+ * Gestion des paiements de loyer des commerçants
+ * Architecture: Route → Controller → Service
  */
 
-// Routes Admin
-/**
- * @route   GET /api/loyers/historique
- * @desc    Obtenir l'historique complet des paiements de loyer
- * @access  Private (Admin)
- * @query   mois, annee, page, limit
- */
-router.get('/historique', adminAuth, loyerController.obtenirHistorique);
+// Middleware d'authentification pour toutes les routes
+router.use(auth);
 
-/**
- * @route   GET /api/loyers/boutiques/impayees
- * @desc    Obtenir les boutiques n'ayant pas payé le loyer du mois en cours
- * @access  Private (Admin)
- * @query   mois, annee
- */
-router.get('/boutiques/impayees', adminAuth, loyerController.obtenirBoutiquesImpayees);
+// @route   POST /api/commercant/loyers/pay
+// @desc    Effectuer le paiement du loyer
+// @access  Private (Commercant)
+// @body    { boutiqueId?, montant?, periode? }
+// @return  { recepisse, transaction }
+router.post('/pay', [
+  body('boutiqueId')
+    .optional()
+    .isMongoId()
+    .withMessage('ID boutique invalide'),
+  body('montant')
+    .optional()
+    .isFloat({ min: 1, max: 10000 })
+    .withMessage('Le montant doit être entre 1€ et 10,000€'),
+  body('periode')
+    .optional()
+    .matches(/^\d{4}-\d{2}$/)
+    .withMessage('La période doit être au format YYYY-MM')
+], loyerController.payLoyer);
 
-/**
- * @route   GET /api/loyers/boutiques/payees
- * @desc    Obtenir les boutiques ayant payé le loyer du mois en cours
- * @access  Private (Admin)
- * @query   mois, annee
- */
-router.get('/boutiques/payees', adminAuth, loyerController.obtenirBoutiquesPayees);
+// @route   GET /api/commercant/loyers/historique
+// @desc    Obtenir l'historique des paiements de loyer
+// @access  Private (Commercant)
+// @query   page, limit
+// @return  { loyers, pagination }
+router.get('/historique', loyerController.getHistoriqueLoyers);
 
-/**
- * @route   GET /api/loyers/statistiques
- * @desc    Obtenir les statistiques des loyers par année
- * @access  Private (Admin)
- * @query   annee
- */
-router.get('/statistiques', adminAuth, loyerController.obtenirStatistiques);
+// @route   GET /api/admin/loyers/historique-par-periode
+// @desc    Obtenir l'historique des paiements de loyer par mois/année
+// @access  Private (Admin)
+// @query   mois (YYYY-MM), annee (YYYY), page, limit
+// @return  { loyers, statistiques, pagination }
+router.get('/historique-par-periode', loyerController.getHistoriqueParPeriode);
 
-// Routes Commercant
-/**
- * @route   GET /api/commercant/loyers/historique
- * @desc    Obtenir l'historique des loyers d'un commercant
- * @access  Private (Commercant)
- * @query   mois, annee, page, limit
- */
-router.get(
-  '/commercant/historique',
-  auth,
-  authorize(RoleEnum.Commercant),
-  loyerController.obtenirHistoriqueCommercant
-);
-
-/**
- * @route   POST /api/commercant/loyers/:loyerId/payer
- * @desc    Payer un loyer
- * @access  Private (Commercant)
- * @param   loyerId - ID du loyer
- * @body    { modePaiement }
- */
-router.post(
-  '/commercant/:loyerId/payer',
-  auth,
-  authorize(RoleEnum.Commercant),
-  loyerController.payerLoyer
-);
+// @route   GET /api/admin/loyers/boutiques-impayees
+// @desc    Obtenir la liste des boutiques avec loyer impayé
+// @access  Private (Admin)
+// @query   mois (YYYY-MM, optionnel)
+// @return  { boutiquesImpayees, statistiques }
+router.get('/boutiques-impayees', loyerController.getBoutiquesImpayees);
 
 module.exports = router;
