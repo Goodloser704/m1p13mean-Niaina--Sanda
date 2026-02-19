@@ -10,3 +10,28 @@ cruds:
 - form_fields: nom(text, required)
 - list_ui: row, champs_affiches=[nom]
 - dialogs: delete_confirm=true
+
+Automatisation-CRUD
+generation: 
+- mode=update(add_new_line_in_existing_files)
+- fichiers_a_modifier:
+  - service: src/app/core/services/commercant/boutique.service.ts
+  - page_ts: src/app/pages/admin/boutiques-admin/boutiques-admin.ts
+  - page_html: src/app/pages/admin/boutiques-admin/boutiques-admin.html
+cruds:
+1)
+- entity: src/app/core/models/commercant/boutique.model.ts, src/app/core/models/pagination.model.ts
+- crud_type: pagination
+- titre_page: List des boutiques actives
+- service_methods: list=getAllBoutiqueByStatut
+- response_shapes: list={ boutiques: Boutique[], pagination: Pagination }
+- list_ui: grid, champs_affiches=[photo?, nom, description, categorie, commercant(nom prenoms), espace?(code etage(niveau))]
+2)
+- entity: src/app/core/models/commercant/boutique.model.ts, src/app/core/models/pagination.model.ts
+- crud_type: pagination
+- titre_page: List des boutiques inactives
+- service_methods: list=getAllBoutiqueByStatut
+- response_shapes: list={ boutiques: Boutique[], pagination: Pagination }
+- list_ui: grid, champs_affiches=[photo?, nom, description, categorie, commercant(nom prenoms), espace?(code etage(niveau))]
+resultat_attendu:
+- ajouter 2 nouveau row pour la liste des boutiques actives et inactives dans boutiques-admin.html

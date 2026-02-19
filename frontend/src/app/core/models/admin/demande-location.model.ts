@@ -1,4 +1,5 @@
 import { Boutique } from "../commercant/boutique.model";
+import { Pagination } from "../pagination.model";
 import { Espace } from "./espaces.model";
 
 export enum EtatDemandeLocation {
@@ -18,12 +19,7 @@ export interface DemandeLocation {
 
 export interface DemandeLocationResponse {
   demandes: DemandeLocation[],
-  pagination: {
-    page: number,
-    limit: number,
-    total: number,
-    totalPages: number
-  }
+  pagination: Pagination
 }
 
 export function getBoutiqueId(boutique: Boutique | string): string | null {

@@ -171,4 +171,8 @@ export class BoutiquesAdmin implements OnInit {
 
   // -- CATEGORIE BOUTIQUE END --
 
+  // ---- Liste des boutiques ----
+
+  // -- End Liste des boutiques --
+
 }
