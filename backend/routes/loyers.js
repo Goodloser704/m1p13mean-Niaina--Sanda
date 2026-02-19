@@ -62,4 +62,10 @@ router.get('/boutiques-impayees', loyerController.getBoutiquesImpayees);
 // @return  { boutiquesPayees, statistiques }
 router.get('/boutiques-payees', loyerController.getBoutiquesPayees);
 
+// @route   GET /api/admin/loyers/statut-paiements-mois-courant
+// @desc    Obtenir le statut complet des paiements du mois en cours (payées + impayées)
+// @access  Private (Admin)
+// @return  { periode, boutiquesPayees, boutiquesImpayees, statistiques }
+router.get('/statut-paiements-mois-courant', loyerController.getStatutPaiementsMoisCourant);
+
 module.exports = router;

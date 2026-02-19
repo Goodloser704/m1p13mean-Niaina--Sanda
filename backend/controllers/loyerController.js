@@ -426,6 +426,165 @@ class LoyerController {
   }
 
   /**
+   * @route   GET /api/admin/loyers/statut-paiements-mois-courant
+   * @desc    Obtenir le statut complet des paiements du mois en cours (payées + impayées)
+   * @access  Private (Admin)
+   * @return  { periode, boutiquesPayees, boutiquesImpayees, statistiques }
+   */
+  async getStatutPaiementsMoisCourant(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`📊 [${timestamp}] Statut paiements mois courant`);
+    console.log(`   👤 Admin ID: ${req.user._id}`);
+    
+    try {
+      // Vérifier que l'utilisateur est admin
+      if (req.user.role !== 'Admin') {
+        console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
+        return res.status(403).json({ 
+          message: 'Accès réservé aux administrateurs' 
+        });
+      }
+
+      // Calculer automatiquement le mois en cours
+      const now = new Date();
+      const periodeRecherche = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+      console.log(`📅 Période automatique: ${periodeRecherche}`);
+
+      // Récupérer toutes les boutiques actives avec espace
+      const boutiquesActives = await Boutique.find({
+        statutBoutique: 'Actif',
+        espace: { $ne: null }
+      })
+      .populate('commercant', 'nom prenoms email telephone')
+      .populate({
+        path: 'espace',
+        select: 'code loyer etage',
+        populate: {
+          path: 'etage',
+          select: 'numero nom'
+        }
+      });
+
+      console.log(`🏪 ${boutiquesActives.length} boutiques actives trouvées`);
+
+      // Récupérer les paiements de loyer pour la période
+      const paiementsEffectues = await Recepisse.find({
+        type: 'Loyer',
+        statut: 'Emis',
+        periode: periodeRecherche
+      }).select('boutique montant dateEmission numeroRecepisse');
+
+      const boutiquesPayeesIds = new Set(
+        paiementsEffectues.map(p => p.boutique?.toString()).filter(Boolean)
+      );
+
+      // Créer un map des paiements par boutique
+      const paiementsMap = new Map();
+      paiementsEffectues.forEach(p => {
+        if (p.boutique) {
+          paiementsMap.set(p.boutique.toString(), {
+            montant: p.montant,
+            date: p.dateEmission,
+            numeroRecepisse: p.numeroRecepisse
+          });
+        }
+      });
+
+      console.log(`✅ ${boutiquesPayeesIds.size} boutiques ont payé`);
+
+      // Séparer les boutiques payées et impayées
+      const boutiquesPayees = [];
+      const boutiquesImpayees = [];
+
+      boutiquesActives.forEach(boutique => {
+        const boutiqueId = boutique._id.toString();
+        const paiement = paiementsMap.get(boutiqueId);
+        
+        const boutiqueData = {
+          _id: boutique._id,
+          nom: boutique.nom,
+          commercant: boutique.commercant ? {
+            _id: boutique.commercant._id,
+            nom: boutique.commercant.nom,
+            prenoms: boutique.commercant.prenoms,
+            email: boutique.commercant.email,
+            telephone: boutique.commercant.telephone
+          } : null,
+          espace: boutique.espace ? {
+            _id: boutique.espace._id,
+            code: boutique.espace.code,
+            loyer: boutique.espace.loyer,
+            etage: boutique.espace.etage ? {
+              numero: boutique.espace.etage.numero,
+              nom: boutique.espace.etage.nom
+            } : null
+          } : null
+        };
+
+        if (paiement) {
+          // Boutique payée
+          boutiquesPayees.push({
+            ...boutiqueData,
+            montantPaye: paiement.montant,
+            datePaiement: paiement.date,
+            numeroRecepisse: paiement.numeroRecepisse,
+            statut: 'Payé'
+          });
+        } else {
+          // Boutique impayée
+          boutiquesImpayees.push({
+            ...boutiqueData,
+            montantDu: boutique.espace?.loyer || 0,
+            statut: 'Impayé'
+          });
+        }
+      });
+
+      // Calculer les statistiques
+      const totalEncaisse = boutiquesPayees.reduce(
+        (sum, b) => sum + (b.montantPaye || 0), 
+        0
+      );
+
+      const totalMontantDu = boutiquesImpayees.reduce(
+        (sum, b) => sum + (b.montantDu || 0), 
+        0
+      );
+
+      const tauxPaiement = boutiquesActives.length > 0
+        ? Math.round((boutiquesPayees.length / boutiquesActives.length) * 100)
+        : 0;
+
+      console.log(`📊 Statistiques: ${boutiquesPayees.length} payées, ${boutiquesImpayees.length} impayées`);
+      
+      res.json({
+        periode: periodeRecherche,
+        moisCourant: {
+          annee: now.getFullYear(),
+          mois: now.getMonth() + 1,
+          nomMois: now.toLocaleDateString('fr-FR', { month: 'long' })
+        },
+        boutiquesPayees,
+        boutiquesImpayees,
+        statistiques: {
+          nombreBoutiquesActives: boutiquesActives.length,
+          nombreBoutiquesPayees: boutiquesPayees.length,
+          nombreBoutiquesImpayees: boutiquesImpayees.length,
+          totalEncaisse: Math.round(totalEncaisse * 100) / 100,
+          totalMontantDu: Math.round(totalMontantDu * 100) / 100,
+          tauxPaiement
+        }
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur statut paiements:`, error.message);
+      console.error(`   📊 Stack:`, error.stack);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
    * @route   GET /api/admin/loyers/boutiques-payees
    * @desc    Obtenir la liste des boutiques qui ont payé le loyer
    * @access  Private (Admin)
