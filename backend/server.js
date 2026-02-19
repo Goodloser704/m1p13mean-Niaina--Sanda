@@ -167,9 +167,9 @@ app.use('/api/acheteur', require('./routes/acheteur'));
 console.log('🛣️  Chargement route commercant...');
 app.use('/api/commercant', require('./routes/commercant'));
 
-// Routes de loyers (nouvelles)
+// Routes de loyers
 console.log('🛣️  Chargement route loyers...');
-app.use('/api/commercant/loyers', require('./routes/loyers'));
+app.use('/api/loyers', require('./routes/loyers'));
 
 // Routes de factures (nouvelles)
 console.log('🛣️  Chargement route factures...');

@@ -216,7 +216,20 @@ async function seedTestData() {
       
       console.log('✅ Boutique créée et liée à l\'espace');
     } else {
-      console.log('ℹ️  Boutique existe déjà');
+      // S'assurer que la boutique a un espace et est active
+      if (!boutique.espace || boutique.statutBoutique !== StatutBoutiqueEnum.Actif) {
+        boutique.espace = espace._id;
+        boutique.statutBoutique = StatutBoutiqueEnum.Actif;
+        await boutique.save();
+        
+        espace.boutique = boutique._id;
+        espace.statut = 'Occupee';
+        await espace.save();
+        
+        console.log('✅ Boutique mise à jour (Actif + espace lié)');
+      } else {
+        console.log('ℹ️  Boutique existe déjà');
+      }
     }
 
     // 8. Créer Type Produit
