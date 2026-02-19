@@ -102,6 +102,7 @@ app.use('/api/auth', require('./routes/auth'));
 // Routes utilisateurs (conformes aux spécifications)
 console.log('🛣️  Chargement routes utilisateurs...');
 app.use('/api', require('./routes/auth')); // Pour /api/users/*
+app.use('/api/users', require('./routes/users')); // Routes utilisateurs supplémentaires
 
 // Routes de notifications
 console.log('🛣️  Chargement route notifications...');
@@ -157,6 +158,10 @@ app.use('/api', require('./routes/portefeuille')); // Pour /api/users/:id/wallet
 
 console.log('🛣️  Chargement route achats...');
 app.use('/api/achats', require('./routes/achats'));
+
+// Routes acheteur (conformes aux spécifications)
+console.log('🛣️  Chargement routes acheteur...');
+app.use('/api/acheteur', require('./routes/acheteur'));
 
 // Routes commercant
 console.log('🛣️  Chargement route commercant...');

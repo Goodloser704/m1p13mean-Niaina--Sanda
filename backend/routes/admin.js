@@ -1,6 +1,7 @@
 const express = require('express');
 const { adminAuth } = require('../middleware/auth');
 const adminController = require('../controllers/adminController');
+const demandeLocationController = require('../controllers/demandeLocationController');
 
 const router = express.Router();
 
@@ -15,5 +16,13 @@ const router = express.Router();
 // @access  Private (Admin)
 // @return  { boutiques, espaces, utilisateurs, revenus, ventes }
 router.get('/dashboard', adminAuth, adminController.getDashboardStats);
+
+/**
+ * @route   GET /api/admin/demandes-location/etat/:etat
+ * @desc    Obtenir les demandes de location par état (conforme aux spécifications)
+ * @access  Private (Admin)
+ * @spec    Liste-des-fonctions.txt - getDemandeLocationParEtat
+ */
+router.get('/demandes-location/etat/:etat', adminAuth, demandeLocationController.obtenirDemandesParEtat);
 
 module.exports = router;

@@ -237,13 +237,13 @@ exports.obtenirDemandesParEtat = async (req, res) => {
     const demandes = await DemandeLocation.find(query)
       .populate({
         path: 'boutique',
-        select: 'nom',
+        select: 'nom commercant',
         populate: {
-          path: 'commercant proprietaire',
+          path: 'commercant',
           select: 'nom prenoms email'
         }
       })
-      .populate('espace', 'codeEspace surface loyer etage')
+      .populate('espace', 'code surface loyer etage')
       .populate('adminRepondant', 'nom prenoms')
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))

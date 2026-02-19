@@ -26,7 +26,7 @@ class FactureController {
       const { page = 1, limit = 20, dateDebut, dateFin } = req.query;
 
       // Vérifier les permissions
-      if (req.user._id.toString() !== id && req.user.role !== 'admin') {
+      if (req.user._id.toString() !== id && req.user.role !== 'Admin') {
         console.log(`❌ Accès refusé - User: ${req.user._id}, Target: ${id}, Role: ${req.user.role}`);
         return res.status(403).json({ 
           message: 'Vous ne pouvez consulter que vos propres factures' 
@@ -52,21 +52,46 @@ class FactureController {
       // Récupérer les factures avec pagination
       const factures = await Facture.find(query)
         .populate('acheteur', 'nom prenoms email')
-        .populate({
-          path: 'achats',
-          populate: {
-            path: 'produit',
-            populate: {
-              path: 'boutique',
-              select: 'nom'
-            }
-          }
-        })
         .sort({ dateEmission: -1 })
         .limit(parseInt(limit))
         .skip((parseInt(page) - 1) * parseInt(limit));
 
       const total = await Facture.countDocuments(query);
+
+      // Pour chaque facture, récupérer les achats associés
+      const facturesAvecAchats = await Promise.all(
+        factures.map(async (facture) => {
+          const achats = await Achat.find({ facture: facture._id })
+            .populate({
+              path: 'produit',
+              populate: {
+                path: 'boutique',
+                select: 'nom'
+              }
+            });
+          
+          return {
+            _id: facture._id,
+            numeroFacture: facture.numeroFacture,
+            dateEmission: facture.dateEmission,
+            montantTotal: facture.montantTotal,
+            montantTTC: facture.montantTTC,
+            statut: facture.statut,
+            achats: achats.map(achat => ({
+              _id: achat._id,
+              produit: {
+                _id: achat.produit._id,
+                nom: achat.produit.nom,
+                prix: achat.produit.prix,
+                boutique: achat.produit.boutique
+              },
+              typeAchat: achat.typeAchat,
+              etat: achat.etat
+            })),
+            acheteur: facture.acheteur
+          };
+        })
+      );
 
       // Calculer les statistiques
       const stats = await Facture.aggregate([
@@ -84,25 +109,7 @@ class FactureController {
       console.log(`✅ ${factures.length} factures récupérées`);
       
       res.json({
-        factures: factures.map(facture => ({
-          _id: facture._id,
-          numeroFacture: facture.numeroFacture,
-          dateEmission: facture.dateEmission,
-          montantTotal: facture.montantTotal,
-          statut: facture.statut,
-          achats: facture.achats.map(achat => ({
-            _id: achat._id,
-            produit: {
-              _id: achat.produit._id,
-              nom: achat.produit.nom,
-              prix: achat.produit.prix,
-              boutique: achat.produit.boutique
-            },
-            quantite: achat.quantite,
-            prixTotal: achat.prixTotal
-          })),
-          acheteur: facture.acheteur
-        })),
+        factures: facturesAvecAchats,
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),
@@ -144,17 +151,7 @@ class FactureController {
       const { factureId } = req.params;
 
       const facture = await Facture.findById(factureId)
-        .populate('acheteur', 'nom prenoms email telephone')
-        .populate({
-          path: 'achats',
-          populate: {
-            path: 'produit',
-            populate: {
-              path: 'boutique',
-              select: 'nom description'
-            }
-          }
-        });
+        .populate('acheteur', 'nom prenoms email telephone');
 
       if (!facture) {
         console.log(`❌ Facture non trouvée: ${factureId}`);
@@ -162,12 +159,22 @@ class FactureController {
       }
 
       // Vérifier les permissions
-      if (req.user._id.toString() !== facture.acheteur._id.toString() && req.user.role !== 'admin') {
+      if (req.user._id.toString() !== facture.acheteur._id.toString() && req.user.role !== 'Admin') {
         console.log(`❌ Accès refusé - User: ${req.user._id}, Owner: ${facture.acheteur._id}`);
         return res.status(403).json({ 
           message: 'Vous ne pouvez consulter que vos propres factures' 
         });
       }
+
+      // Récupérer les achats associés
+      const achats = await Achat.find({ facture: facture._id })
+        .populate({
+          path: 'produit',
+          populate: {
+            path: 'boutique',
+            select: 'nom description'
+          }
+        });
 
       console.log(`✅ Facture récupérée: ${facture.numeroFacture}`);
       
@@ -177,9 +184,10 @@ class FactureController {
           numeroFacture: facture.numeroFacture,
           dateEmission: facture.dateEmission,
           montantTotal: facture.montantTotal,
+          montantTTC: facture.montantTTC,
           statut: facture.statut,
           acheteur: facture.acheteur,
-          achats: facture.achats.map(achat => ({
+          achats: achats.map(achat => ({
             _id: achat._id,
             produit: {
               _id: achat.produit._id,
@@ -188,10 +196,9 @@ class FactureController {
               prix: achat.produit.prix,
               boutique: achat.produit.boutique
             },
-            quantite: achat.quantite,
-            prixTotal: achat.prixTotal,
-            dateAchat: achat.dateAchat,
-            etat: achat.etat
+            typeAchat: achat.typeAchat,
+            etat: achat.etat,
+            createdAt: achat.createdAt
           })),
           createdAt: facture.createdAt,
           updatedAt: facture.updatedAt
@@ -226,28 +233,28 @@ class FactureController {
       const { factureId } = req.params;
 
       const facture = await Facture.findById(factureId)
-        .populate('acheteur', 'nom prenoms email telephone')
-        .populate({
-          path: 'achats',
-          populate: {
-            path: 'produit',
-            populate: {
-              path: 'boutique',
-              select: 'nom description'
-            }
-          }
-        });
+        .populate('acheteur', 'nom prenoms email telephone');
 
       if (!facture) {
         return res.status(404).json({ message: 'Facture non trouvée' });
       }
 
       // Vérifier les permissions
-      if (req.user._id.toString() !== facture.acheteur._id.toString() && req.user.role !== 'admin') {
+      if (req.user._id.toString() !== facture.acheteur._id.toString() && req.user.role !== 'Admin') {
         return res.status(403).json({ 
           message: 'Vous ne pouvez télécharger que vos propres factures' 
         });
       }
+
+      // Récupérer les achats associés
+      const achats = await Achat.find({ facture: facture._id })
+        .populate({
+          path: 'produit',
+          populate: {
+            path: 'boutique',
+            select: 'nom description'
+          }
+        });
 
       // Pour l'instant, retourner les données JSON
       // Dans une vraie implémentation, on utiliserait une librairie comme PDFKit
@@ -260,7 +267,7 @@ class FactureController {
           dateEmission: facture.dateEmission,
           montantTotal: facture.montantTotal,
           acheteur: facture.acheteur,
-          achats: facture.achats
+          achats
         }
       });
 
