@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Espace, EspaceQueryParams, EspacesResponse, EspaceStatut, Etage } from '../../models/admin/espaces.model';
+import { Espace, EspaceQueryParams, EspacesResponse, EspacesStatsResponse, EspaceStatut, Etage } from '../../models/admin/espaces.model';
 import { Observable } from 'rxjs';
 import { buildQueryParams } from '../../helpers/params.helper';
 
@@ -93,6 +93,10 @@ export class EspacesService {
       `${this.apiUrl}/api/espaces/${espaceId}/liberer`,
       {}
     )
+  }
+
+  getEspaceStats() {
+    return this.http.get<EspacesStatsResponse>(`${this.apiUrl}/api/espaces/stats`);
   }
 
   // -- End Espaces --

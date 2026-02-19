@@ -31,6 +31,24 @@ export interface Boutique {
   updatedAt: string
 }
 
+export interface BoutiqueStatsResponse {
+  parStatut: {
+    statutBoutique: string,
+    count: number
+  },
+  total: number,
+  parCategorie: {
+    categorie: string,
+    count: number
+  }[]
+}
+
+export interface BoutiqueStats {
+  total: number;
+  parStatut: { statut: string; count: number }[];
+  parCategorie: { categorie: string; count: number }[];
+}
+
 export function getBoutiqueCategorieLabel(boutique: Boutique): string {
   const categorie = boutique.categorie;
   return typeof categorie === 'object' && categorie !== null ? categorie.nom : '';

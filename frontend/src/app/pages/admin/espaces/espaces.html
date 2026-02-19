@@ -64,8 +64,8 @@
           <app-empty-row-list [label]="'Aucun etage'" />
         }
 
-        @for (etage of etages(); track etage._id) {
-          <div class="glass row-list-item mb-2">
+        @for (etage of etages(); track etage._id; let i = $index) {
+          <div class="glass row-list-item mb-2" data-aos="fade-up" [attr.data-aos-delay]="(i+1)*100">
             <p>{{ etage.nom | titlecase }}</p>
             <div class="d-flex flex-row align-items-center gap-2">
               <button class="btn btn-outline-primary px-2 py-1" (click)="editFloor(etage)">
@@ -174,8 +174,8 @@
             <app-empty-grid-list [label]="'Aucun espace'" />
           }
 
-          @for (espace of espaces(); track espace._id) {
-            <div class="col-12 col-sm-6 mb-4">
+          @for (espace of espaces(); track espace._id; let i = $index) {
+            <div class="col-12 col-sm-6 mb-4" data-aos="fade-left" [attr.data-aos-delay]="(i+1)*100">
               <div class="card h-100 glass">
                 <div class="card-body d-flex flex-column">
                   <!-- Header -->

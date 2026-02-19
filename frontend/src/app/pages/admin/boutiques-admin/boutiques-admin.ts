@@ -1,4 +1,4 @@
-import { Component, effect, OnInit, signal } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, effect, OnInit, signal } from '@angular/core';
 import { CategorieBoutique } from '../../../core/models/admin/categorie-boutique.model';
 import { CategorieBoutiqueService } from '../../../core/services/admin/categorie-boutique.service';
 import { finalize } from 'rxjs';
@@ -11,8 +11,7 @@ import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-
 import { Boutique, getBoutiqueCategorieLabel, getBoutiqueCommercantLabel, getBoutiqueEspaceCode, getBoutiqueEspaceEtageNiveau, StatutBoutique } from '../../../core/models/commercant/boutique.model';
 import { BoutiqueService } from '../../../core/services/commercant/boutique.service';
 import { createPagination } from '../../../core/functions/pagination-function';
-import { Espace, getEspaceEtageNiveau } from '../../../core/models/admin/espaces.model';
-import { User } from '../../../core/models/user.model';
+import Aos from 'aos';
 
 @Component({
   selector: 'app-boutiques-admin',
@@ -20,7 +19,7 @@ import { User } from '../../../core/models/user.model';
   templateUrl: './boutiques-admin.html',
   styleUrl: './boutiques-admin.scss',
 })
-export class BoutiquesAdmin implements OnInit {
+export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
   isLoading = signal(false);
   private pendingRequests = 0;
 
@@ -44,6 +43,14 @@ export class BoutiquesAdmin implements OnInit {
 
   ngOnInit(): void {
     this.getAllCategories();
+  }
+
+  ngAfterViewInit() {
+    Aos.init();
+  }
+
+  ngAfterViewChecked() {
+    Aos.refresh();
   }
 
   // ---- CATEGORIE BOUTIQUE ----
@@ -204,7 +211,11 @@ export class BoutiquesAdmin implements OnInit {
   getBoutiquesActives(page: number) {
     this.startLoading();
 
-    this.boutiqueService.getActiveBoutiques(page, this.activeBoutiquesPagination.limit)
+    this.boutiqueService.getAllBoutiqueByStatut(
+      StatutBoutique.Actif, 
+      page, 
+      this.activeBoutiquesPagination.limit
+    )
       .pipe(finalize(() => this.stopLoading()))
       .subscribe({
         next: (res) => {
@@ -218,7 +229,11 @@ export class BoutiquesAdmin implements OnInit {
   getBoutiquesInactives(page: number) {
     this.startLoading();
 
-    this.boutiqueService.getInactiveBoutiques(page, this.inactiveBoutiquesPagination.limit)
+    this.boutiqueService.getAllBoutiqueByStatut(
+      StatutBoutique.Inactif,
+      page, 
+      this.inactiveBoutiquesPagination.limit
+    )
       .pipe(finalize(() => this.stopLoading()))
       .subscribe({
         next: (res) => {

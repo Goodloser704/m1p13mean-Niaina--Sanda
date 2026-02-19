@@ -5,10 +5,28 @@
         <div class="col-lg-6 col-md-4 d-none d-md-block"></div>
         <div class="col-lg-6 col-md-8 d-flex justify-content-center">
           <div class="hero-image" data-aos="zoom-out" data-aos-delay="300">
-            <img src="assets/img/illustration-1.webp" alt="Hero Image" class="img-fluid">
+            <img src="assets/img/illustration-1.png" alt="Hero Image" class="img-fluid">
           </div>
         </div>
       </div>
+    </div>
+
+    <div 
+      class="
+        position-absolute 
+        bottom-0 
+        w-100
+        p-3
+        d-none
+        d-sm-flex
+        flex-column
+        justify-content-center
+        align-items-center
+      ">
+      <h2 class="bienvenu">
+        <b>{{ centreCommercialName() | titlecase }}</b>
+      </h2>
+      <p class="copyright">Copyright - {{ year }}</p>
     </div>
   </section>
 </main>

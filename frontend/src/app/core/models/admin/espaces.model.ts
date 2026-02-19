@@ -47,6 +47,13 @@ export interface EspacesResponse {
   totalPages: number;
 }
 
+export interface EspacesStatsResponse {
+  totalEspaces: number,
+  espacesDisponibles: number,
+  espacesOccupes: number,
+  tauxOccupation: number
+}
+
 export function getEspaceEtageNiveau(espace: Espace): number {
   const etage = espace.etage;
 

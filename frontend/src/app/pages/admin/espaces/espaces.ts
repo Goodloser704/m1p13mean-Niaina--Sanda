@@ -5,7 +5,7 @@ import {
   getEspaceEtageNiveau,
   getEtage
 } from "./../../../core/models/admin/espaces.model";
-import { Component, effect, OnInit, signal } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, effect, OnInit, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Loader } from "../../../components/shared/loader/loader";
 import { Espace, Etage } from '../../../core/models/admin/espaces.model';
@@ -16,6 +16,7 @@ import { Dialog } from "../../../components/shared/dialog/dialog";
 import { createPagination } from '../../../core/functions/pagination-function';
 import { EmptyRowList } from "../../../components/shared/empty-row-list/empty-row-list";
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
+import Aos from "aos";
 
 @Component({
   selector: 'app-espaces',
@@ -23,7 +24,7 @@ import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-
   templateUrl: './espaces.html',
   styleUrl: './espaces.scss',
 })
-export class Espaces implements OnInit {
+export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
   isLoading = signal(false);
 
   constructor(
@@ -45,6 +46,14 @@ export class Espaces implements OnInit {
 
   ngOnInit() {
     this.load();
+  }
+
+  ngAfterViewInit() {
+    Aos.init();
+  }
+
+  ngAfterViewChecked() {
+    Aos.refresh();
   }
 
   load() {

@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { Boutique, StatutBoutique } from '../../models/commercant/boutique.model';
+import { Boutique, BoutiqueStatsResponse, StatutBoutique } from '../../models/commercant/boutique.model';
 import { Pagination } from '../../models/pagination.model';
 import { Produit } from '../../models/commercant/produit.model';
+import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -101,9 +102,10 @@ export class BoutiqueService {
 
   getAllBoutiqueByStatut(statutBoutique: StatutBoutique, page = 1, limit = 10) {
     return this.http.get<{ boutiques: Boutique[], pagination: Pagination }>(
-      `${this.apiUrl}/api/boutique/all/statut/${statutBoutique}`,
+      `${this.apiUrl}/api/boutique/by-statut`,
       {
         params: {
+          statut: statutBoutique,
           page: page,
           limit: limit
         }
@@ -111,11 +113,8 @@ export class BoutiqueService {
     );
   }
 
-  getActiveBoutiques(page = 1, limit = 10) {
-    return this.getAllBoutiqueByStatut(StatutBoutique.Actif, page, limit);
+  getBoutiqueStats() {
+    return this.http.get<BoutiqueStatsResponse>(`${this.apiUrl}/api/boutique/admin/stats`);
   }
 
-  getInactiveBoutiques(page = 1, limit = 10) {
-    return this.getAllBoutiqueByStatut(StatutBoutique.Inactif, page, limit);
-  }
 }

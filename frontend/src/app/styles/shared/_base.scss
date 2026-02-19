@@ -179,6 +179,14 @@ h1, h2 {
   aspect-ratio: 1;
 }
 
+.card-img-top {
+  border: 1px solid transparent;
+  width: 100%;
+  aspect-ratio: 1.5;
+  object-fit: cover;
+  display: block; // supprime l'espace blanc sous l'image
+}
+
 // - End Image avatar -
 
 // ---- Template ----
@@ -278,6 +286,10 @@ h1, h2 {
 
 .nav-item {
   border: 1px solid transparent;
+}
+
+.nav-link {
+  color: v.$default-color;
 }
 
 .bi-bolder {
