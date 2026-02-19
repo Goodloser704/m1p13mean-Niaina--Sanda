@@ -309,12 +309,12 @@ class BoutiqueController {
       console.log(`✅ Boutique créée: ${boutique.nom}`);
       
       res.status(201).json({
-        message: 'Inscription boutique créée avec succès. En attente de validation admin.',
+        message: 'Boutique créée avec succès (statut: Inactif). Elle sera activée après approbation de votre demande de location d\'espace.',
         boutique: {
           _id: boutique._id,
           nom: boutique.nom,
           categorie: boutique.categorie,
-          statut: boutique.statut,
+          statutBoutique: boutique.statutBoutique,
           dateCreation: boutique.dateCreation
         }
       });
@@ -404,13 +404,13 @@ class BoutiqueController {
 
   /**
    * @route   GET /api/boutique/pending
-   * @desc    Obtenir les boutiques en attente de validation
+   * @desc    Obtenir les boutiques inactives
    * @access  Private (Admin)
    * @return  { boutiques, count }
    */
   async getPendingBoutiques(req, res) {
     const timestamp = new Date().toISOString();
-    console.log(`📋 [${timestamp}] Récupération boutiques en attente`);
+    console.log(`📋 [${timestamp}] Récupération boutiques inactives`);
     console.log(`   👤 Admin ID: ${req.user._id}`);
     console.log(`   🔑 Rôle: ${req.user.role}`);
     
@@ -418,7 +418,7 @@ class BoutiqueController {
       // Le middleware adminAuth a déjà vérifié les permissions
       const boutiques = await boutiqueService.getPendingBoutiques();
 
-      console.log(`✅ ${boutiques.length} boutiques en attente récupérées`);
+      console.log(`✅ ${boutiques.length} boutiques inactives récupérées`);
       
       res.json({
         boutiques,
@@ -426,23 +426,23 @@ class BoutiqueController {
       });
 
     } catch (error) {
-      console.error(`❌ Erreur récupération boutiques en attente:`, error.message);
+      console.error(`❌ Erreur récupération boutiques inactives:`, error.message);
       res.status(500).json({ message: 'Erreur serveur' });
     }
   }
 
   /**
-   * ✅ Approuver une boutique (Admin seulement)
+   * ✅ Activer une boutique (Admin seulement)
    */
   async approveBoutique(req, res) {
     const timestamp = new Date().toISOString();
-    console.log(`✅ [${timestamp}] Approbation boutique`);
+    console.log(`✅ [${timestamp}] Activation boutique`);
     console.log(`   👤 Admin ID: ${req.user._id}`);
     console.log(`   🏪 Boutique ID: ${req.params.boutiqueId}`);
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== 'admin' && req.user.role !== 'Admin') {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
@@ -454,21 +454,21 @@ class BoutiqueController {
         req.user._id
       );
 
-      console.log(`✅ Boutique approuvée: ${boutique.nom}`);
+      console.log(`✅ Boutique activée: ${boutique.nom}`);
       
       res.json({
-        message: 'Boutique approuvée avec succès',
+        message: 'Boutique activée avec succès',
         boutique
       });
 
     } catch (error) {
-      console.error(`❌ Erreur approbation boutique:`, error.message);
+      console.error(`❌ Erreur activation boutique:`, error.message);
       
       if (error.message === 'Boutique non trouvée') {
         return res.status(404).json({ message: error.message });
       }
       
-      if (error.message.includes('déjà été traitée')) {
+      if (error.message.includes('déjà')) {
         return res.status(400).json({ message: error.message });
       }
       
@@ -477,17 +477,17 @@ class BoutiqueController {
   }
 
   /**
-   * ❌ Rejeter une boutique (Admin seulement)
+   * ❌ Désactiver une boutique (Admin seulement)
    */
   async rejectBoutique(req, res) {
     const timestamp = new Date().toISOString();
-    console.log(`❌ [${timestamp}] Rejet boutique`);
+    console.log(`❌ [${timestamp}] Désactivation boutique`);
     console.log(`   👤 Admin ID: ${req.user._id}`);
     console.log(`   🏪 Boutique ID: ${req.params.boutiqueId}`);
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== 'admin' && req.user.role !== 'Admin') {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
@@ -501,22 +501,18 @@ class BoutiqueController {
         reason
       );
 
-      console.log(`❌ Boutique rejetée`);
+      console.log(`❌ Boutique désactivée`);
       
       res.json({
-        message: 'Boutique rejetée',
+        message: 'Boutique désactivée',
         reason: result.reason
       });
 
     } catch (error) {
-      console.error(`❌ Erreur rejet boutique:`, error.message);
+      console.error(`❌ Erreur désactivation boutique:`, error.message);
       
       if (error.message === 'Boutique non trouvée') {
         return res.status(404).json({ message: error.message });
-      }
-      
-      if (error.message.includes('déjà été traitée')) {
-        return res.status(400).json({ message: error.message });
       }
       
       res.status(500).json({ message: 'Erreur serveur' });
@@ -620,8 +616,7 @@ class BoutiqueController {
       console.error(`❌ Erreur suppression boutique:`, error.message);
       
       if (error.message.includes('non trouvée') || 
-          error.message.includes('propriétaire') ||
-          error.message.includes('en attente')) {
+          error.message.includes('propriétaire')) {
         return res.status(400).json({ message: error.message });
       }
       

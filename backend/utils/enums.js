@@ -15,8 +15,9 @@ const RoleEnum = {
 // Statuts des boutiques
 const StatutBoutiqueEnum = {
   Actif: 'Actif',
-  Inactif: 'Inactif',
-  EnAttente: 'EnAttente'
+  Inactif: 'Inactif'
+  // EnAttente supprimé - Les boutiques sont Inactif par défaut
+  // et deviennent Actif quand leur demande de location est approuvée
 };
 
 // Statuts des espaces

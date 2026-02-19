@@ -48,19 +48,16 @@ class BoutiqueService {
         throw new Error('Vous avez déjà une boutique avec ce nom');
       }
 
-      // Créer la boutique avec le statut EnAttente (en attente de validation admin)
+      // Créer la boutique avec le statut Inactif (devient Actif après approbation demande location)
       const boutique = new Boutique({
         commercant: userId,
         ...boutiqueData,
-        statutBoutique: 'EnAttente' // Boutique en attente de validation
+        statutBoutique: 'Inactif' // Boutique inactive par défaut
       });
 
       await boutique.save();
 
-      // Créer les notifications pour les admins
-      await this.createBoutiqueNotification(boutique, user);
-
-      console.log(`✅ Boutique créée: ${boutique.nom} par ${user.email}`);
+      console.log(`✅ Boutique créée: ${boutique.nom} par ${user.email} (statut: Inactif)`);
       return boutique;
 
     } catch (error) {
@@ -142,50 +139,53 @@ class BoutiqueService {
   }
 
   /**
-   * 📋 Obtenir les boutiques en attente (Admin)
+   * 📋 Obtenir les boutiques inactives (pour admin)
+   * Note: Les boutiques sont créées Inactif et deviennent Actif via demande de location
    */
   async getPendingBoutiques() {
     try {
-      const boutiques = await Boutique.find({ statutBoutique: 'EnAttente' })
-        .populate('commercant', 'nom prenoms email telephone') // Utiliser 'prenoms' selon spécifications
-        .populate('categorie', 'nom description') // Populate catégorie pour afficher le nom
-        .populate('espace', 'codeEspace etage') // Populate espace si présent
+      const boutiques = await Boutique.find({ statutBoutique: 'Inactif' })
+        .populate('commercant', 'nom prenoms email telephone')
+        .populate('categorie', 'nom description')
+        .populate('espace', 'codeEspace etage')
         .sort({ dateCreation: -1 });
 
       return boutiques;
     } catch (error) {
-      console.error('❌ Erreur récupération boutiques en attente:', error.message);
-      throw new Error('Erreur lors de la récupération des boutiques en attente');
+      console.error('❌ Erreur récupération boutiques inactives:', error.message);
+      throw new Error('Erreur lors de la récupération des boutiques inactives');
     }
   }
 
   /**
-   * ✅ Approuver une boutique (Admin)
+   * ✅ Activer une boutique (via approbation demande de location)
+   * Note: Cette méthode est appelée quand une demande de location est approuvée
    */
   async approveBoutique(boutiqueId, adminId) {
     try {
       const boutique = await Boutique.findById(boutiqueId)
-        .populate('commercant', 'nom prenoms email') // Utiliser 'prenoms' selon spécifications
-        .populate('categorie', 'nom description'); // Populate catégorie
+        .populate('commercant', 'nom prenoms email')
+        .populate('categorie', 'nom description');
 
       if (!boutique) {
         throw new Error('Boutique non trouvée');
       }
 
-      if (boutique.statutBoutique !== 'EnAttente') {
-        throw new Error('Cette boutique a déjà été traitée');
+      if (boutique.statutBoutique === 'Actif') {
+        throw new Error('Cette boutique est déjà active');
       }
 
       // Mettre à jour le statut
-      boutique.statut = 'approuve';
+      boutique.statutBoutique = 'Actif';
       await boutique.save();
 
       // Créer notification pour le propriétaire
       await notificationService.createNotification({
-        type: 'boutique_approved',
-        title: '✅ Boutique approuvée',
-        message: `Félicitations ! Votre boutique "${boutique.nom}" a été approuvée et est maintenant active dans le centre commercial.`,
-        recipient: boutique.proprietaire._id,
+        type: 'Paiement',
+        title: '✅ Boutique activée',
+        message: `Votre boutique "${boutique.nom}" a été activée et est maintenant visible dans le centre commercial.`,
+        receveur: boutique.commercant._id,
+        recipient: boutique.commercant._id,
         recipientRole: 'boutique',
         relatedEntity: {
           entityType: 'Boutique',
@@ -194,46 +194,45 @@ class BoutiqueService {
         data: {
           boutiqueId: boutique._id,
           boutiqueName: boutique.nom,
-          approvalDate: new Date()
+          activationDate: new Date()
         },
         priority: 'high',
         actionRequired: false
       });
 
-      console.log(`✅ Boutique approuvée: ${boutique.nom}`);
+      console.log(`✅ Boutique activée: ${boutique.nom}`);
       return boutique;
 
     } catch (error) {
-      console.error('❌ Erreur approbation boutique:', error.message);
+      console.error('❌ Erreur activation boutique:', error.message);
       throw error;
     }
   }
 
   /**
-   * ❌ Rejeter une boutique (Admin)
+   * ❌ Désactiver une boutique (Admin)
+   * Note: Remplace le rejet - une boutique peut être désactivée
    */
   async rejectBoutique(boutiqueId, adminId, reason = '') {
     try {
       const boutique = await Boutique.findById(boutiqueId)
-        .populate('proprietaire', 'nom prenom email');
+        .populate('commercant', 'nom prenoms email');
 
       if (!boutique) {
         throw new Error('Boutique non trouvée');
       }
 
-      if (boutique.statut !== 'en_attente') {
-        throw new Error('Cette boutique a déjà été traitée');
-      }
-
-      // Supprimer la boutique (ou marquer comme rejetée)
-      await Boutique.findByIdAndDelete(boutiqueId);
+      // Désactiver la boutique
+      boutique.statutBoutique = 'Inactif';
+      await boutique.save();
 
       // Créer notification pour le propriétaire
       await notificationService.createNotification({
-        type: 'boutique_rejected',
-        title: '❌ Boutique rejetée',
-        message: `Votre demande d'inscription pour la boutique "${boutique.nom}" a été rejetée. ${reason ? `Raison: ${reason}` : ''}`,
-        recipient: boutique.proprietaire._id,
+        type: 'Paiement',
+        title: '⚠️ Boutique désactivée',
+        message: `Votre boutique "${boutique.nom}" a été désactivée. ${reason ? `Raison: ${reason}` : ''}`,
+        receveur: boutique.commercant._id,
+        recipient: boutique.commercant._id,
         recipientRole: 'boutique',
         relatedEntity: {
           entityType: 'Boutique',
@@ -242,18 +241,18 @@ class BoutiqueService {
         data: {
           boutiqueId: boutique._id,
           boutiqueName: boutique.nom,
-          rejectionReason: reason,
-          rejectionDate: new Date()
+          deactivationReason: reason,
+          deactivationDate: new Date()
         },
         priority: 'high',
         actionRequired: false
       });
 
-      console.log(`❌ Boutique rejetée: ${boutique.nom}`);
-      return { message: 'Boutique rejetée', reason };
+      console.log(`❌ Boutique désactivée: ${boutique.nom}`);
+      return { message: 'Boutique désactivée', reason };
 
     } catch (error) {
-      console.error('❌ Erreur rejet boutique:', error.message);
+      console.error('❌ Erreur désactivation boutique:', error.message);
       throw error;
     }
   }
@@ -344,21 +343,17 @@ class BoutiqueService {
   }
 
   /**
-   * 🗑️ Supprimer une boutique (seulement si en attente)
+   * 🗑️ Supprimer une boutique
    */
   async deleteBoutique(boutiqueId, userId) {
     try {
       const boutique = await Boutique.findOne({
         _id: boutiqueId,
-        proprietaire: userId
+        commercant: userId
       });
 
       if (!boutique) {
         throw new Error('Boutique non trouvée ou vous n\'êtes pas le propriétaire');
-      }
-
-      if (boutique.statut !== 'en_attente') {
-        throw new Error('Seules les boutiques en attente peuvent être supprimées');
       }
 
       await Boutique.findByIdAndDelete(boutiqueId);
@@ -451,7 +446,7 @@ class BoutiqueService {
       const skip = (parseInt(page) - 1) * parseInt(limit);
       
       // Valider le statut
-      const statutsValides = ['Actif', 'EnAttente', 'Inactif', 'Rejete'];
+      const statutsValides = ['Actif', 'Inactif'];
       if (!statutsValides.includes(statut)) {
         throw new Error(`Statut invalide. Valeurs acceptées: ${statutsValides.join(', ')}`);
       }

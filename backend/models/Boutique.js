@@ -30,8 +30,8 @@ const boutiqueSchema = new mongoose.Schema({
   statutBoutique: {
     type: String,
     required: true,
-    enum: [StatutBoutiqueEnum.Actif, StatutBoutiqueEnum.Inactif, StatutBoutiqueEnum.EnAttente],
-    default: StatutBoutiqueEnum.EnAttente // Par défaut en attente de validation
+    enum: [StatutBoutiqueEnum.Actif, StatutBoutiqueEnum.Inactif],
+    default: StatutBoutiqueEnum.Inactif // Par défaut Inactif, devient Actif après approbation demande location
   },
   photo: {
     type: String
