@@ -664,10 +664,12 @@ class BoutiqueController {
       res.json({
         boutiques: result.boutiques,
         count: result.boutiques.length,
-        page: result.pagination.page,
-        limit: result.pagination.limit,
-        totalPages: result.pagination.totalPages,
-        total: result.pagination.total
+        pagination: {
+          page: result.pagination.page,
+          limit: result.pagination.limit,
+          totalPages: result.pagination.totalPages,
+          total: result.pagination.total
+        }
       });
 
     } catch (error) {
@@ -701,10 +703,12 @@ class BoutiqueController {
       res.json({
         boutiques: result.boutiques,
         count: result.boutiques.length,
-        page: result.pagination.page,
-        limit: result.pagination.limit,
-        totalPages: result.pagination.totalPages,
-        total: result.pagination.total
+        pagination: {
+          page: result.pagination.page,
+          limit: result.pagination.limit,
+          totalPages: result.pagination.totalPages,
+          total: result.pagination.total
+        }
       });
 
     } catch (error) {
