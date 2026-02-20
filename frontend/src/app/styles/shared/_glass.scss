@@ -2,8 +2,8 @@
 
 .liquid-glass {
   background: rgba(v.$accent-color, 0.075);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  // backdrop-filter: blur(5px);
+  // -webkit-backdrop-filter: blur(5px);
 
   border-radius: 20px;
 
@@ -15,7 +15,7 @@
 
   padding: 1.5rem;
 
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .liquid-glass:hover {
@@ -49,16 +49,16 @@
     0 6px 18px rgba(v.$accent-color, 0.1),
     inset 0 1px 0 rgba(v.$contrast-color, 0.5);
 
-  // transform: translateY(-1px);
+  transform: translateY(-1px);
 }
 
 .glass {
   position: relative;
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(2px) saturate(180%);
+  // backdrop-filter: blur(2px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 13px;
-  box-shadow: 0 3px 32px rgba(v.$accent-color, 0.2), 
+  box-shadow: 0 3px 18px rgba(v.$accent-color, 0.2), 
               inset 0 4px 20px rgba(255, 255, 255, 0.3);
 
   p {
@@ -68,6 +68,8 @@
   b {
     color: v.$default-color;
   }
+
+  will-change: transform;
 }
 
 .glass::after {
@@ -79,12 +81,12 @@
   height: 100%;
   background: rgba(v.$contrast-color, 0.1);
   border-radius: 13px;
-  backdrop-filter: blur(1px);
+  // backdrop-filter: blur(1px);
   box-shadow: inset -10px -8px 0px -11px rgba(255, 255, 255, 1),
               inset 0px -9px 0px -8px rgba(255, 255, 255, 1);
   opacity: 0.6;
   z-index: -1;
-  filter: blur(1px) drop-shadow(2px 2px 6px black) brightness(115%);
+  filter: blur(1px) drop-shadow(2px 4px 6px black) brightness(115%);
 }
 
 .btn-glass {

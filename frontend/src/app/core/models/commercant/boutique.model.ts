@@ -35,18 +35,12 @@ export interface BoutiqueStatsResponse {
   parStatut: {
     statutBoutique: string,
     count: number
-  },
-  total: number,
+  }[],
+  total: number, // Total boutiques dans la collection
   parCategorie: {
     categorie: string,
     count: number
   }[]
-}
-
-export interface BoutiqueStats {
-  total: number;
-  parStatut: { statut: string; count: number }[];
-  parCategorie: { categorie: string; count: number }[];
 }
 
 export function getBoutiqueCategorieLabel(boutique: Boutique): string {

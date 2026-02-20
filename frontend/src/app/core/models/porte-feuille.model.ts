@@ -14,6 +14,13 @@ export enum PFTransactionType {
   Commission = "Commission"
 }
 
+export enum PFTransactionStatut {
+  EnAttente = "EnAttente",
+  Completee = "Completee",
+  Echouee = "Echouee",
+  Annulee = "Annulee"
+}
+
 export interface PFTransaction {
   _id: string;
   fromWallet: PorteFeuille | string;
@@ -21,6 +28,7 @@ export interface PFTransaction {
   type: PFTransactionType,
   amount: number,
   description: string,
+  statut: string,
   createdAt: string
 }
 
