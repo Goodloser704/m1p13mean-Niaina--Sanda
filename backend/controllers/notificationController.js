@@ -1,4 +1,5 @@
 const notificationService = require('../services/notificationService');
+const { RoleEnum } = require('../utils/enums');
 
 /**
  * 🔔 Contrôleur des Notifications
@@ -22,7 +23,7 @@ class NotificationController {
     console.log(`   👤 User ID: ${userId}`);
     
     // Vérifier les permissions si userId différent de l'utilisateur connecté
-    if (req.params.userId && req.user._id.toString() !== req.params.userId && req.user.role !== 'Admin') {
+    if (req.params.userId && req.user._id.toString() !== req.params.userId && req.user.role !== RoleEnum.Admin) {
       console.log(`❌ Accès refusé - User: ${req.user._id}, Target: ${req.params.userId}`);
       return res.status(403).json({ 
         message: 'Vous ne pouvez consulter que vos propres notifications' 
@@ -214,7 +215,7 @@ class NotificationController {
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'Admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }

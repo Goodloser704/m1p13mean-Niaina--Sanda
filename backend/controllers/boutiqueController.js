@@ -176,7 +176,7 @@ class BoutiqueController {
       const { id } = req.params;
       
       // Vérifier les permissions
-      if (req.user._id.toString() !== id && req.user.role !== 'admin') {
+      if (req.user._id.toString() !== id && req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - User: ${req.user._id}, Target: ${id}, Role: ${req.user.role}`);
         return res.status(403).json({ 
           message: 'Vous ne pouvez consulter que vos propres boutiques' 
@@ -232,7 +232,7 @@ class BoutiqueController {
       }
 
       // Vérifier les permissions
-      if (req.user.role !== 'admin' && 
+      if (req.user.role !== RoleEnum.Admin && 
           boutique.proprietaire.toString() !== req.user._id.toString()) {
         console.log(`❌ Accès refusé - User: ${req.user._id}, Owner: ${boutique.proprietaire}`);
         return res.status(403).json({ 
@@ -284,7 +284,7 @@ class BoutiqueController {
     
     try {
       // Vérification supplémentaire du rôle (défense en profondeur)
-      if (req.user.role !== 'Commercant' && req.user.role !== 'boutique') {
+      if (req.user.role !== RoleEnum.Commercant && req.user.role !== 'boutique') {
         console.log(`❌ Tentative création boutique par ${req.user.role}`);
         return res.status(403).json({ 
           message: 'Seuls les commerçants peuvent créer des boutiques',
@@ -442,7 +442,7 @@ class BoutiqueController {
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin' && req.user.role !== 'Admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
@@ -487,7 +487,7 @@ class BoutiqueController {
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin' && req.user.role !== 'Admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
@@ -530,7 +530,7 @@ class BoutiqueController {
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
@@ -630,7 +630,7 @@ class BoutiqueController {
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }

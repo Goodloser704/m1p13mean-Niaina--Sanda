@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const authService = require('../services/authService');
+const { RoleEnum } = require('../utils/enums');
 
 /**
  * 🔐 Contrôleur d'Authentification
@@ -265,7 +266,7 @@ class AuthController {
     
     try {
       // Empêcher la suppression des comptes admin
-      if (req.user.role === 'admin') {
+      if (req.user.role === RoleEnum.Admin) {
         console.log(`❌ Tentative de suppression compte admin refusée`);
         return res.status(403).json({ 
           message: 'Les comptes administrateur ne peuvent pas être supprimés' 
@@ -303,7 +304,7 @@ class AuthController {
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
@@ -344,7 +345,7 @@ class AuthController {
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
@@ -383,7 +384,7 @@ class AuthController {
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
@@ -414,7 +415,7 @@ class AuthController {
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
@@ -460,7 +461,7 @@ class AuthController {
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
