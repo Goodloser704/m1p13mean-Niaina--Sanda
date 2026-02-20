@@ -366,33 +366,61 @@ class BoutiqueService {
       throw error;
     }
   }
+  
   async getBoutiqueStats() {
     try {
       const stats = await Boutique.aggregate([
         {
           $group: {
-            _id: '$statut',
+            _id: '$statutBoutique',
             count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            statutBoutique: '$_id',
+            count: 1
           }
         }
       ]);
-
+  
       const totalBoutiques = await Boutique.countDocuments();
+  
+      // Stats par catégorie (avec lookup pour récupérer le nom)
       const boutiquesParCategorie = await Boutique.aggregate([
-        { $match: { statut: 'approuve' } },
+        {
+          $lookup: {
+            from: 'categorieboutiques', // nom collection exacte dans MongoDb
+            localField: 'categorie',
+            foreignField: '_id',
+            as: 'categorieInfo'
+          }
+        },
+        {
+          $unwind: '$categorieInfo'
+        },
         {
           $group: {
-            _id: '$categorie',
+            _id: '$categorieInfo.nom',
             count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            categorie: '$_id',
+            count: 1
           }
         }
       ]);
-
+  
       return {
         parStatut: stats,
         total: totalBoutiques,
         parCategorie: boutiquesParCategorie
       };
+  
     } catch (error) {
       console.error('❌ Erreur statistiques boutiques:', error.message);
       throw error;
