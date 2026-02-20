@@ -1,4 +1,5 @@
 const boutiqueService = require('../services/boutiqueService');
+const { RoleEnum } = require('../utils/enums');
 
 /**
  * 🏪 Contrôleur des Boutiques
@@ -623,6 +624,7 @@ class BoutiqueController {
       res.status(500).json({ message: 'Erreur serveur' });
     }
   }
+
   async getBoutiqueStats(req, res) {
     const timestamp = new Date().toISOString();
     console.log(`📊 [${timestamp}] Statistiques boutiques`);
@@ -630,7 +632,7 @@ class BoutiqueController {
     
     try {
       // Vérifier les permissions admin
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }
@@ -639,7 +641,7 @@ class BoutiqueController {
 
       console.log(`✅ Statistiques récupérées`);
       
-      res.json({ stats });
+      res.json(stats);
 
     } catch (error) {
       console.error(`❌ Erreur statistiques boutiques:`, error.message);

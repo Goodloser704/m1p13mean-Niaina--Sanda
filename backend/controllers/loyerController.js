@@ -5,6 +5,7 @@ const Recepisse = require('../models/Recepisse');
 const Boutique = require('../models/Boutique');
 const Espace = require('../models/Espace');
 const notificationService = require('../services/notificationService');
+const { TypeTransactionEnum } = require('../utils/enums');
 
 /**
  * 💰 Contrôleur Paiement Loyer
@@ -214,7 +215,7 @@ class LoyerController {
         },
         transaction: {
           _id: transaction._id,
-          montant: transaction.amount,
+          amount: transaction.amount,
           statut: transaction.statut,
           dateTransaction: transaction.createdAt
         },
@@ -256,7 +257,7 @@ class LoyerController {
       // Récupérer les transactions de loyer
       const loyers = await PFTransaction.find({
         fromWallet: portefeuille._id,
-        type: 'Loyer',
+        type: TypeTransactionEnum.Loyer,
         statut: 'Completee'
       })
       .populate('toWallet', 'owner')
@@ -267,7 +268,7 @@ class LoyerController {
       const total = await PFTransaction.countDocuments({
         fromWallet: portefeuille._id,
         type: 'Loyer',
-        statut: 'Completee'
+        statut: TypeTransactionEnum.Loyer
       });
 
       console.log(`✅ ${loyers.length} paiements de loyer récupérés`);
@@ -275,9 +276,9 @@ class LoyerController {
       res.json({
         loyers: loyers.map(loyer => ({
           _id: loyer._id,
-          montant: loyer.amount,
+          amount: loyer.amount,
           description: loyer.description,
-          dateTransaction: loyer.createdAt,
+          createdAt: loyer.createdAt,
           statut: loyer.statut
         })),
         pagination: {
@@ -319,22 +320,14 @@ class LoyerController {
 
       // Construire le filtre de période
       let periodeFilter = {};
-      if (mois) {
-        // Format YYYY-MM
-        if (!/^\d{4}-\d{2}$/.test(mois)) {
+      if (mois && annee) {
+        if (!/^\d{2}$/.test(mois) || !/^\d{4}$/.test(annee)) {
           return res.status(400).json({ 
-            message: 'Format de mois invalide. Utilisez YYYY-MM' 
+            message: 'Format invalide. Mois=MM, Annee=YYYY' 
           });
         }
-        periodeFilter.periode = mois;
-      } else if (annee) {
-        // Format YYYY
-        if (!/^\d{4}$/.test(annee)) {
-          return res.status(400).json({ 
-            message: 'Format d\'année invalide. Utilisez YYYY' 
-          });
-        }
-        periodeFilter.periode = { $regex: `^${annee}` };
+
+        periodeFilter.periode = `${annee}-${mois}`;
       }
 
       // Récupérer les reçus de loyer
