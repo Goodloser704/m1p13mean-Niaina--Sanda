@@ -3,6 +3,7 @@ const Espace = require('../models/Espace');
 const Achat = require('../models/Achat');
 const PFTransaction = require('../models/PFTransaction');
 const User = require('../models/User');
+const { RoleEnum } = require('../utils/enums');
 
 /**
  * 📊 Contrôleur Admin Dashboard
@@ -23,7 +24,7 @@ class AdminController {
     
     try {
       // Vérifier les permissions admin (accepter Admin et admin)
-      if (req.user.role !== 'Admin' && req.user.role !== 'admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ message: 'Accès refusé' });
       }

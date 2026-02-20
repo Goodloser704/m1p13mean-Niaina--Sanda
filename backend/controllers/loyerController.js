@@ -6,6 +6,7 @@ const Boutique = require('../models/Boutique');
 const Espace = require('../models/Espace');
 const notificationService = require('../services/notificationService');
 const { TypeTransactionEnum } = require('../utils/enums');
+const { RoleEnum } = require('../utils/enums');
 
 /**
  * 💰 Contrôleur Paiement Loyer
@@ -38,7 +39,7 @@ class LoyerController {
       }
 
       // Vérifier que l'utilisateur est un commerçant
-      if (req.user.role !== 'Commercant') {
+      if (req.user.role !== RoleEnum.Commercant) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ 
           message: 'Seuls les commerçants peuvent payer des loyers' 
@@ -118,6 +119,7 @@ class LoyerController {
 
       // Récupérer le portefeuille admin (destinataire des loyers)
       const adminUser = await require('../models/User').findOne({ role: 'Admin' });
+const { RoleEnum } = require('../utils/enums');
       if (!adminUser) {
         console.log(`❌ Compte admin non trouvé`);
         return res.status(500).json({ 
@@ -309,7 +311,7 @@ class LoyerController {
     
     try {
       // Vérifier que l'utilisateur est admin
-      if (req.user.role !== 'Admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ 
           message: 'Accès réservé aux administrateurs' 
@@ -431,7 +433,7 @@ class LoyerController {
     
     try {
       // Vérifier que l'utilisateur est admin
-      if (req.user.role !== 'Admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ 
           message: 'Accès réservé aux administrateurs' 
@@ -591,7 +593,7 @@ class LoyerController {
     
     try {
       // Vérifier que l'utilisateur est admin
-      if (req.user.role !== 'Admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ 
           message: 'Accès réservé aux administrateurs' 
@@ -723,7 +725,7 @@ class LoyerController {
     
     try {
       // Vérifier que l'utilisateur est admin
-      if (req.user.role !== 'Admin') {
+      if (req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
         return res.status(403).json({ 
           message: 'Accès réservé aux administrateurs' 

@@ -47,7 +47,7 @@ exports.obtenirPortefeuilleUtilisateur = async (req, res) => {
     const { id } = req.params;
     
     // Vérifier les permissions
-    if (req.user._id.toString() !== id && req.user.role !== 'Admin') {
+    if (req.user._id.toString() !== id && req.user.role !== RoleEnum.Admin) {
       return res.status(403).json({
         message: 'Vous ne pouvez consulter que votre propre portefeuille'
       });
@@ -336,6 +336,7 @@ exports.obtenirTousPortefeuilles = async (req, res) => {
     if (search) {
       // Recherche par nom/email de l'utilisateur
       const User = require('../models/User');
+const { RoleEnum } = require('../utils/enums');
       const utilisateurs = await User.find({
         $or: [
           { nom: { $regex: search, $options: 'i' } },

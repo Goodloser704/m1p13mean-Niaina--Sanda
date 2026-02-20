@@ -8,6 +8,7 @@ const router = express.Router();
  */
 const espaceController = require('../controllers/espaceController');
 const { auth, authorize } = require('../middleware/auth');
+const { RoleEnum } = require('../utils/enums');
 
 // Middleware d'authentification pour toutes les routes
 router.use(auth);
@@ -24,7 +25,7 @@ router.get('/test', (req, res) => {
 
 // Middleware de vérification du rôle admin
 const requireAdmin = (req, res, next) => {
-  if (req.user.role !== 'Admin' && req.user.role !== 'admin') {
+  if (req.user.role !== RoleEnum.Admin) {
     return res.status(403).json({ 
       message: 'Accès refusé. Seuls les administrateurs peuvent gérer les espaces.' 
     });

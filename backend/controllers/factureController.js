@@ -1,5 +1,6 @@
 const Facture = require('../models/Facture');
 const Achat = require('../models/Achat');
+const { RoleEnum } = require('../utils/enums');
 
 /**
  * 🧾 Contrôleur des Factures
@@ -26,7 +27,7 @@ class FactureController {
       const { page = 1, limit = 20, dateDebut, dateFin } = req.query;
 
       // Vérifier les permissions
-      if (req.user._id.toString() !== id && req.user.role !== 'Admin') {
+      if (req.user._id.toString() !== id && req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - User: ${req.user._id}, Target: ${id}, Role: ${req.user.role}`);
         return res.status(403).json({ 
           message: 'Vous ne pouvez consulter que vos propres factures' 
@@ -159,7 +160,7 @@ class FactureController {
       }
 
       // Vérifier les permissions
-      if (req.user._id.toString() !== facture.acheteur._id.toString() && req.user.role !== 'Admin') {
+      if (req.user._id.toString() !== facture.acheteur._id.toString() && req.user.role !== RoleEnum.Admin) {
         console.log(`❌ Accès refusé - User: ${req.user._id}, Owner: ${facture.acheteur._id}`);
         return res.status(403).json({ 
           message: 'Vous ne pouvez consulter que vos propres factures' 
@@ -240,7 +241,7 @@ class FactureController {
       }
 
       // Vérifier les permissions
-      if (req.user._id.toString() !== facture.acheteur._id.toString() && req.user.role !== 'Admin') {
+      if (req.user._id.toString() !== facture.acheteur._id.toString() && req.user.role !== RoleEnum.Admin) {
         return res.status(403).json({ 
           message: 'Vous ne pouvez télécharger que vos propres factures' 
         });
