@@ -639,7 +639,7 @@ class BoutiqueController {
 
       console.log(`✅ Statistiques récupérées`);
       
-      res.json(stats);
+      res.json({ stats });
 
     } catch (error) {
       console.error(`❌ Erreur statistiques boutiques:`, error.message);
