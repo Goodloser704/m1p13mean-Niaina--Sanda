@@ -38,14 +38,14 @@
           
           <ul class="navbar-nav ms-md-auto mb-2 mb-md-0 d-flex align-items-md-center gap-0 gap-md-2">
             <li class="nav-item">
-              <a class="nav-link" aria-current="page" routerLink="dashboard">Dashboard</a>
+              <a class="nav-link" aria-current="page" [routerLink]="['/admin/dashboard']">Dashboard</a>
             </li>
 
             <li class="nav-item dropdown">
               <a 
                 class="nav-link dropdown-toggle"
                 href="#"
-                role="button"
+                type="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false">
                 Gestion
@@ -53,17 +53,17 @@
 
               <div class="dropdown-menu custom-dropdown shadow border-0">
 
-                <a class="dropdown-menu-item" routerLink="espaces">
+                <a class="dropdown-menu-item" [routerLink]="['/admin/espaces']">
                   <i class="bi bi-grid-1x2 me-2"></i>
                   <div class="item-title">Espaces (Locaux)</div>
                 </a>
 
-                <a class="dropdown-menu-item" routerLink="demandes-location">
+                <a class="dropdown-menu-item" [routerLink]="['/admin/demandes-location']">
                   <i class="bi bi-hourglass-split me-2"></i>
                   <div class="item-title">Demandes de location</div>
                 </a>
 
-                <a class="dropdown-menu-item" routerLink="boutiques-admin">
+                <a class="dropdown-menu-item" [routerLink]="['/admin/boutiques-admin']">
                   <i class="bi bi-shop me-2"></i>
                   <div class="item-title">Boutiques</div>
                 </a>
@@ -72,7 +72,7 @@
             </li>
 
             <li class="nav-item">
-              <a class="nav-link position-relative notification-link" routerLink="notifications">
+              <a class="nav-link position-relative notification-link" [routerLink]="['/admin/notifications']">
                 <i class="bi bi-bell bi-bolder notification-icon"></i>
                 <!-- <span class="notification-dot"></span> -->
               </a>
@@ -84,7 +84,7 @@
                   class="nav-link dropdown-toggle d-flex align-items-center"
                   href="#"
                   id="userDropdown"
-                  role="button"
+                  type="button"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
@@ -101,7 +101,7 @@
                   aria-labelledby="userDropdown" 
                   style="width: fit-content; min-width: 200px;"
                 >
-                  <li class="px-2 py-1" style="cursor: pointer;" routerLink="user-profil">
+                  <li class="px-2 py-1" style="cursor: pointer;" [routerLink]="['/admin/user-profil']">
                     <strong>{{ user.prenoms }} {{ user.nom }}</strong>
                   </li>
                   <li class="px-2 py-1 text-black-50">{{ user.email }}</li>

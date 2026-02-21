@@ -20,6 +20,7 @@ import { PorteFeuille } from './pages/shared/porte-feuille/porte-feuille';
 import { Espaces } from './pages/admin/espaces/espaces';
 import { DemandesLocation } from './pages/admin/demandes-location/demandes-location';
 import { BoutiquesAdmin } from './pages/admin/boutiques-admin/boutiques-admin';
+import { CreationBoutique } from './pages/commercant/creation-boutique/creation-boutique';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -58,7 +59,7 @@ export const routes: Routes = [
     data: { roles: [UserRole.Commercant] }, 
     children: [
       { path: 'mes-boutiques', component: MesBoutiques },
-
+      { path: 'creation-boutique', component: CreationBoutique },
 
       { path: 'user-profil', component: UserProfil },
       { path: 'notifications', component: Notifications },

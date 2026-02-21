@@ -1,0 +1,94 @@
+<section id="hero" class="hero section">
+  <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
+    <h2 class="mb-4">Gestion des étages</h2>
+
+    <div class="row liquid-glass mt-4">
+      <div class="col-lg-12">
+        <h4>Nouvel espace:</h4>
+        <hr>
+        
+        <form
+          class="php-email-form"
+          [formGroup]="boutiqueForm"
+          (ngSubmit)="creerBoutique()"
+          data-aos="fade-up"
+          data-aos-delay="200"
+        >      
+          <div class="row gy-3">
+            <div class="col-sm-6">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Code"
+                formControlName="codeEspace"
+              >
+            </div>
+
+            <div class="col-sm-6">
+              <select class="form-control" formControlName="etage">
+                <option value="" disabled selected>Etage</option>
+                @for (etage of etages(); track etage._id) {
+                  <option [value]="etage._id">{{ etage.nom }}</option>
+                } 
+              </select>
+            </div>
+
+            <div class="col-sm-6">
+              <input
+                type="number"
+                min="1"
+                step="0.1"
+                class="form-control"
+                placeholder="Surface (m²)"
+                formControlName="surface"
+              >
+            </div>
+
+            <div class="col-sm-6">
+              <input
+                type="number"
+                min="1"
+                step="0.01"
+                class="form-control"
+                placeholder="Loyer (Ar/mois)"
+                formControlName="loyer"
+              >
+            </div>
+
+            <div class="col-12 my-3 text-center">
+              @if (!spaceEditMode()) {
+                <button
+                  type="submit"
+                  class="btn-sm btn-primary"
+                  [disabled]="isLoading() || espaceForm.invalid"
+                >
+                  Ajouter
+                </button>
+              } @else {
+                <div class="w-100 d-flex flex-row flex-wrap justify-content-center align-items-center gap-2">
+                  <button
+                    type="submit"
+                    class="btn-sm btn-primary"
+                  >
+                    Valider
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary rounded-5"
+                    (click)="discardEditEspace()"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+@if (isLoading()) {
+  <app-loader />
+}

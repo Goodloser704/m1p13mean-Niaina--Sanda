@@ -36,6 +36,8 @@ export class PorteFeuille implements OnInit {
       this.porteFeuilleService.obtenirMonPorteFeuille(userId)
         .subscribe({
           next: (res) => {
+            console.log(`My wallet: ${JSON.stringify(res.wallet)}`);
+
             this.porteFeuille.set(res.wallet);
             this.transactions.set(res.transactions);
           },

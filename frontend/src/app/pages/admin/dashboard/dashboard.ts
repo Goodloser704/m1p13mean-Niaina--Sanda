@@ -197,20 +197,24 @@ export class Dashboard implements OnInit {
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: (res) => {
-          const espStats = res.espaceStats;
-          console.log(`Espace Stats: ${JSON.stringify(espStats)}`);
-          this.espaceStats.set(res.espaceStats);
+          try {
+            const espStats = res.espaceStats;
+            console.log(`Espace Stats: ${JSON.stringify(espStats)}`);
+            this.espaceStats.set(res.espaceStats);
 
-          const btqStats = res.boutiqueStats;
-          console.log(`Boutique Stats: ${JSON.stringify(btqStats)}`);
-          this.boutiqueStats.set(btqStats);
+            const btqStats = res.boutiqueStats;
+            console.log(`Boutique Stats: ${JSON.stringify(btqStats)}`);
+            this.boutiqueStats.set(btqStats);
 
-          this.statutPaiementMois.set(res.statutPaiementMois as PaiementsMoisCourantResponse);
-          this.historiqueLoyers.set(res.historiqueLoyers.loyers);
-          this.historiqueStats.set(res.historiqueLoyers.statistiques);
-          this.buildDashboardCharts();
-          this.buildLoyerPeriodeChart(res.historiqueLoyers.loyers, mois, annee);
-          this.periodeStats.set(res.historiqueLoyers.statistiques);
+            this.statutPaiementMois.set(res.statutPaiementMois as PaiementsMoisCourantResponse);
+            this.historiqueLoyers.set(res.historiqueLoyers.loyers);
+            this.historiqueStats.set(res.historiqueLoyers.statistiques);
+            this.buildDashboardCharts();
+            this.buildLoyerPeriodeChart(res.historiqueLoyers.loyers, mois, annee);
+            this.periodeStats.set(res.historiqueLoyers.statistiques);
+          } catch (err) {
+            console.error(err);
+          }
         },
         error: console.error
       });

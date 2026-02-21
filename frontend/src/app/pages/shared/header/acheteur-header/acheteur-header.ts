@@ -25,7 +25,7 @@ export class AcheteurHeader {
     private authService: AuthService,
     private centreCommercialService: CentreCommercialService
   ) {
-    this.currentUser.set(this.authService.getCurrentUser());
+    this.currentUser.set(this.authService.currentUser());
   }
 
   onClickLogout() {

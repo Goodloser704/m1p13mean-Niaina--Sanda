@@ -17,7 +17,7 @@ export class UserProfil {
     private authService: AuthService,
     private router: Router
   ) {
-    this.currentUser.set(authService.getCurrentUser());
+    this.currentUser.set(authService.currentUser());
   }
 
   goToPorteFeuille() {

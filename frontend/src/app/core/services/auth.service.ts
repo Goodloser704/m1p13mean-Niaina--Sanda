@@ -16,16 +16,25 @@ export class AuthService {
   private readonly USER_KEY = 'auth_user';
   private readonly TOKEN_KEY = 'auth_token';
 
-  // registrationRole = signal<UserRole | null>(null);
-  registrationRole = signal<UserRole | null>(UserRole.Commercant); // Juste pour les test Ctrl + S
+  private _currentUser = signal<User | null>(null);
+  readonly currentUser = this._currentUser.asReadonly();
 
-  constructor(private http: HttpClient, private router: Router) {}
+  registrationRole = signal<UserRole | null>(null);
+  // registrationRole = signal<UserRole | null>(UserRole.Commercant); // Juste pour les test Ctrl + S
+
+  constructor(private http: HttpClient, private router: Router) {
+    const user: string | null = localStorage.getItem(this.USER_KEY);
+    if (user) {
+      this._currentUser.set(JSON.parse(user));
+    }
+  }
 
   private setSession(res: AuthResponse) {
     console.log(`User ID: ${res.user.id}`);
     localStorage.setItem(this.TOKEN_KEY, res.token);
     localStorage.setItem(this.USER_ID_KEY, res.user.id);
     localStorage.setItem(this.USER_KEY, JSON.stringify(res.user));
+    this._currentUser.set(res.user);
   }
 
   // --- Fonctions appel api ---
@@ -45,6 +54,7 @@ export class AuthService {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_ID_KEY);
     localStorage.removeItem(this.USER_KEY);
+    this._currentUser.set(null);
     this.router.navigate(['/login']);
   }
 
@@ -67,17 +77,17 @@ export class AuthService {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  getCurrentUser(): User | null {
-    const user = localStorage.getItem(this.USER_KEY);
-    if (user) {
-      const userObject = JSON.parse(user);
-      console.log(`User not null: ${JSON.stringify(userObject)} \n UserRole: ${userObject.role}`);
-      return userObject;
-    } else {
-      console.warn("User is null in local storage");
-      return null;
-    }
-  }
+  // getCurrentUser(): User | null {
+  //   const user = localStorage.getItem(this.USER_KEY);
+  //   if (user) {
+  //     const userObject = JSON.parse(user);
+  //     console.log(`User not null: ${JSON.stringify(userObject)} \n UserRole: ${userObject.role}`);
+  //     return userObject;
+  //   } else {
+  //     console.warn("User is null in local storage");
+  //     return null;
+  //   }
+  // }
 
   getCurrentUserId(): string | null {
     const userId = localStorage.getItem(this.USER_ID_KEY);
@@ -134,7 +144,7 @@ export class AuthService {
   }
 
   getCurrentUserHomeByRole(): string {
-    const role = this.getCurrentUser()?.role;
+    const role = this.currentUser()?.role;
     if (role) {
       switch (role) {
         case UserRole.Admin:

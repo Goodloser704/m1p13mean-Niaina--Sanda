@@ -1,7 +1,7 @@
 <section id="hero" class="hero section">
   <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
     <h2 class="mb-4">Gestion des Categories de Boutiques</h2>
-    <div class="row liquid-glass">
+    <div class="row liquid-glass mb-4">
       <div class="col-md-6">
         <h4>Nouvelle categorie:</h4>
         <hr>
@@ -78,8 +78,8 @@
       </div>
     </div>
 
-    <h2 class="my-4">List des boutiques actives</h2>
-    <div class="row liquid-glass mt-4">
+    <h2 class="mb-4">List des boutiques actives</h2>
+    <div class="row liquid-glass mb-4">
       <div class="col-12">
         <h4>Boutiques actives:</h4>
         <hr>
@@ -176,7 +176,7 @@
               <ul class="pagination">
                 <li class="page-item">
                   <button
-                    role="button"
+                    type="button"
                     class="page-link"
                     aria-label="Previous"
                     (click)="activeBoutiquesPagination.previous()"
@@ -190,7 +190,7 @@
                     class="page-item"
                     [ngClass]="page == activeBoutiquesPagination.currentPage() ? 'active' : ''"
                   >
-                    <button role="button" class="page-link" (click)="activeBoutiquesPagination.goTo(page)">
+                    <button type="button" class="page-link" (click)="activeBoutiquesPagination.goTo(page)">
                       {{ page }}
                     </button>
                   </li>
@@ -198,7 +198,7 @@
 
                 <li class="page-item">
                   <button
-                    role="button"
+                    type="button"
                     class="page-link"
                     aria-label="Next"
                     (click)="activeBoutiquesPagination.next()"
@@ -213,7 +213,7 @@
       </div>
     </div>
 
-    <h2 class="my-4">List des boutiques inactives</h2>
+    <h2 class="mb-4">List des boutiques inactives</h2>
     <div class="row liquid-glass mt-4">
       <div class="col-12">
         <h4>Boutiques inactives:</h4>
@@ -275,7 +275,7 @@
               <ul class="pagination">
                 <li class="page-item">
                   <button
-                    role="button"
+                    type="button"
                     class="page-link"
                     aria-label="Previous"
                     (click)="inactiveBoutiquesPagination.previous()"
@@ -289,7 +289,7 @@
                     class="page-item"
                     [ngClass]="page == inactiveBoutiquesPagination.currentPage() ? 'active' : ''"
                   >
-                    <button role="button" class="page-link" (click)="inactiveBoutiquesPagination.goTo(page)">
+                    <button type="button" class="page-link" (click)="inactiveBoutiquesPagination.goTo(page)">
                       {{ page }}
                     </button>
                   </li>
@@ -297,7 +297,7 @@
 
                 <li class="page-item">
                   <button
-                    role="button"
+                    type="button"
                     class="page-link"
                     aria-label="Next"
                     (click)="inactiveBoutiquesPagination.next()"

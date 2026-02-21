@@ -7,7 +7,7 @@ export const noAuthGuard: CanActivateFn = (route, state) => {
   const auth = inject(AuthService);
   
   if (auth.isLoggedIn()) {
-    const user = auth.getCurrentUser();
+    const user = auth.currentUser();
     if (user) {
       auth.redirectByRole(user.role);
     }

@@ -11,40 +11,40 @@
             <small>Total boutiques</small>
             <i class="bi bi-shop text-primary fs-4"></i>
           </div>
-          <h3 class="mb-1">{{ boutiqueStats().total }}</h3>
+          <h3 class="mb-1 text-white">{{ boutiqueStats().total }}</h3>
           <small>Collection boutiques</small>
         </div>
       </div>
 
       <div class="col-12 col-md-6 col-xl-3">
-        <div class="glass p-3 h-100">
+        <div class="glass-green p-3 h-100">
           <div class="d-flex justify-content-between align-items-center">
             <small>Boutiques actives</small>
             <i class="bi bi-check-circle text-success fs-4"></i>
           </div>
-          <h3 class="mb-1">{{ getBoutiqueCountByStatut(StatutBoutique.Actif) }}</h3>
+          <h3 class="mb-1 text-white">{{ getBoutiqueCountByStatut(StatutBoutique.Actif) }}</h3>
           <small>Statut actif</small>
         </div>
       </div>
 
       <div class="col-12 col-md-6 col-xl-3">
-        <div class="glass p-3 h-100">
+        <div class="glass-red p-3 h-100">
           <div class="d-flex justify-content-between align-items-center">
             <small>Boutiques inactives</small>
             <i class="bi bi-x-circle text-danger fs-4"></i>
           </div>
-          <h3 class="mb-1">{{ getBoutiqueCountByStatut(StatutBoutique.Inactif) }}</h3>
+          <h3 class="mb-1 text-white">{{ getBoutiqueCountByStatut(StatutBoutique.Inactif) }}</h3>
           <small>Statut inactif</small>
         </div>
       </div>
 
       <div class="col-12 col-md-6 col-xl-3">
-        <div class="glass p-3 h-100">
+        <div class="glass-blue p-3 h-100">
           <div class="d-flex justify-content-between align-items-center">
-            <small>Occupation espaces</small>
+            <small>Occupation des espaces</small>
             <i class="bi bi-grid-1x2 text-info fs-4"></i>
           </div>
-          <h3 class="mb-1">{{ espaceStats().tauxOccupation | number:'1.0-1' }}%</h3>
+          <h3 class="mb-1 text-white">{{ espaceStats().tauxOccupation | number:'1.0-1' }}%</h3>
           <small>{{ espaceStats().espacesOccupes }} / {{ espaceStats().totalEspaces }} occupes</small>
         </div>
       </div>

@@ -38,13 +38,11 @@
 
           <ul class="navbar-nav ms-md-auto mb-2 mb-md-0 d-flex align-items-md-center gap-0 gap-md-2">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" routerLink="user-profil">Home</a>
+              <a class="nav-link" aria-current="page" [routerLink]="['/commercant/mes-boutiques']">Boutiques</a>
             </li>
+
             <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link position-relative notification-link" routerLink="notifications">
+              <a class="nav-link position-relative notification-link" [routerLink]="['/commercant/notifications']">
                 <i class="bi bi-bell bi-bolder notification-icon"></i>
                 <!-- <span class="notification-dot"></span> -->
               </a>
@@ -56,7 +54,7 @@
                   class="nav-link dropdown-toggle d-flex align-items-center"
                   href="#"
                   id="userDropdown"
-                  role="button"
+                  type="button"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
@@ -73,7 +71,7 @@
                   aria-labelledby="userDropdown" 
                   style="width: fit-content; min-width: 200px;"
                 >
-                  <li class="px-2 py-1" style="cursor: pointer;" routerLink="user-profil">
+                  <li class="px-2 py-1" style="cursor: pointer;" [routerLink]="['/commercant/user-profil']">
                     <strong>{{ user.prenoms }} {{ user.nom }}</strong>
                   </li>
                   <li class="px-2 py-1 text-black-50">{{ user.email }}</li>

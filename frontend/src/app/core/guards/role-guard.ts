@@ -8,7 +8,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   
   const expectedRoles: UserRole[] = route.data['roles'];
-  const user: User | null = auth.getCurrentUser();
+  const user: User | null = auth.currentUser();
 
   if (!user || !expectedRoles.includes(user.role)) {
     console.warn(`Expected Roles: ${expectedRoles}, User Role: ${user?.role}. Redirect to Login`);

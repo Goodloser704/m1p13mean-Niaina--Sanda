@@ -75,7 +75,7 @@
           <ul class="pagination">
             <li class="page-item">
               <button 
-                role="button" 
+                type="button" 
                 class="page-link"  
                 aria-label="Previous" 
                 (click)="demandePagination.previous()"
@@ -89,7 +89,7 @@
                 class="page-item" 
                 [ngClass]="page == demandePagination.currentPage() ? 'active' : ''"
               >
-                <button role="button" class="page-link" (click)="demandePagination.goTo(page)">
+                <button type="button" class="page-link" (click)="demandePagination.goTo(page)">
                   {{ page }}
                 </button>
               </li>
@@ -97,7 +97,7 @@
 
             <li class="page-item">
               <button
-                role="button"
+                type="button"
                 class="page-link"
                 aria-label="Next"
                 (click)="demandePagination.next()"
@@ -176,7 +176,7 @@
           <ul class="pagination">
             <li class="page-item">
               <button 
-                role="button" 
+                type="button" 
                 class="page-link"  
                 aria-label="Previous" 
                 (click)="demandePagination.previous()"
@@ -190,7 +190,7 @@
                 class="page-item" 
                 [ngClass]="page == demandePagination.currentPage() ? 'active' : ''"
               >
-                <button role="button" class="page-link" (click)="demandePagination.goTo(page)">
+                <button type="button" class="page-link" (click)="demandePagination.goTo(page)">
                   {{ page }}
                 </button>
               </li>
@@ -198,7 +198,7 @@
 
             <li class="page-item">
               <button
-                role="button"
+                type="button"
                 class="page-link"
                 aria-label="Next"
                 (click)="demandePagination.next()"
