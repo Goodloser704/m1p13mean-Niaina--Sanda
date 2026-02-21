@@ -37,12 +37,4 @@ router.get('/:id/me', auth, authController.getProfile);
  */
 router.get('/:userId/notifications', auth, notificationController.getUserNotifications);
 
-/**
- * @route   GET /api/users/:id/wallet
- * @desc    Obtenir le portefeuille d'un utilisateur (conforme aux spécifications)
- * @access  Private
- * @spec    Liste-des-fonctions.txt - getMyWallet
- */
-router.get('/:id/wallet', auth, portefeuilleController.obtenirMonPortefeuille);
-
 module.exports = router;
