@@ -1,12 +1,9 @@
 <section id="hero" class="hero section">
   <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
-    <h2 class="mb-4">Gestion des étages</h2>
+    <h2 class="mb-4">Création d'une boutique</h2>
 
     <div class="row liquid-glass mt-4">
       <div class="col-lg-12">
-        <h4>Nouvel espace:</h4>
-        <hr>
-        
         <form
           class="php-email-form"
           [formGroup]="boutiqueForm"
@@ -19,68 +16,74 @@
               <input
                 type="text"
                 class="form-control"
-                placeholder="Code"
-                formControlName="codeEspace"
+                placeholder="Nom"
+                formControlName="nom"
               >
             </div>
 
             <div class="col-sm-6">
-              <select class="form-control" formControlName="etage">
-                <option value="" disabled selected>Etage</option>
-                @for (etage of etages(); track etage._id) {
-                  <option [value]="etage._id">{{ etage.nom }}</option>
+              <select class="form-control" formControlName="categorie">
+                <option value="" disabled selected>Categorie</option>
+                @for (categorie of categories(); track categorie._id) {
+                  <option [value]="categorie._id">{{ categorie.nom }}</option>
                 } 
               </select>
             </div>
 
             <div class="col-sm-6">
-              <input
-                type="number"
-                min="1"
-                step="0.1"
-                class="form-control"
-                placeholder="Surface (m²)"
-                formControlName="surface"
+              <label 
+                for="formFile" 
+                class="form-label text-secondary"
               >
+                Photo (optionnel, max: 2mo)
+              </label>
+              <input
+                type="file" 
+                #photInput
+                id="formFile"
+                class="form-control"
+                (change)="onPhotoSelected($event)"
+                accept="image/*"
+              >
+              @if (photoSizeError()) {
+                <p class="text-danger mt-2">Taille du fichier maximum (2MB)</p>
+              }
             </div>
 
             <div class="col-sm-6">
-              <input
-                type="number"
-                min="1"
-                step="0.01"
-                class="form-control"
-                placeholder="Loyer (Ar/mois)"
-                formControlName="loyer"
-              >
+              <textarea
+                class="form-control h-100"
+                placeholder="Description"
+                formControlName="description"
+                rows="2"
+              ></textarea>
+            </div>
+
+            @if (photoPreview()) {
+              <div class="col-sm-6">
+                <div class="d-flex align-items-center">
+                  <img [src]="photoPreview()" class="photo-preview me-3">
+                  <button type="button" class="btn-sm btn-secondary" (click)="clearPhoto()">Effacer</button>
+                </div>
+              </div>
+            }
+
+            <div class="col-12">
+              <app-horaires-form
+                [title]="'Horaires d\'ouverture'"
+                [class]="'bg-white p-3 pb-2 rounded-2'"
+                (horairesChange)="onHorairesChange($event)">
+              </app-horaires-form>
             </div>
 
             <div class="col-12 my-3 text-center">
-              @if (!spaceEditMode()) {
-                <button
-                  type="submit"
-                  class="btn-sm btn-primary"
-                  [disabled]="isLoading() || espaceForm.invalid"
-                >
-                  Ajouter
-                </button>
-              } @else {
-                <div class="w-100 d-flex flex-row flex-wrap justify-content-center align-items-center gap-2">
-                  <button
-                    type="submit"
-                    class="btn-sm btn-primary"
-                  >
-                    Valider
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-outline-primary rounded-5"
-                    (click)="discardEditEspace()"
-                  >
-                    Annuler
-                  </button>
-                </div>
-              }
+              <button
+                type="submit"
+                class="btn-sm btn-primary"
+                [disabled]="isLoading() || boutiqueForm.invalid"
+              >
+                Créer
+              </button>
             </div>
           </div>
         </form>

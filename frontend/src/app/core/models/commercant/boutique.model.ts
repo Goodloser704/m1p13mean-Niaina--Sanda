@@ -12,6 +12,12 @@ export enum JourSemaine {
   Dimanche = "Dimanche"
 }
 
+export interface HoraireHebdo {
+  jour: JourSemaine,
+  debut: string,
+  fin: string
+}
+
 export enum StatutBoutique {
   Actif = "Actif",
   Inactif = "Inactif"
@@ -26,7 +32,7 @@ export interface Boutique {
   statutBoutique: StatutBoutique,
   photo: string | null,
   espace: Espace | string | null,
-  horairesHebdo: JourSemaine,
+  horairesHebdo: HoraireHebdo[],
   createdAt: string,
   updatedAt: string
 }

@@ -13,10 +13,3 @@
   overflow-y: auto;
   @include m.thin-scrollbar
 }
-
-.photo-preview {
-  border: 1px solid lightgray;
-  border-radius: 13px;
-  width: 120px;
-  aspect-ratio: 1;
-}

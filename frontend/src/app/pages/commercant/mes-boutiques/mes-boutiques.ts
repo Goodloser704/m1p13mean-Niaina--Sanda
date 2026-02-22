@@ -41,8 +41,12 @@ export class MesBoutiques implements OnInit {
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: (res) => {
-          console.log(`Nombre de boutique: ${res.count}`);
-          this.mesBoutiques.set(res.boutiques);
+          try {
+            console.log(`Nombre de boutique: ${res.count}`);
+            this.mesBoutiques.set(res.boutiques);
+          } catch (err) {
+            console.error(err);
+          }
         },
         error: console.error
       });

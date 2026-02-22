@@ -166,7 +166,15 @@ h1, h2 {
 
 // -- End Button --
 
-// --- Image avatar ---
+// --- Image section ---
+
+.photo-preview {
+  border: 1px solid lightgray;
+  border-radius: 13px;
+  width: 120px;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
 
 .navbar-nav .nav-item img {
   object-fit: cover;
@@ -187,7 +195,7 @@ h1, h2 {
   display: block; // supprime l'espace blanc sous l'image
 }
 
-// - End Image avatar -
+// - End Image section -
 
 // ---- Template ----
 

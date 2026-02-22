@@ -1,18 +1,36 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { Boutique, BoutiqueStatsResponse, StatutBoutique } from '../../models/commercant/boutique.model';
 import { Pagination } from '../../models/pagination.model';
 import { Produit } from '../../models/commercant/produit.model';
 import { map, Observable } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BoutiqueService {
   apiUrl = environment.apiUrl;
+
+  private _maBoutique = signal<Boutique | null>(null);
+  readonly maBoutique = this._maBoutique.asReadonly();
   
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {}
+
+  setMaBoutique(maBoutique: Boutique) {
+    this._maBoutique.set(maBoutique);
+  }
+
+  allerVersMaBoutique(maBoutique: Boutique) {
+    this.setMaBoutique(maBoutique);
+    this.router.navigate(['/commercant/ma-boutique']);
+  }
+
+  // ---- API ----
 
   searchBoutique(keyword: string, page = 1, limit = 10) {
     return this.http.get<{ boutiques: Boutique[], pagination: Pagination }>(
@@ -116,5 +134,7 @@ export class BoutiqueService {
   getBoutiqueStats() {
     return this.http.get<BoutiqueStatsResponse>(`${this.apiUrl}/api/boutique/admin/stats`);
   }
+
+  // -- End API --
 
 }
