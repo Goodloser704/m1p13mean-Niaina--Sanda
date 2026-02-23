@@ -119,8 +119,6 @@ export class CreationBoutique implements OnInit {
     const commercantId: string | null = this.authService.getCurrentUserId();
     if (!commercantId || this.boutiqueForm.invalid) return;
 
-    this.loaderService.show();
-
     const horairesBackend = this.horairesUI
       .filter(h => h.ouvert)
       .map(h => ({
@@ -132,6 +130,8 @@ export class CreationBoutique implements OnInit {
     if (horairesBackend.length === 0) {
       return;
     }
+
+    this.loaderService.show();
     
     const newBoutique: Partial<Boutique> = {
       ...this.boutiqueForm.getRawValue(),

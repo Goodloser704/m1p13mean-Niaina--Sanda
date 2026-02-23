@@ -10,6 +10,7 @@ export enum Genre {
 }
 
 export interface User {
+  _id: string,
   id: string,
   nom: string,
   prenoms: string,

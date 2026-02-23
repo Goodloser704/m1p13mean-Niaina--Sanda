@@ -112,7 +112,7 @@
             <select class="form-control" formControlName="categorie">
               <option value="" disabled selected>Categorie</option>
               @for (categorie of categories(); track categorie._id) {
-                <option [value]="categorie._id">{{ categorie.nom }}</option>
+                <option [value]="categorie._id" [selected]="categorie._id == getBoutiqueCategorieId(maBoutique())">{{ categorie.nom }}</option>
               } 
             </select>
           </div>

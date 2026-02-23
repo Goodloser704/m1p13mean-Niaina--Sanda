@@ -3,10 +3,12 @@ import { BoutiqueService } from '../../../../core/services/commercant/boutique.s
 import { TitleCasePipe, DatePipe } from "@angular/common";
 import {
   Boutique,
+  getBoutiqueCategorieId,
   getBoutiqueCategorieLabel,
   getBoutiqueCommercantLabel,
   getBoutiqueEspaceCode,
-  getBoutiqueEspaceEtageNiveau
+  getBoutiqueEspaceEtageNiveau,
+  JourSemaine
 } from "../../../../core/models/commercant/boutique.model";
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CategorieBoutique } from '../../../../core/models/admin/categorie-boutique.model';
@@ -15,6 +17,8 @@ import { CategorieBoutiqueService } from '../../../../core/services/admin/catego
 import { finalize } from 'rxjs';
 import { HorairesForm } from "../../../../components/shared/horaires-form/horaires-form";
 import { LoaderService } from '../../../../core/services/loader.service';
+import { User } from '../../../../core/models/user.model';
+import { Espace } from '../../../../core/models/admin/espaces.model';
 
 @Component({
   selector: 'app-infos',
@@ -73,6 +77,7 @@ export class Infos implements OnInit {
     });
   }
 
+  getBoutiqueCategorieId = getBoutiqueCategorieId;
   getBoutiqueCategorieLabel = getBoutiqueCategorieLabel;
   getBoutiqueCommercantLabel = getBoutiqueCommercantLabel;
   getBoutiqueEspaceCode = getBoutiqueEspaceCode;
@@ -129,6 +134,15 @@ export class Infos implements OnInit {
       photo: currentBoutique.photo,
       description: currentBoutique.description 
     });
+    
+    currentBoutique.horairesHebdo.forEach((j) => {
+      this.horairesUI.push({
+        jour: j.jour,
+        debut: j.debut,
+        fin: j.fin,
+        ouvert: true
+      });
+    });
 
     this.edtiInfoSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -140,8 +154,6 @@ export class Infos implements OnInit {
 
   saveEditedBoutique() {
     if (this.boutiqueForm.invalid) return;
-    
-    // this.loaderService.isLoading.set(true);
 
     const horairesBackend = this.horairesUI
       .filter(h => h.ouvert)
@@ -154,16 +166,44 @@ export class Infos implements OnInit {
     if (horairesBackend.length === 0) {
       return;
     }
+
+    this.loaderService.show();
     
     const currentBoutique = this.maBoutique();
-    const updatedBoutique: Partial<Boutique> = {
+    const updatedBoutique: Boutique = {
       ...this.boutiqueForm.getRawValue(),
-      commercant: currentBoutique.commercant,
-      espace: currentBoutique.espace,
-      statutBoutique: currentBoutique, // pas encore d'espace alloué
+      _id: currentBoutique._id,
+      commercant: (currentBoutique.commercant as User)._id,
+      espace: currentBoutique.espace ? (currentBoutique.espace as Espace)._id : null,
+      statutBoutique: currentBoutique.statutBoutique,
       horairesHebdo: horairesBackend
-    };
+    } as Boutique;
 
     console.log(`Updated boutique: ${JSON.stringify(updatedBoutique)}`);
+
+    this.boutiqueService.updateMyBoutique(updatedBoutique)
+      .pipe(finalize(() => this.loaderService.hide()))
+      .subscribe({
+        next: (res) => {
+          try {
+            console.log(`Updated res: ${JSON.stringify(res.boutique)}`);
+            
+            const newBoutique: Boutique = {
+              ...updatedBoutique,
+              categorie: this.categories().find(c => c._id == updatedBoutique.categorie)!,
+              commercant: currentBoutique.commercant,
+              espace: currentBoutique.espace,
+              createdAt: res.boutique.createdAt,
+              updatedAt: res.boutique.updatedAt
+            }
+            this.boutiqueService.setMaBoutique(newBoutique);
+            this.discardEditBoutique();
+          } catch (err) {
+            console.error(err);
+          }
+        },
+        error: console.error
+      });
+
   }
 }

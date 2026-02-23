@@ -49,6 +49,16 @@ export interface BoutiqueStatsResponse {
   }[]
 }
 
+export function getBoutiqueCategorieId(boutique: Boutique): string | null {
+  const categorie = boutique.categorie;
+  if (typeof categorie === 'string') {
+    return categorie;
+  } else if (typeof categorie === 'object' && categorie !== null) {
+    return categorie._id;
+  }
+  return null;
+}
+
 export function getBoutiqueCategorieLabel(boutique: Boutique): string {
   const categorie = boutique.categorie;
   return typeof categorie === 'object' && categorie !== null ? categorie.nom : '';
