@@ -50,7 +50,7 @@ class BoutiqueService {
 
       // Créer la boutique avec le statut Inactif (devient Actif après approbation demande location)
       const boutique = new Boutique({
-        commercant: userId,
+        commercant: user,
         ...boutiqueData,
         statutBoutique: 'Inactif' // Boutique inactive par défaut
       });
@@ -263,7 +263,7 @@ class BoutiqueService {
   async getBoutiqueById(boutiqueId) {
     try {
       const boutique = await Boutique.findById(boutiqueId)
-        .populate('proprietaire', 'nom prenom email telephone');
+        .populate('commercant', 'nom prenom email telephone');
 
       if (!boutique) {
         throw new Error('Boutique non trouvée');
@@ -282,6 +282,7 @@ class BoutiqueService {
   async getUserBoutiques(userId) {
     try {
       const boutiques = await Boutique.find({ commercant: userId })
+        .populate('commercant', 'nom prenoms')
         .populate('categorie', 'nom description')
         .populate('espace', 'code surface')
         .sort({ createdAt: -1 });
@@ -319,7 +320,7 @@ class BoutiqueService {
     try {
       const boutique = await Boutique.findOne({
         _id: boutiqueId,
-        proprietaire: userId
+        commercant: userId
       });
 
       if (!boutique) {
@@ -328,7 +329,9 @@ class BoutiqueService {
 
       // Ne pas permettre de changer le statut via cette méthode
       delete updateData.statut;
-      delete updateData.proprietaire;
+      delete updateData.commercant;
+
+      console.log(`Boutique updatedData: ${JSON.stringify(updateData)}`);
 
       Object.assign(boutique, updateData);
       await boutique.save();
