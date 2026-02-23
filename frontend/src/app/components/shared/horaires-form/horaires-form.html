@@ -35,8 +35,10 @@
       </div>
 
       @if (horaire.errors?.['horaireInvalide']) {
-        <div class="col-12 text-danger small">
-          L'heure de fin doit être après l'heure de début
+        <div class="col-12 text-danger small pt-2">
+          <div class="d-flex justify-content-center align-content-center">
+            L'heure de fin doit être après l'heure de début
+          </div>
         </div>
       }
     </div>

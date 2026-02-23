@@ -1,0 +1,18 @@
+<div class="row liquid-glass">
+  <div class="col-12 border-blue">
+  <div class="boutique-info">
+    <img 
+      [src]="maBoutique().photo ? maBoutique().photo : 'assets/img/story-set/boutique-default.png'" 
+      class="boutique-cover" 
+    />
+
+    <div>
+      <p class="boutique-name">{{ maBoutique().nom | titlecase }}</p>
+      <p class="boutique-description">{{ maBoutique().description }}</p>
+    </div>
+
+    <div>
+      <p class=""></p>
+    </div>
+  </div>
+</div>

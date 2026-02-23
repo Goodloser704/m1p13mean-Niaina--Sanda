@@ -21,6 +21,14 @@ import { Espaces } from './pages/admin/espaces/espaces';
 import { DemandesLocation } from './pages/admin/demandes-location/demandes-location';
 import { BoutiquesAdmin } from './pages/admin/boutiques-admin/boutiques-admin';
 import { CreationBoutique } from './pages/commercant/creation-boutique/creation-boutique';
+import { MaBoutique } from './pages/commercant/ma-boutique/ma-boutique';
+import { Produits } from './pages/commercant/ma-boutique/produits/produits';
+import { TypeProduits } from './pages/commercant/ma-boutique/type-produits/type-produits';
+import { GestionProduit } from './pages/commercant/ma-boutique/gestion-produit/gestion-produit';
+import { GestionAchats } from './pages/commercant/ma-boutique/gestion-achats/gestion-achats';
+import { LocationEspace } from './pages/commercant/ma-boutique/location-espace/location-espace';
+import { Loyers } from './pages/commercant/ma-boutique/loyers/loyers';
+import { Infos } from './pages/commercant/ma-boutique/infos/infos';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -60,6 +68,20 @@ export const routes: Routes = [
     children: [
       { path: 'mes-boutiques', component: MesBoutiques },
       { path: 'creation-boutique', component: CreationBoutique },
+      { 
+        path: 'ma-boutique', 
+        component: MaBoutique,
+        children: [
+          { path: 'produits', component: Produits },
+          { path: 'type-produits', component: TypeProduits },
+          { path: 'gestion-produit', component: GestionProduit },
+          { path: 'gestion-achats', component: GestionAchats },
+          { path: 'location-espace', component: LocationEspace },
+          { path: 'loyers', component: Loyers },
+          { path: 'infos', component: Infos },
+          { path: '', redirectTo: 'produits', pathMatch: 'full' }
+        ]
+      },
 
       { path: 'user-profil', component: UserProfil },
       { path: 'notifications', component: Notifications },

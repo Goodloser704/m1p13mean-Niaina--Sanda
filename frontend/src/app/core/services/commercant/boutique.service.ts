@@ -13,21 +13,38 @@ import { Router } from '@angular/router';
 export class BoutiqueService {
   apiUrl = environment.apiUrl;
 
+  readonly BOUTIQUE_KEY = "ma_boutique";
   private _maBoutique = signal<Boutique | null>(null);
   readonly maBoutique = this._maBoutique.asReadonly();
   
   constructor(
     private http: HttpClient,
     private router: Router
-  ) {}
+  ) {
+    const stored = localStorage.getItem(this.BOUTIQUE_KEY);
+    if (stored) {
+      this._maBoutique.set(JSON.parse(stored));
+    }
+  }
 
   setMaBoutique(maBoutique: Boutique) {
     this._maBoutique.set(maBoutique);
+    localStorage.setItem(this.BOUTIQUE_KEY, JSON.stringify(maBoutique));
+  }
+
+  freeMaBoutique() {
+    this._maBoutique.set(null);
+    localStorage.removeItem(this.BOUTIQUE_KEY);
   }
 
   allerVersMaBoutique(maBoutique: Boutique) {
     this.setMaBoutique(maBoutique);
     this.router.navigate(['/commercant/ma-boutique']);
+  }
+
+  quitterMaBoutique(route: string) {
+    this.freeMaBoutique();
+    this.router.navigate([route]);
   }
 
   // ---- API ----

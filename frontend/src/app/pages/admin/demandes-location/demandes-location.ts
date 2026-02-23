@@ -3,11 +3,12 @@ import { createPagination } from '../../../core/functions/pagination-function';
 import { DemandeLocation, EtatDemandeLocation } from '../../../core/models/admin/demande-location.model';
 import { DemandesLocationService } from './../../../core/services/admin/demandes-location.service';
 import { Component, effect, signal } from '@angular/core';
-import { NgClass } from "@angular/common";
+import { Location, NgClass } from "@angular/common";
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-demandes-location',
-  imports: [NgClass],
+  imports: [NgClass, RouterLink],
   templateUrl: './demandes-location.html',
   styleUrl: './demandes-location.scss',
 })
@@ -25,6 +26,8 @@ export class DemandesLocation {
 
   refuserDemande = signal<DemandeLocation | null>(null);
   showRefuserDialog = signal(false);
+
+  Location = Location;
 
   constructor(private demandesLocationService: DemandesLocationService) {
     effect(() => {

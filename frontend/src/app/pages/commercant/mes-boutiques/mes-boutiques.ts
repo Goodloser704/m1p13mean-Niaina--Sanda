@@ -52,6 +52,10 @@ export class MesBoutiques implements OnInit {
       });
   }
 
+  allerVersMaBoutique(maBoutique: Boutique) {
+    this.boutiqueService.allerVersMaBoutique(maBoutique);
+  }
+
   getBoutiqueCategorieLabel = getBoutiqueCategorieLabel;
   getBoutiqueCommercantLabel = getBoutiqueCommercantLabel;
   getBoutiqueEspaceCode = getBoutiqueEspaceCode;

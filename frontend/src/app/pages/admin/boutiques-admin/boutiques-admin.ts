@@ -3,25 +3,35 @@ import { CategorieBoutique } from '../../../core/models/admin/categorie-boutique
 import { CategorieBoutiqueService } from '../../../core/services/admin/categorie-boutique.service';
 import { finalize } from 'rxjs';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { NgClass, TitleCasePipe } from "@angular/common";
+import { Location, NgClass, TitleCasePipe } from "@angular/common";
 import { Dialog } from "../../../components/shared/dialog/dialog";
 import { Loader } from "../../../components/shared/loader/loader";
 import { EmptyRowList } from "../../../components/shared/empty-row-list/empty-row-list";
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
-import { Boutique, getBoutiqueCategorieLabel, getBoutiqueCommercantLabel, getBoutiqueEspaceCode, getBoutiqueEspaceEtageNiveau, StatutBoutique } from '../../../core/models/commercant/boutique.model';
+import {
+  Boutique,
+  getBoutiqueCategorieLabel,
+  getBoutiqueCommercantLabel,
+  getBoutiqueEspaceCode,
+  getBoutiqueEspaceEtageNiveau,
+  StatutBoutique
+} from "../../../core/models/commercant/boutique.model";
 import { BoutiqueService } from '../../../core/services/commercant/boutique.service';
 import { createPagination } from '../../../core/functions/pagination-function';
 import Aos from 'aos';
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-boutiques-admin',
-  imports: [ReactiveFormsModule, TitleCasePipe, Dialog, Loader, EmptyRowList, EmptyGridList, NgClass],
+  imports: [ReactiveFormsModule, TitleCasePipe, Dialog, Loader, EmptyRowList, EmptyGridList, NgClass, RouterLink],
   templateUrl: './boutiques-admin.html',
   styleUrl: './boutiques-admin.scss',
 })
 export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
   isLoading = signal(false);
   private pendingRequests = 0;
+
+  Location = Location;
 
   constructor(
     private fb: FormBuilder,

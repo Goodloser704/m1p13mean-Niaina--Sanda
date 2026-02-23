@@ -11,21 +11,24 @@ import { Loader } from "../../../components/shared/loader/loader";
 import { Espace, Etage } from '../../../core/models/admin/espaces.model';
 import { finalize, forkJoin } from 'rxjs';
 import { EspacesService } from '../../../core/services/admin/espaces.service';
-import { TitleCasePipe, UpperCasePipe, CurrencyPipe, NgClass } from "@angular/common";
+import { TitleCasePipe, UpperCasePipe, CurrencyPipe, NgClass, Location } from "@angular/common";
 import { Dialog } from "../../../components/shared/dialog/dialog";
 import { createPagination } from '../../../core/functions/pagination-function';
 import { EmptyRowList } from "../../../components/shared/empty-row-list/empty-row-list";
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
 import Aos from "aos";
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-espaces',
-  imports: [ReactiveFormsModule, Loader, TitleCasePipe, Dialog, UpperCasePipe, CurrencyPipe, NgClass, EmptyRowList, EmptyGridList],
+  imports: [ReactiveFormsModule, Loader, TitleCasePipe, Dialog, UpperCasePipe, CurrencyPipe, NgClass, EmptyRowList, EmptyGridList, RouterLink],
   templateUrl: './espaces.html',
   styleUrl: './espaces.scss',
 })
 export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
   isLoading = signal(false);
+
+  Location = Location;
 
   constructor(
     private fb: FormBuilder,

@@ -8,12 +8,13 @@ import { CategorieBoutiqueService } from '../../../core/services/admin/categorie
 import { finalize } from 'rxjs';
 import { compressImage } from '../../../core/functions/images-function';
 import { AuthService } from '../../../core/services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HoraireFormModel, HorairesForm } from '../../../components/shared/horaires-form/horaires-form';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-creation-boutique',
-  imports: [ReactiveFormsModule, Loader, HorairesForm],
+  imports: [ReactiveFormsModule, Loader, HorairesForm, RouterLink],
   templateUrl: './creation-boutique.html',
   styleUrl: './creation-boutique.scss',
 })
@@ -28,6 +29,8 @@ export class CreationBoutique implements OnInit {
   photoPreview = signal<string | null>(null);
   photoSizeError = signal(false);
   @ViewChild('photoInput') photoInput!: ElementRef<HTMLInputElement>;
+
+  Location = Location;
 
   constructor(
     private router: Router,
@@ -137,6 +140,8 @@ export class CreationBoutique implements OnInit {
       statutBoutique: StatutBoutique.Inactif, // pas encore d'espace alloué
       horairesHebdo: horairesBackend
     };
+
+    console.log(`New boutique: ${JSON.stringify(newBoutique)}`);
 
     this.boutiqueService.creerBoutique(newBoutique as Boutique)
       .pipe(finalize(() => this.isLoading.set(false)))

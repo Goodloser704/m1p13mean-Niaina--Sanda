@@ -193,6 +193,8 @@ h1, h2 {
   aspect-ratio: 1.5;
   object-fit: cover;
   display: block; // supprime l'espace blanc sous l'image
+  padding: 0.2rem;
+  border-radius: 13px 13px 0 0;
 }
 
 // - End Image section -
