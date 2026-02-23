@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { BoutiqueService } from '../../../core/services/commercant/boutique.service';
 import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Boutique, HoraireHebdo, JourSemaine, StatutBoutique } from '../../../core/models/commercant/boutique.model';
@@ -11,6 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { HoraireFormModel, HorairesForm } from '../../../components/shared/horaires-form/horaires-form';
 import { Location } from '@angular/common';
+import { LoaderService } from '../../../core/services/loader.service';
 
 @Component({
   selector: 'app-creation-boutique',
@@ -19,7 +20,7 @@ import { Location } from '@angular/common';
   styleUrl: './creation-boutique.scss',
 })
 export class CreationBoutique implements OnInit {
-  isLoading = signal(false);
+  loaderService = inject(LoaderService);
 
   categories = signal<CategorieBoutique[]>([]);
 
@@ -47,10 +48,10 @@ export class CreationBoutique implements OnInit {
   }
 
   load() {
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     this.cbService.obtenirCategories()
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           try {
@@ -74,11 +75,10 @@ export class CreationBoutique implements OnInit {
   }
 
   horairesUI: any[] = [];
-
   onHorairesChange(value: any[]) {
     this.horairesUI = value;
   }
-
+  
   get auMoinsUnJourOuvert(): boolean {
     return this.horairesUI.some(h => h.ouvert);
   }
@@ -119,7 +119,7 @@ export class CreationBoutique implements OnInit {
     const commercantId: string | null = this.authService.getCurrentUserId();
     if (!commercantId || this.boutiqueForm.invalid) return;
 
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     const horairesBackend = this.horairesUI
       .filter(h => h.ouvert)
@@ -144,7 +144,7 @@ export class CreationBoutique implements OnInit {
     console.log(`New boutique: ${JSON.stringify(newBoutique)}`);
 
     this.boutiqueService.creerBoutique(newBoutique as Boutique)
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           try {

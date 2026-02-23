@@ -2,9 +2,10 @@ import { finalize } from 'rxjs';
 import { createPagination } from '../../../core/functions/pagination-function';
 import { DemandeLocation, EtatDemandeLocation } from '../../../core/models/admin/demande-location.model';
 import { DemandesLocationService } from './../../../core/services/admin/demandes-location.service';
-import { Component, effect, signal } from '@angular/core';
+import { AfterViewInit, Component, effect, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { Location, NgClass } from "@angular/common";
 import { RouterLink } from "@angular/router";
+import { LoaderService } from '../../../core/services/loader.service';
 
 @Component({
   selector: 'app-demandes-location',
@@ -12,8 +13,10 @@ import { RouterLink } from "@angular/router";
   templateUrl: './demandes-location.html',
   styleUrl: './demandes-location.scss',
 })
-export class DemandesLocation {
-  isLoading = signal(false);
+export class DemandesLocation implements AfterViewInit {
+  @ViewChild('childSection') childSection!: ElementRef;
+  
+  loaderService = inject(LoaderService);
 
   demandePagination = createPagination(10);
   ancienDemandePagination = createPagination(10);
@@ -41,15 +44,19 @@ export class DemandesLocation {
     })
   }
 
+  ngAfterViewInit() {
+    this.childSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   getDemandesEnCours(page: number) {
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     this.demandesLocationService.obtenirDemandesParEtat(
       EtatDemandeLocation.EnAttente,
       page,
       this.demandePagination.limit
     )
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           this.demandesEnCours.set(res.demandes);
@@ -60,14 +67,14 @@ export class DemandesLocation {
   }
 
   getAncienDemandes(page: number) {
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     this.demandesLocationService.obtenirDemandesParEtat(
       EtatDemandeLocation.Acceptee,
       page,
       this.ancienDemandePagination.limit
     )
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           this.demandesEnCours.set(res.demandes);
@@ -90,11 +97,11 @@ export class DemandesLocation {
   accepter(answer: boolean) {
     if (!this.accepterDemande || !answer) return;
 
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     const demande = this.accepterDemande()!;
     this.demandesLocationService.accepterDemande(demande._id)
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           this.demandesEnCours.update(c => c.filter(d => d._id != demande._id));
@@ -117,11 +124,11 @@ export class DemandesLocation {
   refuser(answer: boolean) {
     if (!this.refuserDemande || !answer) return;
 
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     const demande = this.refuserDemande()!;
     this.demandesLocationService.refuserDemande(demande._id)
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           this.demandesEnCours.update(c => c.filter(d => d._id != demande._id));

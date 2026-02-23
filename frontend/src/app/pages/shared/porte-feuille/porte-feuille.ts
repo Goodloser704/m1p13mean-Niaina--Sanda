@@ -1,10 +1,12 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from "@angular/router";
 import { AuthService } from '../../../core/services/auth.service';
 import { PorteFeuille as PF, PFTransaction } from '../../../core/models/porte-feuille.model';
 import { Loader } from "../../../components/shared/loader/loader";
 import { PorteFeuilleService } from '../../../core/services/porte-feuille.service';
 import { CurrencyPipe, DatePipe } from "@angular/common";
+import { LoaderService } from '../../../core/services/loader.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-porte-feuille',
@@ -17,7 +19,7 @@ export class PorteFeuille implements OnInit {
   transactions = signal<PFTransaction[]>([]);
 
   today: string = new Date().toISOString();
-  isLoading = signal(false);
+  loaderService = inject(LoaderService);
 
   constructor(
     private authService: AuthService, 
@@ -29,11 +31,12 @@ export class PorteFeuille implements OnInit {
   }
 
   loadPorteFeuille() {
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     const userId = this.authService.getCurrentUserId();
     if (userId) {
       this.porteFeuilleService.obtenirMonPorteFeuille(userId)
+        .pipe(finalize(() => this.loaderService.hide()))
         .subscribe({
           next: (res) => {
             console.log(`My wallet: ${JSON.stringify(res.wallet)}`);
@@ -41,14 +44,10 @@ export class PorteFeuille implements OnInit {
             this.porteFeuille.set(res.wallet);
             this.transactions.set(res.transactions);
           },
-          error: (err) => {
-            console.error(err);
-            this.isLoading.set(false);
-          },
-          complete: () => this.isLoading.set(false)
+          error: console.error
         })
     } else {
-      this.isLoading.set(false);
+      this.loaderService.hide();
     }
   }
 

@@ -44,7 +44,7 @@
               </label>
               <input
                 type="file" 
-                #photInput
+                #photoInput
                 id="formFile"
                 class="form-control"
                 (change)="onPhotoSelected($event)"
@@ -77,7 +77,8 @@
               <app-horaires-form
                 [title]="'Horaires d\'ouverture'"
                 [class]="'bg-white p-3 pb-2 rounded-2'"
-                (horairesChange)="onHorairesChange($event)">
+                (horairesChange)="onHorairesChange($event)"
+              >
               </app-horaires-form>
             </div>
 
@@ -85,7 +86,7 @@
               <button
                 type="submit"
                 class="btn-sm btn-primary"
-                [disabled]="isLoading() || boutiqueForm.invalid"
+                [disabled]="loaderService.isLoading() || boutiqueForm.invalid"
               >
                 Créer
               </button>
@@ -97,6 +98,6 @@
   </div>
 </section>
 
-@if (isLoading()) {
+@if (loaderService.isLoading()) {
   <app-loader />
 }

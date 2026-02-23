@@ -1,4 +1,4 @@
-<section id="hero" class="hero section">
+<section #childSection id="hero" class="hero section">
   <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2>Gestion des étages</h2>
@@ -36,7 +36,7 @@
                 <button
                   type="submit"
                   class="btn-sm btn-primary"
-                  [disabled]="isLoading() || etageForm.invalid"
+                  [disabled]="loaderService.isLoading() || etageForm.invalid"
                 >
                   Ajouter
                 </button>
@@ -145,7 +145,7 @@
                 <button
                   type="submit"
                   class="btn-sm btn-primary"
-                  [disabled]="isLoading() || espaceForm.invalid"
+                  [disabled]="loaderService.isLoading() || espaceForm.invalid"
                 >
                   Ajouter
                 </button>
@@ -339,6 +339,6 @@
 
 <!--- End Espace --->
 
-@if (isLoading()) {
+@if (loaderService.isLoading()) {
   <app-loader />
 }

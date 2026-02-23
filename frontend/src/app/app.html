@@ -1,1 +1,5 @@
 <router-outlet />
+
+@if (loaderService.isLoading()) {
+  <app-loader />
+}

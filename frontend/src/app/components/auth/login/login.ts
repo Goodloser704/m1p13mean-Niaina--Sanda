@@ -1,9 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { UserRole } from '../../../core/models/user.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from "@angular/router";
 import { Loader } from "../../shared/loader/loader";
+import { LoaderService } from '../../../core/services/loader.service';
+import { finalize } from 'rxjs';
 
 interface DefaultUser {
   role: UserRole,
@@ -26,7 +28,7 @@ export class Login {
     { role: UserRole.Acheteur, email: 'client@test.com', mdp: 'Client123456!' }
   ]
 
-  isLoading = signal(false);
+  loaderService = inject(LoaderService);
   error = signal<String | null>(null);
 
   form: any;
@@ -56,17 +58,16 @@ export class Login {
   login() {
     if (this.form.invalid) return;
 
-    this.isLoading.set(true);
+    this.loaderService.show();
     this.error.set(null);
 
     this.authService.login(this.form.value)
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         error: (err) => {
           this.error.set('Identifiants invalides');
           console.error(err);
-          this.isLoading.set(false);
-        },
-        complete: () => this.isLoading.set(false)
+        }
       })
   }
 }

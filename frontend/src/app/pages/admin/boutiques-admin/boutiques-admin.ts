@@ -1,4 +1,4 @@
-import { AfterViewChecked, AfterViewInit, Component, effect, OnInit, signal } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, effect, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CategorieBoutique } from '../../../core/models/admin/categorie-boutique.model';
 import { CategorieBoutiqueService } from '../../../core/services/admin/categorie-boutique.service';
 import { finalize } from 'rxjs';
@@ -20,6 +20,7 @@ import { BoutiqueService } from '../../../core/services/commercant/boutique.serv
 import { createPagination } from '../../../core/functions/pagination-function';
 import Aos from 'aos';
 import { RouterLink } from "@angular/router";
+import { LoaderService } from '../../../core/services/loader.service';
 
 @Component({
   selector: 'app-boutiques-admin',
@@ -28,7 +29,9 @@ import { RouterLink } from "@angular/router";
   styleUrl: './boutiques-admin.scss',
 })
 export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
-  isLoading = signal(false);
+  @ViewChild('childSection') childSection!: ElementRef;
+  
+  loaderService = inject(LoaderService);
   private pendingRequests = 0;
 
   Location = Location;
@@ -57,6 +60,7 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
 
   ngAfterViewInit() {
     Aos.init();
+    this.childSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   ngAfterViewChecked() {
@@ -258,14 +262,14 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
 
   private startLoading() {
     this.pendingRequests += 1;
-    this.isLoading.set(true);
+    this.loaderService.show();
   }
 
   private stopLoading() {
     this.pendingRequests = Math.max(0, this.pendingRequests - 1);
 
     if (this.pendingRequests === 0) {
-      this.isLoading.set(false);
+      this.loaderService.hide();
     }
   }
 

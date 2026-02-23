@@ -1,8 +1,10 @@
+import { finalize } from 'rxjs';
 import { timeAgo } from '../../../core/functions/date-function';
 import { Notification } from '../../../core/models/notification.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { LoaderService } from '../../../core/services/loader.service';
 import { NotificationsService } from './../../../core/services/notifications.service';
-import { Component, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-notifications',
@@ -10,13 +12,15 @@ import { Component, OnInit, signal } from '@angular/core';
   templateUrl: './notifications.html',
   styleUrl: './notifications.scss',
 })
-export class Notifications implements OnInit {
+export class Notifications implements OnInit, AfterViewInit {
+  @ViewChild('childSection') childSection!: ElementRef;
+  
   notifications = signal<Notification[]>([]);
   total = signal(0);
   unreadCount = signal(0);
   page = signal(1);
   limit = 10;
-  isLoading = signal(false);
+  loaderService = inject(LoaderService);
 
   constructor(
     private notificationsService: NotificationsService,
@@ -29,14 +33,19 @@ export class Notifications implements OnInit {
     this.loadNotifications();
   }
 
+  ngAfterViewInit() {
+    this.childSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   loadNotifications() {
     const userId = this.authService.getCurrentUserId();
     if (!userId) return;
 
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     this.notificationsService
       .getNotifications(userId, this.page(), this.limit)
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           // tri récent en haut
@@ -49,12 +58,8 @@ export class Notifications implements OnInit {
           this.notifications.set(sorted);
           this.total.set(res.total);
           this.unreadCount.set(res.unreadCount);
-          this.isLoading.set(false);
         },
-        error: (err) => {
-          this.isLoading.set(false);
-          console.error(err);
-        }
+        error: console.error
       });
   }
 

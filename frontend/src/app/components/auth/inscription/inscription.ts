@@ -6,6 +6,8 @@ import { Router, RouterLink } from '@angular/router';
 import { Loader } from "../../shared/loader/loader";
 import { compressImage } from '../../../core/functions/images-function';
 import { Location } from '@angular/common';
+import { LoaderService } from '../../../core/services/loader.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-inscription',
@@ -14,7 +16,7 @@ import { Location } from '@angular/common';
   styleUrl: './inscription.scss',
 })
 export class Inscription implements OnInit {
-  isLoading = signal(false);
+  loaderService = inject(LoaderService);
   error = signal<string | null>(null);
 
   genres = Object.values(Genre);
@@ -104,7 +106,7 @@ export class Inscription implements OnInit {
   }
 
   register() {
-    this.isLoading.set(true);
+    this.loaderService.show();
     this.error.set(null);
 
     const newUser: Partial<User> = {
@@ -115,13 +117,12 @@ export class Inscription implements OnInit {
     console.log(`New User: ${JSON.stringify(newUser)}`);
 
     this.authService.inscription(newUser as User)
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         error: (err) => {
-          this.isLoading.set(false);
           console.error(err);
           this.error.set(`${err.error.message}`);
-        },
-        complete: () => this.isLoading.set(false)
+        }
       })
   }
 }

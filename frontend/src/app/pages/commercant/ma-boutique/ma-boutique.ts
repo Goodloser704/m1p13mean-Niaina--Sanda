@@ -1,18 +1,19 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, computed, ElementRef, inject, ViewChild } from '@angular/core';
 import { Loader } from "../../../components/shared/loader/loader";
 import { BoutiqueService } from '../../../core/services/commercant/boutique.service';
-import { Boutique } from '../../../core/models/commercant/boutique.model';
 import { RouterOutlet, RouterLink, RouterLinkActive } from "@angular/router";
-import { TitleCasePipe } from "@angular/common";
+import { LoaderService } from '../../../core/services/loader.service';
 
 @Component({
   selector: 'app-ma-boutique',
-  imports: [Loader, RouterOutlet, TitleCasePipe, RouterLink, RouterLinkActive],
+  imports: [Loader, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './ma-boutique.html',
   styleUrl: './ma-boutique.scss',
 })
-export class MaBoutique {
-  isLoading = signal(false);
+export class MaBoutique implements AfterViewInit {
+  @ViewChild('childSection') childSection!: ElementRef;
+  
+  loaderService = inject(LoaderService);
 
   boutiqueService = inject(BoutiqueService);
   maBoutique = computed(() => {
@@ -30,6 +31,10 @@ export class MaBoutique {
     } else {
       console.log(`Boutique: ${this.maBoutique().nom}`);
     }
+  }
+
+  ngAfterViewInit() {
+    this.childSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   quitterMaBoutique(route: string) {

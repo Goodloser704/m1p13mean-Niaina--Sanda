@@ -1,18 +1,189 @@
-<div class="row liquid-glass">
-  <div class="col-12 border-blue">
-  <div class="boutique-info">
-    <img 
-      [src]="maBoutique().photo ? maBoutique().photo : 'assets/img/story-set/boutique-default.png'" 
-      class="boutique-cover" 
-    />
+<div class="boutique-hero">
+  <img 
+    [src]="maBoutique().photo ? maBoutique().photo : 'assets/img/story-set/boutique-default.png'" 
+    class="boutique-cover"
+  />
 
-    <div>
-      <p class="boutique-name">{{ maBoutique().nom | titlecase }}</p>
-      <p class="boutique-description">{{ maBoutique().description }}</p>
-    </div>
+  <div class="boutique-hero-overlay"></div>
 
-    <div>
-      <p class=""></p>
+  <div class="boutique-hero-content">
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
+      
+      <div>
+        <h1 class="boutique-name">
+          {{ maBoutique().nom | titlecase }}
+        </h1>
+
+        @if (maBoutique().description) {
+          <p class="boutique-description">
+            {{ maBoutique().description }}
+          </p>
+        }
+      </div>
+
+      <span 
+        class="statut-badge"
+        [class.actif]="maBoutique().statutBoutique === 'Actif'"
+        [class.inactif]="maBoutique().statutBoutique === 'Inactif'"
+      >
+        {{ maBoutique().statutBoutique }}
+      </span>
+
     </div>
   </div>
 </div>
+
+<!-- Infos générales -->
+<div class="liquid-glass p-3 mt-4">
+  <h3 class="section-title">Informations générales</h3>
+  <div class="info-grid">
+    <div>
+      <label>Catégorie</label>
+      <p>{{ getBoutiqueCategorieLabel(maBoutique()) }}</p>
+    </div>
+
+    <div>
+      <label>Commerçant</label>
+      <p>
+        {{ getBoutiqueCommercantLabel(maBoutique()) }}
+      </p>
+    </div>
+
+    <div>
+      <label>Date création</label>
+      <p>{{ maBoutique().createdAt | date:'mediumDate' }}</p>
+    </div>
+
+    <div>
+      <label>Dernière mise à jour</label>
+      <p>{{ maBoutique().updatedAt | date:'mediumDate' }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Horaires -->
+<div class="liquid-glass p-3 mt-4">
+  <h3 class="section-title">Horaires d'ouverture</h3>
+  <div class="row gy-3">
+    @for (horaire of maBoutique().horairesHebdo; track horaire.jour) {
+      <div class="col-12 col-sm-4 col-lg-3">
+        <div class="horaire-item">
+          <span class="jour">{{ horaire.jour }}</span>
+          <span class="heure">{{ horaire.debut }} - {{ horaire.fin }}</span>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<div #editInfo class="row mt-4">
+  <div class="col-12 d-flex justify-content-end">
+    @if (!boutiqueEditMode()) {
+      <button type="button" class="btn-glass-tertiary" (click)="editBoutique()">
+        Edit Info <i class="bi bi-pen ms-1"></i>
+      </button>
+    }
+  </div>
+</div>
+
+@if (boutiqueEditMode()) {
+  <div class="row liquid-glass mt-4">
+    <h2 class="mb-4">Modification des informations</h2>
+
+    <div class="col-lg-12">
+      <form
+        class="php-email-form"
+        [formGroup]="boutiqueForm"
+        (ngSubmit)="saveEditedBoutique()"
+        data-aos="fade-up"
+        data-aos-delay="200"
+      >      
+        <div class="row gy-3">
+          <div class="col-sm-6">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Nom"
+              formControlName="nom"
+            >
+          </div>
+
+          <div class="col-sm-6">
+            <select class="form-control" formControlName="categorie">
+              <option value="" disabled selected>Categorie</option>
+              @for (categorie of categories(); track categorie._id) {
+                <option [value]="categorie._id">{{ categorie.nom }}</option>
+              } 
+            </select>
+          </div>
+
+          <div class="col-sm-6">
+            <label 
+              for="formFile" 
+              class="form-label text-secondary"
+            >
+              Nouvelle photo (optionnel, max: 2mo)
+            </label>
+            <input
+              type="file" 
+              #photoInput
+              id="formFile"
+              class="form-control"
+              (change)="onPhotoSelected($event)"
+              accept="image/*"
+            >
+            @if (photoSizeError()) {
+              <p class="text-danger mt-2">Taille du fichier maximum (2MB)</p>
+            }
+          </div>
+
+          <div class="col-sm-6">
+            <textarea
+              class="form-control h-100"
+              placeholder="Description"
+              formControlName="description"
+              rows="2"
+            ></textarea>
+          </div>
+
+          @if (photoPreview()) {
+            <div class="col-sm-6">
+              <div class="d-flex align-items-center">
+                <img [src]="photoPreview()" class="photo-preview me-3">
+                <button type="button" class="btn-sm btn-secondary" (click)="clearPhoto()">Effacer</button>
+              </div>
+            </div>
+          }
+
+          <div class="col-12">
+            <app-horaires-form
+              [title]="'Horaires d\'ouverture'"
+              [class]="'bg-white p-3 pb-2 rounded-2'"
+              [initialHoraires]="maBoutique().horairesHebdo"
+              (horairesChange)="onHorairesChange($event)"
+            >
+            </app-horaires-form>
+          </div>
+
+          <div class="col-12 d-flex justify-content-center gap-2">
+            <button
+              type="submit"
+              class="btn-glass"
+              [disabled]="loaderService.isLoading() || boutiqueForm.invalid"
+            >
+              Valider
+            </button>
+
+            <button
+              type="button"
+              class="btn-glass-secondary"
+              (click)="discardEditBoutique()"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+}

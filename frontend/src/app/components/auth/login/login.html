@@ -51,7 +51,7 @@
               <button
                 type="submit"
                 class="btn"
-                [disabled]="isLoading() || form.invalid"
+                [disabled]="loaderService.isLoading() || form.invalid"
               >
                 Se connecter
               </button>
@@ -67,6 +67,6 @@
   </div>
 </div>
 
-@if (isLoading()) {
+@if (loaderService.isLoading()) {
   <app-loader />
 }

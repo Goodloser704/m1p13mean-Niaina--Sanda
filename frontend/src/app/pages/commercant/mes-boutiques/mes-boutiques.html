@@ -1,4 +1,4 @@
-<section id="hero" class="hero section">
+<section #childSection id="hero" class="hero section">
   <div class="container" data-aos="fade-up" data-aos-delay="100">
     <h2 class="mb-4">Boutiques</h2>
 
@@ -75,6 +75,6 @@
   </div>
 </section>
 
-@if (isLoading()) {
+@if (loaderService.isLoading()) {
   <app-loader />
 }

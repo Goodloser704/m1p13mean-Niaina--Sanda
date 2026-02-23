@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe, DecimalPipe, NgClass, TitleCasePipe } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { finalize, forkJoin } from 'rxjs';
 import { Loader } from "../../../components/shared/loader/loader";
 import { BaseChartDirective } from 'ng2-charts';
@@ -11,6 +11,7 @@ import { LoyerStats } from '../../../core/models/commercant/commercant.model';
 import { EspacesService } from '../../../core/services/admin/espaces.service';
 import { BoutiqueService } from '../../../core/services/commercant/boutique.service';
 import { LoyerService } from '../../../core/services/admin/loyer.service';
+import { LoaderService } from '../../../core/services/loader.service';
 
 interface PaiementsMoisCourantResponse {
   periode: string;
@@ -49,12 +50,14 @@ interface PaiementsMoisCourantResponse {
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
-export class Dashboard implements OnInit {
+export class Dashboard implements OnInit, AfterViewInit {
+  @ViewChild('childSection') childSection!: ElementRef;
+
   static {
     Chart.register(...registerables);
   }
 
-  isLoading = signal(false);
+  loaderService = inject(LoaderService);
 
   espaceStats = signal<EspacesStatsResponse>({
     totalEspaces: 0,
@@ -181,12 +184,16 @@ export class Dashboard implements OnInit {
     this.loadDashboard();
   }
 
+  ngAfterViewInit() {
+    this.childSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   loadDashboard() {
     const now = new Date();
     const mois = String(now.getMonth() + 1).padStart(2, '0');
     const annee = String(now.getFullYear());
 
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     forkJoin({
       espaceStats: this.espacesService.getEspaceStats(),
@@ -194,7 +201,7 @@ export class Dashboard implements OnInit {
       statutPaiementMois: this.loyerService.getStatutPaimentsMoisCourant(),
       historiqueLoyers: this.loyerService.obtenirHistoriqueLoyers(mois, annee, 1, 6)
     })
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           try {
@@ -235,9 +242,9 @@ export class Dashboard implements OnInit {
     const annee = this.selectedYear();
     if (!mois || !annee) return;
 
-    this.isLoading.set(true);
+    this.loaderService.show();
     this.loyerService.obtenirHistoriqueLoyers(mois, annee, 1, 200)
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           this.buildLoyerPeriodeChart(res.loyers, mois, annee);

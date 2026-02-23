@@ -5,7 +5,7 @@ import {
   getEspaceEtageNiveau,
   getEtage
 } from "./../../../core/models/admin/espaces.model";
-import { AfterViewChecked, AfterViewInit, Component, effect, OnInit, signal } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, effect, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Loader } from "../../../components/shared/loader/loader";
 import { Espace, Etage } from '../../../core/models/admin/espaces.model';
@@ -18,6 +18,7 @@ import { EmptyRowList } from "../../../components/shared/empty-row-list/empty-ro
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
 import Aos from "aos";
 import { RouterLink } from "@angular/router";
+import { LoaderService } from "../../../core/services/loader.service";
 
 @Component({
   selector: 'app-espaces',
@@ -26,7 +27,9 @@ import { RouterLink } from "@angular/router";
   styleUrl: './espaces.scss',
 })
 export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
-  isLoading = signal(false);
+  @ViewChild('childSection') childSection!: ElementRef;
+  
+  loaderService = inject(LoaderService);
 
   Location = Location;
 
@@ -53,6 +56,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
   ngAfterViewInit() {
     Aos.init();
+    this.childSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   ngAfterViewChecked() {
@@ -60,10 +64,10 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
   }
 
   load() {
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     this.espacesService.getAllFloor()
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => this.etages.set(res.etages),
         error: console.error
@@ -96,7 +100,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
   createNewFloor() {
     if (this.etageForm.invalid) return;
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     const { niveau } = this.etageForm.getRawValue();
 
@@ -110,7 +114,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
     this.espacesService.createFloor(etage as Etage)
       .pipe(
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: (res) => {
@@ -140,7 +144,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
   saveEditedFloor() {
     if (this.etageForm.invalid || !this.editingFloorId()) return;
-    this.isLoading.set(true);
+    this.loaderService.show();
     
     const { niveau } = this.etageForm.getRawValue();
 
@@ -157,7 +161,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
     this.espacesService.updateFloor(updatedFloor as Etage)
       .pipe(
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: (res) => {
@@ -199,11 +203,11 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
       return;
     };
 
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     this.espacesService.deleteFloor(etageId!)
       .pipe(
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: () => {
@@ -251,7 +255,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
   creerEspace() {
     if (this.espaceForm.invalid) return;
 
-    this.isLoading.set(true);
+    this.loaderService.show();
     const newSpace: Partial<Espace> = {
       ...this.espaceForm.getRawValue(),
       statut: EspaceStatut.Disponible,
@@ -260,7 +264,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
     this.espacesService.createNewSpace(newSpace as Espace)
       .pipe(
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: (res) => {
@@ -294,7 +298,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
   saveEditedEspace() {
     if (this.espaceForm.invalid || !this.editingSpaceId()) return;
 
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     const currentSpace = this.espaces()
       .find(e => e._id === this.editingSpaceId());
@@ -308,7 +312,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
     this.espacesService.editSpace(updatedSpace as Espace)
       .pipe(
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: (res) => {
@@ -352,11 +356,11 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
       return;
     }
 
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     this.espacesService.deleteSpace(espaceId)
       .pipe(
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: () => {
@@ -393,11 +397,11 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
       return;
     }
 
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     this.espacesService.libererUneEspace(espaceId)
       .pipe(
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: () => {
@@ -416,7 +420,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
   }
 
   getSpaces(page: number) {
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     const params: EspaceQueryParams = {
       page,
@@ -425,7 +429,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
     this.espacesService.getAllSpaces(params)
       .pipe(
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: (res) => {

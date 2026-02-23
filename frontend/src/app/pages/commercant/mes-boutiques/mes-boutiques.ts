@@ -6,13 +6,14 @@ import {
   StatutBoutique
 } from "./../../../core/models/commercant/boutique.model";
 import { BoutiqueService } from './../../../core/services/commercant/boutique.service';
-import { Component, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { TitleCasePipe } from "@angular/common";
 import { Boutique } from '../../../core/models/commercant/boutique.model';
 import { finalize } from 'rxjs';
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
 import { RouterLink } from "@angular/router";
 import { Loader } from "../../../components/shared/loader/loader";
+import { LoaderService } from "../../../core/services/loader.service";
 
 @Component({
   selector: 'app-mes-boutiques',
@@ -20,8 +21,10 @@ import { Loader } from "../../../components/shared/loader/loader";
   templateUrl: './mes-boutiques.html',
   styleUrl: './mes-boutiques.scss',
 })
-export class MesBoutiques implements OnInit {
-  isLoading = signal(false);
+export class MesBoutiques implements OnInit, AfterViewInit {
+  @ViewChild('childSection') childSection!: ElementRef;
+  
+  loaderService = inject(LoaderService);
 
   mesBoutiques = signal<Boutique[]>([]);
   StatutBoutique = StatutBoutique;
@@ -34,11 +37,15 @@ export class MesBoutiques implements OnInit {
     this.loadMyBoutiques();
   }
 
+  ngAfterViewInit() {
+    this.childSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   loadMyBoutiques() {
-    this.isLoading.set(true);
+    this.loaderService.show();
 
     this.boutiqueService.getMyBoutiques()
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           try {
