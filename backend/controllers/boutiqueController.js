@@ -624,6 +624,7 @@ class BoutiqueController {
       res.status(500).json({ message: 'Erreur serveur' });
     }
   }
+
   async getBoutiqueStats(req, res) {
     const timestamp = new Date().toISOString();
     console.log(`📊 [${timestamp}] Statistiques boutiques`);
@@ -640,7 +641,7 @@ class BoutiqueController {
 
       console.log(`✅ Statistiques récupérées`);
       
-      res.json({ stats });
+      res.json(stats);
 
     } catch (error) {
       console.error(`❌ Erreur statistiques boutiques:`, error.message);

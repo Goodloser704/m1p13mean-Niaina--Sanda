@@ -242,7 +242,7 @@ class EspaceController {
     try {
       const stats = await espaceService.obtenirStatistiques();
       console.log(`✅ Statistiques espaces récupérées`);
-      res.json({ stats });
+      res.json(stats);
     } catch (error) {
       console.error('❌ Erreur récupération statistiques espaces:', error.message);
       console.error('❌ Stack trace:', error.stack);

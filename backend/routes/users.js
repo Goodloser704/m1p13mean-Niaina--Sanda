@@ -69,4 +69,5 @@ router.get('/wallet', auth, portefeuilleController.obtenirMonPortefeuille);
  */
 router.get('/:id/wallet', auth, portefeuilleController.obtenirMonPortefeuille);
 
+
 module.exports = router;
