@@ -1,4 +1,5 @@
 const boutiqueService = require('../services/boutiqueService');
+const { RoleEnum } = require('../utils/enums');
 
 /**
  * 🏪 Contrôleur des Boutiques
@@ -40,9 +41,9 @@ class BoutiqueController {
 
       const boutiques = await require('../models/Boutique')
         .find(query)
-        .populate('proprietaire', 'nom prenoms email')
+        .populate('commercant', 'nom prenoms email')
         .populate('categorie', 'nom')
-        .populate('espace', 'numero etage')
+        .populate('espace', 'code etage')
         .sort({ nom: 1 })
         .limit(parseInt(limit))
         .skip((parseInt(page) - 1) * parseInt(limit));
@@ -108,13 +109,13 @@ class BoutiqueController {
       let query = { boutique: id };
       
       if (disponibleOnly === 'true') {
-        query.nombreDispo = { $gt: 0 };
+        query['stock.nombreDispo'] = { $gt: 0 };
       }
       
       const produits = await require('../models/Produit')
         .find(query)
         .populate('boutique', 'nom')
-        .populate('typeProduit', 'nom')
+        .populate('typeProduit', 'type')
         .sort({ nom: 1 })
         .limit(parseInt(limit))
         .skip((parseInt(page) - 1) * parseInt(limit));
@@ -129,11 +130,11 @@ class BoutiqueController {
           nom: p.nom,
           description: p.description,
           prix: p.prix,
-          nombreDispo: p.nombreDispo,
-          photo: p.photo,
+          stock: p.stock,
           typeProduit: p.typeProduit,
           boutique: p.boutique,
-          dateCreation: p.dateCreation
+          tempsPreparation: p.tempsPreparation,
+          createdAt: p.createdAt
         })),
         boutique: {
           _id: boutique._id,

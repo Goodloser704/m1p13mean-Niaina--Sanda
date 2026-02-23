@@ -181,13 +181,13 @@ exports.obtenirToutesDemandes = async (req, res) => {
     const demandes = await DemandeLocation.find(query)
       .populate({
         path: 'boutique',
-        select: 'nom',
+        select: 'nom commercant',
         populate: {
-          path: 'commercant proprietaire',
+          path: 'commercant',
           select: 'nom prenoms email'
         }
       })
-      .populate('espace', 'codeEspace surface loyer etage')
+      .populate('espace', 'code surface loyer etage')
       .populate('adminRepondant', 'nom prenoms')
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
@@ -264,6 +264,61 @@ exports.obtenirDemandesParEtat = async (req, res) => {
     console.error('Erreur obtention demandes par état:', error);
     res.status(500).json({
       message: 'Erreur serveur lors de la récupération des demandes'
+    });
+  }
+};
+
+// @route   PUT /api/demandes-location/:id
+// @desc    Mettre à jour l'état d'une demande (route générique conforme aux spécifications)
+// @access  Private (Admin)
+exports.updateDemandeEtat = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        message: 'Données invalides',
+        errors: errors.array()
+      });
+    }
+    
+    const { id } = req.params;
+    const { etat } = req.body;
+    
+    const demande = await DemandeLocation.findById(id)
+      .populate('boutique')
+      .populate('espace');
+    
+    if (!demande) {
+      return res.status(404).json({
+        message: 'Demande non trouvée'
+      });
+    }
+    
+    // Mettre à jour l'état
+    demande.etatDemande = etat;
+    
+    // Si acceptée, mettre à jour l'espace
+    if (etat === 'Acceptee' && demande.espace) {
+      demande.espace.statut = 'Occupee';
+      demande.espace.boutique = demande.boutique._id;
+      await demande.espace.save();
+      
+      // Mettre à jour la boutique
+      demande.boutique.espace = demande.espace._id;
+      demande.boutique.statutBoutique = 'Actif';
+      await demande.boutique.save();
+    }
+    
+    await demande.save();
+    
+    res.json({
+      message: `Demande ${etat === 'Acceptee' ? 'acceptée' : etat === 'Refusee' ? 'refusée' : 'mise à jour'} avec succès`,
+      demande
+    });
+  } catch (error) {
+    console.error('Erreur mise à jour état demande:', error);
+    res.status(500).json({
+      message: 'Erreur serveur lors de la mise à jour de la demande'
     });
   }
 };

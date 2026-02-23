@@ -20,22 +20,23 @@ class FactureController {
     const timestamp = new Date().toISOString();
     console.log(`🧾 [${timestamp}] Récupération factures acheteur`);
     console.log(`   👤 User ID: ${req.user._id}`);
-    console.log(`   🎯 Target ID: ${req.params.id}`);
+    console.log(`   🎯 Target ID: ${req.params.id || 'self'}`);
     
     try {
-      const { id } = req.params;
+      // Si pas d'ID dans params, utiliser l'ID de l'utilisateur connecté
+      const targetId = req.params.id || req.user._id.toString();
       const { page = 1, limit = 20, dateDebut, dateFin } = req.query;
 
       // Vérifier les permissions
-      if (req.user._id.toString() !== id && req.user.role !== RoleEnum.Admin) {
-        console.log(`❌ Accès refusé - User: ${req.user._id}, Target: ${id}, Role: ${req.user.role}`);
+      if (req.user._id.toString() !== targetId && req.user.role !== RoleEnum.Admin) {
+        console.log(`❌ Accès refusé - User: ${req.user._id}, Target: ${targetId}, Role: ${req.user.role}`);
         return res.status(403).json({ 
           message: 'Vous ne pouvez consulter que vos propres factures' 
         });
       }
 
       // Construire la requête
-      let query = { acheteur: id };
+      let query = { acheteur: targetId };
 
       // Filtrer par date si spécifié
       if (dateDebut || dateFin) {

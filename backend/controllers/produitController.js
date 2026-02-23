@@ -97,23 +97,23 @@ exports.obtenirProduitsParBoutique = async (req, res) => {
     const { page = 1, limit = 20, typeProduit, enStock, recherche } = req.query;
     
     const criteres = {
-      boutique: boutiqueId,
-      page: parseInt(page),
-      limit: parseInt(limit)
+      boutique: boutiqueId
     };
     
     if (typeProduit) criteres.typeProduit = typeProduit;
-    if (enStock === 'true') criteres.enStock = true;
-    if (recherche) criteres.recherche = recherche;
+    if (enStock === 'true') criteres['stock.nombreDispo'] = { $gt: 0 };
+    if (recherche) criteres.$text = { $search: recherche };
     
-    const produits = await Produit.rechercher(criteres);
-    const total = await Produit.countDocuments({ 
-      boutique: boutiqueId, 
-      isActive: true,
-      ...(typeProduit && { typeProduit }),
-      ...(enStock === 'true' && { 'stock.nombreDispo': { $gt: 0 } }),
-      ...(recherche && { $text: { $search: recherche } })
-    });
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const produits = await Produit.find(criteres)
+      .populate('typeProduit', 'type')
+      .populate('boutique', 'nom')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Produit.countDocuments(criteres);
     
     res.json({
       produits,

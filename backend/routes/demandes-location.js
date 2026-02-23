@@ -82,6 +82,17 @@ router.delete('/:id',
   demandeLocationController.annulerDemande
 );
 
+// @route   PUT /api/demandes-location/:id
+// @desc    Mettre à jour l'état d'une demande (route générique conforme aux spécifications)
+// @access  Private (Admin)
+router.put('/:id', [
+  body('etat')
+    .isIn(['EnAttente', 'Acceptee', 'Refusee'])
+    .withMessage('État invalide')
+], 
+authorize(RoleEnum.Admin, 'admin'), 
+demandeLocationController.updateDemandeEtat);
+
 // @route   PUT /api/demandes-location/:id/accepter
 // @desc    Accepter une demande de location
 // @access  Private (Admin)

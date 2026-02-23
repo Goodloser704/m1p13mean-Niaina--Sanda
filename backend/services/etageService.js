@@ -20,6 +20,17 @@ class EtageService {
       etageData.niveau = niveauEtage;
       delete etageData.numero; // Supprimer l'alias
       
+      // Générer automatiquement le nom si absent
+      if (!etageData.nom) {
+        if (etageData.niveau === 0) {
+          etageData.nom = 'Rez-de-chaussée';
+        } else if (etageData.niveau < 0) {
+          etageData.nom = `Sous-sol ${Math.abs(etageData.niveau)}`;
+        } else {
+          etageData.nom = `Étage ${etageData.niveau}`;
+        }
+      }
+      
       // Vérifier si un étage actif avec ce niveau existe déjà
       const etageExistant = await Etage.findOne({ 
         niveau: etageData.niveau,

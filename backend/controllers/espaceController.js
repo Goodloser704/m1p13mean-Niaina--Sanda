@@ -13,8 +13,36 @@ class EspaceController {
     console.log(`   📝 Données:`, req.body);
     
     try {
+      // Vérifier si un espace avec ce code existe déjà
+      const Espace = require('../models/Espace');
+      const espaceExistant = await Espace.findOne({ code: req.body.code });
+      
+      if (espaceExistant) {
+        console.warn(`⚠️ Espace avec code ${req.body.code} existe déjà (ID: ${espaceExistant._id})`);
+        return res.status(409).json({
+          message: `Un espace avec le code ${req.body.code} existe déjà`,
+          espaceExistant: {
+            _id: espaceExistant._id,
+            code: espaceExistant.code,
+            surface: espaceExistant.surface,
+            statut: espaceExistant.statut
+          }
+        });
+      }
+      
+      // Vérifier que l'étage existe
+      const Etage = require('../models/Etage');
+      const etage = await Etage.findById(req.body.etage);
+      
+      if (!etage) {
+        console.warn(`⚠️ Étage ${req.body.etage} non trouvé`);
+        return res.status(404).json({
+          message: `L'étage spécifié n'existe pas`
+        });
+      }
+      
       const espace = await espaceService.creerEspace(req.body);
-      console.log(`✅ Espace créé: ${espace.codeEspace} (Étage ${espace.etage})`);
+      console.log(`✅ Espace créé: ${espace.code} (Étage ${espace.etage})`);
       
       res.status(201).json({
         message: 'Espace créé avec succès',

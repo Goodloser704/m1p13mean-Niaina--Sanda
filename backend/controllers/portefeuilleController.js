@@ -1,6 +1,7 @@
 const PorteFeuille = require('../models/PorteFeuille');
 const PFTransaction = require('../models/PFTransaction');
 const { validationResult } = require('express-validator');
+const { RoleEnum } = require('../utils/enums');
 
 /**
  * 💰 Contrôleur Portefeuille
@@ -46,18 +47,23 @@ exports.obtenirPortefeuilleUtilisateur = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Vérifier les permissions
-    if (req.user._id.toString() !== id && req.user.role !== RoleEnum.Admin) {
-      return res.status(403).json({
-        message: 'Vous ne pouvez consulter que votre propre portefeuille'
-      });
-    }
-    
-    const portefeuille = await PorteFeuille.obtenirParUtilisateur(id);
+    // Récupérer le portefeuille depuis la base de données
+    const portefeuille = await PorteFeuille.findOne({ owner: id }).populate('owner', 'nom prenoms email role');
     
     if (!portefeuille) {
       return res.status(404).json({
         message: 'Portefeuille non trouvé'
+      });
+    }
+    
+    // Vérifier les permissions - L'utilisateur peut consulter son propre portefeuille
+    // ou un admin peut consulter n'importe quel portefeuille
+    const isOwnWallet = req.user._id.toString() === portefeuille.owner._id.toString();
+    const isAdmin = req.user.role === RoleEnum.Admin;
+    
+    if (!isOwnWallet && !isAdmin) {
+      return res.status(403).json({
+        message: 'Vous ne pouvez consulter que votre propre portefeuille'
       });
     }
     
@@ -66,13 +72,18 @@ exports.obtenirPortefeuilleUtilisateur = async (req, res) => {
       $or: [
         { fromWallet: portefeuille._id },
         { toWallet: portefeuille._id }
-      ],
-      statut: 'Completee'
+      ]
     })
     .sort({ createdAt: -1 })
     .limit(10)
-    .populate('fromWallet toWallet', 'owner')
-    .populate('fromWallet.owner toWallet.owner', 'nom prenoms');
+    .populate({
+      path: 'fromWallet',
+      populate: { path: 'owner', select: 'nom prenoms email' }
+    })
+    .populate({
+      path: 'toWallet',
+      populate: { path: 'owner', select: 'nom prenoms email' }
+    });
     
     res.json({
       wallet: {

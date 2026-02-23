@@ -68,8 +68,13 @@ class AuthService {
       // Créer le portefeuille automatiquement selon les spécifications
       console.log('🔧 [SERVICE] Étape 4: Création PorteFeuille...');
       const PorteFeuille = require('../models/PorteFeuille');
-      const portefeuille = await PorteFeuille.creerPourUtilisateur(user._id);
-      console.log('✅ [SERVICE] PorteFeuille créé avec succès - ID:', portefeuille._id);
+      
+      // Donner un solde initial pour les tests
+      // Commerçants: 5000€ pour payer les loyers
+      // Acheteurs: 10000€ pour acheter des produits
+      const soldeInitial = role === 'Commercant' ? 5000 : (role === 'Acheteur' ? 10000 : 0);
+      const portefeuille = await PorteFeuille.creerPourUtilisateur(user._id, soldeInitial);
+      console.log(`✅ [SERVICE] PorteFeuille créé avec succès - ID: ${portefeuille._id}, Solde: ${soldeInitial}€`);
 
       // Générer le token
       const token = this.generateToken(user._id);

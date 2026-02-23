@@ -1,5 +1,6 @@
 /**
- * Script pour nettoyer les collections Espace et Etage
+ * 🧹 Script de nettoyage des espaces et étages de test
+ * Supprime uniquement les données créées lors des tests
  */
 
 const path = require('path');
@@ -8,19 +9,46 @@ const mongoose = require('mongoose');
 const Espace = require('../models/Espace');
 const Etage = require('../models/Etage');
 
-async function cleanCollections() {
+async function cleanTestData() {
   try {
     console.log('🔌 Connexion à MongoDB...');
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log('✅ Connecté à MongoDB');
+    console.log('✅ Connecté à MongoDB\n');
 
-    console.log('\n🗑️  Suppression des espaces...');
-    const espacesDeleted = await Espace.deleteMany({});
-    console.log(`✅ ${espacesDeleted.deletedCount} espaces supprimés`);
+    // Supprimer les espaces de test (code commence par TST)
+    console.log('🧹 Suppression des espaces de test (code TST*)...');
+    const espacesDeleted = await Espace.deleteMany({
+      $or: [
+        { code: { $regex: /^TST/i } },
+        { etage: null }, // Espaces sans étage
+        { etage: { $exists: false } } // Espaces sans champ étage
+      ]
+    });
+    console.log(`✅ ${espacesDeleted.deletedCount} espaces de test supprimés`);
 
-    console.log('\n🗑️  Suppression des étages...');
-    const etagesDeleted = await Etage.deleteMany({});
-    console.log(`✅ ${etagesDeleted.deletedCount} étages supprimés`);
+    // Supprimer les étages de test (niveau >= 10)
+    console.log('\n🧹 Suppression des étages de test (niveau >= 10)...');
+    const etagesDeleted = await Etage.deleteMany({
+      niveau: { $gte: 10 }
+    });
+    console.log(`✅ ${etagesDeleted.deletedCount} étages de test supprimés`);
+
+    // Afficher les statistiques
+    const totalEtages = await Etage.countDocuments();
+    const totalEspaces = await Espace.countDocuments();
+    
+    console.log('\n📊 Statistiques après nettoyage:');
+    console.log(`   - Étages restants: ${totalEtages}`);
+    console.log(`   - Espaces restants: ${totalEspaces}`);
+
+    // Afficher les étages restants
+    if (totalEtages > 0) {
+      console.log('\n📋 Étages restants:');
+      const etages = await Etage.find().sort({ niveau: 1 });
+      etages.forEach(etage => {
+        console.log(`   - Niveau ${etage.niveau}: ${etage.nom}`);
+      });
+    }
 
     console.log('\n✅ Nettoyage terminé avec succès!');
     
@@ -33,4 +61,5 @@ async function cleanCollections() {
   }
 }
 
-cleanCollections();
+cleanTestData();
+

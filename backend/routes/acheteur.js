@@ -16,6 +16,34 @@ const { RoleEnum } = require('../utils/enums');
 const acheteurAuth = [auth, authorize(RoleEnum.Acheteur)];
 
 /**
+ * @route   GET /api/acheteur/achats/en-cours
+ * @desc    Obtenir mes achats en cours (sans paramètre ID)
+ * @access  Private (Acheteur)
+ */
+router.get('/achats/en-cours', acheteurAuth, achatController.obtenirMesAchatsEnCours);
+
+/**
+ * @route   GET /api/acheteur/achats/historique
+ * @desc    Obtenir mon historique des achats (sans paramètre ID)
+ * @access  Private (Acheteur)
+ */
+router.get('/achats/historique', acheteurAuth, achatController.obtenirMonHistoriqueAchats);
+
+/**
+ * @route   POST /api/acheteur/achats/panier/validate
+ * @desc    Valider mon panier (sans paramètre ID)
+ * @access  Private (Acheteur)
+ */
+router.post('/achats/panier/validate', acheteurAuth, achatController.validerPanier);
+
+/**
+ * @route   GET /api/acheteur/factures
+ * @desc    Obtenir mes factures (sans paramètre ID)
+ * @access  Private (Acheteur)
+ */
+router.get('/factures', acheteurAuth, factureController.getMyFactures);
+
+/**
  * @route   GET /api/acheteur/:id/achats/en-cours
  * @desc    Obtenir les achats en cours d'un acheteur (conforme aux spécifications)
  * @access  Private (Acheteur)
@@ -39,6 +67,13 @@ router.get('/:id/achats/historique', acheteurAuth, achatController.obtenirMonHis
  * @note    Cette route existe aussi sur /api/achats/panier/valider
  */
 router.post('/:id/achats/panier/validate', acheteurAuth, achatController.validerPanier);
+
+/**
+ * @route   GET /api/acheteur/factures
+ * @desc    Obtenir mes factures (sans paramètre ID)
+ * @access  Private (Acheteur)
+ */
+router.get('/factures', acheteurAuth, factureController.getMyFactures);
 
 /**
  * @route   GET /api/acheteur/:id/factures

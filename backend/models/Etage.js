@@ -6,11 +6,11 @@ const etageSchema = new mongoose.Schema({
     required: true,
     unique: true,
     min: -2, // Sous-sols possibles
-    max: 50  // Limite augmentée pour les tests
+    max: 100  // Limite augmentée pour les tests
   },
   nom: {
     type: String,
-    required: true,
+    required: false, // Optionnel, généré automatiquement si absent
     trim: true,
     maxlength: 100
   },
@@ -25,6 +25,20 @@ const etageSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true
+});
+
+// Middleware pre-save pour générer automatiquement le nom si absent
+etageSchema.pre('save', function(next) {
+  if (!this.nom) {
+    if (this.niveau === 0) {
+      this.nom = 'Rez-de-chaussée';
+    } else if (this.niveau < 0) {
+      this.nom = `Sous-sol ${Math.abs(this.niveau)}`;
+    } else {
+      this.nom = `Étage ${this.niveau}`;
+    }
+  }
+  next();
 });
 
 // Index pour optimiser les requêtes

@@ -53,8 +53,13 @@ exports.validerPanier = async (req, res) => {
     const facture = new Facture({
       acheteur: acheteurId,
       description: `Achat de ${achatsData.length} produit${achatsData.length > 1 ? 's' : ''}`,
-      montantTotal
+      montantTotal,
+      tauxTVA: 20 // 20% par défaut
     });
+    
+    // Calculer le montant TTC
+    facture.calculerMontantTTC();
+    
     await facture.save();
 
     console.log('🧾 Facture créée:', facture._id);
@@ -68,7 +73,13 @@ exports.validerPanier = async (req, res) => {
       const { produit: produitId, quantite, typeAchat, prixUnitaire } = achatData;
 
       // Vérifier le produit
-      const produit = await Produit.findById(produitId).populate('boutique');
+      const produit = await Produit.findById(produitId).populate({
+        path: 'boutique',
+        populate: {
+          path: 'commercant',
+          select: '_id nom prenoms email'
+        }
+      });
       if (!produit) {
         throw new Error(`Produit ${produitId} non trouvé`);
       }

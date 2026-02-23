@@ -115,16 +115,19 @@ app.use('/api', require('./routes/notifications')); // Pour /api/users/:userId/n
 // Routes d'administration
 console.log('🛣️  Chargement route admin...');
 app.use('/api/admin', require('./routes/admin'));
+// Routes admin pour boutiques
+console.log('🛣️  Chargement routes admin/boutiques...');
+app.use('/api/admin/boutiques', require('./routes/boutique'));
+// Routes admin pour demandes de location
+console.log('🛣️  Chargement routes admin/demandes-location...');
+app.use('/api/admin/demandes-location', require('./routes/demandes-location'));
 
 // Routes de boutiques
 console.log('🛣️  Chargement route boutique...');
 app.use('/api/boutique', require('./routes/boutique'));
-
-// Routes publiques boutiques (conformes aux spécifications)
-// Note: Les routes /api/boutiques/* sont déjà dans le fichier boutique.js
-// Ne PAS monter sur /api car cela capture toutes les routes comme /api/espaces
-// console.log('🛣️  Chargement routes boutiques publiques...');
-// app.use('/api', require('./routes/boutique')); // DÉSACTIVÉ - cause des conflits
+// Routes publiques boutiques avec pluriel (conformes aux spécifications)
+console.log('🛣️  Chargement routes boutiques (pluriel)...');
+app.use('/api/boutiques', require('./routes/boutique'));
 
 // Routes client
 console.log('🛣️  Chargement route client...');
@@ -143,14 +146,22 @@ app.use('/api/orders', require('./routes/orders'));
 // Routes d'infrastructure
 console.log('🛣️  Chargement route etages...');
 app.use('/api/etages', require('./routes/etages'));
+app.use('/api/admin/etages', require('./routes/etages')); // Routes admin pour étages
 console.log('🛣️  Chargement route espaces...');
 app.use('/api/espaces', require('./routes/espaces'));
+app.use('/api/admin/espaces', require('./routes/espaces')); // Routes admin pour espaces
 console.log('🛣️  Chargement route centre-commercial...');
 app.use('/api/centre-commercial', require('./routes/centre-commercial'));
 
 // Routes de gestion financière
 console.log('🛣️  Chargement route portefeuille...');
 app.use('/api/portefeuille', require('./routes/portefeuille'));
+
+// Routes de catégories (AVANT les routes génériques /api)
+console.log('🛣️  Chargement route types-produit...');
+app.use('/api/types-produit', require('./routes/types-produit'));
+console.log('🛣️  Chargement route categories-boutique...');
+app.use('/api/categories-boutique', require('./routes/categories-boutique'));
 
 // Routes utilisateurs portefeuille (conformes aux spécifications)
 console.log('🛣️  Chargement routes portefeuille utilisateurs...');
@@ -162,10 +173,22 @@ app.use('/api/achats', require('./routes/achats'));
 // Routes acheteur (conformes aux spécifications)
 console.log('🛣️  Chargement routes acheteur...');
 app.use('/api/acheteur', require('./routes/acheteur'));
+// Routes acheteur pour factures
+console.log('🛣️  Chargement routes acheteur/factures...');
+app.use('/api/acheteur', require('./routes/factures'));
 
 // Routes commercant
 console.log('🛣️  Chargement route commercant...');
 app.use('/api/commercant', require('./routes/commercant'));
+// Routes commercant pour boutiques (conformes aux spécifications)
+console.log('🛣️  Chargement routes commercant/boutiques...');
+app.use('/api/commercant/boutiques', require('./routes/boutique'));
+// Routes commercant pour produits
+console.log('🛣️  Chargement routes commercant/produits...');
+app.use('/api/commercant/produits', require('./routes/produits'));
+// Routes commercant pour achats
+console.log('🛣️  Chargement routes commercant/achats...');
+app.use('/api/commercant/achats', require('./routes/achats'));
 
 // Routes de loyers (nouvelles)
 console.log('🛣️  Chargement route loyers...');
@@ -180,16 +203,9 @@ app.use('/api/factures', require('./routes/factures'));
 console.log('🛣️  Chargement route demandes-location...');
 app.use('/api/demandes-location', require('./routes/demandes-location'));
 
-// Routes de catégories
-console.log('🛣️  Chargement route types-produit...');
-app.use('/api/types-produit', require('./routes/types-produit'));
-console.log('🛣️  Chargement route categories-boutique...');
-app.use('/api/categories-boutique', require('./routes/categories-boutique'));
-
 // 🧪 Routes de test (pour développement)
 console.log('🛣️  Chargement route test-items...');
 app.use('/api/test-items', require('./routes/test-items'));
-app.use('/api/categories-boutique', require('./routes/categories-boutique'));
 
 console.log('✅ Routes initialisées avec succès');
 

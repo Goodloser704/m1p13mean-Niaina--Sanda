@@ -13,6 +13,14 @@ const notificationController = require('../controllers/notificationController');
 const portefeuilleController = require('../controllers/portefeuilleController');
 
 /**
+ * @route   GET /api/users/me
+ * @desc    Obtenir le profil de l'utilisateur connecté (conforme aux spécifications)
+ * @access  Private
+ * @spec    Liste-des-fonctions.txt - getMyProfile
+ */
+router.get('/me', auth, authController.getProfile);
+
+/**
  * @route   GET /api/users/:id/me
  * @desc    Obtenir le profil de l'utilisateur connecté (conforme aux spécifications)
  * @access  Private
@@ -30,12 +38,28 @@ router.get('/:id/me', auth, authController.getProfile);
 // Déjà géré dans auth.js via app.use('/api', require('./routes/auth'))
 
 /**
+ * @route   GET /api/users/notifications
+ * @desc    Obtenir mes notifications (conforme aux spécifications)
+ * @access  Private
+ * @spec    Liste-des-fonctions.txt - getMyNotifications
+ */
+router.get('/notifications', auth, notificationController.getUserNotifications);
+
+/**
  * @route   GET /api/users/:userId/notifications
  * @desc    Obtenir les notifications d'un utilisateur (conforme aux spécifications)
  * @access  Private
  * @spec    Liste-des-fonctions.txt - getMyNotifications
  */
 router.get('/:userId/notifications', auth, notificationController.getUserNotifications);
+
+/**
+ * @route   GET /api/users/wallet
+ * @desc    Obtenir mon portefeuille (conforme aux spécifications)
+ * @access  Private
+ * @spec    Liste-des-fonctions.txt - getMyWallet
+ */
+router.get('/wallet', auth, portefeuilleController.obtenirMonPortefeuille);
 
 /**
  * @route   GET /api/users/:id/wallet

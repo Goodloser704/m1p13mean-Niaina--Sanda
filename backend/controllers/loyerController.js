@@ -118,7 +118,6 @@ class LoyerController {
 
       // Récupérer le portefeuille admin (destinataire des loyers)
       const adminUser = await require('../models/User').findOne({ role: 'Admin' });
-const { RoleEnum } = require('../utils/enums');
       if (!adminUser) {
         console.log(`❌ Compte admin non trouvé`);
         return res.status(500).json({ 
