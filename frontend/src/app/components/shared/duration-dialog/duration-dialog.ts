@@ -1,25 +1,42 @@
 import { Component } from '@angular/core';
-import { FormsModule } from "@angular/forms";
+import { FormBuilder, FormsModule, Validators, ReactiveFormsModule } from "@angular/forms";
 
 @Component({
   selector: 'app-duration-dialog',
-  imports: [FormsModule],
+  imports: [FormsModule, ReactiveFormsModule],
   templateUrl: './duration-dialog.html',
   styleUrl: './duration-dialog.scss',
 })
 export class DurationDialog {
-  jour: number = 0;
-  heure: number = 0;
-  minute: number = 0;
-  seconde: number = 0;
+  close!: (result: string | null) => void;
 
-  close!: (result: any) => void;
+  form: any;
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      jour: [0, [Validators.min(0)]],
+      heure: [0, [Validators.min(0), Validators.max(23)]],
+      minute: [0, [Validators.min(0), Validators.max(59)]],
+      seconde: [0, [Validators.min(0), Validators.max(59)]],
+    });
+  }
 
-  formatDuration() {
-    let durationString: string = '';
+  private pad(value: number): string {
+    return value.toString().padStart(2, '0');
+  }
+
+  get formattedDuration(): string | null {
+    if (this.form.invalid) return null;
+
+    const { jour, heure, minute, seconde } = this.form.value;
+    const totalHeures = (jour! * 24) + heure!;
+
+    return `${this.pad(totalHeures)}:${this.pad(minute!)}:${this.pad(seconde!)}`;
   }
 
   submit() {
-    this.close({ duration: this.duration });
+    if (this.form.invalid) return;
+
+    console.log(`Duration: ${this.formattedDuration}`);
+    this.close(this.formattedDuration);
   }
 }

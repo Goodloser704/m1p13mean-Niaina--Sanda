@@ -9,11 +9,10 @@ import { EmptyRowList } from "../../../../components/shared/empty-row-list/empty
 import { TitleCasePipe, NgClass } from "@angular/common";
 import { Dialog } from "../../../../components/shared/dialog/dialog";
 import { DialogService } from '../../../../core/services/dialog.service';
-import { DurationDialog } from "../../../../components/shared/duration-dialog/duration-dialog";
 
 @Component({
   selector: 'app-type-produits',
-  imports: [ReactiveFormsModule, EmptyRowList, TitleCasePipe, NgClass, DurationDialog],
+  imports: [ReactiveFormsModule, EmptyRowList, TitleCasePipe, NgClass],
   templateUrl: './type-produits.html',
   styleUrl: './type-produits.scss',
 })
