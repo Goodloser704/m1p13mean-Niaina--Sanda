@@ -1,9 +1,5 @@
 import { Boutique } from "./boutique.model";
-
-export interface TypeProduit {
-  _id: string,
-  nom: String
-}
+import { TypeProduit } from "./type-produit.model";
 
 export interface Produit {
   _id: string,

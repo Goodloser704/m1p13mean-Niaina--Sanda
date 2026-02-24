@@ -1,1 +1,165 @@
-<p>type-produits works!</p>
+<div #childSection class="mb-4">
+  <!-- <h3>Type de produit</h3> -->
+  <p class="text-primary text-wrap">Gerer les types de produit vendu par votre boutique</p>
+</div>
+
+<div #typeFormSection class="row liquid-glass mb-4">
+  <div class="col-md-6">
+    <h4>Nouveau type:</h4>
+    <hr>
+
+    <form
+      class="php-email-form"
+      [formGroup]="typeForm"
+      (ngSubmit)="onSubmitType()"
+      data-aos="fade-up"
+      data-aos-delay="200"
+    >
+      <div class="row gy-3">
+        <div class="col-12">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Type (*)"
+            formControlName="type"
+          >
+        </div>
+
+        <div class="col-12">
+          <textarea
+            class="form-control h-100"
+            placeholder="Description"
+            formControlName="description"
+            rows="2"
+          ></textarea>
+        </div>
+
+        <div class="col-12">
+          <div class="input-color">
+            <p class="text-muted">Couleur</p>
+            
+            <input
+              type="color"
+              class="form-control"
+              formControlName="couleur"
+            >
+
+            <button
+              type="button"
+              class="btn-glass-secondary"
+              (click)="clearColor()"
+            >
+              Supprimer
+            </button>
+
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="icon-input">
+            <p class="text-muted">Icone</p>
+            <div class="icon-grid">
+              <div
+                class="icon-item"
+                (click)="clearIcon()"
+                [class.selected]="!typeForm.value.icone"
+              >
+                <!-- <span class="no-icon">🚫</span> -->
+                <small class="text-muted">Aucune</small>
+              </div>
+
+              @for (icon of ICONES_TYPE_PRODUIT; track icon.label) {
+                <div
+                  class="icon-item"
+                  (click)="selectIcon(icon.value)"
+                  [class.selected]="typeForm.value.icone === icon.value"
+                >
+                  <i
+                    class="bi"
+                    [ngClass]="icon.value"
+                    [style.color]="typeForm.value.couleur || '#333'"
+                  ></i>
+                  <small>{{ icon.label }}</small>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 my-3 text-center">
+          @if (!typeEditMode()) {
+            <button
+              type="submit"
+              class="btn-glass"
+              [disabled]="loaderService.isLoading() || typeForm.invalid"
+            >
+              Ajouter
+            </button>
+          } @else {
+            <div class="w-100 d-flex flex-row flex-wrap justify-content-center align-items-center gap-2">
+              <button
+                type="submit"
+                class="btn-glass"
+              >
+                Valider
+              </button>
+              <button
+                type="button"
+                class="btn-glass-secondary"
+                (click)="discardEditType()"
+              >
+                Annuler
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-md-6">
+    <h4>Types actuels:</h4>
+    <hr>
+
+    @if (types().length === 0) {
+      <app-empty-row-list [label]="'Aucun type de produit'" />
+    }
+
+    @for (type of types(); track type._id; let i = $index) {
+      <div class="glass row-list-item mb-2" data-aos="fade-up" [attr.data-aos-delay]="(i+1)*100">
+        <div class="d-flex justify-content-center align-items-center">
+          <p 
+            class="mb-0"
+            [style.color]="type.couleur || '#333'"
+          >
+            {{ type.type| titlecase }}
+          </p>
+          @if (type.icone) {
+            <i
+              class="ms-2 bi fs-4"
+              [ngClass]="type.icone"
+              [style.color]="type.couleur || '#333'"
+            ></i>
+          }
+        </div>
+        
+        <div class="d-flex flex-row align-items-center gap-2">
+          <button class="btn btn-outline-primary px-2 py-1" (click)="editType(type)">
+            <i class="bi bi-pen-fill"></i>
+          </button>
+          <button class="btn btn-secondary px-2 py-1" (click)="toggleDeleteTypeDialog(type._id)">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+@if (showTypeDeleteDialog()) {
+  <app-dialog
+    dialog="Confirmer la suppression ?"
+    (dialogResponse)="onDeleteType($event)"
+    (clickOutside)="discardDeleteType()"
+  />
+}
