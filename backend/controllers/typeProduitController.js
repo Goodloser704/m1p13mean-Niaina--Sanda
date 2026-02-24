@@ -151,8 +151,21 @@ exports.creerTypeProduit = async (req, res) => {
     });
     
     if (typeExistant) {
-      return res.status(400).json({
-        message: 'Ce type de produit existe déjà pour cette boutique'
+      typeExistant.isActive = true;
+
+      // Update les autres champs
+      typeExistant.description = description;
+      typeExistant.icone = icone;
+      typeExistant.couleur = couleur;
+      typeExistant.ordre = ordre || 0;
+
+      await typeExistant.save();
+
+      await typeExistant.populate('boutique', 'nom');
+
+      return res.status(200).json({
+        message: 'Type de produit restauré avec succès',
+        typeProduit: typeExistant
       });
     }
     
