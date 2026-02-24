@@ -25,7 +25,7 @@ router.get('/achats/en-cours', commercantAuth, achatController.obtenirAchatsComm
 // @access  Private (Commercant)
 router.put('/achats/:id/livraison', commercantAuth, [
   body('dureeLivraison')
-    .matches(/^\d{2}:\d{2}:\d{2}$/)
+    .matches(/^\d+:[0-5]\d:[0-5]\d$/)
     .withMessage('La durée de livraison doit être au format hh:mm:ss')
 ], achatController.validerLivraison);
 
