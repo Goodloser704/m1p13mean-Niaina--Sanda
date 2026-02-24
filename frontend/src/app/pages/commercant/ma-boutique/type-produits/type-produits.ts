@@ -9,6 +9,7 @@ import { isActive } from '@angular/router';
 import { EmptyRowList } from "../../../../components/shared/empty-row-list/empty-row-list";
 import { TitleCasePipe, NgClass } from "@angular/common";
 import { Dialog } from "../../../../components/shared/dialog/dialog";
+import { DialogService } from '../../../../core/services/dialog.service';
 
 @Component({
   selector: 'app-type-produits',
@@ -28,9 +29,6 @@ export class TypeProduits implements OnInit, AfterViewInit {
   typeEditMode = signal(false);
   editingTypeId = signal<string | null>(null);
 
-  showTypeDeleteDialog = signal(false);
-  deletingTypeId = signal<string | null>(null);
-
   boutiqueService = inject(BoutiqueService);
   maBoutique = computed(() => this.boutiqueService.maBoutique()!);
 
@@ -48,7 +46,8 @@ export class TypeProduits implements OnInit, AfterViewInit {
 
   constructor(
     private fb: FormBuilder,
-    private typeProduitService: TypeProduitService
+    private typeProduitService: TypeProduitService,
+    private dialogService: DialogService
   ) {
     this.setTypeForm();
   }
@@ -177,37 +176,26 @@ export class TypeProduits implements OnInit, AfterViewInit {
     }
   }
 
-  toggleDeleteTypeDialog(idType: string) {
-    this.deletingTypeId.set(idType);
-    this.showTypeDeleteDialog.set(true);
-  }
+  deleteType(idType: string) {
+    this.dialogService.open(
+      "Confirmer la suppression ?",
+      (result) => {
+        if (result) {
+          this.loaderService.show();
 
-  discardDeleteType() {
-    this.deletingTypeId.set(null);
-    this.showTypeDeleteDialog.set(false);
-  }
-
-  onDeleteType(answer: boolean) {
-    const idType = this.deletingTypeId();
-    if (!idType || !answer) {
-      this.discardDeleteType();
-      return;
-    };
-
-    this.loaderService.show();
-
-    this.typeProduitService.supprimerTypeProduit(idType!)
-      .pipe(finalize(() => this.loaderService.hide()))
-      .subscribe({
-        next: () => {
-          this.types.update(current => 
-            current.filter(e => e._id != idType)
-          );
-
-          this.discardDeleteType();
-        },
-        error: console.error
-      });
+          this.typeProduitService.supprimerTypeProduit(idType!)
+            .pipe(finalize(() => this.loaderService.hide()))
+            .subscribe({
+              next: () => {
+                this.types.update(current => 
+                  current.filter(e => e._id != idType)
+                );
+              },
+              error: console.error
+            });
+        }
+      }
+    )
   }
 
   // -- End Core --

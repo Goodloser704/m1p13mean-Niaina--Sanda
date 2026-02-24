@@ -147,7 +147,7 @@
           <button class="btn btn-outline-primary px-2 py-1" (click)="editType(type)">
             <i class="bi bi-pen-fill"></i>
           </button>
-          <button class="btn btn-secondary px-2 py-1" (click)="toggleDeleteTypeDialog(type._id)">
+          <button class="btn btn-secondary px-2 py-1" (click)="deleteType(type._id)">
             <i class="bi bi-trash"></i>
           </button>
         </div>
@@ -155,11 +155,3 @@
     }
   </div>
 </div>
-
-@if (showTypeDeleteDialog()) {
-  <app-dialog
-    dialog="Confirmer la suppression ?"
-    (dialogResponse)="onDeleteType($event)"
-    (clickOutside)="discardDeleteType()"
-  />
-}
