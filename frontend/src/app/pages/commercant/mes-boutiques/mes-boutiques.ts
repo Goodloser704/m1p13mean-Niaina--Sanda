@@ -12,12 +12,11 @@ import { Boutique } from '../../../core/models/commercant/boutique.model';
 import { finalize } from 'rxjs';
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
 import { RouterLink } from "@angular/router";
-import { Loader } from "../../../components/shared/loader/loader";
 import { LoaderService } from "../../../core/services/loader.service";
 
 @Component({
   selector: 'app-mes-boutiques',
-  imports: [TitleCasePipe, EmptyGridList, RouterLink, Loader],
+  imports: [TitleCasePipe, EmptyGridList, RouterLink],
   templateUrl: './mes-boutiques.html',
   styleUrl: './mes-boutiques.scss',
 })

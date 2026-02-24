@@ -78,7 +78,7 @@
                   <li class="px-2 py-1 text-muted">{{ user.role }}</li>
                   <li><hr class="dropdown-divider"></li>
                   <li class="px-2 py-1 text-lg-center text-start">
-                    <button class="btn btn-sm btn-danger w-100" (click)="onClickLogout()">
+                    <button class="btn btn-sm btn-danger w-100" (click)="logOut()">
                       <i class="bi bi-home"></i>
                       Log out
                     </button>
@@ -92,12 +92,3 @@
     </nav>
   </div>
 </header>
-
-
-@if (showLogoutDialog()) {
-  <app-dialog 
-    dialog="Voulez-vous vraiment vous déconnecter ?"
-    (dialogResponse)="onLogoutAnswer($event)"
-    (clickOutside)="showLogoutDialog.set(false)"
-  />
-}

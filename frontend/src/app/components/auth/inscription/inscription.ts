@@ -3,7 +3,6 @@ import { AuthService } from '../../../core/services/auth.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Genre, User, UserRole } from '../../../core/models/user.model';
 import { Router, RouterLink } from '@angular/router';
-import { Loader } from "../../shared/loader/loader";
 import { compressImage } from '../../../core/functions/images-function';
 import { Location } from '@angular/common';
 import { LoaderService } from '../../../core/services/loader.service';
@@ -11,7 +10,7 @@ import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-inscription',
-  imports: [ReactiveFormsModule, Loader, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './inscription.html',
   styleUrl: './inscription.scss',
 })

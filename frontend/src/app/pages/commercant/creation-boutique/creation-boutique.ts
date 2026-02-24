@@ -1,21 +1,20 @@
 import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { BoutiqueService } from '../../../core/services/commercant/boutique.service';
-import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Boutique, HoraireHebdo, JourSemaine, StatutBoutique } from '../../../core/models/commercant/boutique.model';
-import { Loader } from "../../../components/shared/loader/loader";
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Boutique, StatutBoutique } from '../../../core/models/commercant/boutique.model';
 import { CategorieBoutique } from '../../../core/models/admin/categorie-boutique.model';
 import { CategorieBoutiqueService } from '../../../core/services/admin/categorie-boutique.service';
 import { finalize } from 'rxjs';
 import { compressImage } from '../../../core/functions/images-function';
 import { AuthService } from '../../../core/services/auth.service';
 import { Router, RouterLink } from '@angular/router';
-import { HoraireFormModel, HorairesForm } from '../../../components/shared/horaires-form/horaires-form';
+import { HorairesForm } from '../../../components/shared/horaires-form/horaires-form';
 import { Location } from '@angular/common';
 import { LoaderService } from '../../../core/services/loader.service';
 
 @Component({
   selector: 'app-creation-boutique',
-  imports: [ReactiveFormsModule, Loader, HorairesForm, RouterLink],
+  imports: [ReactiveFormsModule, HorairesForm, RouterLink],
   templateUrl: './creation-boutique.html',
   styleUrl: './creation-boutique.scss',
 })

@@ -1,12 +1,11 @@
 import { AfterViewInit, Component, computed, ElementRef, inject, ViewChild } from '@angular/core';
-import { Loader } from "../../../components/shared/loader/loader";
 import { BoutiqueService } from '../../../core/services/commercant/boutique.service';
 import { RouterOutlet, RouterLink, RouterLinkActive } from "@angular/router";
 import { LoaderService } from '../../../core/services/loader.service';
 
 @Component({
   selector: 'app-ma-boutique',
-  imports: [Loader, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './ma-boutique.html',
   styleUrl: './ma-boutique.scss',
 })

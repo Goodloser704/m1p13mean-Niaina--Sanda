@@ -1,22 +1,23 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Type } from '@angular/core';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { Dialog } from '../../components/shared/dialog/dialog';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DialogService {
   private overlay = inject(Overlay);
-  private overlayRef?: OverlayRef;
 
-  open(message: string, callback: (result: boolean) => void) {
+  open<T, R = any>(
+    component: Type<T>,
+    config?: { data?: any }
+  ) {
 
-    // Création overlay centré
-    this.overlayRef = this.overlay.create({
+    const overlayRef = this.overlay.create({
       hasBackdrop: true,
       backdropClass: 'cdk-overlay-dark-backdrop',
-      panelClass: 'dialog-panel',
       positionStrategy: this.overlay
         .position()
         .global()
@@ -24,24 +25,28 @@ export class DialogService {
         .centerVertically()
     });
 
-    // Fermer si click backdrop
-    this.overlayRef.backdropClick().subscribe(() => {
-      this.close();
+    const portal = new ComponentPortal(component);
+    const componentRef = overlayRef.attach(portal);
+
+    // Inject data dynamiquement
+    if (config?.data) {
+      Object.assign(componentRef.instance as any, config.data);
+    }
+
+    const close$ = new Subject<R>();
+
+    // On injecte une fonction close dans le component
+    (componentRef.instance as any).close = (result: R) => {
+      close$.next(result);
+      close$.complete();
+      overlayRef.dispose();
+    };
+
+    overlayRef.backdropClick().subscribe(() => {
+      close$.complete();
+      overlayRef.dispose();
     });
 
-    // Attacher ton component
-    const portal = new ComponentPortal(Dialog);
-    const componentRef = this.overlayRef.attach(portal);
-
-    componentRef.instance.dialog = message;
-
-    componentRef.instance.dialogResponse.subscribe(result => {
-      callback(result);
-      this.close();
-    });
-  }
-
-  close() {
-    this.overlayRef?.dispose();
+    return close$.asObservable();
   }
 }

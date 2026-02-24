@@ -1,7 +1,6 @@
-import { CurrencyPipe, DatePipe, DecimalPipe, NgClass, TitleCasePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { finalize, forkJoin } from 'rxjs';
-import { Loader } from "../../../components/shared/loader/loader";
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { EspacesStatsResponse } from '../../../core/models/admin/espaces.model';
@@ -46,7 +45,7 @@ interface PaiementsMoisCourantResponse {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, Loader, DecimalPipe, CurrencyPipe, DatePipe, BaseChartDirective],
+  imports: [NgClass, DecimalPipe, CurrencyPipe, DatePipe, BaseChartDirective],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })

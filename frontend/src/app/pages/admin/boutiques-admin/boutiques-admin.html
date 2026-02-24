@@ -75,7 +75,7 @@
               <button class="btn btn-outline-primary px-2 py-1" (click)="editCategorie(categorie)">
                 <i class="bi bi-pen-fill"></i>
               </button>
-              <button class="btn btn-secondary px-2 py-1" (click)="toggleDeleteCategorieDialog(categorie._id)">
+              <button class="btn btn-secondary px-2 py-1" (click)="deleteCategorie(categorie._id)">
                 <i class="bi bi-trash"></i>
               </button>
             </div>
@@ -320,18 +320,4 @@
   </div>
 </section>
 
-<!----- Categorie boutique ----->
 
-@if (showCategorieDeleteDialog()) {
-  <app-dialog
-    dialog="Confirmer la suppression ?"
-    (dialogResponse)="onDeleteCategorie($event)"
-    (clickOutside)="discardDeleteCategorie()"
-  />
-}
-
-<!--- End Categorie boutique --->
-
-@if (loaderService.isLoading()) {
-  <app-loader />
-}

@@ -6,12 +6,14 @@ import { User } from '../../../../core/models/user.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Dialog } from "../../../../components/shared/dialog/dialog";
 import { RouterLink } from "@angular/router";
+import { DialogService } from '../../../../core/services/dialog.service';
+import { filter, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-acheteur-header',
   templateUrl: './acheteur-header.html',
   styleUrl: './acheteur-header.scss',
-    imports: [TitleCasePipe, Dialog, RouterLink]
+    imports: [TitleCasePipe, RouterLink]
 })
 export class AcheteurHeader {
   centre = computed(() =>
@@ -19,24 +21,24 @@ export class AcheteurHeader {
       ?? this.centreCommercialService.getDefault()
   );
   currentUser = signal<User | null>(null);
-  showLogoutDialog = signal(false);
 
   constructor(
     private authService: AuthService,
-    private centreCommercialService: CentreCommercialService
+    private centreCommercialService: CentreCommercialService,
+    private dialogService: DialogService
   ) {
     this.currentUser.set(this.authService.currentUser());
   }
 
-  onClickLogout() {
-    this.showLogoutDialog.set(true);
-  }
-
-  onLogoutAnswer(answer: boolean) {
-    this.showLogoutDialog.set(false);
-
-    if (answer) {
-      this.authService.logOut();
-    }
+  logOut() {
+    this.dialogService
+      .open(Dialog, {
+        data: { message: "Voulez-vous vraiment vous déconnecter ?" }
+      })
+      .pipe(filter(result => result === true))
+      .subscribe({
+        next: () => this.authService.logOut(),
+        error: console.error
+      })
   }
 }

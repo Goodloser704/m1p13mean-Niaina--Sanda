@@ -2,7 +2,6 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from "@angular/router";
 import { AuthService } from '../../../core/services/auth.service';
 import { PorteFeuille as PF, PFTransaction } from '../../../core/models/porte-feuille.model';
-import { Loader } from "../../../components/shared/loader/loader";
 import { PorteFeuilleService } from '../../../core/services/porte-feuille.service';
 import { CurrencyPipe, DatePipe } from "@angular/common";
 import { LoaderService } from '../../../core/services/loader.service';
@@ -10,7 +9,7 @@ import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-porte-feuille',
-  imports: [Loader, CurrencyPipe, DatePipe],
+  imports: [CurrencyPipe, DatePipe],
   templateUrl: './porte-feuille.html',
   styleUrl: './porte-feuille.scss',
 })

@@ -7,9 +7,8 @@ import {
 } from "./../../../core/models/admin/espaces.model";
 import { AfterViewChecked, AfterViewInit, Component, effect, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Loader } from "../../../components/shared/loader/loader";
 import { Espace, Etage } from '../../../core/models/admin/espaces.model';
-import { finalize, forkJoin } from 'rxjs';
+import { filter, finalize, switchMap, tap } from 'rxjs';
 import { EspacesService } from '../../../core/services/admin/espaces.service';
 import { TitleCasePipe, UpperCasePipe, CurrencyPipe, NgClass, Location } from "@angular/common";
 import { Dialog } from "../../../components/shared/dialog/dialog";
@@ -19,10 +18,11 @@ import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-
 import Aos from "aos";
 import { RouterLink } from "@angular/router";
 import { LoaderService } from "../../../core/services/loader.service";
+import { DialogService } from "../../../core/services/dialog.service";
 
 @Component({
   selector: 'app-espaces',
-  imports: [ReactiveFormsModule, Loader, TitleCasePipe, Dialog, UpperCasePipe, CurrencyPipe, NgClass, EmptyRowList, EmptyGridList, RouterLink],
+  imports: [ReactiveFormsModule, TitleCasePipe, UpperCasePipe, CurrencyPipe, NgClass, EmptyRowList, EmptyGridList, RouterLink],
   templateUrl: './espaces.html',
   styleUrl: './espaces.scss',
 })
@@ -35,7 +35,8 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
   constructor(
     private fb: FormBuilder,
-    private espacesService: EspacesService
+    private espacesService: EspacesService,
+    private dialogService: DialogService
   ) {
     this.setEtageForm();
     this.setEspaceForm();
@@ -81,9 +82,6 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
   floorEditMode = signal(false);
   editingFloorId = signal<string | null>(null);
-
-  showFloorDeleteDialog = signal(false);
-  deletingFloorId = signal<string | null>(null);
 
   setEtageForm() {
     this.etageForm = this.fb.nonNullable.group({
@@ -186,36 +184,22 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
     }
   }
 
-  toggleDeleteFloorDialog(etageId: string) {
-    this.deletingFloorId.set(etageId);
-    this.showFloorDeleteDialog.set(true);
-  }
-
-  discardDeleteFloor() {
-    this.deletingFloorId.set(null);
-    this.showFloorDeleteDialog.set(false);
-  }
-
-  onDeleteFloor(answer: boolean) {
-    const etageId = this.deletingFloorId();
-    if (!etageId || !answer) {
-      this.discardDeleteFloor();
-      return;
-    };
-
-    this.loaderService.show();
-
-    this.espacesService.deleteFloor(etageId!)
+  deleteFloor(idEtage: string) {
+    this.dialogService
+      .open(Dialog, {
+        data: { message: "Confirmer la suppression ?" }
+      })
       .pipe(
+        filter(Boolean),
+        tap(() => this.loaderService.show()),
+        switchMap(() => this.espacesService.deleteFloor(idEtage)),
         finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: () => {
-          this.etages.update(current => 
-            current.filter(e => e._id != etageId)
+          this.etages.update(current =>
+            current.filter(e => e._id != idEtage)
           );
-
-          this.discardDeleteFloor();
         },
         error: console.error
       });
@@ -230,12 +214,6 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
   spaceEditMode = signal(false);
   editingSpaceId = signal<string | null>(null);
-
-  showSpaceDeleteDialog = signal(false);
-  deletingSpaceId = signal<string | null>(null);
-
-  showLibererDialog = signal(false);
-  libererSpaceId = signal<string | null>(null);
 
   espacePagination = createPagination(10);
 
@@ -337,83 +315,52 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
     }
   }
 
-  toggleDeleteEspaceDialog(espaceId: string) {
-    this.deletingSpaceId.set(espaceId);
-    this.showSpaceDeleteDialog.set(true);
-  }
-
-  discardDeleteEspace() {
-    this.deletingSpaceId.set(null);
-    this.showSpaceDeleteDialog.set(false);
-  }
-
-
-  onDeleteEspace(answer: boolean) {
-    const espaceId = this.deletingSpaceId();
-
-    if (!espaceId || !answer) {
-      this.discardDeleteEspace();
-      return;
-    }
-
-    this.loaderService.show();
-
-    this.espacesService.deleteSpace(espaceId)
+  deleteEspace(idEspace: string) {
+    this.dialogService
+      .open(Dialog, {
+        data: { message: "Confirmer la suppression ?" }
+      })
       .pipe(
+        filter(Boolean),
+        tap(() => this.loaderService.show()),
+        switchMap(() => this.espacesService.deleteSpace(idEspace)),
         finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: () => {
           this.espaces.update(current =>
-            current.filter(e => e._id !== espaceId)
+            current.filter(e => e._id !== idEspace)
           );
 
           // Revenir a la page precedent si la page actuel n'a plus d'element
           if (this.espaces().length === 0 && this.espacePagination.currentPage() > 1) {
             this.espacePagination.previous();
           }
-
-          this.discardDeleteEspace();
         },
         error: console.error
       });
   }
 
-  toggleLibererDialog(espaceId: string) {
-    this.libererSpaceId.set(espaceId);
-    this.showLibererDialog.set(true);
-  }
-
-  discardLibererDialog() {
-    this.libererSpaceId.set(null);
-    this.showLibererDialog.set(false);
-  }
-
-  onLibererEspace(answer: boolean) {
-    const espaceId = this.libererSpaceId();
-
-    if (!espaceId || !answer) {
-      this.discardLibererDialog();
-      return;
-    }
-
-    this.loaderService.show();
-
-    this.espacesService.libererUneEspace(espaceId)
+  libererEspace(idEspace: string) {
+    this.dialogService
+      .open(Dialog, {
+        data: { message: "Confirmer la suppression ?" }
+      })
       .pipe(
+        filter(Boolean),
+        tap(() => this.loaderService.show()),
+        switchMap(() => this.espacesService.libererUneEspace(idEspace)),
         finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: () => {
           this.espaces.update(current =>
             current.map(e =>
-              e._id === espaceId
+              e._id === idEspace
                 ? { ...e, statut: EspaceStatut.Disponible, boutique: null }
                 : e
             )
           );
-
-          this.discardLibererDialog();
         },
         error: console.error
       });

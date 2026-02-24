@@ -7,10 +7,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   styleUrl: './dialog.scss',
 })
 export class Dialog {
-  @Input() dialog: string = 'Yes or No ?';
-  @Output() dialogResponse = new EventEmitter<boolean>();
-
-  onChoose(value: boolean) {
-    this.dialogResponse.emit(value);
-  }
+  @Input() message: string = 'Confirmation';
+  close!: (result: boolean) => void;
 }

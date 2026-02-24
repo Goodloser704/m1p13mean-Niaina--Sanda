@@ -1,11 +1,10 @@
 import { AfterViewChecked, AfterViewInit, Component, effect, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CategorieBoutique } from '../../../core/models/admin/categorie-boutique.model';
 import { CategorieBoutiqueService } from '../../../core/services/admin/categorie-boutique.service';
-import { finalize } from 'rxjs';
+import { filter, finalize, switchMap, tap } from 'rxjs';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Location, NgClass, TitleCasePipe } from "@angular/common";
 import { Dialog } from "../../../components/shared/dialog/dialog";
-import { Loader } from "../../../components/shared/loader/loader";
 import { EmptyRowList } from "../../../components/shared/empty-row-list/empty-row-list";
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
 import {
@@ -21,10 +20,11 @@ import { createPagination } from '../../../core/functions/pagination-function';
 import Aos from 'aos';
 import { RouterLink } from "@angular/router";
 import { LoaderService } from '../../../core/services/loader.service';
+import { DialogService } from '../../../core/services/dialog.service';
 
 @Component({
   selector: 'app-boutiques-admin',
-  imports: [ReactiveFormsModule, TitleCasePipe, Dialog, Loader, EmptyRowList, EmptyGridList, NgClass, RouterLink],
+  imports: [ReactiveFormsModule, TitleCasePipe, EmptyRowList, EmptyGridList, NgClass, RouterLink],
   templateUrl: './boutiques-admin.html',
   styleUrl: './boutiques-admin.scss',
 })
@@ -39,7 +39,8 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
   constructor(
     private fb: FormBuilder,
     private categorieBoutiqueService: CategorieBoutiqueService,
-    private boutiqueService: BoutiqueService
+    private boutiqueService: BoutiqueService,
+    private dialogService: DialogService
   ) {
     this.setCategorieForm();
 
@@ -74,9 +75,6 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
 
   categorieEditMode = signal(false);
   editingCategorieId = signal<string | null>(null);
-
-  showCategorieDeleteDialog = signal(false);
-  deletingCategorieId = signal<string | null>(null);
 
   getAllCategories() {
     this.startLoading();
@@ -170,36 +168,22 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
     }
   }
 
-  toggleDeleteCategorieDialog(idCategorie: string) {
-    this.deletingCategorieId.set(idCategorie);
-    this.showCategorieDeleteDialog.set(true);
-  }
-
-  discardDeleteCategorie() {
-    this.deletingCategorieId.set(null);
-    this.showCategorieDeleteDialog.set(false);
-  }
-
-  onDeleteCategorie(answer: boolean) {
-    const idCategorie = this.deletingCategorieId();
-    if (!idCategorie || !answer) {
-      this.discardDeleteCategorie();
-      return;
-    };
-
-    this.startLoading();
-
-    this.categorieBoutiqueService.deleteCategorie(idCategorie!)
+  deleteCategorie(idCategorie: string) {
+    this.dialogService
+      .open(Dialog, {
+        data: { message: "Confirmer la suppression ?" }
+      })
       .pipe(
-        finalize(() => this.stopLoading())
+        filter(Boolean),
+        tap(() => this.loaderService.show()),
+        switchMap(() => this.categorieBoutiqueService.deleteCategorie(idCategorie)),
+        finalize(() => this.loaderService.hide())
       )
       .subscribe({
         next: () => {
           this.categories.update(current => 
             current.filter(e => e._id != idCategorie)
           );
-
-          this.discardDeleteCategorie();
         },
         error: console.error
       });

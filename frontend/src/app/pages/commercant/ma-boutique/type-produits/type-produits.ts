@@ -2,18 +2,18 @@ import { AfterViewInit, Component, computed, ElementRef, inject, OnInit, signal,
 import { LoaderService } from '../../../../core/services/loader.service';
 import { TypeProduitService } from '../../../../core/services/commercant/type-produit.service';
 import { TypeProduit } from '../../../../core/models/commercant/type-produit.model';
-import { finalize } from 'rxjs';
+import { filter, finalize, switchMap, tap } from 'rxjs';
 import { BoutiqueService } from '../../../../core/services/commercant/boutique.service';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { isActive } from '@angular/router';
 import { EmptyRowList } from "../../../../components/shared/empty-row-list/empty-row-list";
 import { TitleCasePipe, NgClass } from "@angular/common";
 import { Dialog } from "../../../../components/shared/dialog/dialog";
 import { DialogService } from '../../../../core/services/dialog.service';
+import { DurationDialog } from "../../../../components/shared/duration-dialog/duration-dialog";
 
 @Component({
   selector: 'app-type-produits',
-  imports: [ReactiveFormsModule, EmptyRowList, TitleCasePipe, NgClass, Dialog],
+  imports: [ReactiveFormsModule, EmptyRowList, TitleCasePipe, NgClass, DurationDialog],
   templateUrl: './type-produits.html',
   styleUrl: './type-produits.scss',
 })
@@ -177,25 +177,26 @@ export class TypeProduits implements OnInit, AfterViewInit {
   }
 
   deleteType(idType: string) {
-    this.dialogService.open(
-      "Confirmer la suppression ?",
-      (result) => {
-        if (result) {
-          this.loaderService.show();
-
-          this.typeProduitService.supprimerTypeProduit(idType!)
-            .pipe(finalize(() => this.loaderService.hide()))
-            .subscribe({
-              next: () => {
-                this.types.update(current => 
-                  current.filter(e => e._id != idType)
-                );
-              },
-              error: console.error
-            });
-        }
-      }
-    )
+    this.dialogService
+      .open(Dialog, {
+        data: { message: "Confirmer la suppression ??" }
+      })
+      .pipe(
+        filter(result => result === true),
+        tap(() => this.loaderService.show()),
+        switchMap(() => 
+          this.typeProduitService.supprimerTypeProduit(idType)
+        ),
+        finalize(() => this.loaderService.hide())
+      )
+      .subscribe({
+        next: () => {
+          this.types.update(current => 
+            current.filter(e => e._id != idType)
+          );
+        },
+        error: console.error
+      });
   }
 
   // -- End Core --
