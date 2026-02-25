@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormsModule, Validators, ReactiveFormsModule } from "@angular/forms";
+import { toFormattedString } from '../../../core/functions/date-function';
 
 @Component({
   selector: 'app-duration-dialog',
@@ -20,17 +21,16 @@ export class DurationDialog {
     });
   }
 
-  private pad(value: number): string {
-    return value.toString().padStart(2, '0');
-  }
-
   get formattedDuration(): string | null {
     if (this.form.invalid) return null;
-
     const { jour, heure, minute, seconde } = this.form.value;
-    const totalHeures = (jour! * 24) + heure!;
 
-    return `${this.pad(totalHeures)}:${this.pad(minute!)}:${this.pad(seconde!)}`;
+    return toFormattedString({
+      jour: jour,
+      heure: heure,
+      minute: minute,
+      seconde: seconde
+    });
   }
 
   submit() {

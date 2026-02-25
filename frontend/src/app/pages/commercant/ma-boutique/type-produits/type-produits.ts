@@ -56,7 +56,7 @@ export class TypeProduits implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.childSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    //this.childSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   getAllTypes() {

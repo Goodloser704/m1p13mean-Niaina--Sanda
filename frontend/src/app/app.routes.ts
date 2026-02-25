@@ -22,7 +22,6 @@ import { DemandesLocation } from './pages/admin/demandes-location/demandes-locat
 import { BoutiquesAdmin } from './pages/admin/boutiques-admin/boutiques-admin';
 import { CreationBoutique } from './pages/commercant/creation-boutique/creation-boutique';
 import { MaBoutique } from './pages/commercant/ma-boutique/ma-boutique';
-import { Produits } from './pages/commercant/ma-boutique/produits/produits';
 import { TypeProduits } from './pages/commercant/ma-boutique/type-produits/type-produits';
 import { GestionProduit } from './pages/commercant/ma-boutique/gestion-produit/gestion-produit';
 import { GestionAchats } from './pages/commercant/ma-boutique/gestion-achats/gestion-achats';
@@ -72,14 +71,13 @@ export const routes: Routes = [
         path: 'ma-boutique', 
         component: MaBoutique,
         children: [
-          { path: 'produits', component: Produits },
           { path: 'type-produits', component: TypeProduits },
           { path: 'gestion-produit', component: GestionProduit },
           { path: 'gestion-achats', component: GestionAchats },
           { path: 'location-espace', component: LocationEspace },
           { path: 'loyers', component: Loyers },
           { path: 'infos', component: Infos },
-          { path: '', redirectTo: 'produits', pathMatch: 'full' }
+          { path: '', redirectTo: 'infos', pathMatch: 'full' }
         ]
       },
 

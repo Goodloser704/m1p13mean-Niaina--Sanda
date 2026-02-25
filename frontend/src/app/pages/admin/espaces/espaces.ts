@@ -190,7 +190,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
         data: { message: "Confirmer la suppression ?" }
       })
       .pipe(
-        filter(Boolean),
+        filter(result => result === true),
         tap(() => this.loaderService.show()),
         switchMap(() => this.espacesService.deleteFloor(idEtage)),
         finalize(() => this.loaderService.hide())
@@ -321,7 +321,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
         data: { message: "Confirmer la suppression ?" }
       })
       .pipe(
-        filter(Boolean),
+        filter(result => result === true),
         tap(() => this.loaderService.show()),
         switchMap(() => this.espacesService.deleteSpace(idEspace)),
         finalize(() => this.loaderService.hide())
@@ -347,7 +347,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
         data: { message: "Confirmer la suppression ?" }
       })
       .pipe(
-        filter(Boolean),
+        filter(result => result === true),
         tap(() => this.loaderService.show()),
         switchMap(() => this.espacesService.libererUneEspace(idEspace)),
         finalize(() => this.loaderService.hide())

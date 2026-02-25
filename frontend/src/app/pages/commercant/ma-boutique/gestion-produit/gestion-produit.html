@@ -1,1 +1,275 @@
-<p>gestion-produit works!</p>
+<div #childSection class="mb-4 scroll-margin-top">
+  <!-- <h3>Type de produit</h3> -->
+  <p class="text-primary text-wrap">Gérer vos produits</p>
+</div>
+
+@if (!newProduct()) {
+  <div class="row mb-4" data-aos="fade-left" data-aos-delay="200">
+    <div class="col-12">
+      <button 
+        type="button" 
+        class="btn-glass-tertiary fs-4" 
+        (click)="toggleNewProduct()"
+      >
+        Créer <i class="bi bi-plus"></i>
+      </button>
+    </div>
+  </div>
+}
+
+<!--------- Formulaire ---------->
+
+@if (newProduct() || editProductMode()) {
+  <div #formSection class="row liquid-glass mb-4">
+    <div class="col-12">
+      <h4>Produit:</h4>
+      <hr>
+
+      <form
+        class="php-email-form"
+        [formGroup]="productForm"
+        (ngSubmit)="onSubmitProduct()"
+        data-aos="fade-up"
+        data-aos-delay="200"
+      >
+        <div class="row gy-3">
+
+          <div class="col-sm-6">
+            <label class="form-label" for="nom">Nom du produit</label>
+            <input
+              type="text"
+              id="nom"
+              class="form-control"
+              placeholder="Nom"
+              formControlName="nom"
+            >
+          </div>
+
+          <div class="col-sm-6">
+            <label class="form-label" for="prix">Prix unitaire</label>
+            <input
+              type="number"
+              id="prix"
+              class="form-control"
+              placeholder="Prix"
+              formControlName="prix"
+            >
+          </div>
+
+          <div class="col-sm-6">
+            <label class="form-label" for="type">Type de produit</label>
+            <select id="type" class="form-control" formControlName="typeProduit">
+              <option value="" disabled selected>- Type -</option>
+              @for (type of typesProduit(); track type._id) {
+                <option [value]="type._id">{{ type.type }}</option>
+              } 
+            </select>
+          </div>
+
+          <div class="col-sm-6">
+            <label class="form-label" for="stock">Stock disponible</label>
+            <input
+              type="number"
+              id="stock"
+              class="form-control"
+              placeholder="Nombre"
+              formControlName="stock"
+            >
+          </div>
+
+          <div class="col-sm-6">
+            <div class="bg-white rounded-2 border border-1 p-2">
+              <p>Temps de préparation</p>
+              <div class="row">
+                <div class="col-6 col-md-5 col-lg-3">
+                  <label class="form-label text-muted small">Heure</label>
+                  <input class="form-control" type="number" formControlName="heure" />
+                  @if (productForm.get('heure')?.invalid && productForm.get('heure')?.touched) {
+                    <div class="text-danger small mt-1">
+                      0 à 23 uniquement
+                    </div>
+                  }
+                </div>
+
+                <div class="col-6 col-md-5 col-lg-3">
+                  <label class="form-label text-muted small">Minute</label>
+                  <input class="form-control" type="number" formControlName="minute" />
+                  @if (productForm.get('minute')?.invalid && productForm.get('minute')?.touched) {
+                    <div class="text-danger small mt-1">
+                      0 à 59 uniquement
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <textarea
+              class="form-control h-100"
+              placeholder="Description"
+              formControlName="description"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <div class="col-sm-6">
+            <label 
+              for="formFile" 
+              class="form-label text-secondary"
+            >
+              Photo (optionnel, max: 2mo)
+            </label>
+            <input
+              type="file" 
+              #photoInput
+              id="formFile"
+              class="form-control"
+              (change)="onPhotoSelected($event)"
+              accept="image/*"
+            >
+            @if (photoSizeError()) {
+              <p class="text-danger mt-2">Taille du fichier maximum (2MB)</p>
+            }
+          </div>
+
+          <div class="col-12 mt-4 text-center">
+            @if (!editProductMode()) {
+              <div class="w-100 d-flex flex-row flex-wrap justify-content-center align-items-center gap-2">
+                <button
+                  type="submit"
+                  class="btn-glass"
+                  [disabled]="loaderService.isLoading() || productForm.invalid"
+                >
+                  Ajouter
+                </button>
+                <button
+                    type="button"
+                    class="btn-glass-secondary"
+                    (click)="discardNewProduct()"
+                  >
+                    Annuler
+                  </button>
+              </div>
+            } @else {
+              <div class="w-100 d-flex flex-row flex-wrap justify-content-center align-items-center gap-2">
+                <button
+                  type="submit"
+                  class="btn-glass"
+                >
+                  Valider
+                </button>
+                <button
+                  type="button"
+                  class="btn-glass-secondary"
+                  (click)="discardEditProduct()"
+                >
+                  Annuler
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!--------- Liste Produits ---------->
+
+<div class="row liquid-glass mb-4">
+  <div class="col-12">
+    <h4>Vos produits:</h4>
+    <hr>
+
+    <div class="row">
+      @if (products().length === 0) {
+        <app-empty-grid-list [label]="'Aucun produit'" />
+      }
+
+      @for (product of productsWithType(); track product._id; let i = $index) {
+        <div class="col-12 col-sm-6 col-lg-4 mb-4" data-aos="fade-left" [attr.data-aos-delay]="(i+1)*100">
+          <div class="card h-100 glass boutique-card">
+            <img
+              [src]="product.photo ? product.photo : 'assets/img/story-set/shopping-bag.png'"
+              class="card-img-top"
+              loading="lazy"
+              [alt]="product.nom"
+            >
+
+            <div class="position-absolute w-100 top-0 p-2 d-flex justify-content-end align-items-end gap-2">
+              <button 
+                type="button"
+                class="btn btn-sm btn-light rounded-2"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="Modifier"
+                (click)="editProduct(product)"
+              >
+                <i class="bi bi-pen"></i>
+              </button>
+
+              <button 
+                type="button"
+                class="btn btn-sm btn-danger rounded-2"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="Effacer"
+                (click)="deleteProduct(product._id)"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="mb-0 fw-bold">{{ product.nom | titlecase }}</h5>
+                <span class="badge" [ngClass]="product.stock.nombreDispo == 0 ? 'bg-danger' : 'bg-success'">
+                  {{ product.stock.nombreDispo }} <i class="bi bi-box-seam"></i>
+                </span>
+              </div>
+
+              @if (product.description) {
+                <p class="small mb-2 text-primary">{{ product.description }}</p>
+              }
+
+              <div class="d-flex align-items-center mb-1 small gap-2">
+                @if (!product.tempsPreparation && product.stock.nombreDispo > 0) {
+                  <p class="small text-muted">Disponible de suite</p>
+                } @else if (product.tempsPreparation && product.stock.nombreDispo > 0) {
+                  <p class="small text-muted">Disponible dans {{ product.tempsPreparation | timeDuration }}</p>
+                } @else {
+                  <p class="small text-muted">Non disponible</p>
+                }
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                @if (product.typeProduitObj; as typeProduit) {
+                  <div class="d-flex px-2 py-1 border border-1 rounded-2 small"
+                    [style.borderColor]="`${typeProduit.couleur} !important` || 'lightgrey !important'"
+                  >
+                    <p [style.color]="typeProduit.couleur || '#333'">
+                      {{ typeProduit.type }}
+                    </p>
+
+                    @if (typeProduit.icone) {
+                      <i
+                        class="ms-2 bi"
+                        [ngClass]="typeProduit.icone"
+                        [style.color]="typeProduit.couleur || '#333'"
+                      ></i>
+                    }
+                  </div>
+                }
+
+                <div class="bg-warning p-1 rounded-2 ms-2">
+                  <b>{{ product.prix | currency:'MGA':'Ar ':'1.2-2' }}</b>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

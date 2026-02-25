@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { Boutique, BoutiqueStatsResponse, StatutBoutique } from '../../models/commercant/boutique.model';
@@ -62,15 +62,29 @@ export class BoutiqueService {
     );
   }
 
-  getBoutiqueProduits(idBoutique: string, page = 1, limit = 10) {
+  getBoutiqueProduits({
+    idBoutique, 
+    page = 1, 
+    limit = 10,
+    disponibleOnly = false,
+    statutBoutique,
+  }: {
+    idBoutique: string,
+    page?: number,
+    limit?: number,
+    disponibleOnly?: boolean,
+    statutBoutique?: StatutBoutique
+  }) {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('limit', limit);
+
+    if (disponibleOnly) params.set('disponibleOnly', disponibleOnly);
+    if (statutBoutique) params.set('statutBoutique', statutBoutique);
+
     return this.http.get<{ produits: Produit[], boutique: Boutique, pagination: Pagination }>(
       `${this.apiUrl}/api/boutiques/${idBoutique}/produits`,
-      {
-        params: {
-          page: page,
-          limit: limit
-        }
-      }
+      { params }
     );
   }
 

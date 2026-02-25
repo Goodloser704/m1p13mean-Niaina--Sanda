@@ -174,7 +174,7 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
         data: { message: "Confirmer la suppression ?" }
       })
       .pipe(
-        filter(Boolean),
+        filter(result => result === true),
         tap(() => this.loaderService.show()),
         switchMap(() => this.categorieBoutiqueService.deleteCategorie(idCategorie)),
         finalize(() => this.loaderService.hide())
