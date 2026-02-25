@@ -203,6 +203,7 @@ exports.creerProduit = async (req, res) => {
     const {
       nom,
       description,
+      photo,
       prix,
       typeProduit,
       boutique,
@@ -242,6 +243,7 @@ exports.creerProduit = async (req, res) => {
     const produit = new Produit({
       nom,
       description,
+      photo,
       prix,
       typeProduit,
       boutique,
