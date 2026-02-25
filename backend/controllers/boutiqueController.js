@@ -117,7 +117,7 @@ class BoutiqueController {
       const produits = await require('../models/Produit')
         .find(query)
         .populate('boutique', 'nom')
-        .populate('typeProduit', 'type')
+        .populate('typeProduit', 'type description icone couleur')
         .sort({ nom: 1 })
         .limit(parseInt(limit))
         .skip((parseInt(page) - 1) * parseInt(limit));

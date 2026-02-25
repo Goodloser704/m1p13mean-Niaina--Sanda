@@ -31,8 +31,8 @@ exports.obtenirProduits = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
     const produits = await Produit.find(criteres)
-      .populate('typeProduit', 'nom description')
-      .populate('boutique', 'nom proprietaire')
+      .populate('typeProduit', 'type description icone couleur')
+      .populate('boutique', 'nom commercant')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -107,7 +107,7 @@ exports.obtenirProduitsParBoutique = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
     const produits = await Produit.find(criteres)
-      .populate('typeProduit', 'type')
+      .populate('typeProduit', 'type description icone couleur')
       .populate('boutique', 'nom')
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -163,7 +163,7 @@ exports.obtenirMesProduits = async (req, res) => {
     
     const produits = await Produit.find(query)
       .populate('boutique', 'nom')
-      .populate('typeProduit', 'type')
+      .populate('typeProduit', 'type description icone couleur')
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit));
@@ -260,7 +260,7 @@ exports.creerProduit = async (req, res) => {
     // Populer les données pour la réponse
     await produit.populate([
       { path: 'boutique', select: 'nom' },
-      { path: 'typeProduit', select: 'type' }
+      { path: 'typeProduit', select: 'type description icone couleur' }
     ]);
     
     res.status(201).json({
@@ -292,7 +292,9 @@ exports.modifierProduit = async (req, res) => {
     const updateData = req.body;
     
     // Récupérer le produit avec sa boutique
-    const produit = await Produit.findById(id).populate('boutique');
+    const produit = await Produit.findById(id)
+    .populate('boutique')
+    .populate('typeProduit', 'type description icone couleur');
     
     if (!produit) {
       return res.status(404).json({
@@ -360,7 +362,9 @@ exports.modifierStock = async (req, res) => {
     const { nombreDispo } = req.body;
     
     // Récupérer le produit avec sa boutique
-    const produit = await Produit.findById(id).populate('boutique');
+    const produit = await Produit.findById(id)
+      .populate('boutique')
+      .populate('typeProduit', 'type description icone couleur');
     
     if (!produit) {
       return res.status(404).json({
@@ -455,7 +459,7 @@ exports.obtenirProduitParId = async (req, res) => {
     
     const produit = await Produit.findOne({ _id: id, isActive: true })
       .populate('boutique', 'nom description contact horairesHebdo')
-      .populate('typeProduit', 'type description');
+      .populate('typeProduit', 'type description icone couleur');
     
     if (!produit) {
       return res.status(404).json({
