@@ -92,13 +92,15 @@ class BoutiqueController {
     
     try {
       const { id } = req.params;
-      const { page = 1, limit = 20, disponibleOnly = 'true' } = req.query;
+      const { page = 1, limit = 20, disponibleOnly = 'true', statutBoutique } = req.query;
+
+      const filter = { _id: id };
+      if (statutBoutique) {
+        filter.statutBoutique = statutBoutique;
+      }
       
       // Vérifier que la boutique existe et est active
-      const boutique = await require('../models/Boutique').findOne({
-        _id: id,
-        statutBoutique: 'Actif'
-      });
+      const boutique = await require('../models/Boutique').findOne(filter);
       
       if (!boutique) {
         console.log(`❌ Boutique non trouvée ou inactive: ${id}`);
