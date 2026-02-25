@@ -309,7 +309,18 @@ exports.modifierProduit = async (req, res) => {
     }
     
     // Mettre à jour les champs autorisés
-    const allowedFields = ['nom', 'description', 'prix', 'tempsPreparation', 'images', 'caracteristiques', 'isActive'];
+    const allowedFields = [
+      'nom', 
+      'description', 
+      'photo',
+      'prix',
+      'typeProduit', 
+      'tempsPreparation',
+      'stock', 
+      'images', 
+      'caracteristiques', 
+      'isActive'
+    ];
     allowedFields.forEach(field => {
       if (updateData[field] !== undefined) {
         produit[field] = updateData[field];
