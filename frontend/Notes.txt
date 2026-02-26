@@ -46,3 +46,7 @@ _ Configuration dans angular.json:
   "node_modules/glightbox/dist/js/glightbox.min.js",
   "node_modules/swiper/swiper-bundle.min.js"
 ]
+
+--------------------------------------------------------------------
+
+Activer Mongo Replica Set pour utiliser les transactions

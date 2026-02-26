@@ -13,7 +13,11 @@
         <hr>
       </div>
 
-      <!-- @for (demande of demandesEnCours(); track demande._id) { -->
+      @if (demandesEnCours().length === 0) {
+        <app-empty-grid-list [label]="'Aucune demande'"></app-empty-grid-list>
+      }
+
+      @for (demande of demandesWithDetails(); track demande._id) {
         <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
           <div class="card h-100 glass">
             <div class="card-body d-flex flex-column">
@@ -22,47 +26,51 @@
               <div class="d-flex justify-content-between align-items-start mb-1 small">
                 <p>Demandeur:</p>
                 <div class="d-flex flex-column align-items-end text-end">
-                  <b>Boutique 1</b>
-                  <b>De Rakoto Jean</b>
+                  <b>{{ demande.boutique.nom }}</b>
+                  <b>({{ demande.commercantNames }})</b>
                 </div>
               </div>
 
               <div class="d-flex justify-content-between align-items-start mb-1 small">
                 <p>Local:</p>
                 <div class="d-flex flex-column align-items-end text-end">
-                  <b>Code 1</b>
-                  <b>Etage 1</b>
+                  <b>{{ demande.espace.code }}</b>
+                  <b>{{ demande.espaceEtageNom }}</b>
                 </div>
               </div>
 
               <div class="d-flex justify-content-between align-items-start mb-1 small">
                 <p>Details:</p>
                 <div class="d-flex flex-column align-items-end text-end">
-                  <b>1m²</b>
-                  <b>1 000 000 Ar/mois</b>
+                  <b>{{ demande.espace.surface }} m²</b>
+                  <b>{{ demande.espace.loyer | currency:'MGA':'Ar':'1.0-0' }}/mois</b>
                 </div>
               </div>
 
               <div class="d-flex justify-content-between align-items-end mt-2">
-                <p class="text-primary small">2026-02-17</p>
+                <p class="text-primary small">{{ demande.createdAt | date: 'd MMM yyyy, HH:mm' }}</p>
 
                 <!-- Actions -->
                 <div class="mt-auto d-flex justify-content-end gap-2">
 
                   <button 
+                    type="button"
                     class="btn btn-sm btn-success rounded-2"
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
                     title="Accepter"
+                    (click)="accepter(demande._id)"
                   >
                     <i class="bi bi-check"></i>
                   </button>
 
                   <button 
+                    type="button"
                     class="btn btn-sm btn-danger rounded-2"
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
                     title="Refuser"
+                    (click)="refuser(demande._id)"
                   >
                     <i class="bi bi-x"></i>
                   </button>
@@ -74,7 +82,7 @@
           </div>
 
         </div>
-      <!-- } -->
+      }
 
       <div class="col-12 d-flex justify-content-end align-items-center">
         <nav aria-label="Page navigation">
@@ -123,7 +131,11 @@
         <hr>
       </div>
 
-      <!-- @for (demande of ancienDemandes(); track demande._id) { -->
+      @if (ancienDemandes().length === 0) {
+        <app-empty-grid-list [label]="'Aucune demande'"></app-empty-grid-list>
+      }
+
+      @for (demande of ancienDemandesWithDetails(); track demande._id) {
         <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
           <div class="card h-100 glass">
             <div class="card-body d-flex flex-column">
@@ -132,50 +144,39 @@
               <div class="d-flex justify-content-between align-items-start mb-1 small">
                 <p>Demandeur:</p>
                 <div class="d-flex flex-column align-items-end text-end">
-                  <b>Boutique 1</b>
-                  <b>De Rakoto Jean</b>
+                  <b>{{ demande.boutique.nom }}</b>
+                  <b>({{ demande.commercantNames }})</b>
                 </div>
               </div>
 
               <div class="d-flex justify-content-between align-items-start mb-1 small">
                 <p>Local:</p>
                 <div class="d-flex flex-column align-items-end text-end">
-                  <b>Code 1</b>
-                  <b>Etage 1</b>
+                  <b>{{ demande.espace.code }}</b>
+                  <b>{{ demande.espaceEtageNom }}</b>
                 </div>
               </div>
 
               <div class="d-flex justify-content-between align-items-start mb-1 small">
                 <p>Details:</p>
                 <div class="d-flex flex-column align-items-end text-end">
-                  <b>1m²</b>
-                  <b>1 000 000 Ar/mois</b>
+                  <b>{{ demande.espace.surface }}</b>
+                  <b>{{ demande.espace.loyer | currency:'MGA':'Ar':'1.0-0' }}/mois</b>
                 </div>
               </div>
 
               <div class="d-flex justify-content-between align-items-start mb-1 small">
                 <p>Acceptée le:</p>
                 <div class="d-flex flex-column align-items-end text-end">
-                  <b>2026-02-18</b>
+                  <b>{{ demande.updatedAt | date: 'dd MMM yyyy, HH:mm' }}</b>
                 </div>
-              </div>
-
-              <div class="w-100 d-flex justify-content-end align-items-end mt-2">
-                <button 
-                  class="btn btn-sm btn-danger rounded-2"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="top"
-                  title="Refuser"
-                >
-                  <i class="bi bi-x"></i>
-                </button>
               </div>
 
             </div>
           </div>
 
         </div>
-      <!-- } -->
+      }
 
       <div class="col-12 d-flex justify-content-end align-items-center">
         <nav aria-label="Page navigation">

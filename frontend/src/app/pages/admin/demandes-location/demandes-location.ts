@@ -1,38 +1,54 @@
-import { finalize } from 'rxjs';
+import { filter, finalize, switchMap, tap } from 'rxjs';
 import { createPagination } from '../../../core/functions/pagination-function';
 import { DemandeLocation, EtatDemandeLocation } from '../../../core/models/admin/demande-location.model';
 import { DemandesLocationService } from './../../../core/services/admin/demandes-location.service';
-import { AfterViewInit, Component, effect, ElementRef, inject, signal, ViewChild } from '@angular/core';
-import { Location, NgClass } from "@angular/common";
+import { AfterViewInit, Component, computed, effect, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { Location, NgClass, CurrencyPipe, DatePipe } from "@angular/common";
 import { RouterLink } from "@angular/router";
 import { LoaderService } from '../../../core/services/loader.service';
+import { getBoutiqueCommercantLabel } from '../../../core/models/commercant/boutique.model';
+import { getEtage } from '../../../core/models/admin/espaces.model';
+import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
+import { DialogService } from '../../../core/services/dialog.service';
+import { Dialog } from '../../../components/shared/dialog/dialog';
 
 @Component({
   selector: 'app-demandes-location',
-  imports: [NgClass, RouterLink],
+  imports: [NgClass, RouterLink, CurrencyPipe, DatePipe, EmptyGridList],
   templateUrl: './demandes-location.html',
   styleUrl: './demandes-location.scss',
 })
 export class DemandesLocation implements AfterViewInit {
   @ViewChild('childSection') childSection!: ElementRef;
-  
-  loaderService = inject(LoaderService);
 
   demandePagination = createPagination(10);
   ancienDemandePagination = createPagination(10);
 
   demandesEnCours = signal<DemandeLocation[]>([]);
+  demandesWithDetails = computed(() => 
+    this.demandesEnCours().map(demande => ({
+      ...demande,
+      commercantNames: getBoutiqueCommercantLabel(demande.boutique),
+      espaceEtageNom: getEtage(demande.espace).nom
+    }))
+  );
+
   ancienDemandes = signal<DemandeLocation[]>([]);
-
-  accepterDemande = signal<DemandeLocation | null>(null);
-  showAccepterDialog = signal(false);
-
-  refuserDemande = signal<DemandeLocation | null>(null);
-  showRefuserDialog = signal(false);
+  ancienDemandesWithDetails = computed(() => 
+    this.ancienDemandes().map(demande => ({
+      ...demande,
+      commercantNames: getBoutiqueCommercantLabel(demande.boutique),
+      espaceEtageNom: getEtage(demande.espace).nom
+    }))
+  );
 
   Location = Location;
 
-  constructor(private demandesLocationService: DemandesLocationService) {
+  constructor(
+    private demandesLocationService: DemandesLocationService,
+    private dialogService: DialogService,
+    private loaderService: LoaderService
+  ) {
     effect(() => {
       const page = this.demandePagination.currentPage();
       this.getDemandesEnCours(page);
@@ -77,63 +93,51 @@ export class DemandesLocation implements AfterViewInit {
       .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
-          this.demandesEnCours.set(res.demandes);
+          this.ancienDemandes.set(res.demandes);
           this.ancienDemandePagination.setTotal(res.pagination.totalPages);
         },
         error: console.error
       })
   }
 
-  toggleAccepterDemande(demande: DemandeLocation) {
-    this.accepterDemande.set(demande);
-    this.showAccepterDialog.set(true);
+  accepter(idDemande: string) {
+   this.dialogService.open(Dialog, {
+    data: { message: "Accepter la demande ?" }
+   })
+    .pipe(
+      filter(result => result === true),
+      tap(() => this.loaderService.show()),
+      switchMap(() => this.demandesLocationService.accepterDemande(idDemande)),
+      finalize(() => this.loaderService.hide())
+    )
+    .subscribe({
+      next: (res) => {
+        console.log(res.message);
+
+        this.demandesEnCours.update(c => c.filter(d => d._id !== idDemande));
+        this.ancienDemandes.update(c => [res.demande, ...c]);
+      },
+      error: console.error
+    });
   }
 
-  discardAccepterDemande() {
-    this.accepterDemande.set(null);
-    this.showAccepterDialog.set(false);
-  }
-
-  accepter(answer: boolean) {
-    if (!this.accepterDemande || !answer) return;
-
-    this.loaderService.show();
-
-    const demande = this.accepterDemande()!;
-    this.demandesLocationService.accepterDemande(demande._id)
-      .pipe(finalize(() => this.loaderService.hide()))
+  refuser(idDemande: string) {
+    this.dialogService.open(Dialog, {
+      data: { message: "Refuser la demande ?" }
+    })
+      .pipe(
+        filter(result => result === true),
+        tap(() => this.loaderService.show()),
+        switchMap(() => this.demandesLocationService.refuserDemande(idDemande)),
+        finalize(() => this.loaderService.hide())
+      )
       .subscribe({
         next: (res) => {
-          this.demandesEnCours.update(c => c.filter(d => d._id != demande._id));
-          this.ancienDemandes.update(c => [res.demande, ...c]);
+          console.log(res.message);
+
+          this.demandesEnCours.update(c => c.filter(d => d._id !== idDemande));
         },
         error: console.error
-      })
-  }
-
-  toggleRefuserDemande(demande: DemandeLocation) {
-    this.refuserDemande.set(demande);
-    this.showRefuserDialog.set(true);
-  }
-
-  discardRefuserDemande() {
-    this.refuserDemande.set(null);
-    this.showRefuserDialog.set(false);
-  }
-
-  refuser(answer: boolean) {
-    if (!this.refuserDemande || !answer) return;
-
-    this.loaderService.show();
-
-    const demande = this.refuserDemande()!;
-    this.demandesLocationService.refuserDemande(demande._id)
-      .pipe(finalize(() => this.loaderService.hide()))
-      .subscribe({
-        next: (res) => {
-          this.demandesEnCours.update(c => c.filter(d => d._id != demande._id));
-        },
-        error: console.error
-      })
+      });
   }
 }

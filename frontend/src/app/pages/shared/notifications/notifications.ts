@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { LoaderService } from '../../../core/services/loader.service';
 import { NotificationsService } from './../../../core/services/notifications.service';
 import { AfterViewInit, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { logSafe } from '../../../core/functions/console-function';
 
 @Component({
   selector: 'app-notifications',
@@ -55,6 +56,8 @@ export class Notifications implements OnInit, AfterViewInit {
               new Date(a.createdAt).getTime()
           );
 
+          logSafe(res.data, 'Notifications: ');
+
           this.notifications.set(sorted);
           this.total.set(res.total);
           this.unreadCount.set(res.unreadCount);
@@ -64,13 +67,13 @@ export class Notifications implements OnInit, AfterViewInit {
   }
 
   markAsRead(notification: Notification) {
-    if (notification.estLu) return;
+    if (notification.isRead) return;
 
     this.notificationsService
       .markAsRead(notification._id)
       .subscribe({
         next: () => {
-          notification.estLu = true;
+          notification.isRead = true;
           this.unreadCount.update(v => v - 1);
         },
         error: (err) => {
@@ -87,7 +90,7 @@ export class Notifications implements OnInit, AfterViewInit {
           this.notifications.update((notifications) => 
             notifications.map(n => ({
               ...n,
-              estLu: true
+              isRead: true
             }))
           );
 

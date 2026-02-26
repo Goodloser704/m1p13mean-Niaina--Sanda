@@ -1,7 +1,8 @@
 export enum NotificationType {
   Paiement = "Paiement",
   Achat = "Achat",
-  Vente = "Vente"
+  Vente = "Vente",
+  Demande = "Demande"
 }
 
 export interface Notification {
@@ -9,7 +10,7 @@ export interface Notification {
   type: NotificationType,
   message: string,
   receveur: string,
-  estLu: boolean,
+  isRead: boolean,
   urlRoute: string,
   createdAt: string,
   updatedAt: string

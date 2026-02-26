@@ -46,12 +46,12 @@
               <div class="ms-2 d-flex align-items-center">
                 <p>{{ timeAgo(notification.createdAt) }}</p>
                 
-                @if (!notification.estLu) {
+                @if (!notification.isRead) {
                   <div class="unread-dot ms-2"></div>
                 }
               </div>
 
-              @if (!notification.estLu) {
+              @if (!notification.isRead) {
                 <i class="mark-as-read bi bi-check" role="button" (click)="markAsRead(notification)"></i>
               }
             </div>

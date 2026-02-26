@@ -10,7 +10,7 @@ export enum EtatDemandeLocation {
 
 export interface DemandeLocation {
   _id: string,
-  boutique: Boutique | string,
+  boutique: Boutique,
   espace: Espace,
   etatDemande: EtatDemandeLocation,
   createdAt: string,
@@ -38,7 +38,7 @@ export function boutiquePresent(boutique: Boutique | string): boolean {
   return false;
 }
 
-export function getBoutiqueName(boutique: Boutique | string): Boutique | null {
+export function getBoutique(boutique: Boutique | string): Boutique | null {
   if (typeof boutique === 'object' && boutique !== null) {
     return boutique;
   }
