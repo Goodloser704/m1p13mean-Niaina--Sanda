@@ -13,7 +13,7 @@ export class DemandesLocationService {
 
   obtenirMesDemandes(etat = EtatDemandeLocation.EnAttente, page = 1, limit = 10) {
     return this.http.get<DemandeLocationResponse>(
-      `${this.apiUrl}/demandes-location/me`,
+      `${this.apiUrl}/api/demandes-location/me`,
       {
         params: { etat: etat, page: page, limit: limit }
       }

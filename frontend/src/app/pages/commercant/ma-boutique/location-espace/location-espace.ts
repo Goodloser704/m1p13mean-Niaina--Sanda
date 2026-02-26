@@ -11,7 +11,7 @@ import {
 } from "../../../../core/models/admin/espaces.model";
 import { BoutiqueService } from '../../../../core/services/commercant/boutique.service';
 import { getBoutiqueEspace } from '../../../../core/models/commercant/boutique.model';
-import { UpperCasePipe, NgClass, CurrencyPipe } from "@angular/common";
+import { UpperCasePipe, NgClass, CurrencyPipe, DatePipe } from "@angular/common";
 import { LoaderService } from '../../../../core/services/loader.service';
 import { DialogService } from '../../../../core/services/dialog.service';
 import { Dialog } from '../../../../components/shared/dialog/dialog';
@@ -23,7 +23,7 @@ import { DemandeLocation, EtatDemandeLocation } from '../../../../core/models/ad
 
 @Component({
   selector: 'app-location-espace',
-  imports: [EmptyGridList, UpperCasePipe, NgClass, CurrencyPipe, ReactiveFormsModule],
+  imports: [EmptyGridList, UpperCasePipe, NgClass, CurrencyPipe, ReactiveFormsModule, DatePipe],
   templateUrl: './location-espace.html',
   styleUrl: './location-espace.scss',
 })
@@ -79,7 +79,9 @@ export class LocationEspace implements OnInit {
     });
 
     effect(() => {
-
+      const page = this.demandesPaginations.currentPage();
+      
+      this.getDemandes(page);
     })
   }
 
@@ -194,7 +196,8 @@ export class LocationEspace implements OnInit {
     .subscribe({
       next: (res) => {
         try {
-
+          console.log(res.message);
+          this.mesDemandes.update(c => [res.demande, ...c]);
         } catch (err) {
           console.error(err);
         }
