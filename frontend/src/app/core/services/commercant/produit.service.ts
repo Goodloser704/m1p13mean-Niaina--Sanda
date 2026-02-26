@@ -26,9 +26,9 @@ export class ProduitService {
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    if (search) params = params.set('search', search);
-    if (idBoutique) params = params.set('boutiqueId', idBoutique);
-    if (idType) params = params.set('typeId', idType);
+    if (search !== undefined) params = params.set('search', search);
+    if (idBoutique !== undefined) params = params.set('boutiqueId', idBoutique);
+    if (idType !== undefined) params = params.set('typeId', idType);
 
     return this.http.get<{ produits: Produit[], pagination: Pagination }>(
       this.defaultUrl,

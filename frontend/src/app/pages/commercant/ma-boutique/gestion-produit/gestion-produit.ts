@@ -15,6 +15,7 @@ import { parseDuration, toFormattedString } from '../../../../core/functions/dat
 import { DialogService } from '../../../../core/services/dialog.service';
 import { Dialog } from '../../../../components/shared/dialog/dialog';
 import { TimeDurationPipe } from "../../../../core/pipes/time-duration-pipe";
+import { logSafe } from '../../../../core/functions/console-function';
 
 @Component({
   selector: 'app-gestion-produit',
@@ -92,12 +93,15 @@ export class GestionProduit implements OnInit {
     this.boutiqueService.getBoutiqueProduits({
       idBoutique: this.maBoutique()._id,
       page: page,
-      limit: this.productPagination.limit
+      limit: this.productPagination.limit,
+      disponibleOnly: false
     })
       .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           try {
+            console.log(`Nombre de produits: ${res.pagination.total}`);
+
             this.products.set(res.produits);
             this.productPagination.setTotal(res.pagination.totalPages);
           } catch (err) {
@@ -111,7 +115,7 @@ export class GestionProduit implements OnInit {
   setProductForm() {
     this.productForm = this.fb.group({
       nom: ['', [Validators.required]],
-      description: [''],
+      description: [null as string | null],
       prix: ['', [Validators.min(0)]],
       typeProduit: ['', Validators.required],
 
@@ -119,7 +123,8 @@ export class GestionProduit implements OnInit {
       minute: [0, [Validators.min(0), Validators.max(59)]],
       seconde: [0, [Validators.min(0), Validators.max(59)]],
 
-      stock: [0, [Validators.min(0)]]
+      stock: [0, [Validators.min(0)]],
+      photo: [null as string | null]
     });
   }
 
@@ -202,6 +207,8 @@ export class GestionProduit implements OnInit {
       }
     } as Produit;
 
+    logSafe(product);
+
     this.produitService.creerProduit(product)
       .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
@@ -218,6 +225,7 @@ export class GestionProduit implements OnInit {
 
   editProduct(produit: Produit) {
     this.editProductMode.set(true);
+    this.editingProductId.set(produit._id);
 
     this.productForm.patchValue({
       nom: produit.nom,
@@ -226,7 +234,8 @@ export class GestionProduit implements OnInit {
       typeProduit: typeof produit.typeProduit === 'object'
         ? produit.typeProduit._id
         : produit.typeProduit,
-      stock: produit.stock.nombreDispo
+      stock: produit.stock.nombreDispo,
+      photo: produit.photo
     });
 
     if (produit.tempsPreparation) {
@@ -266,7 +275,11 @@ export class GestionProduit implements OnInit {
   }
 
   saveEditedProduct() {
+    console.log(`ProductForm: [${JSON.stringify(this.productForm.getRawValue())}], is valid: [${!this.productForm.invalid}]`);
+    console.log(`EditingProductId: [${this.editingProductId()}]`);
+
     if (this.productForm.invalid || !this.editingProductId()) return;
+    
     this.loaderService.show();
 
     const productRaw = this.productForm.getRawValue();
@@ -290,13 +303,14 @@ export class GestionProduit implements OnInit {
       }
     } as Produit;
 
-    console.log(`Updated product: ${JSON.stringify(updatedProduct)}`);
+    logSafe(updatedProduct, 'Updated product: ');
 
     this.produitService.modifierProduit(updatedProduct)
       .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
-          console.log(`Result: ${JSON.stringify(res)}`)
+          console.log(res.message);
+
           this.products.update(current => 
             current.map(e => 
               e._id == res.produit._id ? res.produit : e 
@@ -312,9 +326,11 @@ export class GestionProduit implements OnInit {
   }
 
   onSubmitProduct() {
+    console.log(`NewProduct: [${this.newProduct()}], EditProduct: [${this.editProductMode()}]`);
     if (this.newProduct()) {
       this.saveNewProduct();
     } else if (this.editProductMode()) {
+      console.log(`Save edited product`);
       this.saveEditedProduct();
     }
   }

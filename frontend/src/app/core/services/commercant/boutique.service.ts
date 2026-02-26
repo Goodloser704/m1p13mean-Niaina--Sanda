@@ -75,12 +75,17 @@ export class BoutiqueService {
     disponibleOnly?: boolean,
     statutBoutique?: StatutBoutique
   }) {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('page', page)
       .set('limit', limit);
 
-    if (disponibleOnly) params.set('disponibleOnly', disponibleOnly);
-    if (statutBoutique) params.set('statutBoutique', statutBoutique);
+    if (disponibleOnly !== undefined) {
+      params = params.set('disponibleOnly', disponibleOnly);
+    }
+
+    if (statutBoutique !== undefined) {
+      params = params.set('statutBoutique', statutBoutique);
+    }
 
     return this.http.get<{ produits: Produit[], boutique: Boutique, pagination: Pagination }>(
       `${this.apiUrl}/api/boutiques/${idBoutique}/produits`,

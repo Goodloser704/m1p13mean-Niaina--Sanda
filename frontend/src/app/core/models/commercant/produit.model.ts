@@ -15,7 +15,8 @@ export interface Produit {
     updatedAt: string
   },
   createdAt: string,
-  updatedAt: string
+  updatedAt: string,
+  isActive: boolean
 }
 
 export function getTypeProduit(product: Produit): TypeProduit | null {
