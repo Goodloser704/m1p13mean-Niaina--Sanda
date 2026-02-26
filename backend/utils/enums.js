@@ -44,7 +44,8 @@ const TypeTransactionEnum = {
 const TypeNotificationEnum = {
   Paiement: 'Paiement',
   Achat: 'Achat',
-  Vente: 'Vente'
+  Vente: 'Vente',
+  Demande: 'Demande'
 };
 
 // Types d'achats
