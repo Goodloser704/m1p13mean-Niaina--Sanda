@@ -548,7 +548,7 @@ async function creerNotificationPourAdmins(demande) {
     for (const admin of admins) {
       await Notification.create({
         type: 'Paiement',
-        message: `Nouvelle demande de location pour l'espace ${demande.espace.codeEspace} par la boutique ${demande.boutique.nom}`,
+        message: `Nouvelle demande de location pour l'espace ${demande.espace.code} par la boutique ${demande.boutique.nom}`,
         receveur: admin._id,
         recipient: admin._id,
         estLu: false,
