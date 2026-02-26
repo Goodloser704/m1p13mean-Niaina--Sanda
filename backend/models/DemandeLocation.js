@@ -21,11 +21,11 @@ const demandeLocationSchema = new mongoose.Schema({
   // Informations sur la demande
   dateDebutSouhaitee: {
     type: Date,
-    required: true
+    required: true,
+    default: Date.now
   },
   dureeContrat: {
     type: Number, // en mois
-    required: true,
     min: 1,
     max: 120 // Maximum 10 ans
   },

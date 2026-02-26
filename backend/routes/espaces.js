@@ -38,13 +38,13 @@ const requireAdmin = (req, res, next) => {
 // @access  Authentifié
 router.get('/disponibles', espaceController.rechercherEspacesDisponibles);
 
-// Appliquer le middleware admin aux routes suivantes
-router.use(requireAdmin);
-
 // @route   GET /api/espaces
 // @desc    Obtenir tous les espaces avec filtres
-// @access  Admin
+// @access  Admin, Boutique (liste des espaces a demander)
 router.get('/', espaceController.obtenirEspaces);
+
+// Appliquer le middleware admin aux routes suivantes
+router.use(requireAdmin);
 
 // @route   GET /api/espaces/stats
 // @desc    Obtenir les statistiques des espaces

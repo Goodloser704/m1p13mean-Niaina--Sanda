@@ -81,7 +81,7 @@ class EspaceController {
       const options = {
         page: parseInt(req.query.page) || 1,
         limit: parseInt(req.query.limit) || 50,
-        etage: req.query.etage ? parseInt(req.query.etage) : undefined,
+        etage: req.query.etage ? req.query.etage : undefined,
         statut: req.query.statut,
         surfaceMin: req.query.surfaceMin ? parseFloat(req.query.surfaceMin) : undefined,
         surfaceMax: req.query.surfaceMax ? parseFloat(req.query.surfaceMax) : undefined,

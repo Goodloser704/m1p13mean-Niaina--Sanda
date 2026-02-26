@@ -67,21 +67,30 @@ exports.creerDemande = async (req, res) => {
         message: 'Une demande est déjà en attente pour cet espace'
       });
     }
-    
-    const demande = new DemandeLocation({
+
+    const newDemande = {
       boutique: boutiqueId,
       espace: espaceId,
-      dateDebutSouhaitee: new Date(dateDebutSouhaitee),
       dureeContrat,
       messageCommercant
-    });
+    };
+
+    if (dateDebutSouhaitee) {
+      newDemande.dateDebutSouhaitee = new Date(dateDebutSouhaitee)
+    }
+    
+    const demande = new DemandeLocation(newDemande);
     
     await demande.save();
     
     // Populer les données pour la réponse
     await demande.populate([
       { path: 'boutique', select: 'nom' },
-      { path: 'espace', select: 'codeEspace surface loyer etage' }
+      { 
+        path: 'espace', 
+        select: 'code surface loyer etage',
+        populate: { path: 'etage', select: 'nom niveau' }
+      }
     ]);
     
     // Créer une notification pour les admins
@@ -123,9 +132,15 @@ exports.obtenirMesDemandes = async (req, res) => {
     }
     
     const demandes = await DemandeLocation.find(query)
-      .populate('boutique', 'nom')
-      .populate('espace', 'codeEspace surface loyer etage')
-      .populate('adminRepondant', 'nom prenoms')
+      .populate([
+        { path: 'boutique', select: 'nom' },
+        { 
+          path: 'espace',
+          select: 'code surface loyer etage',
+          populate: { path: 'etage', select: 'nom niveau' } 
+        },
+        { path: 'adminRepondant', select: 'nom prenoms' }
+      ])
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit));
@@ -503,8 +518,7 @@ exports.annulerDemande = async (req, res) => {
       });
     }
     
-    demande.isActive = false;
-    await demande.save();
+    await demande.deleteOne();
     
     res.json({
       message: 'Demande annulée avec succès'
@@ -534,7 +548,7 @@ async function creerNotificationPourAdmins(demande) {
     for (const admin of admins) {
       await Notification.create({
         type: 'Paiement',
-        message: `Nouvelle demande de location pour l'espace ${demande.espace.codeEspace} par la boutique ${demande.boutique.nom}`,
+        message: `Nouvelle demande de location pour l'espace ${demande.espace.code} par la boutique ${demande.boutique.nom}`,
         receveur: admin._id,
         recipient: admin._id,
         estLu: false,
