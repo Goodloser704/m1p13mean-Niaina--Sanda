@@ -24,12 +24,8 @@ export function createPagination(initialLimit = 10) {
     }
   }
 
-  function setTotal(total: number) {
+  function setTotalPages(total: number) {
     totalPages.set(total);
-  }
-
-  function getPageNumbers() {
-
   }
 
   return {
@@ -40,6 +36,6 @@ export function createPagination(initialLimit = 10) {
     next,
     previous,
     goTo,
-    setTotal
+    setTotal: setTotalPages
   };
 }

@@ -223,7 +223,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
 
   setEspaceForm() {
     this.espaceForm = this.fb.nonNullable.group({
-      codeEspace: ['', [Validators.required, Validators.minLength(1)]],
+      code: ['', [Validators.required, Validators.minLength(1)]],
       surface: ['', [Validators.required, Validators.min(1)]],
       etage: ['', [Validators.required]],
       loyer: ['', [Validators.required, Validators.min(0)]]
@@ -260,7 +260,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
     this.editingSpaceId.set(espace._id);
 
     this.espaceForm.patchValue({
-      codeEspace: espace.codeEspace,
+      code: espace.code,
       surface: espace.surface,
       etage: getEtage(espace)._id,
       loyer: espace.loyer,

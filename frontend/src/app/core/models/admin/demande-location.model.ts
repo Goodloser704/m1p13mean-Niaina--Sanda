@@ -11,7 +11,7 @@ export enum EtatDemandeLocation {
 export interface DemandeLocation {
   _id: string,
   boutique: Boutique | string,
-  espace: Espace | string,
+  espace: Espace,
   etatDemande: EtatDemandeLocation,
   createdAt: string,
   updatedAt: string

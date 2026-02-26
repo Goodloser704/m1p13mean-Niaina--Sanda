@@ -54,7 +54,7 @@ export class DemandesLocationService {
     )
   }
 
-  effacerDemande(idDemande: string) {
+  annulerDemande(idDemande: string) {
     return this.http.delete<any>(`${this.apiUrl}/api/demandes-location/${idDemande}`);
   }
 }

@@ -74,10 +74,18 @@ export function getBoutiqueCommercantLabel(boutique: Boutique): string {
   return '';
 }
 
+export function getBoutiqueEspace(boutique: Boutique): Espace | null {
+  const espace = boutique.espace;
+  if (typeof espace === 'object' && espace !== null) {
+    return espace;
+  }
+  return null;
+}
+
 export function getBoutiqueEspaceCode(boutique: Boutique): string {
   const espace = boutique.espace as Espace | string | null;
   if (typeof espace === 'object' && espace !== null) {
-    return espace.codeEspace;
+    return espace.code;
   }
   return '';
 }

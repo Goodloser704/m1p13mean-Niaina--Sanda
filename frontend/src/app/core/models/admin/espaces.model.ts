@@ -18,7 +18,7 @@ export enum EspaceStatut {
 export interface Espace {
   _id: string,
   centreCommercial: CentreCommercial | string,
-  codeEspace: string,
+  code: string,
   surface: number,
   etage: Etage | string,
   loyer: number,

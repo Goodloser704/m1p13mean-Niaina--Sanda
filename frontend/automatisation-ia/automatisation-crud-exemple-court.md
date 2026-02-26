@@ -25,13 +25,13 @@ cruds:
 - titre_page: List des boutiques actives
 - service_methods: list=getAllBoutiqueByStatut
 - response_shapes: list={ boutiques: Boutique[], pagination: Pagination }
-- list_ui: grid, champs_affiches=[photo?, nom, description, categorie, commercant(nom prenoms), espace?(code etage(niveau))]
+- list_ui: grid, champs_affiches=[photo?, nom, description, categorie, commercant(nom prenoms), espace?(codeEspaceEspace etage(niveau))]
 2)
 - entity: src/app/core/models/commercant/boutique.model.ts, src/app/core/models/pagination.model.ts
 - crud_type: pagination
 - titre_page: List des boutiques inactives
 - service_methods: list=getAllBoutiqueByStatut
 - response_shapes: list={ boutiques: Boutique[], pagination: Pagination }
-- list_ui: grid, champs_affiches=[photo?, nom, description, categorie, commercant(nom prenoms), espace?(code etage(niveau))]
+- list_ui: grid, champs_affiches=[photo?, nom, description, categorie, commercant(nom prenoms), espace?(codeEspace etage(niveau))]
 resultat_attendu:
 - ajouter 2 nouveau row pour la liste des boutiques actives et inactives dans boutiques-admin.html
