@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/boutiques', async (req, res) => {
   try {
     const { page = 1, limit = 12, categorie, search } = req.query;
-    const filter = { statut: 'approuve' };
+    const filter = { statutBoutique: 'Actif' }; // Utiliser statutBoutique au lieu de statut
     
     if (categorie) {
       filter.categorie = categorie;
@@ -25,8 +25,8 @@ router.get('/boutiques', async (req, res) => {
     }
 
     const boutiques = await Boutique.find(filter)
-      .populate('proprietaire', 'nom prenom')
-      .sort({ 'note.moyenne': -1, dateCreation: -1 })
+      .populate('commercant', 'nom prenoms email')
+      .sort({ dateCreation: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
@@ -39,7 +39,7 @@ router.get('/boutiques', async (req, res) => {
       total
     });
   } catch (error) {
-    console.error(error);
+    console.error('Erreur GET /api/client/boutiques:', error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
@@ -51,8 +51,8 @@ router.get('/boutiques/:id', async (req, res) => {
   try {
     const boutique = await Boutique.findOne({
       _id: req.params.id,
-      statut: 'approuve'
-    }).populate('proprietaire', 'nom prenom');
+      statutBoutique: 'Actif' // Utiliser statutBoutique au lieu de statut
+    }).populate('commercant', 'nom prenoms email');
 
     if (!boutique) {
       return res.status(404).json({ message: 'Boutique non trouvée' });
@@ -69,7 +69,7 @@ router.get('/boutiques/:id', async (req, res) => {
       produits
     });
   } catch (error) {
-    console.error(error);
+    console.error('Erreur GET /api/client/boutiques/:id:', error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
@@ -124,19 +124,22 @@ router.get('/search', async (req, res) => {
 
     if (type === 'all' || type === 'boutiques') {
       results.boutiques = await Boutique.find({
-        statut: 'approuve',
+        statutBoutique: 'Actif', // Utiliser statutBoutique au lieu de statut
         $or: [
           { nom: { $regex: q, $options: 'i' } },
-          { description: { $regex: q, $options: 'i' } },
-          { categorie: { $regex: q, $options: 'i' } }
+          { description: { $regex: q, $options: 'i' } }
         ]
       }).limit(5);
     }
 
     if (type === 'all' || type === 'products') {
+      // Recherche simple sans index text (qui peut ne pas exister)
       results.products = await Produit.find({
         isActive: true,
-        $text: { $search: q }
+        $or: [
+          { nom: { $regex: q, $options: 'i' } },
+          { description: { $regex: q, $options: 'i' } }
+        ]
       })
       .populate('boutique', 'nom')
       .limit(10);
@@ -144,7 +147,7 @@ router.get('/search', async (req, res) => {
 
     res.json(results);
   } catch (error) {
-    console.error(error);
+    console.error('Erreur GET /api/client/search:', error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
@@ -154,10 +157,10 @@ router.get('/search', async (req, res) => {
 // @access  Public
 router.get('/categories', async (req, res) => {
   try {
-    const categories = await Boutique.distinct('categorie', { statut: 'approuve' });
+    const categories = await Boutique.distinct('categorie', { statutBoutique: 'Actif' }); // Utiliser statutBoutique
     res.json(categories);
   } catch (error) {
-    console.error(error);
+    console.error('Erreur GET /api/client/categories:', error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
