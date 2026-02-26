@@ -110,9 +110,9 @@ class EspaceService {
         if (isNaN(prixLoyer) || prixLoyer < 0) {
           throw new Error('Le prix du loyer doit être un nombre positif ou zéro');
         }
-        if (prixLoyer > 1000000) {
-          throw new Error('Le prix du loyer ne peut pas dépasser 1 000 000');
-        }
+        // if (prixLoyer > 1000000) {
+        //   throw new Error('Le prix du loyer ne peut pas dépasser 1 000 000');
+        // }
         espaceData.loyer = prixLoyer; // Le modèle utilise 'loyer'
       } else if (espaceData.loyer !== undefined) {
         const prixLoyer = parseFloat(espaceData.loyer);
