@@ -136,6 +136,7 @@ class BoutiqueController {
           typeProduit: p.typeProduit,
           boutique: p.boutique,
           tempsPreparation: p.tempsPreparation,
+          photo: p.photo,
           createdAt: p.createdAt
         })),
         boutique: {
