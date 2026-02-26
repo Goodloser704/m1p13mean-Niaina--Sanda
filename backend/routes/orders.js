@@ -1,7 +1,7 @@
 const express = require('express');
 const { auth, authorize } = require('../middleware/auth');
 const Order = require('../models/Order');
-const Product = require('../models/Product');
+const Produit = require('../models/Produit');
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.post('/', auth, authorize('client'), async (req, res) => {
     const produitsValides = [];
 
     for (const item of produits) {
-      const produit = await Product.findById(item.produit);
+      const produit = await Produit.findById(item.produit);
       
       if (!produit || !produit.isActive) {
         return res.status(400).json({ 
@@ -54,7 +54,7 @@ router.post('/', auth, authorize('client'), async (req, res) => {
     const commandesParBoutique = {};
     
     for (const item of produitsValides) {
-      const produit = await Product.findById(item.produit);
+      const produit = await Produit.findById(item.produit);
       const boutiqueId = produit.boutique.toString();
       
       if (!commandesParBoutique[boutiqueId]) {
@@ -191,7 +191,7 @@ router.put('/:id/cancel', auth, authorize('client'), async (req, res) => {
 
     // Remettre les produits en stock
     for (const item of order.produits) {
-      const produit = await Product.findById(item.produit);
+      const produit = await Produit.findById(item.produit);
       if (produit) {
         produit.stock.quantite += item.quantite;
         await produit.save();

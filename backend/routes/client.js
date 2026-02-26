@@ -1,7 +1,7 @@
 const express = require('express');
 const { auth, authorize } = require('../middleware/auth');
 const Boutique = require('../models/Boutique');
-const Product = require('../models/Product');
+const Produit = require('../models/Produit');
 
 const router = express.Router();
 
@@ -59,7 +59,7 @@ router.get('/boutiques/:id', async (req, res) => {
     }
 
     // Récupérer quelques produits de la boutique
-    const produits = await Product.find({
+    const produits = await Produit.find({
       boutique: boutique._id,
       isActive: true
     }).limit(8);
@@ -89,13 +89,13 @@ router.get('/boutiques/:id/products', async (req, res) => {
       filter.categorie = categorie;
     }
 
-    const products = await Product.find(filter)
+    const products = await Produit.find(filter)
       .populate('boutique', 'nom')
       .sort({ dateCreation: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
-    const total = await Product.countDocuments(filter);
+    const total = await Produit.countDocuments(filter);
 
     res.json({
       products,
@@ -134,7 +134,7 @@ router.get('/search', async (req, res) => {
     }
 
     if (type === 'all' || type === 'products') {
-      results.products = await Product.find({
+      results.products = await Produit.find({
         isActive: true,
         $text: { $search: q }
       })

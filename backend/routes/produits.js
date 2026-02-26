@@ -13,13 +13,15 @@ const { auth } = require('../middleware/auth');
 router.get('/', produitController.obtenirProduits);
 router.get('/test', produitController.testProduits);
 router.get('/boutique/:boutiqueId', produitController.obtenirProduitsParBoutique);
-router.get('/:id', produitController.obtenirProduitParId);
 
-// Routes commerçant (propriétaire de la boutique)
+// Routes commerçant (propriétaire de la boutique) - AVANT /:id pour éviter conflit
 router.get('/me', auth, produitController.obtenirMesProduits);
 router.post('/', auth, produitController.creerProduit);
+router.put('/:id/stock', auth, produitController.modifierStock);
 router.put('/:id', auth, produitController.modifierProduit);
 router.delete('/:id', auth, produitController.supprimerProduit);
-router.put('/:id/stock', auth, produitController.modifierStock);
+
+// Route publique avec paramètre dynamique - DOIT ÊTRE EN DERNIER
+router.get('/:id', produitController.obtenirProduitParId);
 
 module.exports = router;

@@ -5,7 +5,7 @@ require('dotenv').config();
 // Import des modèles
 const User = require('../models/User');
 const Boutique = require('../models/Boutique');
-const Product = require('../models/Product');
+const Produit = require('../models/Produit');
 
 const initDatabase = async () => {
   try {
@@ -16,7 +16,7 @@ const initDatabase = async () => {
     // Nettoyer la base de données
     await User.deleteMany({});
     await Boutique.deleteMany({});
-    await Product.deleteMany({});
+    await Produit.deleteMany({});
     console.log('🧹 Base de données nettoyée');
 
     // Créer un admin

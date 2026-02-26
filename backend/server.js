@@ -133,9 +133,7 @@ app.use('/api/boutiques', require('./routes/boutique'));
 console.log('🛣️  Chargement route client...');
 app.use('/api/client', require('./routes/client'));
 
-// Routes de produits (deux versions)
-console.log('🛣️  Chargement route products...');
-app.use('/api/products', require('./routes/products'));
+// Routes de produits
 console.log('🛣️  Chargement route produits...');
 app.use('/api/produits', require('./routes/produits'));
 
