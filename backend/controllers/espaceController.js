@@ -13,9 +13,12 @@ class EspaceController {
     console.log(`   📝 Données:`, req.body);
     
     try {
-      // Vérifier si un espace avec ce code existe déjà
+      // Vérifier si un espace actif avec ce code existe déjà
       const Espace = require('../models/Espace');
-      const espaceExistant = await Espace.findOne({ code: req.body.code });
+      const espaceExistant = await Espace.findOne({ 
+        code: req.body.code,
+        isActive: true 
+      });
       
       if (espaceExistant) {
         console.warn(`⚠️ Espace avec code ${req.body.code} existe déjà (ID: ${espaceExistant._id})`);

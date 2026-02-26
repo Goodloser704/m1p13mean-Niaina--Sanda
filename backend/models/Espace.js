@@ -9,7 +9,6 @@ const espaceSchema = new mongoose.Schema({
   code: { // Champ principal selon spécifications
     type: String,
     required: true,
-    unique: true,
     trim: true,
     uppercase: true,
     match: /^[A-Z0-9]{1,10}$/, // Format flexible: lettres et chiffres
@@ -85,6 +84,16 @@ espaceSchema.index({ etage: 1 });
 espaceSchema.index({ statut: 1 });
 espaceSchema.index({ surface: 1 });
 espaceSchema.index({ loyer: 1 });
+
+// Index composé unique: un code peut exister plusieurs fois si isActive=false
+// mais un seul espace actif avec ce code peut exister par étage
+espaceSchema.index(
+  { code: 1, etage: 1, isActive: 1 }, 
+  { 
+    unique: true, 
+    partialFilterExpression: { isActive: true } 
+  }
+);
 
 // Middleware pre-save pour gérer l'occupation
 espaceSchema.pre('save', function(next) {
