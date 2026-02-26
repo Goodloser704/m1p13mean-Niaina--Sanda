@@ -97,7 +97,8 @@ exports.obtenirProduitsParBoutique = async (req, res) => {
     const { page = 1, limit = 20, typeProduit, enStock, recherche } = req.query;
     
     const criteres = {
-      boutique: boutiqueId
+      boutique: boutiqueId,
+      isActive: true  // Filtrer uniquement les produits actifs
     };
     
     if (typeProduit) criteres.typeProduit = typeProduit;

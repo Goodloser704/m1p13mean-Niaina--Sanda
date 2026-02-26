@@ -108,7 +108,10 @@ class BoutiqueController {
       }
       
       // Construire la requête pour les produits
-      let query = { boutique: id };
+      let query = { 
+        boutique: id,
+        isActive: true  // Filtrer uniquement les produits actifs
+      };
       
       if (disponibleOnly === 'true') {
         query['stock.nombreDispo'] = { $gt: 0 };
