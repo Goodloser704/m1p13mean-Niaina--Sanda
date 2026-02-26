@@ -449,12 +449,13 @@ exports.refuserDemande = async (req, res) => {
 exports.obtenirDemandeParId = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(`🔍 Récupération demande ${id} par user ${req.user._id}`);
     
     const demande = await DemandeLocation.findById(id)
       .populate({
         path: 'boutique',
         populate: {
-          path: 'commercant proprietaire',
+          path: 'commercant',
           select: 'nom prenoms email telephone'
         }
       })
@@ -462,19 +463,24 @@ exports.obtenirDemandeParId = async (req, res) => {
       .populate('adminRepondant', 'nom prenoms email');
     
     if (!demande) {
+      console.log(`❌ Demande ${id} non trouvée`);
       return res.status(404).json({
         message: 'Demande non trouvée'
       });
     }
     
+    console.log(`✅ Demande trouvée, boutique: ${demande.boutique?._id}, commercant: ${demande.boutique?.commercant?._id}`);
+    
     // Vérifier les permissions
     const isAdmin = req.user.role === 'Admin' || req.user.role === 'admin';
-    const isOwner = demande.boutique.commercant?._id.toString() === req.user._id.toString() ||
-                   demande.boutique.proprietaire?._id.toString() === req.user._id.toString();
+    const isOwner = demande.boutique?.commercant?._id.toString() === req.user._id.toString();
+    
+    console.log(`   isAdmin: ${isAdmin}, isOwner: ${isOwner}`);
     
     if (!isAdmin && !isOwner) {
+      console.log(`❌ Accès refusé pour user ${req.user._id}`);
       return res.status(403).json({
-        message: 'Accès non autorisé'
+        message: 'Accès refusé - Permissions insuffisantes'
       });
     }
     

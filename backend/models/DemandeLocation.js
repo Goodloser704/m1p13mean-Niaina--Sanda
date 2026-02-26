@@ -172,13 +172,13 @@ demandeLocationSchema.methods.creerNotificationAcceptation = async function() {
   const Notification = mongoose.model('Notification');
   const Boutique = mongoose.model('Boutique');
   
-  const boutique = await Boutique.findById(this.boutique).populate('proprietaire');
+  const boutique = await Boutique.findById(this.boutique).populate('commercant');
   
-  if (boutique && boutique.proprietaire) {
+  if (boutique && boutique.commercant) {
     await Notification.create({
       type: 'Paiement',
       message: `Votre demande de location pour l'espace ${this.espace} a été acceptée. Vous pouvez maintenant procéder au paiement du loyer.`,
-      receveur: boutique.proprietaire._id,
+      receveur: boutique.commercant._id,
       estLu: false,
       urlRoute: `/commercant/boutiques/${this.boutique}/location`
     });
@@ -190,13 +190,13 @@ demandeLocationSchema.methods.creerNotificationRefus = async function() {
   const Notification = mongoose.model('Notification');
   const Boutique = mongoose.model('Boutique');
   
-  const boutique = await Boutique.findById(this.boutique).populate('proprietaire');
+  const boutique = await Boutique.findById(this.boutique).populate('commercant');
   
-  if (boutique && boutique.proprietaire) {
+  if (boutique && boutique.commercant) {
     await Notification.create({
       type: 'Paiement',
       message: `Votre demande de location pour l'espace ${this.espace} a été refusée. Raison: ${this.raisonRefus}`,
-      receveur: boutique.proprietaire._id,
+      receveur: boutique.commercant._id,
       estLu: false,
       urlRoute: `/commercant/boutiques/${this.boutique}/demandes-location`
     });
@@ -206,8 +206,14 @@ demandeLocationSchema.methods.creerNotificationRefus = async function() {
 // Méthodes statiques
 demandeLocationSchema.statics.obtenirDemandesEnAttente = function() {
   return this.find({ etatDemande: EtatDemandeEnum.EnAttente, isActive: true })
-    .populate('boutique', 'nom proprietaire')
-    .populate('boutique.proprietaire', 'nom prenoms email')
+    .populate({
+      path: 'boutique',
+      select: 'nom commercant',
+      populate: {
+        path: 'commercant',
+        select: 'nom prenoms email'
+      }
+    })
     .populate('espace', 'codeEspace surface loyer etage')
     .sort({ createdAt: -1 });
 };

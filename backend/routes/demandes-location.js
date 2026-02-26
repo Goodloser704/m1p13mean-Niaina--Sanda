@@ -48,28 +48,29 @@ router.get('/me',
 // @route   POST /api/demandes-location
 // @desc    Créer une demande de location
 // @access  Private (Commercant)
-router.post('/', [
-  body('boutiqueId')
-    .isMongoId()
-    .withMessage('ID de boutique invalide'),
-  body('espaceId')
-    .isMongoId()
-    .withMessage('ID d\'espace invalide'),
-  body('dateDebutSouhaitee')
-    .optional()
-    .isISO8601()
-    .withMessage('Date de début invalide'),
-  body('dureeContrat')
-    .optional()
-    .isInt({ min: 1, max: 120 })
-    .withMessage('La durée du contrat doit être entre 1 et 120 mois'),
-  body('messageCommercant')
-    .optional()
-    .isLength({ max: 1000 })
-    .withMessage('Le message ne peut pas dépasser 1000 caractères')
-], 
-authorize(RoleEnum.Commercant, 'boutique'), 
-demandeLocationController.creerDemande);
+router.post('/', 
+  authorize(RoleEnum.Commercant, 'boutique'),
+  [
+    body('boutiqueId')
+      .isMongoId()
+      .withMessage('ID de boutique invalide'),
+    body('espaceId')
+      .isMongoId()
+      .withMessage('ID d\'espace invalide'),
+    body('dateDebutSouhaitee')
+      .optional()
+      .isISO8601()
+      .withMessage('Date de début invalide'),
+    body('dureeContrat')
+      .optional()
+      .isInt({ min: 1, max: 120 })
+      .withMessage('La durée du contrat doit être entre 1 et 120 mois'),
+    body('messageCommercant')
+      .optional()
+      .isLength({ max: 1000 })
+      .withMessage('Le message ne peut pas dépasser 1000 caractères')
+  ], 
+  demandeLocationController.creerDemande);
 
 // @route   GET /api/demandes-location/:id
 // @desc    Obtenir une demande par ID
