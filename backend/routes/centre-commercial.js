@@ -10,11 +10,23 @@ const centreCommercialController = require('../controllers/centreCommercialContr
 const { auth, authorize } = require('../middleware/auth');
 const { RoleEnum } = require('../utils/enums');
 
-// Routes publiques
+// @route   GET /api/centre-commercial
+// @desc    Obtenir les informations du centre commercial
+// @access  Public
+// @return  { centreCommercial }
 router.get('/', centreCommercialController.obtenirCentreCommercial);
 
-// Routes admin uniquement
+// @route   PUT /api/centre-commercial
+// @desc    Modifier les informations du centre commercial
+// @access  Private (Admin)
+// @body    { nom, adresse, telephone, email, horaires, description }
+// @return  { message, centreCommercial }
 router.put('/', auth, authorize(RoleEnum.Admin, 'admin'), centreCommercialController.modifierCentreCommercial);
+
+// @route   GET /api/centre-commercial/stats
+// @desc    Obtenir les statistiques du centre commercial
+// @access  Private (Admin)
+// @return  { statistiques }
 router.get('/stats', auth, authorize(RoleEnum.Admin, 'admin'), centreCommercialController.obtenirStatistiques);
 
 module.exports = router;
