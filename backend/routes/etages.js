@@ -36,6 +36,22 @@ router.get('/test', (req, res) => {
   res.json(response);
 });
 
+// @route   GET /api/etages
+// @desc    Obtenir tous les étages
+// @access  Authentifié
+router.get('/', (req, res, next) => {
+  console.log(`🏢 [ROUTES] GET / - Appel contrôleur obtenirEtages`);
+  etageController.obtenirEtages(req, res, next);
+});
+
+// @route   GET /api/etages/:id
+// @desc    Obtenir un étage par ID
+// @access  Authentifié
+router.get('/:id', (req, res, next) => {
+  console.log(`🏢 [ROUTES] GET /:id - Appel contrôleur obtenirEtageParId`);
+  etageController.obtenirEtageParId(req, res, next);
+});
+
 // Middleware de vérification du rôle admin
 const requireAdmin = (req, res, next) => {
   console.log(`🛡️ [ROUTES] Vérification admin pour ${req.originalUrl}`);
@@ -52,28 +68,12 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-// @route   GET /api/etages
-// @desc    Obtenir tous les étages
-// @access  Admin
-router.get('/', requireAdmin, (req, res, next) => {
-  console.log(`🏢 [ROUTES] GET / - Appel contrôleur obtenirEtages`);
-  etageController.obtenirEtages(req, res, next);
-});
-
 // @route   GET /api/etages/stats
 // @desc    Obtenir les statistiques des étages
 // @access  Admin
 router.get('/stats', requireAdmin, (req, res, next) => {
   console.log(`📊 [ROUTES] GET /stats - Appel contrôleur obtenirStatistiques`);
   etageController.obtenirStatistiques(req, res, next);
-});
-
-// @route   GET /api/etages/:id
-// @desc    Obtenir un étage par ID
-// @access  Admin
-router.get('/:id', requireAdmin, (req, res, next) => {
-  console.log(`🏢 [ROUTES] GET /:id - Appel contrôleur obtenirEtageParId`);
-  etageController.obtenirEtageParId(req, res, next);
 });
 
 // @route   POST /api/etages
