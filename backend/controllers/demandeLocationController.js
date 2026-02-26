@@ -362,8 +362,16 @@ exports.accepterDemande = async (req, res) => {
     } = req.body;
     
     const demande = await DemandeLocation.findById(id)
-      .populate('boutique')
-      .populate('espace');
+      .populate([
+        { 
+          path: 'boutique',
+          populate: { path: 'commercant', select: 'nom prenoms' }
+        },
+        { 
+          path: 'espace',
+          populate: { path: 'etage' }
+        }
+      ]);
     
     if (!demande) {
       return res.status(404).json({
@@ -378,12 +386,17 @@ exports.accepterDemande = async (req, res) => {
     }
     
     const contratInfo = {
-      dateDebut: new Date(dateDebut),
-      dateFin: new Date(dateFin),
       loyerMensuel: loyerMensuel || demande.espace.loyer,
       caution,
       conditionsSpeciales
     };
+
+    if (dateDebut) {
+      contratInfo.dateDebut = new Date(dateDebut);
+    }
+    if (dateFin) {
+      contratInfo.dateFin = new Date(dateFin);
+    }
     
     await demande.accepter(req.user._id, contratInfo, messageAdmin);
     

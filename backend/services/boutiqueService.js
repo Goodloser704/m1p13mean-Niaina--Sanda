@@ -282,9 +282,15 @@ class BoutiqueService {
   async getUserBoutiques(userId) {
     try {
       const boutiques = await Boutique.find({ commercant: userId })
-        .populate('commercant', 'nom prenoms')
-        .populate('categorie', 'nom description')
-        .populate('espace', 'code surface')
+        .populate([
+          { path: 'commercant', select: 'nom prenoms' },
+          { path: 'categorie', select: 'nom description' },
+          { 
+            path: 'espace', 
+            select: 'code surface loyer',
+            populate: { path: 'etage', select: 'nom niveau' } 
+          }
+        ])
         .sort({ createdAt: -1 });
       return boutiques;
     } catch (error) {

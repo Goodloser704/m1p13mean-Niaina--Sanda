@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { EtatDemandeEnum } = require('../utils/enums');
+const { EtatDemandeEnum, StatutBoutiqueEnum, StatutEspaceEnum, TypeNotificationEnum } = require('../utils/enums');
 
 const demandeLocationSchema = new mongoose.Schema({
   boutique: {
@@ -123,7 +123,7 @@ demandeLocationSchema.methods.accepter = async function(adminId, contratInfo, me
     await Espace.findByIdAndUpdate(
       this.espace,
       {
-        statut: 'Occupee',
+        statut: StatutEspaceEnum.Occupee,
         boutique: this.boutique,
         dateOccupation: contratInfo.dateDebut || new Date()
       },
@@ -134,7 +134,10 @@ demandeLocationSchema.methods.accepter = async function(adminId, contratInfo, me
     const Boutique = mongoose.model('Boutique');
     await Boutique.findByIdAndUpdate(
       this.boutique,
-      { espace: this.espace },
+      { 
+        espace: this.espace,
+        statutBoutique: StatutBoutiqueEnum.Actif
+      },
       { session }
     );
     
@@ -176,10 +179,10 @@ demandeLocationSchema.methods.creerNotificationAcceptation = async function() {
   
   if (boutique && boutique.commercant) {
     await Notification.create({
-      type: 'Paiement',
+      type: TypeNotificationEnum.Demande,
       message: `Votre demande de location pour l'espace ${this.espace} a été acceptée. Vous pouvez maintenant procéder au paiement du loyer.`,
       receveur: boutique.commercant._id,
-      estLu: false,
+      isRead: false,
       urlRoute: `/commercant/boutiques/${this.boutique}/location`
     });
   }
@@ -194,10 +197,10 @@ demandeLocationSchema.methods.creerNotificationRefus = async function() {
   
   if (boutique && boutique.commercant) {
     await Notification.create({
-      type: 'Paiement',
+      type: TypeNotificationEnum.Demande,
       message: `Votre demande de location pour l'espace ${this.espace} a été refusée. Raison: ${this.raisonRefus}`,
       receveur: boutique.commercant._id,
-      estLu: false,
+      isRead: false,
       urlRoute: `/commercant/boutiques/${this.boutique}/demandes-location`
     });
   }

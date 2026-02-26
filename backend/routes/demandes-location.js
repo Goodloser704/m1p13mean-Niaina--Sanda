@@ -101,9 +101,11 @@ demandeLocationController.updateDemandeEtat);
 // @access  Private (Admin)
 router.put('/:id/accepter', [
   body('dateDebut')
+    .optional()
     .isISO8601()
     .withMessage('Date de début invalide'),
   body('dateFin')
+    .optional()
     .isISO8601()
     .withMessage('Date de fin invalide'),
   body('loyerMensuel')
@@ -130,11 +132,11 @@ demandeLocationController.accepterDemande);
 // @desc    Refuser une demande de location
 // @access  Private (Admin)
 router.put('/:id/refuser', [
-  body('raisonRefus')
-    .notEmpty()
-    .withMessage('La raison du refus est requise')
-    .isLength({ max: 500 })
-    .withMessage('La raison du refus ne peut pas dépasser 500 caractères'),
+  // body('raisonRefus')
+  //   .notEmpty()
+  //   .withMessage('La raison du refus est requise')
+  //   .isLength({ max: 500 })
+  //   .withMessage('La raison du refus ne peut pas dépasser 500 caractères'),
   body('messageAdmin')
     .optional()
     .isLength({ max: 1000 })
