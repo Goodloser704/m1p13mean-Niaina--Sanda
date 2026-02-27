@@ -2,7 +2,7 @@ const DemandeLocation = require('../models/DemandeLocation');
 const Boutique = require('../models/Boutique');
 const Espace = require('../models/Espace');
 const { validationResult } = require('express-validator');
-const { EtatDemandeEnum } = require('../utils/enums');
+const { EtatDemandeEnum, TypeNotificationEnum } = require('../utils/enums');
 
 /**
  * 🏪 Contrôleur Demande de Location
@@ -566,8 +566,8 @@ async function creerNotificationPourAdmins(demande) {
     
     for (const admin of admins) {
       await Notification.create({
-        type: 'Paiement',
-        message: `Nouvelle demande de location pour l'espace ${demande.espace.code} par la boutique ${demande.boutique.nom}`,
+        type: TypeNotificationEnum.Demande,
+        message: `Nouvelle demande de location pour l'espace [${demande.espace.code}, ${demande.espace.etage.nom}] par la boutique ${demande.boutique.nom}`,
         receveur: admin._id,
         recipient: admin._id,
         estLu: false,
