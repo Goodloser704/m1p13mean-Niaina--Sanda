@@ -22,6 +22,21 @@ const achatSchema = new mongoose.Schema({
     ref: 'Facture',
     required: true
   },
+  quantite: {
+    type: Number,
+    required: true,
+    min: 1
+  },
+  prixUnitaire: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  montantTotal: {
+    type: Number,
+    required: true,
+    min: 0
+  },
   typeAchat: {
     type: {
       type: String,
@@ -41,8 +56,13 @@ const achatSchema = new mongoose.Schema({
   etat: {
     type: String,
     required: true,
-    enum: [EtatAchatEnum.EnAttente, EtatAchatEnum.Validee],
+    enum: [EtatAchatEnum.EnAttente, EtatAchatEnum.Validee, EtatAchatEnum.Annulee],
     default: EtatAchatEnum.EnAttente
+  },
+  raisonAnnulation: {
+    type: String,
+    trim: true,
+    maxlength: 500
   }
 }, {
   timestamps: true // Ajoute createdAt et updatedAt automatiquement

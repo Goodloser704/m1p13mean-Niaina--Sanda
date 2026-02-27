@@ -515,6 +515,14 @@ class BoutiqueService {
       throw error;
     }
   }
+
+  /**
+   * 🏪 Obtenir les boutiques d'un propriétaire (alias pour getUserBoutiques)
+   */
+  async getBoutiquesByOwner(userId) {
+    return await this.getUserBoutiques(userId);
+  }
 }
 
+module.exports = new BoutiqueService();
 module.exports = new BoutiqueService();

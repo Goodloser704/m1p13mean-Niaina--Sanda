@@ -173,6 +173,90 @@ class AuthService {
     
     return updatedUser.getPublicProfile();
   }
+
+  /**
+   * 🔑 Changer le mot de passe d'un utilisateur
+   */
+  async changeUserPassword(userId, currentPassword, newPassword) {
+    // Vérifier si l'utilisateur existe
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    // Vérifier le mot de passe actuel
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      throw new Error('Mot de passe actuel incorrect');
+    }
+
+    // Mettre à jour le mot de passe
+    user.mdp = newPassword;
+    await user.save();
+
+    console.log(`✅ Mot de passe changé pour utilisateur ${userId}`);
+  }
+
+  /**
+   * 🔍 Rechercher des utilisateurs
+   */
+  async searchUsers(query, role) {
+    const searchCriteria = {
+      $or: [
+        { email: { $regex: query, $options: 'i' } },
+        { nom: { $regex: query, $options: 'i' } },
+        { prenoms: { $regex: query, $options: 'i' } }
+      ]
+    };
+
+    // Ajouter le filtre de rôle si spécifié
+    if (role) {
+      searchCriteria.role = role;
+    }
+
+    const users = await User.find(searchCriteria)
+      .select('-mdp')
+      .limit(50)
+      .sort({ createdAt: -1 });
+
+    return users.map(user => user.getPublicProfile());
+  }
+
+  /**
+   * 🔄 Mettre à jour le statut d'un utilisateur
+   */
+  async updateUserStatus(userId, isActive) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    user.isActive = isActive;
+    await user.save();
+
+    console.log(`✅ Statut mis à jour pour utilisateur ${userId}: ${isActive ? 'Actif' : 'Inactif'}`);
+    
+    return user.getPublicProfile();
+  }
+
+  /**
+   * 🗑️ Supprimer le compte d'un utilisateur
+   */
+  async deleteUserAccount(userId) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    // Supprimer le portefeuille associé
+    const PorteFeuille = require('../models/PorteFeuille');
+    await PorteFeuille.deleteOne({ user: userId });
+
+    // Supprimer l'utilisateur
+    await User.findByIdAndDelete(userId);
+
+    console.log(`✅ Compte supprimé pour utilisateur ${userId}`);
+  }
 }
 
 module.exports = new AuthService();

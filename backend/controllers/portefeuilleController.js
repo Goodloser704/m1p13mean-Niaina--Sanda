@@ -101,7 +101,7 @@ exports.obtenirPortefeuilleUtilisateur = async (req, res) => {
         description: transaction.description,
         statut: transaction.statut,
         createdAt: transaction.createdAt,
-        typeForUser: transaction.fromWallet.toString() === portefeuille._id.toString() ? 'Sortie' : 'Entree'
+        typeForUser: transaction.fromWallet && transaction.fromWallet.toString() === portefeuille._id.toString() ? 'Sortie' : 'Entree'
       }))
     });
   } catch (error) {
@@ -137,7 +137,7 @@ exports.obtenirMesTransactions = async (req, res) => {
     const transactionsEnrichies = transactions.map(transaction => ({
       ...transaction.toObject(),
       typeForUser: transaction.getTypeForWallet(portefeuille._id),
-      montant: transaction.fromWallet.toString() === portefeuille._id.toString() 
+      montant: transaction.fromWallet && transaction.fromWallet.toString() === portefeuille._id.toString() 
         ? -transaction.amount 
         : transaction.amount
     }));

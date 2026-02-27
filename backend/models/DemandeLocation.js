@@ -142,16 +142,18 @@ demandeLocationSchema.methods.accepter = async function(adminId, contratInfo, me
     );
     
     await session.commitTransaction();
+    session.endSession();
     
-    // Créer une notification pour le commerçant
+    // Créer une notification pour le commerçant (après la transaction)
     await this.creerNotificationAcceptation();
     
     return this;
   } catch (error) {
-    await session.abortTransaction();
-    throw error;
-  } finally {
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
     session.endSession();
+    throw error;
   }
 };
 

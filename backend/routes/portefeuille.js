@@ -59,7 +59,7 @@ router.get('/stats', portefeuilleController.obtenirStatistiques);
 // @desc    Obtenir tous les portefeuilles (Admin seulement)
 // @access  Private (Admin)
 router.get('/admin/all', 
-  authorize([RoleEnum.Admin, 'admin']), 
+  authorize(RoleEnum.Admin), 
   portefeuilleController.obtenirTousPortefeuilles
 );
 

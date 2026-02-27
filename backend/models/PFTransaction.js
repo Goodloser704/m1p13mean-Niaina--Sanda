@@ -5,17 +5,29 @@ const pfTransactionSchema = new mongoose.Schema({
   fromWallet: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'PorteFeuille',
-    required: true
+    required: function() {
+      // fromWallet n'est pas requis pour les recharges
+      return this.type !== 'Recharge';
+    }
   },
   toWallet: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'PorteFeuille',
-    required: true
+    required: function() {
+      // toWallet n'est pas requis pour les retraits
+      return this.type !== 'Retrait';
+    }
   },
   type: {
     type: String,
     required: true,
-    enum: [TypeTransactionEnum.Achat, TypeTransactionEnum.Loyer, TypeTransactionEnum.Commission]
+    enum: [
+      TypeTransactionEnum.Achat, 
+      TypeTransactionEnum.Loyer, 
+      TypeTransactionEnum.Commission,
+      TypeTransactionEnum.Recharge,
+      TypeTransactionEnum.Retrait
+    ]
   },
   amount: {
     type: Number,
@@ -159,9 +171,9 @@ pfTransactionSchema.statics.obtenirHistorique = function(walletId, options = {})
 
 // Méthode pour obtenir le type de transaction pour un portefeuille donné
 pfTransactionSchema.methods.getTypeForWallet = function(walletId) {
-  if (this.fromWallet.toString() === walletId.toString()) {
+  if (this.fromWallet && this.fromWallet.toString() === walletId.toString()) {
     return 'Sortie';
-  } else if (this.toWallet.toString() === walletId.toString()) {
+  } else if (this.toWallet && this.toWallet.toString() === walletId.toString()) {
     return 'Entrée';
   }
   return 'Inconnue';

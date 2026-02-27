@@ -184,9 +184,7 @@ app.use('/api/commercant/boutiques', require('./routes/boutique'));
 // Routes commercant pour produits
 console.log('🛣️  Chargement routes commercant/produits...');
 app.use('/api/commercant/produits', require('./routes/produits'));
-// Routes commercant pour achats
-console.log('🛣️  Chargement routes commercant/achats...');
-app.use('/api/commercant/achats', require('./routes/achats'));
+// Note: Les routes commercant/achats sont gérées dans routes/commercant.js
 
 // Routes de loyers (nouvelles)
 console.log('🛣️  Chargement route loyers...');

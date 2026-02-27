@@ -39,4 +39,54 @@ porteFeuilleSchema.statics.obtenirParUtilisateur = function(userId) {
   return this.findOne({ owner: userId }).populate('owner', 'nom prenoms email role');
 };
 
+// Méthode d'instance pour créditer le portefeuille
+porteFeuilleSchema.methods.crediter = async function(montant, description = 'Crédit') {
+  if (montant <= 0) {
+    throw new Error('Le montant doit être positif');
+  }
+  
+  this.balance += montant;
+  this.derniereMiseAJour = new Date();
+  await this.save();
+  
+  // Créer une transaction
+  const PFTransaction = mongoose.model('PFTransaction');
+  await PFTransaction.create({
+    type: 'Recharge',
+    amount: montant,
+    description,
+    toWallet: this._id,
+    statut: 'Completee'
+  });
+  
+  return this;
+};
+
+// Méthode d'instance pour débiter le portefeuille
+porteFeuilleSchema.methods.debiter = async function(montant, description = 'Débit') {
+  if (montant <= 0) {
+    throw new Error('Le montant doit être positif');
+  }
+  
+  if (this.balance < montant) {
+    throw new Error('Solde insuffisant');
+  }
+  
+  this.balance -= montant;
+  this.derniereMiseAJour = new Date();
+  await this.save();
+  
+  // Créer une transaction
+  const PFTransaction = mongoose.model('PFTransaction');
+  await PFTransaction.create({
+    type: 'Retrait',
+    amount: montant,
+    description,
+    fromWallet: this._id,
+    statut: 'Completee'
+  });
+  
+  return this;
+};
+
 module.exports = mongoose.model('PorteFeuille', porteFeuilleSchema);

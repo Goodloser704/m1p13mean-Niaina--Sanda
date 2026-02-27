@@ -37,11 +37,11 @@ const validatePanier = [
 // Middleware pour vérifier le rôle acheteur
 const acheteurAuth = [auth, authorize(RoleEnum.Acheteur)];
 
-// @route   GET /api/achats
+// @route   GET /api/achats/test
 // @desc    Test de l'API achats (route publique pour tests)
 // @access  Public
 // @return  { message, endpoints, timestamp }
-router.get('/', (req, res) => {
+router.get('/test', (req, res) => {
   res.json({
     message: 'API Achats fonctionnelle',
     endpoints: [

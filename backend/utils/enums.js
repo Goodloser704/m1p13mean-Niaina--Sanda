@@ -37,7 +37,9 @@ const EtatDemandeEnum = {
 const TypeTransactionEnum = {
   Achat: 'Achat',
   Loyer: 'Loyer',
-  Commission: 'Commission'
+  Commission: 'Commission',
+  Recharge: 'Recharge',
+  Retrait: 'Retrait'
 };
 
 // Types de notifications
