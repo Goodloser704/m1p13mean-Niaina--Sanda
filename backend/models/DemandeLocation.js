@@ -141,11 +141,11 @@ demandeLocationSchema.methods.accepter = async function(adminId, contratInfo, me
       { session }
     );
     
+    // Créer une notification pour le commerçant
+    await this.creerNotificationAcceptation(session);
+
     await session.commitTransaction();
     session.endSession();
-    
-    // Créer une notification pour le commerçant (après la transaction)
-    await this.creerNotificationAcceptation();
     
     return this;
   } catch (error) {
@@ -173,21 +173,29 @@ demandeLocationSchema.methods.refuser = async function(adminId, raisonRefus, mes
 };
 
 // Méthode pour créer une notification d'acceptation
-demandeLocationSchema.methods.creerNotificationAcceptation = async function() {
+demandeLocationSchema.methods.creerNotificationAcceptation = async function(session) {
   const Notification = mongoose.model('Notification');
   const Boutique = mongoose.model('Boutique');
-  
-  const boutique = await Boutique.findById(this.boutique).populate('commercant');
-  
-  if (boutique && boutique.commercant) {
-    await Notification.create({
-      type: TypeNotificationEnum.Demande,
-      message: `Votre demande de location pour l'espace ${this.espace} a été acceptée. Vous pouvez maintenant procéder au paiement du loyer.`,
-      receveur: boutique.commercant._id,
-      isRead: false,
-      urlRoute: `/commercant/boutiques/${this.boutique}/location`
-    });
-  }
+
+  const boutique = await Boutique.findById(this.boutique)
+    .populate('commercant')
+    .session(session);
+
+  if (!boutique?.commercant) return;
+
+  const message = `Votre demande de location pour l'espace [${
+    this.espace?.code || ''
+  }, ${
+    this.espace?.etage?.nom || ''
+  }] a été acceptée.`;
+
+  await Notification.create([{
+    type: TypeNotificationEnum.Demande,
+    message,
+    receveur: boutique.commercant._id,
+    isRead: false,
+    urlRoute: `/commercant/boutiques/${this.boutique}/location`
+  }], { session });
 };
 
 // Méthode pour créer une notification de refus
@@ -195,12 +203,13 @@ demandeLocationSchema.methods.creerNotificationRefus = async function() {
   const Notification = mongoose.model('Notification');
   const Boutique = mongoose.model('Boutique');
   
-  const boutique = await Boutique.findById(this.boutique).populate('commercant');
+  const boutique = await Boutique.findById(this.boutique)
+    .populate('commercant');
   
   if (boutique && boutique.commercant) {
     await Notification.create({
       type: TypeNotificationEnum.Demande,
-      message: `Votre demande de location pour l'espace ${this.espace} a été refusée. Raison: ${this.raisonRefus}`,
+      message: `Votre demande de location pour l'espace [${this.espace.code}, ${this.espace.etage.nom}] a été refusée. Raison: ${this.raisonRefus}`,
       receveur: boutique.commercant._id,
       isRead: false,
       urlRoute: `/commercant/boutiques/${this.boutique}/demandes-location`

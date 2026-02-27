@@ -1,0 +1,254 @@
+LISTE DE QUELQUES FONCTIONS NECESSAIRES
+N.B. : II peut y avoir des erreurs/oublies (dans l’Endpoint, dans les Params ou dans les
+Retour), ou des fonctions à développer avant de développer les fonctions ci-dessous
+dans leur Service respective mais il faut toujours se référer aux règles de gestion pour
+savoir quoi faire lors de leur développement.
+
+
+
+
+1 Authentification & Profil – AuthService
+
+registerUser
+        •      Endpoint : POST /api/auth/register
+        •      Params : { user : User }
+
+        •      Retour : { user: User, token: string, portefeuille: PorteFeuille }
+
+        •       Description : Inscription Commercant ou Acheteur. Création automatique du
+    PorteFeuille.
+
+login
+        •      Endpoint : POST /api/auth/login
+        •      Params : { email: string, mdp: string }
+        •      Retour : { user: User, token: string }
+        •      Description : Authentifie Admin / Commercant / Acheteur
+
+
+getMyProfile
+
+
+        •      Endpoint : GET /api/users/:id/me
+        •      Params: { id : any }
+        •      Retour : User
+        •      Description : Récupère le profil de l’utilisateur connecté
+
+updateMyProfile
+        •      Endpoint : PUT /api/users/me
+        •      Params : { userId : any, data : User }
+        •      Retour : User (déjà à jour)
+        •      Description : Mise à jour des infos personnelles
+
+
+2 Notifications – NotificationService
+
+getMyNotifications
+        •      Endpoint : GET /api/users/:userId/notifications
+          •      Query params : { userId : any, page: number, limit: number }
+          •      Retour : { data: Notification[ ], total: number, unreadCount: number }
+          •      Description : Liste paginée des notifications utilisateur
+
+markNotificationAsRead
+          •      Endpoint : PUT /api/notifications/:id/read
+          •      Params : { id : any }
+          •      Retour : Notification
+          •      Description : Marque une notification comme lue
+
+
+createNotification (interne non exposé aux api)
+
+
+       •       Params : { type: NotificationTypeEnum, message: string, receveur: UserId,
+   urlRoute?: string }
+          •      Description : Création auto lors d’un achat, paiement, vente
+
+
+3 PorteFeuille – PorteFeuilleService
+
+getMyWallet
+          •      Endpoint : GET /api/users/:id/wallet
+          •      Params : { id: any }
+          •      Retour : { wallet: PorteFeuille, transactions: PFTransaction[ ] }
+
+
+createTransaction (interne non exposé aux api)
+
+
+      •      Params : { fromWallet: PorteFeuille, toWallet: PorteFeuille, type:
+   PFTransactionTypeEnum, amount: number, description?: string }
+          •      Description : Gère Achat / Loyer / Commission. Met à jour les balances.
+
+
+
+
+I – ADMIN SERVICES
+
+
+
+Centre Commercial – CentreCommercialService
+updateCentreCommercial
+      •       Endpoint : PUT /api/admin/centre-commercial
+      •       Params : { data: CentreCommercial }
+      •       Description : Permet de mettre à jour les informations du centre commercial
+Étages – EtageService
+createEtage
+      •       Endpoint : POST /api/admin/etages
+      •       Params : { niveau: number }
+      •       Retour : { etage : Etage }
+      •       Description : créer un etage dans la base en verifiant si le numero n’est pas encore
+              présent.
+
+
+Espaces – EspaceService
+createEspace
+      •       Endpoint : POST /api/admin/espaces
+      •       Params : { espace : Espace }
+      •       Retour : { espace : Espace }
+
+getEspace
+      •       Endpoint : GET /api/admin/espaces/:id
+      •       Params : { id : any }
+      •       Retour : { espace : Espace }
+
+getAllEspaces
+      •       Endpoint : GET /api/admin/espaces
+      •       Retour : { espace : Espace[ ] }
+
+
+
+
+Catégories – CategorieBoutiqueService
+createCategorie
+      •       Endpoint : GET /api/categories-boutique
+      •       Params : { categorie : CategorieBoutique }
+      •       Retour : { categorie : CategorieBoutique }
+
+getCategories
+
+
+          •      Endpoint : GET /api/categories-boutique
+
+
+Demandes de location – DemandeLocationService
+getDemandesLocation
+      •       Endpoint : GET /api/admin/demandes-location
+      •       Description : retourne tous les demandes de locations
+getDemandeLocationParEtat
+       •   Endpoint : GET /api/admin/demandes-location/etat/:etat
+       •   Params : { etat : EtatDemandeLocationEnum }
+       •   Description : retourne tous les demandes de locations selon un etat
+
+
+
+updateDemandeEtat
+   • Endpoint : PUT /api/admin/demandes-location/:id
+   • Params : { id : any, etat: EtatDemandeEnum }
+   • Effets : Affecte l’espace, Disponible -> Occupee
+
+
+
+
+Dashboard – AdminDashboardService
+getDashboardStats
+   •   Endpoint : GET /api/admin/dashboard
+   •   Retour : { totalBoutiques: number, actives: number, inactives: number, tauxOccupation:
+       number, loyersParMois: any, ... }
+   •   Description : retourne les elements necessaires pour etre utilisees dans l’ecran Dashboard
+       de l’administrateur
+
+
+
+
+II – COMMERCANT SERVICES
+
+
+
+Boutiques – BoutiqueService
+createBoutique
+   • Endpoint : POST /api/commercant/boutique
+   • Params : { boutique : Boutique }
+   • Retour : { boutique : Boutique }
+
+
+getBoutique
+   • Endpoint : GET /api/commercant/boutique/:id
+   • Params : { id : any }
+   • Retour : { boutique : Boutique }
+
+
+
+getMyBoutiques
+   • Endpoint : GET /api/commercant/:id/boutiques
+   • Params : { id : any }
+   • Retour : { boutiques : Boutique[ ] }
+
+
+
+
+Paiement loyer – LoyerService
+payLoyer
+   •   Endpoint : POST /api/commercant/loyers/pay
+   •   Params : { commercant: User }
+   •   Retour : { recepisse: Recepisse }
+   •   Description : effectue des transactions entre les PorteFeuilles
+
+
+
+Produits – ProduitService
+createProduit
+   • Endpoint : POST /api/commercant/produits
+
+updateStock
+   •   Endpoint : PUT /api/commercant/produits/:id/stock
+   •   Params : { nombreDispo: number }
+   •   Description : modifie le stock dans le produit
+
+
+Achats (Commercant) – AchatCommercantService
+getAchatsEnCours
+        •       Endpoint : GET /api/commercant/achats/en-cours
+
+
+validerLivraison
+   •   Endpoint PUT /api/commercant/achats/:id/livraison
+   •   Params : { id : any, dureeLivraison: string }
+   •   Effets : dateFin calculée, etat -> Validee, Transaction PF
+
+
+III – ACHETEUR SERVICES
+
+
+
+Boutiques & Produits – PublicShopService
+getBoutiques
+   • Endpoint : GET /api/boutiques
+   • Query : { page, limit }
+   • Description : retourne tous les boutiques Actif du centre commercial
+
+searchBoutiques
+   • Endpoint : GET /api/boutiques/search/
+   • Query : { keyword: string }
+
+getProduitsByBoutique
+   • Endpoint : GET /api/boutiques/:id/produits
+
+
+Panier & Achat – AchatService
+validerPanier
+   • Endpoint : POST /api/acheteur/:id/achats/panier/validate
+   • Params : { panier : Panier }
+   • Retour : { facture: Facture, achats: Achat[] }
+   • Description : recuperation du Panier venant du front et traitement de chaque Achat dans la
+     liste
+
+getMyAchatsEnCours
+   • Endpoint : GET /api/acheteur/:id/achats/en-cours
+
+getMyHistoriqueAchats
+   • Endpoint : GET /api/acheteur/:id/achats/historique
+
+
+Factures – FactureService
+getMyFactures
+   • Endpoint : GET /api/acheteur/:id/factures
+

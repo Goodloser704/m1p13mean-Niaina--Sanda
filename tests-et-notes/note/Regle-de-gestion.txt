@@ -1,0 +1,536 @@
+Description et règles de gestion de l’application
+Projet académique – Web Avancé (MEAN Stack)
+
+
+Remarque
+Important: Pour eviter les erreurs de faute d'orthographe qui va faire perdre des heures VEUILLEZ UTILISER DES Enums et recuperer la chaine voulu avec l'Enum
+correspondant, Par exemple if(role === RoleEnum.Admin) au lieu de if(role === "Admin") partout !!
+
+
+
+
+1 Contexte général
+       Une entité CentreCommercial sera créée manuellement et à l’avance dans la base de données.
+
+
+  CentreCommercial {
+     nom:            String, required
+     description: String, optional
+     adresse:        String, required,
+     email: String, optional,
+     telephone: String, optional,
+     photo: String, optional,
+     createdAt:      Date, default
+     updatedAt:      Date, default
+ }
+
+
+       L’application comporte 3 types d’utilisateurs, correspondant à 3 rôles :
+
+                Admin
+                Commercant
+                Acheteur
+
+
+
+
+2 Règles générales (partagées par les 3 rôles)
+
+Authentification & Profil
+
+       Une interface de connexion pour Admin, Commercant et Acheteur
+
+       Une interface d’inscription uniquement pour :
+
+                Commercant
+                Acheteur
+
+       Lors de l’inscription :
+
+                Une entité PorteFeuille est créée et liée à l’utilisateur.
+
+       Les Admins sont :
+
+                Créés manuellement à l’avance dans la base de données.
+                Associés eux aussi à une entité PorteFeuille.
+
+       Une page permettant à l’utilisateur de :
+
+                Voir
+                Modifier les informations de son profil .
+
+
+
+
+Notifications
+
+       Une interface permettant de consulter la liste des notifications :
+
+                Notifications en temps réel (ex : Socket.io)
+                Notifications paginées
+                Marquage lu / non lu
+
+       Les notifications sont créées (insérées en base) lors d’actions jugées importantes, par exemple :
+
+                Lors d’un achat :
+
+                        Notification de type "Achat" inséré pour l’Acheteur
+                        Notification de type "Vente" inséré pour le Commercant
+PorteFeuille
+
+       Une page permettant de :
+
+                Voir les transactions
+                Voir la balance actuelle
+
+
+
+
+Entités communes
+
+3.1 User
+
+Entité représentant un utilisateur ayant l’un des rôles suivants :
+
+       Admin
+       Commercant
+       Acheteur
+
+
+  User {
+     nom:           String, required
+     prenoms:       String, required
+     email:         String, required, unique
+     telephone:     String, optional
+     mdp:           String, required
+     photo:         String, optional
+     role:          String, required, enum ["Admin", "Commercant", "Acheteur"]
+     createdAt:     Date, default
+     updatedAt:     Date, default
+ }
+
+
+        role : String (enums) "Admin" , "Commercant" , "Acheteur"
+
+
+
+
+3.2 PorteFeuille
+
+Entité représentant le porte-monnaie virtuel d’un utilisateur (Admin, Commercant ou Acheteur) (facilitera l'integration 'une systeme de paiement en ligne reelle donc ce
+sera utile pour une bonne conception).
+
+Elle permet de suivre les transactions :
+
+       Location
+       Achat
+       Commission
+
+
+Cas du paiement de loyer (type = "Loyer")
+
+       Une transaction avec le PorteFeuille de l’Admin dans "toWallet" => + l'amount sur la balance de son PorteFeuille
+       Une transaction avec le meme amount et le PorteFeuille du Commercant dans "fromWallet" => - l'amount sur la balance de son PorteFeuille
+
+
+Cas d’un achat (type = "Achat")
+
+       Une transaction avec le PorteFeuille du Commercant dans "toWallet"
+       Une transaction avec le PorteFeuille de l’Acheteur dans "fromWallet"
+
+
+  PorteFeuille {
+     owner:        ObjectId, required, ref "User"
+     balance:      Number, required, default 0
+     createdAt: Date, default
+     updatedAt: Date, default
+ }
+ PFTransaction {
+     fromWallet: ObjectId, required, ref "PorteFeuille" // celui qui paie
+     toWallet:      ObjectId, required, ref "PorteFeuille" // celui qui reçoit
+     type:          String, required, enum ["Achat", "Loyer", "Commission"]
+     amount:        Number, required // toujours positif
+     description:String, optional
+     createdAt:     Date, default
+ }
+
+
+        type : "Achat" , "Loyer" , "Commission"
+
+
+
+
+3.3 Notification
+
+ Notification {
+     type:          String, required, enum ["Paiement", "Achat", "Vente"]
+     message:       String, required
+     receveur:      ObjectId, required, ref "User"
+     estLu:         Boolean, required, default false
+     urlRoute:      String, optional
+     createdAt:     Date, default
+     updatedAt:     Date, default
+ }
+
+
+        type : "Paiement" , "Achat"
+
+
+
+
+I️ - ADMIN
+Règles de gestion
+
+       L’Admin est un User créé manuellement à l’avance dans la base de données.
+       Après connexion, l’Admin peut :
+
+                Modifier les informations générales du CentreCommercial
+
+                Ajouter / modifier / supprimer :
+
+                         Les étages
+                         Les espaces (locaux louables)
+
+                Voir la liste des demandes de location
+
+                         Les confirmer ou les refuser
+
+                Gérer les choix de catégories de boutiques (CRUD)
+
+                         (Vêtement, Restaurant, Téléphonie, Bijouterie, Autres, etc.)
+
+                Voir :
+
+                         La liste des boutiques actives
+
+                         La liste des boutiques inactives
+
+                                Nom
+                                Commercants associés
+                                Statut
+                                Espace (emplacement)
+
+                Consulter le Dashboard, affichant :
+
+                         Nombre total de boutiques
+                         Nombre de boutiques actives
+                         Nombre de boutiques inactives
+                         Pourcentage d’occupation des espaces
+                         Historique des paiements de loyers (par mois / année)
+                         Boutiques ayant payé ou non le loyer du mois en cours
+
+
+
+
+Explication:
+  _ Apres sa connexion, l'admin pourra:
+       _ modifier les informations generales concernant l'entité CentreCommercial, ajouter/modifier/supprimer les etages et
+       les espaces (locale louable) appartenant au centre commercial
+       _ voir la liste des demandes de location et les confirmeront ou non.
+       _ ajouter/modifier/supprimer les categories de boutique (une boutique créer aura une categorie(Vetement, Restaurant, Telephonie, ...))
+       _ voir la liste des boutiques actives et une autre liste des inactives [Nom de la boutique, commercants associés, statut, espace(emplacem
+       _ consulter le Dashboard où ils verront:
+              _ nombre total de boutiques ("Actif" et "Inactif")
+              _ nombre de boutique actives et nombre de boutiques inactives
+              _ pourcentage d'occupation des espaces de la CentreCommercial
+              _ historique de paiement des loyers selon le mois et l'annees choisit
+              _ les boutiques qui ont deja payés leur loyer du mois actuelle et ceux qui n'ont pas encore
+
+
+
+
+Entités:
+
+  Etage {
+     niveau: Number, required
+ }
+
+
+        niveau : 0, 1, 2
+
+
+  Espace {
+     centreCommercial: ObjectId, required, ref "CentreCommercial"
+     code:                  String, required
+     surface:               Number, required
+     etage:                 ObjectId, required, ref "Etage"
+     loyer:                 Number, required
+     statut:                String, required, enum ["Disponible", "Occupee"]
+     boutique:              ObjectId, optional, ref "Boutique"
+     createdAt:             Date, default
+     updatedAt:             Date, default
+ }
+
+
+        code : A12, B5, ...
+        surface : m²
+        loyer : valeur du loyer mensuel
+        statut : "Disponible" , "Occupee"
+
+
+  CategorieBoutique {
+     categorie: String, required
+ }
+
+
+       Exemples : "Vetements" , "Telephonie" , "Restaurant" , "Bijouterie" , "Autres"
+
+
+
+
+II - COMMERCANT
+Règles de gestion
+
+       Le Commercant s’inscrit via une interface classique.
+
+       Après connexion, il peut :
+
+                Créer une ou plusieurs boutiques
+                Voir la liste de ses boutiques
+
+Pour une boutique existante, il peut :
+
+       Modifier les informations de la boutique
+
+       Faire une demande de location d’espace
+
+       Fermer totalement la boutique (statut = "Inactif" )
+
+       Voir l’historique de paiement des loyers
+          Payer le loyer mensuel → création d’un Recepisse (Reçu) avec :
+
+                     receveur = Commercant
+                     donneur = Admin
+
+          Gérer :
+
+                     Types de produits (de ce boutique)
+                     Les Produits
+                     Le stock dans chaque produit (Modifier)
+
+          Gérer les achats :
+
+                     Achats en cours (Livraison / Récupération)
+                     États : "EnAttente" , "Validee" , "Annulee"
+                     Saisie de la durée de livraison
+                     Historique des achats
+
+
+
+
+Explication:
+
+ _ Lorsqu'un commercant entre dans une de ses boutiques dans la liste deja existant, il pourra:
+          _ modifier les informations d'une boutique
+          _ effectuer une demande de location d'un espace parmis les espaces disponible
+          _ Interface permettant de fermer totalement la boutique => Son etat devient "Inactif"
+          _ voir l'historique de paiement des loyers et aura une interface de paiement du loyer mensuelle
+                   Une entité Recepisse(Recu) sera creer avec le receveur (Commercant) et le donneur(l'Admin)
+          _ ajoute/modifier/supprimer les types de produits que sa boutique vend (ex: Food, Smartphone, Bijout, ...)
+          _ ajouter/modifier/supprimer des produits (donc une liste de produits)
+                   Chaque nouveau produit aura un stock (detient le nombreDispo d'un produit, avec 0 par defaut) lié à lui,
+                   Un produit a un temps de preparation ou non (donc une temps hh:mm:ss ou null) selon le produit, null signifie disponible de
+                   suite
+          _ gerer l'information sur le stock d'un produit => modification du nombreDispo des produits
+          _ voir la liste des achats en cours, séparé par 2 categories: Livraison et Recuperation (voir la regle en bas dans Acheteur):
+                   Chaque achat en cours auront un etat parmis "EnAttente", "Validee", "Annulee"
+          _ saisir la duree de livraison d'un achat a "Livrer", l'etat de l'achat "EnAttente" devient => "Validee"
+          _ Historique des achats
+
+
+
+
+Entités:
+
+ Boutique {
+     nom:                       String, required
+     description:               String, optional
+     commercant:                ObjectId, required, ref "User"
+     categorie:                 ObjectId, required, ref "CategorieBoutique"
+     statutBoutique: String, required, enum ["Actif", "Inactif"]
+     photo:                     String, optional
+     espace:                    ObjectId, optional, ref "Espace"
+     horairesHebdo: [
+          {
+              jour:        String, required, enum [
+                   "Lundi","Mardi","Mercredi","Jeudi",
+                   "Vendredi","Samedi","Dimanche"
+              ],
+              debut: String, required, // "08:00"
+              fin:         String, required     // "18:00"
+          }
+     ],
+     createdAt:                 Date, default
+     updatedAt:                 Date, default
+ }
+
+
+          statutBoutique : "Actif" , "Inactif" , "EnAttente"
+          CONTRAINTES LOGIQUES (à appliquer côté code): Maximum 7 horaires: horairesHebdo.length <= 7 Jours uniques dans horairesHebdo (pas de "Lundi" 2 fois)
+          debut < fin ("08:00" < "18:00")
+  DemandeLocation {
+     boutique:         ObjectId, required, ref "Boutique"
+     espace:           ObjectId, required, ref "Espace"
+     etatDemande:String, required, enum ["EnAttente", "Acceptee", "Refusee"]
+     createdAt:        Date, default
+     updatedAt:        Date, default
+ }
+
+
+           etatDemande : "EnAttente" , "Acceptee" , "Refusee"
+
+
+  Recepisse {
+     receveur:      ObjectId, required, ref "User"
+     donneur:       ObjectId, required, ref "User"
+     description: String, required
+     createdAt: Date, default
+ }
+
+
+
+  TypeProduit {
+     type: String, required
+ }
+
+
+
+  Produit {
+     nom:                     String, required
+     description:             String, optional
+     prix:                    Number, required
+     typeProduit:             ObjectId, required, ref "TypeProduit"
+     boutique:                ObjectId, required, ref "Boutique"
+     tempsPreparation: String, optional // "hh:mm:ss" ou null
+     stock: {
+          nombreDispo:        Number, required, default 0,
+          updatedAt:          Date, default
+     },
+     createdAt:               Date, default
+     updatedAt:               Date, default
+ }
+
+
+           tempDePreparation : null ou hh:mm:ss
+
+
+
+
+III - ACHETEUR
+Règles de gestion
+
+          L’Acheteur s’inscrit via une interface classique.
+
+          Après connexion, il peut :
+
+                 Voir la liste paginée des boutiques
+                 Voir la liste des produits d’une boutique
+                 Faire une recherche d'une boutique avec un mots clé: nom de la boutique ou le nom d'un Commercant
+                 Voir sa liste de ses achats en cours
+                 Voir son historique d'achat
+                 Voir la liste de ses factures (pour recuperer son recu en pdf coté frontend)
+
+
+Achat
+
+          Un Achat est lié a une TypeAchat, dont 2 types :
+
+                  "Recuperer"
+                  "Livrer"
+
+          son TypeAchat contient :
+
+                  dateDebut
+                  dateFin donc si dateDebut = dateFin => disponible de suite
+
+Règles :
+       Récupérer :
+
+                  dateFin = dateDebut + tempDePreparation donc si tempDePreparation = 0 => disponible de suite
+
+       Livrer :
+
+                  L’achat est en "EnAttente"
+                  Le Commercant saisit une durée de livraison
+                  dateFin = dateDebut + durée
+                  L’état devient "Validee"
+
+
+Panier
+
+       Objet Panier (DTO, non persisté)
+
+       Regroupe les achats (dans le frontend) avant validation(envoye des listes d'achat avec appel api)
+
+       Lors de la validation :
+
+                  Les Achats sont envoyés au backend
+                  Une Facture est créée, et cette facture sera associés a chaque Achat pour pouvoir les suivres/regrouper
+                  L'acheteur pourra plutard recevoir un Reçu généré pour les achats validés (etat "Validee") grace a ce facture
+
+       À l’insertion d’un Achat "EnAttente" ou "Validee":
+
+                  Le stock dans le Produit est vérifié (s'il y en a encore de nombreDispo)
+                  Le nombreDispo du stock est décrémenté
+
+       Lorsqu’un Achat est "Validee" :
+
+                  Transactions PorteFeuille Acheteur ↔ Commercant
+
+
+
+
+Explication:
+
+ _ Apres sa connexion, il pourra:
+       _ voir la liste des boutiques (paginés) du centre commercial
+       _ voir la liste des produits en visitant un boutique (details du produit, avec achat qui ouvre une interface):
+             Une Achat de produit aura un entité TypeAchat liée à lui dont 2 types: "Recuperer" et "Livrer":
+                   TypeAchat aura dateDebut et dateFin qui permettra de savoir la duree de preparation (s'il y en a) ou la duree de livraison
+                   Si "Recuperer" => dateFin = dateDebut + tempDePreparation du produit
+                   Si "Livrer" => l'achat sera dans la liste des demandes de livraison (liste d'entité Achat avec ses produit, typeAchat "Livrer" et
+                   de livraison) sous forme hh:mm:ss et dateFin = dateDebut + duree saisit qui mettra a jour; est c'est apres que l'etat de l'achat
+             L'Acheteur aura un objet Panier (type dto et pas une entité) qui regroupera les Achats apres avoir choisit "Livrer" ou "Recuperer" su
+             un produit, c'est apres validation du Panier que la liste des Achats sera transporté par l'objet Panier vers le back-end, une entité
+             sera aussi crée pour etre associés a la liste des Achats de l'objet Panier, ce Facture permettra de generer un Recu(recepissé) pour l
+             Des que l'entité Achat est inseree dans la base le nombreDispo dans stock sera deduis que ce soit "EnAttente" ou "Validee", tout en v
+             Lorsque l'etat d'un Achat est deja sur "Validee", ou "EnAttente" qui devient "Validee" la transaction sur le PorteFeuille du Commerca
+       _ faire une recherche d'une boutique dont le mots clé est soit le nom de la boutique ou le nom d'un Commercant
+       _ voir sa liste d'achats en cours
+       _ voir son historique d'achat,
+       _ Voir la liste de ses factures
+
+
+
+
+Objet non persisté
+
+ Panier {
+     user:              User
+     achats:            Array<Achat>
+     dateCreation: Date
+ }
+
+
+
+Entités:
+
+ Facture {
+     acheteur:       ObjectId, required, ref "User"
+     description: String, required
+     createdAt: Date, default
+ }
+Achat {
+    acheteur: ObjectId, required, ref "User"
+    produit:       ObjectId, required, ref "Produit"
+    facture:       ObjectId, required, ref "Facture"
+    typeAchat: {
+        type:        String, required, enum ["Recuperer", "Livrer"]
+        dateDebut: Date, required
+        dateFin:     Date, required
+    }
+    etat:          String, required, enum ["EnAttente", "Validee"]
+    createdAt: Date, default
+    updatedAt: Date, default
+}
+
