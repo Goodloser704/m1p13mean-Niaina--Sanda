@@ -134,7 +134,7 @@ export class LocationEspace implements OnInit {
               (a,b) => getEspaceEtageNiveau(a) - getEspaceEtageNiveau(b)
             )
           );
-          this.espacesDispoPagination.setTotal(res.totalPages);
+          this.espacesDispoPagination.setTotalPages(res.totalPages);
         },
         error: console.error
       });
@@ -177,7 +177,7 @@ export class LocationEspace implements OnInit {
               (a, b) => b.createdAt.localeCompare(a.createdAt)
             )
           );
-          this.demandesPaginations.setTotal(res.pagination.totalPages);
+          this.demandesPaginations.setTotalPages(res.pagination.totalPages);
         },
         error: console.error
       })

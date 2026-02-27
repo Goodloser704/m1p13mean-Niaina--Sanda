@@ -36,6 +36,6 @@ export function createPagination(initialLimit = 10) {
     next,
     previous,
     goTo,
-    setTotal: setTotalPages
+    setTotalPages: setTotalPages
   };
 }

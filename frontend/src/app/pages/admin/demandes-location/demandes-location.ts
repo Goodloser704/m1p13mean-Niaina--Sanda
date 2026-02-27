@@ -76,7 +76,7 @@ export class DemandesLocation implements AfterViewInit {
       .subscribe({
         next: (res) => {
           this.demandesEnCours.set(res.demandes);
-          this.demandePagination.setTotal(res.pagination.totalPages);
+          this.demandePagination.setTotalPages(res.pagination.totalPages);
         },
         error: console.error
       })
@@ -94,7 +94,7 @@ export class DemandesLocation implements AfterViewInit {
       .subscribe({
         next: (res) => {
           this.ancienDemandes.set(res.demandes);
-          this.ancienDemandePagination.setTotal(res.pagination.totalPages);
+          this.ancienDemandePagination.setTotalPages(res.pagination.totalPages);
         },
         error: console.error
       })

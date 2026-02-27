@@ -103,7 +103,7 @@ export class GestionProduit implements OnInit {
             console.log(`Nombre de produits: ${res.pagination.total}`);
 
             this.products.set(res.produits);
-            this.productPagination.setTotal(res.pagination.totalPages);
+            this.productPagination.setTotalPages(res.pagination.totalPages);
           } catch (err) {
             console.error(err);
           }

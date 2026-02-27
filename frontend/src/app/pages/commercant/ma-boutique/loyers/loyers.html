@@ -1,1 +1,112 @@
-<p>loyers works!</p>
+<div #childSection class="mb-4">
+  <p class="text-primary text-wrap">Paiement du loyer et historique</p>
+</div>
+
+<div #typeFormSection class="row liquid-glass mb-4">
+  <div class="col-12">
+    <h4>Payer un loyer:</h4>
+    <hr>
+
+    <form [formGroup]="loyerForm" (ngSubmit)="payerLoyer()" class="php-email-form">
+      <div class="row gy-3">
+        <!-- Montant -->
+        <div class="col-sm-4">
+          <input 
+            type="text"
+            mask="separator.2"
+            thousandSeparator="."
+            decimalMarker=","
+            suffix=" Ar"
+            placeholder="Montant" 
+            formControlName="montant" 
+            class="form-control"
+          >
+        </div>
+
+        <!-- Mois -->
+        <div class="col-sm-4">
+          <select formControlName="mois" class="form-control">
+            <option [value]="null" disabled selected>Mois</option>
+            @for (mois of moisList; track mois.value) {
+              <option [value]="mois.value">{{ mois.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Année -->
+        <div class="col-sm-4">
+          <select formControlName="annee" class="form-control">
+            <option [value]="null" disabled selected>Année</option>
+            @for (annee of anneesList; track annee) {
+              <option [value]="annee">{{ annee }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 d-flex justify-content-center">
+          <button type="submit" class="btn-glass" [disabled]="loyerForm.invalid">Payer</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-12 mt-5">
+    <h4>Historique de paiement:</h4>
+    <hr>
+
+    <div class="table-responsive mb-2">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Date</th>
+            <th>Montant</th>
+            <th>Déscription</th>
+            <th>Statut</th>
+            <th>Recepisse</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (h of historiques(); track h._id; let i = $index) {
+            <tr>
+              <td>{{ i + 1 + (historiquePagination.currentPage()-1)*historiquePagination.limit }}</td>
+              <td>{{ h.createdAt | date:'short' }}</td>
+              <td>{{ h.amount | currency:'MGA':'Ar':'1.0-0' }}</td>
+              <td>{{ h.description }}</td>
+              <td>{{ h.statut }}</td>
+              <td>
+                <button class="btn-sm btn-glass-secondary py-1 d-flex flex-row" (click)="telechargerRecepisse(h._id)">
+                  <i class="bi bi-download me-2"></i> Pdf
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="d-flex justify-content-end">
+      <nav aria-label="Pagination historique">
+        <ul class="pagination">
+          <li class="page-item">
+            <button class="page-link" (click)="historiquePagination.previous()">&laquo;</button>
+          </li>
+
+          @for (page of historiquePagination.pagesArray(); track page) {
+            <li 
+              class="page-item"
+              [ngClass]="page === historiquePagination.currentPage() ? 'active' : ''"
+            >
+              <button class="page-link" (click)="historiquePagination.goTo(page)">{{ page }}</button>
+            </li>
+          }
+          
+          <li class="page-item">
+            <button class="page-link" (click)="historiquePagination.next()">&raquo;</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

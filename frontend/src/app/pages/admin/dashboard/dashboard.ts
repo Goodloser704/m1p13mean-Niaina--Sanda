@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe, DecimalPipe, NgClass } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe, NgClass, TitleCasePipe } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { finalize, forkJoin } from 'rxjs';
 import { BaseChartDirective } from 'ng2-charts';
@@ -6,46 +6,15 @@ import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { EspacesStatsResponse } from '../../../core/models/admin/espaces.model';
 import { BoutiqueStatsResponse, StatutBoutique } from '../../../core/models/commercant/boutique.model';
 import { Recepisse } from '../../../core/models/recepisse.model';
-import { LoyerStats } from '../../../core/models/commercant/commercant.model';
+import { LoyerStats, PaiementsMoisCourantResponse } from '../../../core/models/commercant/commercant.model';
 import { EspacesService } from '../../../core/services/admin/espaces.service';
 import { BoutiqueService } from '../../../core/services/commercant/boutique.service';
 import { LoyerService } from '../../../core/services/admin/loyer.service';
 import { LoaderService } from '../../../core/services/loader.service';
 
-interface PaiementsMoisCourantResponse {
-  periode: string;
-  moisCourant: {
-    annee: number;
-    mois: number;
-    nomMois: string;
-  };
-  boutiquesPayees: {
-    _id: string;
-    nom: string;
-    montantPaye: number;
-    datePaiement: string;
-    numeroRecepisse: string;
-    statut: string;
-  }[];
-  boutiquesImpayees: {
-    _id: string;
-    nom: string;
-    montantDu: number;
-    statut: string;
-  }[];
-  statistiques: {
-    nombreBoutiquesActives: number;
-    nombreBoutiquesPayees: number;
-    nombreBoutiquesImpayees: number;
-    totalEncaisse: number;
-    totalMontantDu: number;
-    tauxPaiement: number;
-  };
-}
-
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, DecimalPipe, CurrencyPipe, DatePipe, BaseChartDirective],
+  imports: [NgClass, DecimalPipe, CurrencyPipe, DatePipe, BaseChartDirective, TitleCasePipe],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -198,7 +167,7 @@ export class Dashboard implements OnInit, AfterViewInit {
       espaceStats: this.espacesService.getEspaceStats(),
       boutiqueStats: this.boutiqueService.getBoutiqueStats(),
       statutPaiementMois: this.loyerService.getStatutPaimentsMoisCourant(),
-      historiqueLoyers: this.loyerService.obtenirHistoriqueLoyers(mois, annee, 1, 6)
+      historiqueLoyers: this.loyerService.obtenirHistoriqueLoyers(mois, annee, 1, 200)
     })
       .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
@@ -212,8 +181,12 @@ export class Dashboard implements OnInit, AfterViewInit {
             console.log(`Boutique Stats: ${JSON.stringify(btqStats)}`);
             this.boutiqueStats.set(btqStats);
 
-            this.statutPaiementMois.set(res.statutPaiementMois as PaiementsMoisCourantResponse);
+            // console.log(`Paiement ce mois ci: ${JSON.stringify(res.statutPaiementMois)}`);
+            this.statutPaiementMois.set(res.statutPaiementMois);
+
+            console.log(`Historique Loyers: ${JSON.stringify(res.historiqueLoyers.loyers)}`);
             this.historiqueLoyers.set(res.historiqueLoyers.loyers);
+
             this.historiqueStats.set(res.historiqueLoyers.statistiques);
             this.buildDashboardCharts();
             this.buildLoyerPeriodeChart(res.historiqueLoyers.loyers, mois, annee);
@@ -246,6 +219,7 @@ export class Dashboard implements OnInit, AfterViewInit {
       .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
+          console.log(`Loyers mois de ${mois}: ${JSON.stringify(res.loyers)}`);
           this.buildLoyerPeriodeChart(res.loyers, mois, annee);
           this.periodeStats.set(res.statistiques);
         },

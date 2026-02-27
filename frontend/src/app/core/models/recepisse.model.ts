@@ -4,10 +4,10 @@ import { User } from "./user.model";
 export interface Recepisse {
   _id: string,
   numeroRecepisse: string,
-  receveur: User | string,
-  donneur: User | string,
+  receveur: User, // nom, prenoms, email
+  donneur: User, // nom, prenoms, email
   description: string,
-  transaction: PFTransaction | string,
+  transaction: PFTransaction,
   montant: number,
   type: string,
   periode: string

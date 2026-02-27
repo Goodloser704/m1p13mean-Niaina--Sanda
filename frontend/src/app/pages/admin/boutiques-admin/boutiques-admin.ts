@@ -218,7 +218,7 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
       .subscribe({
         next: (res) => {
           this.activeBoutiques.set(res.boutiques);
-          this.activeBoutiquesPagination.setTotal(res.pagination.totalPages);
+          this.activeBoutiquesPagination.setTotalPages(res.pagination.totalPages);
         },
         error: console.error
       });
@@ -236,7 +236,7 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
       .subscribe({
         next: (res) => {
           this.inactiveBoutiques.set(res.boutiques);
-          this.inactiveBoutiquesPagination.setTotal(res.pagination.totalPages);
+          this.inactiveBoutiquesPagination.setTotalPages(res.pagination.totalPages);
         },
         error: console.error
       });

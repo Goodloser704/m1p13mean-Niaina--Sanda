@@ -1,4 +1,5 @@
 @use "../../../styles/shared/variables" as v;
+@use "../../../styles/shared/mixins" as m;
 
 .balance {
   
@@ -16,4 +17,10 @@
   i {
     font-size: 1.7rem;
   }
+}
+
+.transactions {
+  overflow-y: auto;
+
+  @include m.thin-scrollbar;
 }

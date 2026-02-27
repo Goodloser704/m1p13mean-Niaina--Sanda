@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { LoyerPaiement, LoyerStats } from '../../models/commercant/commercant.model';
+import { LoyerPaiement, LoyerStats, PaiementsMoisCourantResponse } from '../../models/commercant/commercant.model';
 import { Recepisse } from '../../models/recepisse.model';
 import { PFTransaction } from '../../models/porte-feuille.model';
 import { Pagination } from '../../models/pagination.model';
@@ -30,6 +30,13 @@ export class LoyerService {
     )
   }
 
+  // Commercant
+  obtenirRecepisse(idTransaction: string) {
+    return this.http.get<{ recepisse: Recepisse }>(
+      `${this.apiUrl}/api/commercant/loyers/recepisse/${idTransaction}`
+    );
+  }
+
   // Admin
   obtenirHistoriqueLoyers(mois: string /* MM */, annee: string /* YYYY */, page = 1, limit = 10) {
     return this.http.get<{
@@ -51,68 +58,7 @@ export class LoyerService {
 
   // Admin
   getStatutPaimentsMoisCourant() {
-    return this.http.get<{
-      periode: string /* YYYY-MM */,
-      moisCourant: {
-        annee: number,
-        mois: number,
-        nomMois: string
-      },
-      boutiquesPayees: {
-        _id: string,
-        nom: string,
-        commercant: {
-          _id: string,
-          nom: string,
-          prenoms: string,
-          email: string,
-          telephone: string
-        } | null,
-        espace: {
-          _id: string,
-          code: string,
-          loyer: number,
-          etage: {
-            numero: string,
-            nom: string
-          } | null
-        } | null,
-        montantPaye: number,
-        datePaiement: string,
-        numeroRecepisse: string,
-        statut: string
-      }[],
-      boutiquesImpayees: {
-        _id: string,
-        nom: string,
-        commercant: {
-          _id: string,
-          nom: string,
-          prenoms: string,
-          email: string,
-          telephone: string
-        } | null,
-        espace: {
-          _id: string,
-          code: string,
-          loyer: number,
-          etage: {
-            numero: string,
-            nom: string
-          } | null
-        } | null,
-        montantDu: number,
-        statut: string
-      }[],
-      statistiques: {
-        nombreBoutiquesActives:number,
-        nombreBoutiquesPayees: number,
-        nombreBoutiquesImpayees: number,
-        totalEncaisse: number,
-        totalMontantDu: number,
-        tauxPaiement: number
-      }
-    }>(
+    return this.http.get<PaiementsMoisCourantResponse>(
       `${this.apiUrl}/api/admin/loyers/statut-paiements-mois-courant`
     );
   }

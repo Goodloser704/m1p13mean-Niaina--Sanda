@@ -381,7 +381,7 @@ export class Espaces implements OnInit, AfterViewInit, AfterViewChecked {
       .subscribe({
         next: (res) => {
           this.espaces.set(res.espaces.sort((a,b) => getEspaceEtageNiveau(a) - getEspaceEtageNiveau(b)));
-          this.espacePagination.setTotal(res.totalPages);
+          this.espacePagination.setTotalPages(res.totalPages);
 
           console.log(`Espaces res: ${JSON.stringify(res)}`);
         },

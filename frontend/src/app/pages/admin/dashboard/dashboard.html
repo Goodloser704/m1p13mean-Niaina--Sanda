@@ -108,14 +108,33 @@
           </div>
         </div>
       </div>
+
+      <div class="col-12">
+        <div class="glass p-3 h-100">
+          <h5 class="mb-3">Repartition des boutiques par categorie</h5>
+
+          @if (boutiqueStats().parCategorie.length === 0) {
+            <p class="mb-0 small">Aucune categorie disponible.</p>
+          } @else {
+            <div style="height: 200px;">
+              <canvas
+                baseChart
+                [data]="categoriesChartData"
+                [options]="barOptions"
+                [type]="'bar'"
+              ></canvas>
+            </div>
+          }
+        </div>
+      </div>
     </div>
 
     <div class="row liquid-glass g-3 p-2 pb-3 mb-5" data-aos="fade-left" data-aos-delay="200">
       <h3 class="mb-3">Statistique de paiement</h3>
 
-      <div class="col-12 col-xl-7">
-        <div class="glass p-3 h-100">
-          <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="col-12">
+        <div class="glass p-3">
+          <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="mb-0">Paiements loyers du mois courant</h5>
             <small>{{ statutPaiementMois()?.periode | date:'MMMM yyyy':'':'fr-FR' }}</small>
           </div>
@@ -141,11 +160,11 @@
                 <b>{{ statutPaiementMois()?.statistiques?.nombreBoutiquesImpayees ?? 0 }}</b>
               </div>
               <div class="d-flex justify-content-between mb-2">
-                <small>Total encaisse</small>
+                <small>Total encaissé</small>
                 <b>{{ (statutPaiementMois()?.statistiques?.totalEncaisse ?? 0) | currency:'MGA':'Ar':'1.0-0' }}</b>
               </div>
               <div class="d-flex justify-content-between">
-                <small>Total montant du</small>
+                <small>Total montant encore du</small>
                 <b>{{ (statutPaiementMois()?.statistiques?.totalMontantDu ?? 0) | currency:'MGA':'Ar':'1.0-0' }}</b>
               </div>
             </div>
@@ -161,25 +180,73 @@
             ></div>
           </div>
 
-          <h6 class="mb-2">Derniers paiements</h6>
+          <h6 class="mb-2">Boutiques ayant payé</h6>
           @if (statutPaiementMois()?.boutiquesPayees?.length) {
+            <div class="table-responsive mb-3">
+              <table class="table table-sm table-striped align-middle">
+                <thead>
+                  <tr>
+                    <th>Boutique</th>
+                    <th>Montant du</th>
+                    <th>Montant payé</th>
+                    <th>Date</th>
+                    <th>Recepisse</th>
+                    <th>Montant</th>
+                    <th>Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (bp of statutPaiementMois()!.boutiquesPayees; track bp._id) {
+                    <tr>
+                      <td>{{ bp.nom }}</td>
+                      <td>{{ bp.montantDu | currency:'MGA':'Ar':'1.0-0' }}</td>
+                      <td>{{ bp.montantPaye | currency:'MGA':'Ar':'1.0-0' }}</td>
+                      <td>
+                        <ul class="list-unstyled small mb-0">
+                          @for (p of bp.paiements; track p.numeroRecepisse) {
+                            <li>{{ p.datePaiement | date:'dd/MM/yyyy HH:mm' }}</li>
+                          }
+                        </ul>
+                      </td>
+                      <td>
+                        <ul class="list-unstyled small mb-0">
+                          @for (p of bp.paiements; track p.numeroRecepisse) {
+                            <li>{{ p.numeroRecepisse }}</li>
+                          }
+                        </ul>
+                      </td>
+                      <td>
+                        <ul class="list-unstyled small mb-0">
+                          @for (p of bp.paiements; track p.numeroRecepisse) {
+                            <li>{{ p.montant }}</li>
+                          }
+                        </ul>
+                      </td>
+                      <td>{{ bp.statut | titlecase }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <p class="mb-0 small">Aucun paiement enregistre ce mois.</p>
+          }
+
+          <h6 class="mb-2">Boutiques au location impayées</h6>
+          @if (statutPaiementMois()?.boutiquesImpayees?.length) {
             <div class="table-responsive">
               <table class="table table-sm align-middle mb-0">
                 <thead>
                   <tr>
                     <th>Boutique</th>
-                    <th>Montant</th>
-                    <th>Date</th>
-                    <th>Recepisse</th>
+                    <th>Montant du</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (ligne of statutPaiementMois()!.boutiquesPayees.slice(0, 5); track ligne._id) {
+                  @for (bi of statutPaiementMois()!.boutiquesImpayees; track bi._id) {
                     <tr>
-                      <td>{{ ligne.nom }}</td>
-                      <td>{{ ligne.montantPaye | currency:'MGA':'Ar':'1.0-0' }}</td>
-                      <td>{{ ligne.datePaiement | date:'dd/MM/yyyy HH:mm' }}</td>
-                      <td>{{ ligne.numeroRecepisse }}</td>
+                      <td>{{ bi.nom }}</td>
+                      <td>{{ bi.montantDu | currency:'MGA':'Ar':'1.0-0' }}</td>
                     </tr>
                   }
                 </tbody>
@@ -191,84 +258,65 @@
         </div>
       </div>
 
-      <div class="col-12 col-xl-5">
-        <div class="glass p-3 h-100">
-          <h5 class="mb-3">Repartition par categorie</h5>
 
-          @if (boutiqueStats().parCategorie.length === 0) {
-            <p class="mb-0 small">Aucune categorie disponible.</p>
-          } @else {
-            <div style="height: 200px;">
-              <canvas
-                baseChart
-                [data]="categoriesChartData"
-                [options]="barOptions"
-                [type]="'bar'"
-              ></canvas>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-
-    <div class="row liquid-glass g-3 p-2 pb-3 mb-5" data-aos="fade-left" data-aos-delay="200">
-      <div class="col-12 p-3">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-          <h5 class="mb-0">Historique loyers par periode</h5>
-          <div class="d-flex flex-row gap-2">
-            <select class="form-select" [value]="selectedMonth()" (change)="onMonthChange($event)">
-              @for (month of monthOptions; track month.value) {
-                <option [value]="month.value" [selected]="month.value == selectedMonth()">{{ month.label }}</option>
-              }
-            </select>
-            <select class="form-select" [value]="selectedYear()" (change)="onYearChange($event)">
-              @for (year of yearOptions; track year) {
-                <option [value]="year" [selected]="year == selectedYear()">{{ year }}</option>
-              }
-            </select>
-            <button class="btn btn-primary py-1 px-2 small" (click)="loadHistoriqueParPeriode()">Actualiser</button>
-          </div>
-        </div>
-
-        <div class="row g-3">
-          <div class="col-12 col-xl-8">
-            <div style="height: 340px;">
-              <canvas
-                baseChart
-                [data]="loyerPeriodeChartData"
-                [options]="lineOptions"
-                [type]="'line'"
-              ></canvas>
+      <div class="col-12">
+        <div class="glass p-3">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <h5 class="text-wrap">Statistique de paiement du loyer durant le mois courant</h5>
+            <div class="d-flex flex-row gap-2">
+              <select class="form-select" [value]="selectedMonth()" (change)="onMonthChange($event)">
+                @for (month of monthOptions; track month.value) {
+                  <option [value]="month.value" [selected]="month.value == selectedMonth()">{{ month.label }}</option>
+                }
+              </select>
+              <select class="form-select" [value]="selectedYear()" (change)="onYearChange($event)">
+                @for (year of yearOptions; track year) {
+                  <option [value]="year" [selected]="year == selectedYear()">{{ year }}</option>
+                }
+              </select>
+              <button class="btn btn-primary py-1 px-2 small" (click)="loadHistoriqueParPeriode()">Actualiser</button>
             </div>
           </div>
 
-          <div class="col-12 col-xl-4">
-            <div class="glass rounded-3 p-3 h-100">
-              <div class="d-flex justify-content-between mb-2">
-                <span>Nombre paiements</span>
-                <b>{{ periodeStats().nombrePaiements }}</b>
+          <div class="row g-3">
+            <div class="col-12 col-xl-8">
+              <div style="height: 340px;">
+                <canvas
+                  baseChart
+                  [data]="loyerPeriodeChartData"
+                  [options]="lineOptions"
+                  [type]="'line'"
+                ></canvas>
               </div>
-              <div class="d-flex justify-content-between mb-2">
-                <span>Montant total</span>
-                <b>{{ periodeStats().totalMontant | currency:'MGA':'Ar':'1.0-0' }}</b>
-              </div>
-              <div class="d-flex justify-content-between mb-2">
-                <span>Montant moyen</span>
-                <b>{{ periodeStats().montantMoyen | currency:'MGA':'Ar':'1.0-0' }}</b>
-              </div>
-              <div class="d-flex justify-content-between mb-2">
-                <span>Montant min</span>
-                <b>{{ periodeStats().montantMin | currency:'MGA':'Ar':'1.0-0' }}</b>
-              </div>
-              <div class="d-flex justify-content-between">
-                <span>Montant max</span>
-                <b>{{ periodeStats().montantMax | currency:'MGA':'Ar':'1.0-0' }}</b>
+            </div>
+
+            <div class="col-12 col-xl-4">
+              <div class="bg-white d-flex flex-column rounded-3 p-3 h-100">
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Nombre paiements</span>
+                  <b>{{ periodeStats().nombrePaiements }}</b>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Montant total</span>
+                  <b>{{ periodeStats().totalMontant | currency:'MGA':'Ar':'1.0-0' }}</b>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Montant min</span>
+                  <b>{{ periodeStats().montantMin | currency:'MGA':'Ar':'1.0-0' }}</b>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span>Montant max</span>
+                  <b>{{ periodeStats().montantMax | currency:'MGA':'Ar':'1.0-0' }}</b>
+                </div>
+                <div class="flex-grow-1"></div>
+                <p class="align-self-center text-muted small">- Sans tenir compte du date de paiement -</p>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
   </div>
 </section>
 

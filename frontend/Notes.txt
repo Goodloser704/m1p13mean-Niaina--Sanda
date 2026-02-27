@@ -30,6 +30,7 @@ Installation dependencies:
 _ Vendors du template iLanding Bootstrap:
 npm install bootstrap bootstrap-icons aos glightbox swiper
 npm install --save-dev @types/bootstrap
+npm install ngx-mask
 
 _ Configuration dans angular.json:
 "styles": [
@@ -47,6 +48,7 @@ _ Configuration dans angular.json:
   "node_modules/swiper/swiper-bundle.min.js"
 ]
 
+Pdf: npm install pdfmake jspdf
 --------------------------------------------------------------------
 
 Activer Mongo Replica Set pour utiliser les transactions

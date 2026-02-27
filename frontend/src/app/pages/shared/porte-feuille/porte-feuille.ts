@@ -38,7 +38,7 @@ export class PorteFeuille implements OnInit {
         .pipe(finalize(() => this.loaderService.hide()))
         .subscribe({
           next: (res) => {
-            console.log(`My wallet: ${JSON.stringify(res.wallet)}`);
+            console.log(`My wallet: ${JSON.stringify(res)}`);
 
             this.porteFeuille.set(res.wallet);
             this.transactions.set(res.transactions);

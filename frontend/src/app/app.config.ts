@@ -7,6 +7,7 @@ import { authInterceptor } from './core/interceptor/auth-interceptor';
 import { registerLocaleData } from '@angular/common';
 import localFr from '@angular/common/locales/fr';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { provideEnvironmentNgxMask } from 'ngx-mask';
 
 registerLocaleData(localFr);
 
@@ -14,6 +15,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR' },
     importProvidersFrom(OverlayModule),
+    provideEnvironmentNgxMask(),
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
