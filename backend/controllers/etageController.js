@@ -22,12 +22,15 @@ class EtageController {
     console.log(`🏢 [CONTROLLER] Body:`, JSON.stringify(req.body, null, 2));
     
     try {
-      // Vérifier si un étage avec ce niveau existe déjà
+      // Vérifier si un étage ACTIF avec ce niveau existe déjà
       const Etage = require('../models/Etage');
-      const etageExistant = await Etage.findOne({ niveau: req.body.niveau });
+      const etageExistant = await Etage.findOne({ 
+        niveau: req.body.niveau,
+        isActive: true 
+      });
       
       if (etageExistant) {
-        console.warn(`⚠️ [CONTROLLER] Étage avec niveau ${req.body.niveau} existe déjà (ID: ${etageExistant._id})`);
+        console.warn(`⚠️ [CONTROLLER] Étage actif avec niveau ${req.body.niveau} existe déjà (ID: ${etageExistant._id})`);
         return res.status(400).json({
           message: `Un étage avec le niveau ${req.body.niveau} existe déjà`,
           etageExistant: {
