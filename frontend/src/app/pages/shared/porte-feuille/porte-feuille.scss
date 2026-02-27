@@ -1,0 +1,19 @@
+@use "../../../styles/shared/variables" as v;
+
+.balance {
+  
+  span {
+    color: v.$default-color;
+  }
+}
+
+.feature-box {
+  width: fit-content;
+  max-width: 90%;
+  height: fit-content;
+  padding: 0.5rem;
+
+  i {
+    font-size: 1.7rem;
+  }
+}

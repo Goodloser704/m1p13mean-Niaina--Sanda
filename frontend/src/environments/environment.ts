@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: '/api' // URL relative pour utiliser le proxy en développement
+  apiUrl: 'http://localhost:3000'
 };
 
-export const title = 'Centre Commercial';
+export const title = "Centre Commercial App";

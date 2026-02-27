@@ -1,0 +1,275 @@
+<section #childSection id="hero" class="hero section">
+  <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
+    <h1 class="mb-5">Tableau de bord</h1>
+
+    <div class="row liquid-glass g-3 p-2 pb-3 mb-5" data-aos="fade-left" data-aos-delay="200">
+      <h3 class="mb-3">Boutiques</h3>
+
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="glass p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center">
+            <small>Total boutiques</small>
+            <i class="bi bi-shop text-primary fs-4"></i>
+          </div>
+          <h3 class="mb-1 text-white">{{ boutiqueStats().total }}</h3>
+          <small>Collection boutiques</small>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="glass-green p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center">
+            <small>Boutiques actives</small>
+            <i class="bi bi-check-circle text-success fs-4"></i>
+          </div>
+          <h3 class="mb-1 text-white">{{ getBoutiqueCountByStatut(StatutBoutique.Actif) }}</h3>
+          <small>Statut actif</small>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="glass-red p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center">
+            <small>Boutiques inactives</small>
+            <i class="bi bi-x-circle text-danger fs-4"></i>
+          </div>
+          <h3 class="mb-1 text-white">{{ getBoutiqueCountByStatut(StatutBoutique.Inactif) }}</h3>
+          <small>Statut inactif</small>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="glass-blue p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center">
+            <small>Occupation des espaces</small>
+            <i class="bi bi-grid-1x2 text-info fs-4"></i>
+          </div>
+          <h3 class="mb-1 text-white">{{ espaceStats().tauxOccupation | number:'1.0-1' }}%</h3>
+          <small>{{ espaceStats().espacesOccupes }} / {{ espaceStats().totalEspaces }} occupes</small>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="glass p-3 h-100">
+          <h5 class="mb-3">Statut boutiques</h5>
+          <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-7">
+              <div style="height: 250px;">
+                <canvas
+                  baseChart
+                  [data]="boutiqueStatutChartData"
+                  [options]="doughnutOptions"
+                  [type]="'doughnut'"
+                ></canvas>
+              </div>
+            </div>
+            <div class="col-12 col-md-5">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Actives</span>
+                <b>{{ getBoutiqueCountByStatut(StatutBoutique.Actif) }}</b>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Inactives</span>
+                <b>{{ getBoutiqueCountByStatut(StatutBoutique.Inactif) }}</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="glass p-3 h-100">
+          <h5 class="mb-3">Espaces</h5>
+          <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-7">
+              <div style="height: 250px;">
+                <canvas
+                  baseChart
+                  [data]="espaceOccupationChartData"
+                  [options]="doughnutOptions"
+                  [type]="'doughnut'"
+                ></canvas>
+              </div>
+            </div>
+            <div class="col-12 col-md-5">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Disponibles</span>
+                <b>{{ espaceStats().espacesDisponibles }}</b>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Occupes</span>
+                <b>{{ espaceStats().espacesOccupes }}</b>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Total</span>
+                <b>{{ espaceStats().totalEspaces }}</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row liquid-glass g-3 p-2 pb-3 mb-5" data-aos="fade-left" data-aos-delay="200">
+      <h3 class="mb-3">Statistique de paiement</h3>
+
+      <div class="col-12 col-xl-7">
+        <div class="glass p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">Paiements loyers du mois courant</h5>
+            <small>{{ statutPaiementMois()?.periode | date:'MMMM yyyy':'':'fr-FR' }}</small>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-md-7">
+              <div style="height: 230px;">
+                <canvas
+                  baseChart
+                  [data]="paiementMoisChartData"
+                  [options]="doughnutOptions"
+                  [type]="'doughnut'"
+                ></canvas>
+              </div>
+            </div>
+            <div class="col-12 col-md-5 d-flex flex-column justify-content-center">
+              <div class="d-flex justify-content-between mb-2">
+                <small>Boutiques (deja payé)</small>
+                <b>{{ statutPaiementMois()?.statistiques?.nombreBoutiquesPayees ?? 0 }}</b>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <small>Boutiques (pas encore)</small>
+                <b>{{ statutPaiementMois()?.statistiques?.nombreBoutiquesImpayees ?? 0 }}</b>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <small>Total encaisse</small>
+                <b>{{ (statutPaiementMois()?.statistiques?.totalEncaisse ?? 0) | currency:'MGA':'Ar':'1.0-0' }}</b>
+              </div>
+              <div class="d-flex justify-content-between">
+                <small>Total montant du</small>
+                <b>{{ (statutPaiementMois()?.statistiques?.totalMontantDu ?? 0) | currency:'MGA':'Ar':'1.0-0' }}</b>
+              </div>
+            </div>
+          </div>
+
+          <small>Taux de paiement: {{ statutPaiementMois()?.statistiques?.tauxPaiement ?? 0 | number:'1.0-1' }}%</small>
+          <div class="progress mt-1 mb-3">
+            <div
+              class="progress-bar"
+              [ngClass]="getPaiementProgressType()"
+              role="progressbar"
+              [style.width.%]="statutPaiementMois()?.statistiques?.tauxPaiement ?? 0"
+            ></div>
+          </div>
+
+          <h6 class="mb-2">Derniers paiements</h6>
+          @if (statutPaiementMois()?.boutiquesPayees?.length) {
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Boutique</th>
+                    <th>Montant</th>
+                    <th>Date</th>
+                    <th>Recepisse</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (ligne of statutPaiementMois()!.boutiquesPayees.slice(0, 5); track ligne._id) {
+                    <tr>
+                      <td>{{ ligne.nom }}</td>
+                      <td>{{ ligne.montantPaye | currency:'MGA':'Ar':'1.0-0' }}</td>
+                      <td>{{ ligne.datePaiement | date:'dd/MM/yyyy HH:mm' }}</td>
+                      <td>{{ ligne.numeroRecepisse }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <p class="mb-0 small">Aucun paiement enregistre ce mois.</p>
+          }
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-5">
+        <div class="glass p-3 h-100">
+          <h5 class="mb-3">Repartition par categorie</h5>
+
+          @if (boutiqueStats().parCategorie.length === 0) {
+            <p class="mb-0 small">Aucune categorie disponible.</p>
+          } @else {
+            <div style="height: 200px;">
+              <canvas
+                baseChart
+                [data]="categoriesChartData"
+                [options]="barOptions"
+                [type]="'bar'"
+              ></canvas>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="row liquid-glass g-3 p-2 pb-3 mb-5" data-aos="fade-left" data-aos-delay="200">
+      <div class="col-12 p-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <h5 class="mb-0">Historique loyers par periode</h5>
+          <div class="d-flex flex-row gap-2">
+            <select class="form-select" [value]="selectedMonth()" (change)="onMonthChange($event)">
+              @for (month of monthOptions; track month.value) {
+                <option [value]="month.value" [selected]="month.value == selectedMonth()">{{ month.label }}</option>
+              }
+            </select>
+            <select class="form-select" [value]="selectedYear()" (change)="onYearChange($event)">
+              @for (year of yearOptions; track year) {
+                <option [value]="year" [selected]="year == selectedYear()">{{ year }}</option>
+              }
+            </select>
+            <button class="btn btn-primary py-1 px-2 small" (click)="loadHistoriqueParPeriode()">Actualiser</button>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-xl-8">
+            <div style="height: 340px;">
+              <canvas
+                baseChart
+                [data]="loyerPeriodeChartData"
+                [options]="lineOptions"
+                [type]="'line'"
+              ></canvas>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-4">
+            <div class="glass rounded-3 p-3 h-100">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Nombre paiements</span>
+                <b>{{ periodeStats().nombrePaiements }}</b>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Montant total</span>
+                <b>{{ periodeStats().totalMontant | currency:'MGA':'Ar':'1.0-0' }}</b>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Montant moyen</span>
+                <b>{{ periodeStats().montantMoyen | currency:'MGA':'Ar':'1.0-0' }}</b>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Montant min</span>
+                <b>{{ periodeStats().montantMin | currency:'MGA':'Ar':'1.0-0' }}</b>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Montant max</span>
+                <b>{{ periodeStats().montantMax | currency:'MGA':'Ar':'1.0-0' }}</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+

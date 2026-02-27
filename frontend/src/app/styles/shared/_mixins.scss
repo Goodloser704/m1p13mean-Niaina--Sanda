@@ -1,0 +1,26 @@
+// Mixins SCSS: Des suites de styles qui se ressembre toujours et repetitifs
+// A Importer dans les fichiers scss qui l'utilise avec @use "/chemin_relatif" 
+// utiliser avec @include
+
+@use "./variables" as v;
+
+@mixin thin-scrollbar {
+  /* Scrollbar fine sur Chrome, Edge et Safari */
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #4f5d75;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  /* Scrollbar fine sur Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #4f5d75 transparent;
+}

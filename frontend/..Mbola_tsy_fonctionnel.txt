@@ -1,0 +1,2 @@
+Liste Demandes de location (pas encore integré)
+getAllBoutiqueByStatut (rectifier)

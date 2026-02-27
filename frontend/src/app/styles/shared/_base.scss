@@ -1,0 +1,390 @@
+@use "sass:color";
+@use "variables" as v;
+@use "mixins" as m;
+
+// ----- Default -----
+
+p {
+  margin-bottom: 0;
+}
+
+a {
+  cursor: pointer;
+}
+
+h1, h2 {
+  font-weight: bold;
+  color: v.$accent-color;
+}
+
+// -------------------
+
+.border-red {
+  border: 1px solid red;
+}
+
+.border-blue {
+  border: 1px solid blue;
+}
+
+.border-green {
+  border: 1px solid green;
+}
+
+.header {
+  // background-color: rgba(0, 0, 0, 0.05);
+}
+
+.navbar {
+  font-family: v.$nav-font;
+}
+
+.brand-title {
+  color: v.$accent-color;
+  font-weight: bold;
+  font-family: v.$nav-font;
+}
+
+// --- Pour nos cartes flottante ---
+
+/* Overlay plein écran */
+.floating-container {
+  position: fixed;
+  inset: 0; // top:0 right:0 bottom:0 left:0
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; // laisse passer les events
+  z-index: 1000;
+}
+
+.floating-container-darker { // capable d'intercepter les clicks
+  position: fixed;
+  inset: 0; // top:0 right:0 bottom:0 left:0
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto; // laisse passer les events
+  z-index: 1;
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile */
+@media (max-width: 991px) {
+  .floating-card {
+    max-height: 90vh;
+    padding: 1rem;
+  }
+}
+
+// --- End carte flottante ---
+
+// ---- Forms ----
+
+.contact {
+  // border: 1px solid blue;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.s-inscrire {
+  color: v.$heading-color;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+// tsy mandeha
+.error-message {
+  color: red;
+}
+
+// -- End Forms --
+
+// ---- Button ----
+
+.btn-sm {
+  height: fit-content;
+  padding: 0.2rem 0.6rem;
+  border: none;
+  border-radius: 10px;
+  font-size: small;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+  background-color: v.$accent-color;
+  border-color: v.$accent-color;
+  color: v.$contrast-color;
+
+  &:hover {
+    background-color: color.scale(v.$accent-color, $lightness: -10%);
+    border-color: color.scale(v.$accent-color, $lightness: -10%);
+  }
+}
+
+.btn-outline-primary {
+  background-color: v.$contrast-color;
+  border-width: 2px;
+  border-color: v.$accent-color;
+  color: v.$accent-color;
+
+  &:hover {
+    background-color: color.scale(v.$contrast-color, $lightness: -10%);
+    color: color.scale(v.$accent-color, $lightness: -10%);
+    border-color: color.scale(v.$accent-color, $lightness: -10%);
+  }
+}
+
+.btn-secondary {
+  background-color: v.$heading-color;
+  border-color: v.$heading-color;
+  color: v.$contrast-color;
+
+  &:hover {
+    background-color: color.scale(v.$heading-color, $lightness: -10%);
+    border-color: color.scale(v.$heading-color, $lightness: -10%);
+  }
+}
+
+.btn-outline-secondary {
+  background-color: v.$contrast-color;
+  border-width: 2px;
+  border-color: v.$heading-color;
+  color: v.$heading-color;
+
+  &:hover {
+    background-color: color.scale(v.$contrast-color, $lightness: -10%);
+    color: color.scale(v.$heading-color, $lightness: -10%);
+    border-color: color.scale(v.$heading-color, $lightness: -10%);
+  }
+}
+
+// -- End Button --
+
+// --- Image section ---
+
+.photo-preview {
+  border: 1px solid lightgray;
+  border-radius: 13px;
+  width: 120px;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.navbar-nav .nav-item img {
+  object-fit: cover;
+  border: 2px solid #fff; // optionnel, contour blanc
+  cursor: pointer;
+}
+
+.profile-image {
+  width: 90%;
+  aspect-ratio: 1;
+}
+
+.card-img-top {
+  border: 1px solid transparent;
+  width: 100%;
+  aspect-ratio: 1.5;
+  object-fit: cover;
+  display: block; // supprime l'espace blanc sous l'image
+  padding: 0.2rem;
+  border-radius: 13px 13px 0 0;
+}
+
+// - End Image section -
+
+// ---- Template ----
+
+.hero {
+  height: fit-content;
+  min-height: 100vh;
+  padding-bottom: 5rem;
+}
+
+// -- End Template --
+
+// ---- Surface ----
+
+.row-list-item {
+  padding: 0.7rem;
+  width: 100%;
+  height: fit-content;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  row-gap: 10px;
+}
+
+.scroll-margin-top {
+  scroll-margin-top: 6rem;
+}
+
+// -- End Surface --
+
+// ---- Notifications ----
+
+.notification-link {
+  border: 1px solid transparent;
+  width: fit-content;
+  min-width: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-icon {
+  font-weight: 400;
+  font-size: 1.1rem; /* icône légèrement plus épaisse */
+}
+
+.notification-dot {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background: #dc3545;
+  border-radius: 50%;
+  border: 1px solid white;
+}
+
+.notification-items {
+  border: 1px solid transparent;
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  justify-content: space-between;
+
+  p {
+    font-size: 0.8rem;
+  }
+}
+
+.unread-dot {
+  width: 10px;
+  aspect-ratio: 1;
+  background-color: #dc3545;
+  border-radius: 50%;
+}
+
+.mark-as-read {
+  font-size: 1.5rem;
+  cursor: pointer;
+
+  &:hover {
+    color: v.$heading-color;
+  }
+}
+
+.mark-all-as-read {
+  color: v.$heading-color;
+  font-size: 2.5rem;
+  cursor: pointer;
+
+  &:hover {
+    color: color.scale($color: v.$heading-color, $lightness: -20%);
+  }
+}
+
+// -- End Notifications --
+
+// ---- Bootstrap ----
+
+.nav-item {
+  border: 1px solid transparent;
+}
+
+.nav-link {
+  color: v.$default-color;
+}
+
+.bi-bolder {
+  -webkit-text-stroke-width: 1px; /* Adjust the pixel value for desired thickness */
+  /* For compatibility, though it's a non-standard property */
+  text-stroke-width: 1px; 
+}
+
+.text-primary {
+  color: v.$accent-color !important;
+}
+
+.text-secondary {
+  color: v.$heading-color !important;
+}
+
+.pagination .active {
+  .page-link {
+    font-weight: bold;
+    border-color: rgba(v.$accent-color, 0.12);
+    background-color: rgba(v.$accent-color, 0.12);
+  }
+}
+
+.page-link {
+  color: v.$accent-color !important;
+}
+
+// -- End Bootstrap --
+
+.info-label {
+  color: color-mix(in srgb, var(--default-color), transparent 30%);
+}
+
+.info-value {
+  color: v.$accent-color;
+  font-weight: 700;
+}
+
+// ---- Navbar ----
+
+.custom-dropdown {
+  width: 99%;
+  min-width: 200px;
+  max-width: 400px;
+  height: fit-content;
+  max-height: 230px;
+  padding: 0.5rem;
+  border-radius: 12px;
+  overflow-y: auto;
+  @include m.thin-scrollbar;
+}
+
+.dropdown-menu-item {
+  border: 1px solid transparent;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.dropdown-menu-item i {
+  font-size: 1.2rem;
+  color: v.$accent-color;
+}
+
+.dropdown-menu-item:hover {
+  color: color.scale($color: v.$accent-color, $lightness: -20%);
+  background-color: #f1f3f5;
+  transform: translateX(3px);
+}
+
+.item-title {
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+// -- End Navbar --
