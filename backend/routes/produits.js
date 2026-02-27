@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { body } = require('express-validator');
 
 /**
  * 📦 Routes produits
@@ -7,7 +8,38 @@ const router = express.Router();
  * Architecture: Route → Controller → Service
  */
 const produitController = require('../controllers/produitController');
-const { auth } = require('../middleware/auth');
+const { auth, authorize } = require('../middleware/auth');
+const { RoleEnum } = require('../utils/enums');
+
+// Validations
+const validateProduit = [
+  body('nom')
+    .notEmpty().withMessage('Le nom est requis')
+    .trim()
+    .isLength({ min: 2, max: 200 }).withMessage('Le nom doit contenir entre 2 et 200 caractères'),
+  body('prix')
+    .notEmpty().withMessage('Le prix est requis')
+    .isFloat({ min: 0 }).withMessage('Le prix doit être un nombre positif'),
+  body('boutique')
+    .notEmpty().withMessage('La boutique est requise')
+    .isMongoId().withMessage('ID boutique invalide'),
+  body('typeProduit')
+    .optional()
+    .isMongoId().withMessage('ID type produit invalide'),
+  body('description')
+    .optional()
+    .trim()
+    .isLength({ max: 2000 }).withMessage('La description ne peut pas dépasser 2000 caractères'),
+  body('stock.nombreDispo')
+    .optional()
+    .isInt({ min: 0 }).withMessage('Le stock doit être un entier positif')
+];
+
+const validateStock = [
+  body('nombreDispo')
+    .notEmpty().withMessage('La quantité est requise')
+    .isInt({ min: 0 }).withMessage('La quantité doit être un entier positif')
+];
 
 // Routes publiques
 
@@ -37,14 +69,14 @@ router.get('/boutique/:boutiqueId', produitController.obtenirProduitsParBoutique
 // @desc    Obtenir tous les produits de mes boutiques
 // @access  Private (Commercant)
 // @return  { produits, count }
-router.get('/me', auth, produitController.obtenirMesProduits);
+router.get('/me', auth, authorize(RoleEnum.Commercant), produitController.obtenirMesProduits);
 
 // @route   POST /api/produits
 // @desc    Créer un nouveau produit
 // @access  Private (Commercant)
 // @body    { nom, description, prix, categorie, boutique, stock }
 // @return  { message, produit }
-router.post('/', auth, produitController.creerProduit);
+router.post('/', auth, authorize(RoleEnum.Commercant), validateProduit, produitController.creerProduit);
 
 // @route   PUT /api/produits/:id/stock
 // @desc    Modifier le stock d'un produit
@@ -52,7 +84,7 @@ router.post('/', auth, produitController.creerProduit);
 // @param   id - ID du produit
 // @body    { quantite }
 // @return  { message, produit }
-router.put('/:id/stock', auth, produitController.modifierStock);
+router.put('/:id/stock', auth, authorize(RoleEnum.Commercant), validateStock, produitController.modifierStock);
 
 // @route   PUT /api/produits/:id
 // @desc    Modifier un produit
@@ -60,14 +92,14 @@ router.put('/:id/stock', auth, produitController.modifierStock);
 // @param   id - ID du produit
 // @body    { nom, description, prix, categorie, stock, isActive }
 // @return  { message, produit }
-router.put('/:id', auth, produitController.modifierProduit);
+router.put('/:id', auth, authorize(RoleEnum.Commercant), produitController.modifierProduit);
 
 // @route   DELETE /api/produits/:id
 // @desc    Supprimer un produit (soft delete avec isActive)
 // @access  Private (Commercant)
 // @param   id - ID du produit
 // @return  { message }
-router.delete('/:id', auth, produitController.supprimerProduit);
+router.delete('/:id', auth, authorize(RoleEnum.Commercant), produitController.supprimerProduit);
 
 // Route publique avec paramètre dynamique - DOIT ÊTRE EN DERNIER
 
