@@ -25,11 +25,11 @@ router.use(auth);
 // @access  Private
 router.get('/me', portefeuilleController.obtenirMonPortefeuille);
 
-// @route   GET /api/users/:id/wallet (conforme aux spécifications)
-// @desc    Obtenir le portefeuille d'un utilisateur
-// @access  Private
-// @return  { wallet, transactions }
-router.get('/users/:id/wallet', portefeuilleController.obtenirPortefeuilleUtilisateur);
+// // @route   GET /api/users/:id/wallet (conforme aux spécifications)
+// // @desc    Obtenir le portefeuille d'un utilisateur
+// // @access  Private
+// // @return  { wallet, transactions }
+// router.get('/users/:id/wallet', portefeuilleController.obtenirPortefeuilleUtilisateur);
 
 // @route   GET /api/portefeuille/transactions
 // @desc    Obtenir l'historique de mes transactions

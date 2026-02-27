@@ -489,9 +489,15 @@ class BoutiqueService {
       }
       
       const boutiques = await Boutique.find({ statutBoutique: statut })
-        .populate('commercant', 'nom prenoms email telephone')
-        .populate('categorie', 'nom description')
-        .populate('espace', 'code etage')
+        .populate([
+          { path: 'commercant', select: 'nom prenoms email telephone' },
+          { path: 'categorie', select: 'nom description' },
+          { 
+            path: 'espace', 
+            select: 'code etage',
+            populate: { path: 'etage', select: 'nom niveau' }
+          }
+        ])
         .sort({ createdAt: -1 })
         .limit(parseInt(limit))
         .skip(skip);

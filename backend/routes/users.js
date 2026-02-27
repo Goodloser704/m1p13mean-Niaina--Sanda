@@ -67,7 +67,7 @@ router.get('/wallet', auth, portefeuilleController.obtenirMonPortefeuille);
  * @access  Private
  * @spec    Liste-des-fonctions.txt - getMyWallet
  */
-router.get('/:id/wallet', auth, portefeuilleController.obtenirMonPortefeuille);
+router.get('/:id/wallet', auth, portefeuilleController.obtenirPortefeuilleUtilisateur);
 
 
 module.exports = router;

@@ -24,10 +24,10 @@ router.post('/pay', [
     .optional()
     .isMongoId()
     .withMessage('ID boutique invalide'),
-  body('montant')
-    .optional()
-    .isFloat({ min: 1, max: 10000 })
-    .withMessage('Le montant doit être entre 1€ et 10,000€'),
+  // body('montant')
+  //   .optional()
+  //   .isFloat({ min: 1, max: 10000 })
+  //   .withMessage('Le montant doit être entre 1€ et 10,000€'),
   body('periode')
     .optional()
     .matches(/^\d{4}-\d{2}$/)
@@ -40,6 +40,12 @@ router.post('/pay', [
 // @query   page, limit
 // @return  { loyers, pagination }
 router.get('/historique', loyerController.getHistoriqueLoyers);
+
+// @route   GET /api/commercant/loyers/recepisse/:idtransaction
+// @desc    Obtenir le recepissé
+// @access  Private (Commercant)
+// @return  { recepisse }
+router.get('/recepisse/:idtransaction', loyerController.getRecepisse);
 
 // @route   GET /api/admin/loyers/historique-par-periode
 // @desc    Obtenir l'historique des paiements de loyer par mois/année

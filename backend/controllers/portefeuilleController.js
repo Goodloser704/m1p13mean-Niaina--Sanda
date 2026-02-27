@@ -347,7 +347,6 @@ exports.obtenirTousPortefeuilles = async (req, res) => {
     if (search) {
       // Recherche par nom/email de l'utilisateur
       const User = require('../models/User');
-const { RoleEnum } = require('../utils/enums');
       const utilisateurs = await User.find({
         $or: [
           { nom: { $regex: search, $options: 'i' } },

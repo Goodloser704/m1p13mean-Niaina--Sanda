@@ -2,7 +2,6 @@ const Produit = require('../models/Produit');
 const TypeProduit = require('../models/TypeProduit');
 const Boutique = require('../models/Boutique');
 const { validationResult } = require('express-validator');
-const { RoleEnum } = require('../utils/enums');
 
 /**
  * 📦 Contrôleur Produit

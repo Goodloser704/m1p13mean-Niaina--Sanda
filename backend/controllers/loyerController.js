@@ -3,7 +3,6 @@ const PorteFeuille = require('../models/PorteFeuille');
 const PFTransaction = require('../models/PFTransaction');
 const Recepisse = require('../models/Recepisse');
 const Boutique = require('../models/Boutique');
-const Espace = require('../models/Espace');
 const notificationService = require('../services/notificationService');
 const { TypeTransactionEnum } = require('../utils/enums');
 const { RoleEnum } = require('../utils/enums');
@@ -216,9 +215,12 @@ class LoyerController {
         },
         transaction: {
           _id: transaction._id,
+          type: transaction.type,
           amount: transaction.amount,
+          description: transaction.description,
           statut: transaction.statut,
-          dateTransaction: transaction.createdAt
+          numeroTransaction: transaction.numeroTransaction,
+          createdAt: transaction.createdAt
         },
         nouveauSolde: portefeuilleCommercant.balance - montantLoyer
       });
@@ -232,6 +234,34 @@ class LoyerController {
       }
       
       res.status(500).json({ message: 'Erreur serveur lors du paiement' });
+    }
+  }
+
+  /**
+   * @route   GET /api/commercant/loyers/recepisse/:idtransaction
+   * @desc    Obtenir le recepisse d'un paiement de loyer
+   * @access  Private (Commercant)
+   * @return  { recepisse }
+   */
+  async getRecepisse(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`📋 [${timestamp}] Recuperation recepisse`);
+    console.log(`   👤 Commercant ID: ${req.user._id}`);
+
+    try {
+      const { idtransaction } = req.params;
+
+      const recepisse = await Recepisse.obtenirParTransaction(idtransaction);
+      if (!recepisse) {
+        return res.status(404).json({message: 'Recepissé non trouvé'});
+      }
+
+      return res.json({ recepisse});
+    } catch (error) {
+      console.error('Erreur obtention recepisse par id-transaction:', error);
+      res.status(500).json({
+        message: 'Erreur serveur lors de la récupération du recepisse'
+      });
     }
   }
 
@@ -268,11 +298,11 @@ class LoyerController {
 
       const total = await PFTransaction.countDocuments({
         fromWallet: portefeuille._id,
-        type: 'Loyer',
-        statut: TypeTransactionEnum.Loyer
+        type: TypeTransactionEnum.Loyer,
+        statut: 'Completee'
       });
 
-      console.log(`✅ ${loyers.length} paiements de loyer récupérés`);
+      console.log(`✅ ${loyers.length} paiements de loyer récupérés, sur ${total}`);
       
       res.json({
         loyers: loyers.map(loyer => ({
@@ -476,13 +506,26 @@ class LoyerController {
       // Créer un map des paiements par boutique
       const paiementsMap = new Map();
       paiementsEffectues.forEach(p => {
-        if (p.boutique) {
-          paiementsMap.set(p.boutique.toString(), {
-            montant: p.montant,
-            date: p.dateEmission,
-            numeroRecepisse: p.numeroRecepisse
+        if (!p.boutique) return;
+
+        const boutiqueId = p.boutique.toString();
+
+        if (!paiementsMap.has(boutiqueId)) {
+          paiementsMap.set(boutiqueId, {
+            montantTotal: 0,
+            paiements: []
           });
         }
+
+        const data = paiementsMap.get(boutiqueId);
+
+        data.montantTotal += p.montant;
+
+        data.paiements.push({
+          montant: p.montant,
+          date: p.dateEmission,
+          numeroRecepisse: p.numeroRecepisse
+        });
       });
 
       console.log(`✅ ${boutiquesPayeesIds.size} boutiques ont payé`);
@@ -520,10 +563,16 @@ class LoyerController {
           // Boutique payée
           boutiquesPayees.push({
             ...boutiqueData,
-            montantPaye: paiement.montant,
-            datePaiement: paiement.date,
-            numeroRecepisse: paiement.numeroRecepisse,
-            statut: 'Payé'
+            montantDu: boutique.espace?.loyer || 0,
+            montantPaye: paiement.montantTotal,
+            paiements: paiement.paiements.map(p => ({
+              datePaiement: p.date,
+              numeroRecepisse: p.numeroRecepisse,
+              montant: p.montant
+            })),
+            statut: paiement.montantTotal >= (boutique.espace?.loyer || 0)
+              ? 'Payé'
+              : 'Partiellement payé'
           });
         } else {
           // Boutique impayée

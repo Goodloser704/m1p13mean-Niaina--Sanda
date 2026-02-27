@@ -529,37 +529,38 @@ class BoutiqueController {
   /**
    * 🔍 Obtenir une boutique par ID (Admin seulement)
    */
-  async getBoutiqueById(req, res) {
-    const timestamp = new Date().toISOString();
-    console.log(`🔍 [${timestamp}] Récupération boutique par ID`);
-    console.log(`   👤 User ID: ${req.user._id}`);
-    console.log(`   🏪 Boutique ID: ${req.params.boutiqueId}`);
+  // Ceci est deja declaré en haut, dupliqué
+  // async getBoutiqueById(req, res) {
+  //   const timestamp = new Date().toISOString();
+  //   console.log(`🔍 [${timestamp}] Récupération boutique par ID`);
+  //   console.log(`   👤 User ID: ${req.user._id}`);
+  //   console.log(`   🏪 Boutique ID: ${req.params.boutiqueId}`);
     
-    try {
-      // Vérifier les permissions admin
-      if (req.user.role !== RoleEnum.Admin) {
-        console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
-        return res.status(403).json({ message: 'Accès refusé' });
-      }
+  //   try {
+  //     // Vérifier les permissions admin
+  //     if (req.user.role !== RoleEnum.Admin) {
+  //       console.log(`❌ Accès refusé - Rôle: ${req.user.role}`);
+  //       return res.status(403).json({ message: 'Accès refusé' });
+  //     }
 
-      const { boutiqueId } = req.params;
+  //     const { boutiqueId } = req.params;
       
-      const boutique = await boutiqueService.getBoutiqueById(boutiqueId);
+  //     const boutique = await boutiqueService.getBoutiqueById(boutiqueId);
 
-      console.log(`✅ Boutique trouvée: ${boutique.nom}`);
+  //     console.log(`✅ Boutique trouvée: ${boutique.nom}`);
       
-      res.json({ boutique });
+  //     res.json({ boutique });
 
-    } catch (error) {
-      console.error(`❌ Erreur récupération boutique:`, error.message);
+  //   } catch (error) {
+  //     console.error(`❌ Erreur récupération boutique:`, error.message);
       
-      if (error.message === 'Boutique non trouvée') {
-        return res.status(404).json({ message: error.message });
-      }
+  //     if (error.message === 'Boutique non trouvée') {
+  //       return res.status(404).json({ message: error.message });
+  //     }
       
-      res.status(500).json({ message: 'Erreur serveur' });
-    }
-  }
+  //     res.status(500).json({ message: 'Erreur serveur' });
+  //   }
+  // }
 
   /**
    * ✏️ Mettre à jour une boutique
