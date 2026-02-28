@@ -5,6 +5,7 @@ const PorteFeuille = require('../models/PorteFeuille');
 const PFTransaction = require('../models/PFTransaction');
 const { validationResult } = require('express-validator');
 const { EtatAchatEnum, TypeAchatEnum, TypeTransactionEnum } = require('../utils/enums');
+const mongoose = require('mongoose');
 
 /**
  * 🛒 Contrôleur Achat
@@ -17,9 +18,13 @@ const { EtatAchatEnum, TypeAchatEnum, TypeTransactionEnum } = require('../utils/
 // @body    { achats: Array<Achat>, montantTotal: Number }
 // @return  { message, facture, achats }
 exports.validerPanier = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      await session.abortTransaction();
       return res.status(400).json({
         message: 'Données invalides',
         errors: errors.array()
@@ -29,192 +34,140 @@ exports.validerPanier = async (req, res) => {
     const { achats: achatsData, montantTotal } = req.body;
     const acheteurId = req.user._id;
 
-    console.log('🛒 Validation panier pour utilisateur:', acheteurId);
-    console.log('📦 Nombre d\'achats:', achatsData.length);
-    console.log('💰 Montant total:', montantTotal);
+    const portefeuilleAcheteur = await PorteFeuille
+      .findOne({ owner: acheteurId })
+      .session(session);
 
-    // Vérifier le portefeuille de l'acheteur
-    const portefeuilleAcheteur = await PorteFeuille.findOne({ owner: acheteurId });
-    if (!portefeuilleAcheteur) {
-      return res.status(404).json({
-        message: 'Portefeuille non trouvé'
-      });
+    if (!portefeuilleAcheteur)
+      throw new Error('Portefeuille non trouvé');
+
+    if (portefeuilleAcheteur.balance < montantTotal)
+      throw new Error('Solde insuffisant');
+
+    let montantTotalVerifie = 0;
+    const achatsCreees = [];
+
+    let description = '';
+
+    // ==============================
+    // Vérification complète d'abord
+    // ==============================
+
+    for (const [index, item] of achatsData.entries()) {
+
+      const produit = await Produit.findById(item.produit)
+        .populate('boutique', 'nom')
+        .session(session);
+
+      if (!produit)
+        throw new Error(`Produit ${item.produit} non trouvé`);
+
+      if (produit.stock.nombreDispo < item.quantite)
+        throw new Error(`Stock insuffisant pour ${produit.nom}`);
+
+      if (Math.abs(produit.prix - item.prixUnitaire) > 0.01)
+        throw new Error(`Prix modifié pour ${produit.nom}`);
+
+      montantTotalVerifie += item.quantite * item.prixUnitaire;
+
+      description += `${index + 1}. Produit: ${produit.nom} | Qté: ${item.quantite} | PU: ${item.prixUnitaire} (Boutique: ${produit.boutique.nom})`
+        .join('\n');
     }
 
-    if (portefeuilleAcheteur.balance < montantTotal) {
-      return res.status(400).json({
-        message: 'Solde insuffisant',
-        soldeActuel: portefeuilleAcheteur.balance,
-        montantRequis: montantTotal
-      });
-    }
+    if (Math.abs(montantTotalVerifie - montantTotal) > 0.01)
+      throw new Error('Montant total incohérent');
 
-    // Créer la facture
+    // ==============================
+    // Création facture (après validation)
+    // ==============================
+
     const facture = new Facture({
       acheteur: acheteurId,
-      description: `Achat de ${achatsData.length} produit${achatsData.length > 1 ? 's' : ''}`,
+      description,
       montantTotal,
-      tauxTVA: 20 // 20% par défaut
+      tauxTVA: 20
     });
-    
-    // Calculer le montant TTC
+
     facture.calculerMontantTTC();
-    
-    await facture.save();
+    await facture.save({ session });
 
-    console.log('🧾 Facture créée:', facture._id);
+    // ==============================
+    // Création achats + MAJ stock
+    // ==============================
 
-    const achatsCreees = [];
-    const transactions = [];
-    let montantTotalVerifie = 0;
+    for (const item of achatsData) {
 
-    // Traiter chaque achat
-    for (const achatData of achatsData) {
-      const { produit: produitId, quantite, typeAchat, prixUnitaire } = achatData;
+      const produit = await Produit.findById(item.produit)
+        .populate('boutique')
+        .session(session);
 
-      // Vérifier le produit
-      const produit = await Produit.findById(produitId).populate({
-        path: 'boutique',
-        populate: {
-          path: 'commercant',
-          select: '_id nom prenoms email'
-        }
-      });
-      if (!produit) {
-        throw new Error(`Produit ${produitId} non trouvé`);
-      }
+      const montantAchat = item.quantite * item.prixUnitaire;
 
-      // Vérifier le stock
-      if (produit.stock.nombreDispo < quantite) {
-        throw new Error(`Stock insuffisant pour ${produit.nom}. Disponible: ${produit.stock.nombreDispo}, Demandé: ${quantite}`);
-      }
-
-      // Vérifier le prix
-      if (Math.abs(produit.prix - prixUnitaire) > 0.01) {
-        throw new Error(`Prix modifié pour ${produit.nom}. Prix actuel: ${produit.prix}`);
-      }
-
-      const montantAchat = prixUnitaire * quantite;
-      montantTotalVerifie += montantAchat;
-
-      // Calculer les dates selon le type d'achat
-      const dateDebut = new Date();
-      let dateFin = new Date(dateDebut);
-
-      if (typeAchat === TypeAchatEnum.Recuperer) {
-        // Ajouter le temps de préparation
-        if (produit.tempsPreparation) {
-          const [heures, minutes, secondes] = produit.tempsPreparation.split(':').map(Number);
-          const tempsPreparationMs = (heures * 3600 + minutes * 60 + secondes) * 1000;
-          dateFin = new Date(dateDebut.getTime() + tempsPreparationMs);
-        }
-      } else if (typeAchat === TypeAchatEnum.Livrer) {
-        // Pour la livraison, l'état sera "EnAttente" jusqu'à ce que le commerçant saisisse la durée
-        dateFin = dateDebut; // Sera mis à jour par le commerçant
-      }
-
-      // Créer l'achat
       const achat = new Achat({
         acheteur: acheteurId,
-        produit: produitId,
+        produit: produit._id,
         facture: facture._id,
-        quantite,
-        prixUnitaire,
+        quantite: item.quantite,
+        prixUnitaire: item.prixUnitaire,
         montantTotal: montantAchat,
         typeAchat: {
-          type: typeAchat,
-          dateDebut,
-          dateFin
+          type: item.typeAchat,
+          dateDebut: new Date(),
+          dateFin: new Date()
         },
-        etat: typeAchat === TypeAchatEnum.Livrer ? EtatAchatEnum.EnAttente : EtatAchatEnum.Validee
+        etat: EtatAchatEnum.Validee
       });
 
-      await achat.save();
+      await achat.save({ session });
       achatsCreees.push(achat);
 
-      // Décrémenter le stock
-      produit.stock.nombreDispo -= quantite;
+      produit.stock.nombreDispo -= item.quantite;
       produit.stock.updatedAt = new Date();
-      await produit.save();
+      await produit.save({ session });
 
-      console.log(`📦 Achat créé: ${produit.nom} x${quantite} = ${montantAchat}€`);
+      // Transaction portefeuille commerçant
+      const portefeuilleCommercant = await PorteFeuille
+        .findOne({ owner: produit.boutique.commercant })
+        .session(session);
 
-      // Créer la transaction de portefeuille (Acheteur -> Commerçant)
-      const portefeuilleCommercant = await PorteFeuille.findOne({ owner: produit.boutique.commercant });
-      if (!portefeuilleCommercant) {
-        throw new Error(`Portefeuille du commerçant non trouvé pour la boutique ${produit.boutique.nom}`);
-      }
+      if (!portefeuilleCommercant)
+        throw new Error('Portefeuille commerçant introuvable');
 
-      const transaction = new PFTransaction({
+      await PFTransaction.create([{
         fromWallet: portefeuilleAcheteur._id,
         toWallet: portefeuilleCommercant._id,
         type: TypeTransactionEnum.Achat,
         amount: montantAchat,
-        description: `Achat: ${produit.nom} x${quantite}`,
+        description: `Achat ${produit.nom}`,
         relatedEntity: {
           entityType: 'Achat',
           entityId: achat._id
         }
-      });
+      }], { session });
 
-      await transaction.save();
-      transactions.push(transaction);
-
-      // Mettre à jour les balances
-      portefeuilleAcheteur.balance -= montantAchat;
       portefeuilleCommercant.balance += montantAchat;
-
-      await portefeuilleAcheteur.save();
-      await portefeuilleCommercant.save();
-
-      console.log(`💰 Transaction: ${montantAchat}€ de ${req.user.email} vers ${produit.boutique.nom}`);
+      await portefeuilleCommercant.save({ session });
     }
 
-    // Vérifier que le montant total correspond
-    if (Math.abs(montantTotalVerifie - montantTotal) > 0.01) {
-      throw new Error(`Montant total incohérent. Calculé: ${montantTotalVerifie}, Reçu: ${montantTotal}`);
-    }
+    // Débit global acheteur
+    portefeuilleAcheteur.balance -= montantTotal;
+    await portefeuilleAcheteur.save({ session });
 
-    // Populer les données pour la réponse
-    await facture.populate('acheteur', 'nom prenom email');
-    const achatsPopulees = await Achat.find({ facture: facture._id })
-      .populate('produit', 'nom prix')
-      .populate({
-        path: 'produit',
-        populate: {
-          path: 'boutique',
-          select: 'nom',
-          populate: {
-            path: 'commercant',
-            select: 'nom prenom'
-          }
-        }
-      });
-
-    console.log('✅ Panier validé avec succès');
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(201).json({
-      message: 'Panier validé avec succès',
-      facture: {
-        _id: facture._id,
-        description: facture.description,
-        montantTotal: facture.montantTotal,
-        createdAt: facture.createdAt
-      },
-      achats: achatsPopulees,
-      transactions: transactions.map(t => ({
-        _id: t._id,
-        amount: t.amount,
-        description: t.description,
-        createdAt: t.createdAt
-      }))
+      message: 'Panier validé',
+      facture,
+      achats: achatsCreees
     });
 
   } catch (error) {
-    console.error('❌ Erreur validation panier:', error);
-    res.status(500).json({
-      message: 'Erreur serveur lors de la validation du panier',
-      error: error.message
+    await session.abortTransaction();
+    session.endSession();
+
+    res.status(400).json({
+      message: error.message
     });
   }
 };
