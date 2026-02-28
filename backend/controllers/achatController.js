@@ -47,7 +47,7 @@ exports.validerPanier = async (req, res) => {
     let montantTotalVerifie = 0;
     const achatsCreees = [];
 
-    let description = '';
+    const descriptionLines = [];
 
     // ==============================
     // Vérification complète d'abord
@@ -70,9 +70,10 @@ exports.validerPanier = async (req, res) => {
 
       montantTotalVerifie += item.quantite * item.prixUnitaire;
 
-      description += `${index + 1}. Produit: ${produit.nom} | Qté: ${item.quantite} | PU: ${item.prixUnitaire} (Boutique: ${produit.boutique.nom})`
-        .join('\n');
+      descriptionLines.push(`${index + 1}. Produit: ${produit.nom} | Qté: ${item.quantite} | PU: ${item.prixUnitaire} (Boutique: ${produit.boutique.nom})`);
     }
+
+    const description = descriptionLines.join('\n');
 
     if (Math.abs(montantTotalVerifie - montantTotal) > 0.01)
       throw new Error('Montant total incohérent');

@@ -18,6 +18,13 @@ const router = express.Router();
 // @return  { boutiques, count, page, limit, totalPages }
 router.get('/', boutiqueController.getAllBoutiques);
 
+// @route   GET /api/boutiques/:id (conforme aux spécifications)
+// @desc    Obtenir une boutique par ID
+// @access  Public (NO AUTH REQUIRED)
+// @param   id - ID de la boutique
+// @return  { boutique }
+router.get('/:id', boutiqueController.getBoutiqueByIdPublic);
+
 // @route   GET /api/boutique/by-statut (nouvelle route)
 // @desc    Obtenir toutes les boutiques par statut avec pagination
 // @access  Public (NO AUTH REQUIRED)
@@ -122,9 +129,9 @@ router.put('/:boutiqueId/approve', adminAuth, boutiqueController.approveBoutique
 // @access  Private (Admin seulement)
 router.put('/:boutiqueId/reject', adminAuth, boutiqueController.rejectBoutique);
 
-// @route   GET /api/boutique/:boutiqueId
-// @desc    Obtenir une boutique par ID
+// @route   GET /api/boutique/admin/:boutiqueId
+// @desc    Obtenir une boutique par ID (Admin)
 // @access  Private (Admin seulement)
-router.get('/:boutiqueId', adminAuth, boutiqueController.getBoutiqueById);
+router.get('/admin/:boutiqueId', adminAuth, boutiqueController.getBoutiqueById);
 
 module.exports = router;
