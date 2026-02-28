@@ -65,7 +65,8 @@ app.use(cors({
     }
     
     // Vérifier les patterns Vercel (pour les branches de déploiement)
-    const vercelPattern = /^https:\/\/m1p13mean-niaina-xjl4.*\.vercel\.app$/;
+    // Accepter tous les déploiements Vercel du projet (branches, previews, etc.)
+    const vercelPattern = /^https:\/\/m1p13mean-niaina.*\.vercel\.app$/;
     if (vercelPattern.test(origin)) {
       console.log(`✅ CORS: Vercel deployment ${origin} is allowed`);
       return callback(null, true);
