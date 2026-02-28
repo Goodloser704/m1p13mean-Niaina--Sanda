@@ -26,8 +26,14 @@ export class LoyerService {
   // Commercant
   obtenirMesHistoriqueLoyers(page = 1, limit = 10) {
     return this.http.get<{ loyers: PFTransaction[], pagination: Pagination }>(
-      `${this.apiUrl}/api/commercant/loyers/historique`
-    )
+      `${this.apiUrl}/api/commercant/loyers/historique`,
+      {
+        params: {
+          page: page,
+          limit: limit
+        }
+      }
+    );
   }
 
   // Commercant

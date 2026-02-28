@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormBuilder, FormsModule, Validators, ReactiveFormsModule } from "@angular/forms";
 import { toFormattedString } from '../../../core/functions/date-function';
 
@@ -9,6 +9,7 @@ import { toFormattedString } from '../../../core/functions/date-function';
   styleUrl: './duration-dialog.scss',
 })
 export class DurationDialog {
+  @Input() message: string = 'Confirmation';
   close!: (result: string | null) => void;
 
   form: any;

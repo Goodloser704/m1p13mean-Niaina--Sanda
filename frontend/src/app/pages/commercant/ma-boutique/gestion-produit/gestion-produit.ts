@@ -3,23 +3,23 @@ import { ProduitService } from '../../../../core/services/commercant/produit.ser
 import { LoaderService } from '../../../../core/services/loader.service';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { BoutiqueService } from '../../../../core/services/commercant/boutique.service';
-import { getTypeProduit, Produit } from '../../../../core/models/commercant/produit.model';
+import { Produit } from '../../../../core/models/commercant/produit.model';
 import { createPagination } from '../../../../core/functions/pagination-function';
 import { filter, finalize, switchMap, tap } from 'rxjs';
 import { EmptyGridList } from "../../../../components/shared/empty-grid-list/empty-grid-list";
-import { TitleCasePipe, NgClass, CurrencyPipe } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { TypeProduit } from '../../../../core/models/commercant/type-produit.model';
 import { TypeProduitService } from '../../../../core/services/commercant/type-produit.service';
 import { compressImage } from '../../../../core/functions/images-function';
 import { parseDuration, toFormattedString } from '../../../../core/functions/date-function';
 import { DialogService } from '../../../../core/services/dialog.service';
 import { Dialog } from '../../../../components/shared/dialog/dialog';
-import { TimeDurationPipe } from "../../../../core/pipes/time-duration-pipe";
 import { logSafe } from '../../../../core/functions/console-function';
+import { RowProduct } from "../../../../components/commercant/row-product/row-product";
 
 @Component({
   selector: 'app-gestion-produit',
-  imports: [EmptyGridList, TitleCasePipe, NgClass, ReactiveFormsModule, CurrencyPipe, TimeDurationPipe],
+  imports: [EmptyGridList, NgClass, ReactiveFormsModule, RowProduct],
   templateUrl: './gestion-produit.html',
   styleUrl: './gestion-produit.scss',
 })
@@ -32,12 +32,6 @@ export class GestionProduit implements OnInit {
   maBoutique = computed(() => this.boutiqueService.maBoutique()!);
   
   products = signal<Produit[]>([]);
-  productsWithType = computed(() =>
-    this.products().map(product => ({
-      ...product,
-      typeProduitObj: getTypeProduit(product)
-    }))
-  );
 
   typesProduit = signal<TypeProduit[]>([]);
 

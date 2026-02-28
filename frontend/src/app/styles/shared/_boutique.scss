@@ -1,10 +1,5 @@
 @use "./variables" as v;
 
-.boutique-card:hover {
-  cursor: pointer;
-  box-shadow: 0 3px 10px 0 rgba(v.$heading-color, 0.5);
-}
-
 .ma-boutique-nav {
   display: flex;
   flex-wrap: wrap;

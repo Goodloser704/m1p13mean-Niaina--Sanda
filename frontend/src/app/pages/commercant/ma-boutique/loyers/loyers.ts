@@ -137,7 +137,7 @@ export class Loyers implements OnInit {
           try {
             this.historiques.set(res.loyers);
 
-            logSafe(`Pagination: ${JSON.stringify(res.pagination)}`);
+            console.log(`Pagination: ${JSON.stringify(res)}`);
             this.historiquePagination.setTotalPages(res.pagination.totalPages);
           } catch (err) {
             console.error(err);
