@@ -686,40 +686,97 @@ exports.obtenirStatistiquesAchats = async (req, res) => {
 exports.obtenirAchatsCommercantEnCours = async (req, res) => {
   try {
     const commercantId = req.user._id;
-    console.log('🛒 Récupération achats en cours pour commercant:', commercantId);
 
-    // Trouver les boutiques du commercant
+    // Pagination (valeurs par défaut sécurisées)
+    const { page = 1, limit = 10, boutiqueId, etatsAchat } = req.query;
+    const skip = (page - 1) * limit;
+
     const Boutique = require('../models/Boutique');
-    const boutiques = await Boutique.find({ commercant: commercantId }).select('_id');
-    const boutiqueIds = boutiques.map(b => b._id);
+
+    let boutiqueIds = [];
+
+    if (boutiqueId) {
+      // Vérifier que la boutique appartient bien au commerçant
+      const boutique = await Boutique.findOne({
+        _id: boutiqueId,
+        commercant: commercantId
+      }).select('_id');
+
+      if (!boutique) {
+        return res.status(403).json({
+          message: 'Boutique non autorisée ou introuvable'
+        });
+      }
+
+      boutiqueIds = [boutique._id];
+    } else {
+      // Récupérer toutes les boutiques du commerçant
+      const boutiques = await Boutique.find({
+        commercant: commercantId
+      }).select('_id');
+
+      boutiqueIds = boutiques.map(b => b._id);
+    }
 
     if (boutiqueIds.length === 0) {
       return res.json({
         achats: [],
         count: 0,
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0
+        },
         message: 'Aucune boutique trouvée'
       });
     }
 
-    // Trouver les produits de ces boutiques
-    const produits = await Produit.find({ boutique: { $in: boutiqueIds } }).select('_id');
+    // Produits des boutiques
+    const produits = await Produit.find({
+      boutique: { $in: boutiqueIds }
+    }).select('_id');
+
     const produitIds = produits.map(p => p._id);
 
-    // Trouver les achats en cours pour ces produits
-    const achats = await Achat.find({
-      produit: { $in: produitIds },
-      etat: { $in: [EtatAchatEnum.EnAttente, EtatAchatEnum.EnPreparation] }
-    })
-    .populate('produit', 'nom prix photo')
-    .populate('acheteur', 'nom prenoms email telephone')
-    .populate('facture', 'description montantTotal')
-    .sort({ createdAt: -1 });
+    let etats;
+    if (etatsAchat) {
+      etats = Array.isArray(etatsAchat)
+        ? etatsAchat
+        : [etatsAchat];
+    } else {
+      etats = [EtatAchatEnum.EnAttente, EtatAchatEnum.EnPreparation];
+    }
 
-    console.log(`✅ ${achats.length} achats en cours trouvés`);
+    // Query de base
+    const query = {
+      produit: { $in: produitIds },
+      etat: { $in: etats }
+    };
+
+    // Total AVANT pagination
+    const total = await Achat.countDocuments(query);
+
+    // Achats paginés
+    const achats = await Achat.find(query)
+      .populate('produit', 'nom prix photo')
+      .populate('acheteur', 'nom prenoms email telephone')
+      .populate('facture', 'description montantTotal')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalPages = Math.ceil(total / limit);
 
     res.json({
       achats,
-      count: achats.length
+      count: achats.length, // tu voulais garder count
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages
+      }
     });
 
   } catch (error) {
@@ -753,7 +810,7 @@ exports.validerLivraison = async (req, res) => {
     // Trouver l'achat
     const achat = await Achat.findById(id)
       .populate('produit')
-      .populate('acheteur', 'nom prenoms email');
+      .populate('acheteur', 'nom prenoms email telephone');
 
     if (!achat) {
       return res.status(404).json({
@@ -839,12 +896,13 @@ exports.validerLivraison = async (req, res) => {
 
     res.json({
       message: 'Livraison validée avec succès',
-      achat: {
-        _id: achat._id,
-        etat: achat.etat,
-        typeAchat: achat.typeAchat,
-        montantTotal: achat.montantTotal
-      },
+      // achat: {
+      //   _id: achat._id,
+      //   etat: achat.etat,
+      //   typeAchat: achat.typeAchat,
+      //   montantTotal: achat.montantTotal
+      // },
+      achat: achat,
       transaction: {
         _id: transaction._id,
         amount: transaction.amount,
