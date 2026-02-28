@@ -2,6 +2,7 @@ services:
   - type: web
     name: mall-app-backend
     env: node
+    branch: niaina-dev
     rootDir: backend
     buildCommand: npm install
     startCommand: npm start

@@ -39,16 +39,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware CORS avec logging
+// Middleware CORS avec logging - Configuration permissive pour production
 app.use(cors({
   origin: function(origin, callback) {
     console.log(`🔐 CORS Check - Origin: ${origin || 'No Origin'}`);
     
+    // En production, accepter toutes les origines Vercel et localhost
+    // Cela évite les problèmes avec les déploiements de preview
     const allowedOrigins = [
       'http://localhost:4200',
       'https://localhost:4200',
       'https://m1p13mean-niaina-1.onrender.com',
-      'https://m1p13mean-niaina-xjl4.vercel.app', // Frontend Vercel principal
       process.env.FRONTEND_URL
     ].filter(Boolean);
     
@@ -60,34 +61,36 @@ app.use(cors({
     
     // Vérifier les origines exactes
     if (allowedOrigins.includes(origin)) {
-      console.log(`✅ CORS: Origin ${origin} is allowed`);
+      console.log(`✅ CORS: Origin ${origin} is allowed (exact match)`);
       return callback(null, true);
     }
     
-    // Vérifier les patterns Vercel (pour les branches de déploiement)
-    // Accepter tous les déploiements Vercel du projet (branches, previews, etc.)
-    const vercelPattern = /^https:\/\/m1p13mean-niaina.*\.vercel\.app$/;
-    if (vercelPattern.test(origin)) {
+    // Vérifier les patterns Vercel (accepter TOUS les déploiements Vercel)
+    if (origin.includes('.vercel.app')) {
       console.log(`✅ CORS: Vercel deployment ${origin} is allowed`);
       return callback(null, true);
     }
     
-    // Vérifier les patterns Render (pour les branches de déploiement)
-    const renderPattern = /^https:\/\/m1p13mean-niaina.*\.onrender\.com$/;
-    if (renderPattern.test(origin)) {
+    // Vérifier les patterns Render
+    if (origin.includes('.onrender.com')) {
       console.log(`✅ CORS: Render deployment ${origin} is allowed`);
       return callback(null, true);
     }
     
+    // Localhost avec n'importe quel port
+    if (origin.startsWith('http://localhost:') || origin.startsWith('https://localhost:')) {
+      console.log(`✅ CORS: Localhost ${origin} is allowed`);
+      return callback(null, true);
+    }
+    
     console.log(`❌ CORS: Origin ${origin} is NOT allowed`);
-    console.log(`   Allowed origins:`, allowedOrigins);
-    console.log(`   Vercel pattern: ${vercelPattern}`);
-    console.log(`   Render pattern: ${renderPattern}`);
+    console.log(`   Allowed patterns: *.vercel.app, *.onrender.com, localhost:*`);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Length', 'X-Request-Id']
 }));
 
 app.use(express.json({ limit: '10mb' }));
