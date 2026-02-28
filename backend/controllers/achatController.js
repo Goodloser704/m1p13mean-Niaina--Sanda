@@ -699,7 +699,8 @@ exports.obtenirAchatsCommercantEnCours = async (req, res) => {
         ? etatsAchat
         : [etatsAchat];
     } else {
-      etats = [EtatAchatEnum.EnAttente, EtatAchatEnum.EnPreparation];
+      // Inclure Validee pour afficher les achats récents
+      etats = [EtatAchatEnum.EnAttente, EtatAchatEnum.EnPreparation, EtatAchatEnum.Validee];
     }
 
     let types;
@@ -715,7 +716,7 @@ exports.obtenirAchatsCommercantEnCours = async (req, res) => {
     const query = {
       produit: { $in: produitIds },
       etat: { $in: etats },
-      typeAchat: { $in: types }
+      'typeAchat.type': { $in: types }
     };
 
     // Total AVANT pagination

@@ -84,15 +84,22 @@ class LoyerController {
       console.log(`💰 Montant loyer: ${montantLoyer}€ pour la période ${periodeLoyer}`);
 
       // Vérifier si le loyer n'a pas déjà été payé pour cette période
-      const loyerExistant = await PFTransaction.findOne({
+      // Chercher dans les reçus (plus fiable que les transactions)
+      console.log(`🔍 Recherche reçu existant pour boutique ${boutique._id} et période ${periodeLoyer}...`);
+      
+      const loyerExistant = await Recepisse.findOne({
         type: 'Loyer',
-        description: { $regex: `Boutique ${boutique._id}.*${periodeLoyer}` },
-        statut: 'Completee'
+        boutique: boutique._id,
+        periode: periodeLoyer,
+        statut: 'Emis'
       });
+
+      console.log(`   Résultat recherche:`, loyerExistant ? `Trouvé (${loyerExistant.numeroRecepisse})` : 'Aucun');
 
       if (loyerExistant) {
         console.log(`⚠️ Loyer déjà payé pour cette période`);
-        return res.status(400).json({ 
+        console.log(`   Reçu existant: ${loyerExistant.numeroRecepisse}`);
+        return res.status(400).json({
           message: `Le loyer pour la période ${periodeLoyer} a déjà été payé` 
         });
       }

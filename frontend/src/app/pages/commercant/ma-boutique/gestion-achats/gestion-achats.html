@@ -1,1 +1,119 @@
-<p>gestion-achats works!</p>
+<div class="gestion-achats-container">
+  <div class="header">
+    <h2>
+      <i class="bi bi-cart-check me-2"></i>
+      Gestion des Achats
+      @if (pagination.totalItems() > 0) {
+        <span class="badge bg-primary ms-2">{{ pagination.totalItems() }}</span>
+      }
+    </h2>
+    <p class="text-muted">Liste des clients qui ont acheté vos produits</p>
+  </div>
+
+  @if (achats().length === 0) {
+    <div class="empty-state">
+      <i class="bi bi-cart-x"></i>
+      <p>Aucun achat pour le moment</p>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Client</th>
+            <th>Produit</th>
+            <th>Quantité</th>
+            <th>Prix Unitaire</th>
+            <th>Montant Total</th>
+            <th>Type</th>
+            <th>État</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (achat of achats(); track achat._id) {
+            <tr>
+              <td>
+                <small>{{ achat.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+              </td>
+              <td>
+                <div class="client-info">
+                  <strong>{{ achat.acheteur?.nom }} {{ achat.acheteur?.prenoms }}</strong>
+                  @if (achat.acheteur?.email) {
+                    <br>
+                    <small class="text-muted">{{ achat.acheteur.email }}</small>
+                  }
+                  @if (achat.acheteur?.telephone) {
+                    <br>
+                    <small class="text-muted">
+                      <i class="bi bi-telephone"></i> {{ achat.acheteur.telephone }}
+                    </small>
+                  }
+                </div>
+              </td>
+              <td>
+                <strong>{{ achat.produit?.nom }}</strong>
+                @if (achat.produit?.photo) {
+                  <br>
+                  <img [src]="achat.produit.photo" [alt]="achat.produit.nom" class="product-thumb">
+                }
+              </td>
+              <td>
+                <span class="badge bg-primary">{{ achat.quantite }}</span>
+              </td>
+              <td>
+                {{ achat.prixUnitaire | currency:'EUR':'symbol':'1.2-2' }}
+              </td>
+              <td>
+                <strong>{{ achat.montantTotal | currency:'EUR':'symbol':'1.2-2' }}</strong>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="achat.typeAchat?.type === 'Recuperer' ? 'bg-info' : 'bg-warning'">
+                  {{ getTypeAchatLabel(achat.typeAchat?.type) }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getEtatBadgeClass(achat.etat)">
+                  {{ achat.etat }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (pagination.totalPages() > 1) {
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+          Affichage {{ (pagination.currentPage() - 1) * pagination.limit + 1 }}-{{ Math.min(pagination.currentPage() * pagination.limit, pagination.totalItems()) }} sur {{ pagination.totalItems() }} achats
+        </div>
+        
+        <nav aria-label="Pagination des achats">
+          <ul class="pagination mb-0">
+            <li class="page-item" [ngClass]="{ disabled: pagination.currentPage() === 1 }">
+              <button class="page-link" (click)="pagination.previous()" [disabled]="pagination.currentPage() === 1">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+            </li>
+            
+            @for (page of pagination.pagesArray(); track page) {
+              <li class="page-item" [ngClass]="{ active: page === pagination.currentPage() }">
+                <button class="page-link" (click)="pagination.goTo(page)">
+                  {{ page }}
+                </button>
+              </li>
+            }
+            
+            <li class="page-item" [ngClass]="{ disabled: pagination.currentPage() === pagination.totalPages() }">
+              <button class="page-link" (click)="pagination.next()" [disabled]="pagination.currentPage() === pagination.totalPages()">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    }
+  }
+</div>

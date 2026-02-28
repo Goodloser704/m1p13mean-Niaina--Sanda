@@ -1,1 +1,169 @@
-<p>loyers works!</p>
+<div class="loyers-container">
+  <div class="header">
+    <div>
+      <h2><i class="bi bi-cash-coin me-2"></i>Gestion des Loyers</h2>
+      <p class="text-muted">Payez vos loyers pour vos espaces occupés</p>
+    </div>
+    <div class="solde-card">
+      <small class="text-muted">Solde disponible</small>
+      <h3 class="mb-0">{{ soldePortefeuille() | currency:'EUR':'symbol':'1.2-2' }}</h3>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Colonne gauche: Liste des boutiques (fixe) -->
+    <div class="col-md-3">
+      <div class="card sticky-sidebar">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-shop me-2"></i>Mes Boutiques</h5>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-primary" (click)="selectionnerToutesBoutiques()" title="Tout sélectionner"><i class="bi bi-check-all"></i></button>
+            <button class="btn btn-outline-secondary" (click)="deselectionnerToutesBoutiques()" title="Tout désélectionner"><i class="bi bi-x"></i></button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          @if (boutiques().length === 0) {
+            <div class="empty-state"><i class="bi bi-shop"></i><p>Aucune boutique avec espace</p></div>
+          } @else {
+            <div class="boutiques-sidebar-list">
+              @for (boutique of boutiques(); track boutique._id) {
+                <div class="boutique-sidebar-item" [ngClass]="{ 'selected': boutiquesSelectionnees().has(boutique._id) }" (click)="toggleBoutique(boutique._id)">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" [checked]="boutiquesSelectionnees().has(boutique._id)" (click)="$event.stopPropagation()">
+                    <label class="form-check-label">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                          <strong>{{ boutique.nom }}</strong><br>
+                          <small class="text-muted">{{ boutique.espace?.code }} - Étage {{ boutique.espace?.etage?.numero }}</small><br>
+                          <span class="badge bg-primary mt-1">{{ boutique.espace?.loyer | currency:'EUR':'symbol':'1.2-2' }}/mois</span>
+                        </div>
+                        @if (moisSelectionnes().size === 1) {
+                          <div class="statut-paiement-badge">
+                            @for (periode of Array.from(moisSelectionnes()); track periode) {
+                              @if (estPayePourBoutique(boutique._id, periode)) {
+                                <i class="bi bi-check-circle-fill text-success" title="Payé pour ce mois"></i>
+                              } @else {
+                                <i class="bi bi-exclamation-circle-fill text-warning" title="Non payé pour ce mois"></i>
+                              }
+                            }
+                          </div>
+                        }
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonne droite: Calendrier -->
+    <div class="col-md-9">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-calendar3 me-2"></i>Calendrier des Paiements</h5>
+          <small class="text-muted">Sélectionnez les mois à payer</small>
+        </div>
+        <div class="card-body">
+          <div class="legend mb-3">
+            <span class="badge bg-success me-2"><i class="bi bi-check-circle"></i> Payé</span>
+            <span class="badge badge-warning me-2"><i class="bi bi-clock"></i> Mois courant</span>
+            <span class="badge badge-danger me-2"><i class="bi bi-exclamation-triangle"></i> Impayé</span>
+            <span class="badge badge-secondary me-2"><i class="bi bi-calendar-plus"></i> À venir</span>
+            <span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> Déjà payé (toutes boutiques sélectionnées)</span>
+          </div>
+
+          <div class="calendrier">
+            @for (mois of moisCalendrier(); track mois.periode) {
+              <div class="mois-card" 
+                   [ngClass]="{
+                     'courant': mois.estCourant, 
+                     'passe': mois.estPasse, 
+                     'futur': mois.estFutur, 
+                     'selected': moisSelectionnes().has(mois.periode),
+                     'tout-paye': toutesLesBoutiquesSelectionneesSontPayees(mois.periode)
+                   }" 
+                   (click)="toggleMois(mois.periode)">
+                <div class="mois-header">
+                  <strong>{{ mois.label }}</strong>
+                  @if (moisSelectionnes().has(mois.periode)) {
+                    <i class="bi bi-check-circle-fill text-primary"></i>
+                  }
+                  @if (toutesLesBoutiquesSelectionneesSontPayees(mois.periode) && boutiquesSelectionnees().size > 0) {
+                    <i class="bi bi-lock-fill text-muted" title="Toutes les boutiques sélectionnées ont déjà payé"></i>
+                  }
+                </div>
+                <div class="mois-status">
+                  <span class="badge" [ngClass]="{'badge-warning': mois.estCourant, 'badge-danger': mois.estPasse, 'badge-secondary': mois.estFutur}">
+                    @if (mois.estCourant) { Mois courant } @else if (mois.estPasse) { Passé } @else { À venir }
+                  </span>
+                </div>
+                <div class="paiement-status mt-2">
+                  <div class="status-summary">
+                    <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i>{{ getNombreBoutiquesPayees(mois.periode) }}</span>
+                    @if (getNombreBoutiquesImpayees(mois.periode) > 0) {
+                      <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>{{ getNombreBoutiquesImpayees(mois.periode) }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (boutiquesSelectionnees().size > 0 && moisSelectionnes().size > 0) {
+        <div class="card mt-3 payment-summary">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <h5 class="mb-2">Résumé du paiement</h5>
+                <p class="mb-1"><strong>{{ boutiquesSelectionnees().size }}</strong> boutique(s) × <strong>{{ moisSelectionnes().size }}</strong> mois</p>
+                <p class="text-muted mb-0">Solde après paiement: <strong>{{ soldePortefeuille() - montantTotal() | currency:'EUR':'symbol':'1.2-2' }}</strong></p>
+              </div>
+              <div class="col-md-4 text-end">
+                <div class="montant-total mb-2">
+                  <small class="text-muted">Montant total</small>
+                  <h3 class="mb-0 text-primary">{{ montantTotal() | currency:'EUR':'symbol':'1.2-2' }}</h3>
+                </div>
+                <button class="btn btn-primary btn-lg w-100" (click)="payerLoyers()" [disabled]="montantTotal() > soldePortefeuille()">
+                  <i class="bi bi-credit-card me-2"></i>Payer maintenant
+                </button>
+                @if (montantTotal() > soldePortefeuille()) {
+                  <small class="text-danger d-block mt-2"><i class="bi bi-exclamation-triangle"></i> Solde insuffisant</small>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header"><h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Historique des Paiements</h5></div>
+    <div class="card-body">
+      @if (historiquePaiements().length === 0) {
+        <div class="empty-state"><i class="bi bi-inbox"></i><p>Aucun paiement effectué</p></div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead><tr><th>Date</th><th>Description</th><th>Montant</th><th>Statut</th></tr></thead>
+            <tbody>
+              @for (paiement of historiquePaiements(); track paiement._id) {
+                <tr>
+                  <td><small>{{ paiement.createdAt | date:'dd/MM/yyyy HH:mm' }}</small></td>
+                  <td>{{ paiement.description }}</td>
+                  <td><strong>{{ paiement.amount | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
+                  <td><span class="badge bg-success">{{ paiement.statut }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>

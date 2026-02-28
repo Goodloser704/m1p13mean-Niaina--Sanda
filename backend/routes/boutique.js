@@ -18,13 +18,6 @@ const router = express.Router();
 // @return  { boutiques, count, page, limit, totalPages }
 router.get('/', boutiqueController.getAllBoutiques);
 
-// @route   GET /api/boutiques/:id (conforme aux spécifications)
-// @desc    Obtenir une boutique par ID
-// @access  Public (NO AUTH REQUIRED)
-// @param   id - ID de la boutique
-// @return  { boutique }
-router.get('/:id', boutiqueController.getBoutiqueByIdPublic);
-
 // @route   GET /api/boutique/by-statut (nouvelle route)
 // @desc    Obtenir toutes les boutiques par statut avec pagination
 // @access  Public (NO AUTH REQUIRED)
@@ -38,6 +31,12 @@ router.get('/by-statut', boutiqueController.getAllBoutiquesByStatut);
 // @query   keyword, page, limit
 // @return  { boutiques, count, pagination }
 router.get('/search', boutiqueController.searchBoutiques);
+
+// @route   GET /api/boutique/my-boutiques
+// @desc    Obtenir toutes mes boutiques
+// @access  Private (Commercant)
+// @return  { boutiques, count }
+router.get('/my-boutiques', auth, boutiqueController.getMyBoutiques);
 
 // @route   GET /api/boutique/:id/produits (conforme aux spécifications)
 // @desc    Obtenir les produits d'une boutique
@@ -59,12 +58,6 @@ router.post('/register', auth, authorize('Commercant'), boutiqueController.creat
 // @body    { boutique }
 // @return  { boutique }
 router.post('/commercant/boutique', auth, authorize('Commercant'), boutiqueController.createBoutique);
-
-// @route   GET /api/boutique/my-boutiques
-// @desc    Obtenir toutes mes boutiques
-// @access  Private (Commercant)
-// @return  { boutiques, count }
-router.get('/my-boutiques', auth, boutiqueController.getMyBoutiques);
 
 // @route   GET /api/commercant/:id/boutiques (conforme aux spécifications)
 // @desc    Obtenir les boutiques d'un commerçant
@@ -133,5 +126,12 @@ router.put('/:boutiqueId/reject', adminAuth, boutiqueController.rejectBoutique);
 // @desc    Obtenir une boutique par ID (Admin)
 // @access  Private (Admin seulement)
 router.get('/admin/:boutiqueId', adminAuth, boutiqueController.getBoutiqueById);
+
+// @route   GET /api/boutiques/:id (conforme aux spécifications)
+// @desc    Obtenir une boutique par ID (Public) - DOIT ÊTRE EN DERNIER
+// @access  Public (NO AUTH REQUIRED)
+// @param   id - ID de la boutique
+// @return  { boutique }
+router.get('/:id', boutiqueController.getBoutiqueByIdPublic);
 
 module.exports = router;

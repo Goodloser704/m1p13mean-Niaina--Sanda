@@ -98,57 +98,6 @@ class BoutiqueController {
       if (statutBoutique) {
         filter.statutBoutique = statutBoutique;
       }
-
-  /**
-   * @route   GET /api/boutiques/:id
-   * @desc    Obtenir une boutique par ID (Public)
-   * @access  Public
-   * @param   id - ID de la boutique
-   * @return  { boutique }
-   */
-  async getBoutiqueByIdPublic(req, res) {
-    const timestamp = new Date().toISOString();
-    console.log(`🏪 [${timestamp}] Récupération boutique par ID (Public)`);
-    console.log(`   🏪 Boutique ID: ${req.params.id}`);
-    
-    try {
-      const { id } = req.params;
-      
-      const Boutique = require('../models/Boutique');
-      const boutique = await Boutique.findOne({ 
-        _id: id,
-        statutBoutique: 'Actif' // Seulement les boutiques actives
-      })
-        .populate('commercant', 'nom prenoms email')
-        .populate('categorie', 'categorie')
-        .populate('espace', 'code etage');
-      
-      if (!boutique) {
-        console.log(`❌ Boutique non trouvée ou inactive: ${id}`);
-        return res.status(404).json({ message: 'Boutique non trouvée' });
-      }
-
-      console.log(`✅ Boutique récupérée: ${boutique.nom}`);
-      
-      res.json({
-        boutique: {
-          _id: boutique._id,
-          nom: boutique.nom,
-          description: boutique.description,
-          categorie: boutique.categorie,
-          photo: boutique.photo,
-          horairesHebdo: boutique.horairesHebdo,
-          espace: boutique.espace,
-          commercant: boutique.commercant,
-          dateCreation: boutique.dateCreation
-        }
-      });
-
-    } catch (error) {
-      console.error(`❌ Erreur récupération boutique:`, error.message);
-      res.status(500).json({ message: 'Erreur serveur' });
-    }
-  }
       
       // Vérifier que la boutique existe et est active
       const boutique = await require('../models/Boutique').findOne(filter);
@@ -213,6 +162,57 @@ class BoutiqueController {
         return res.status(400).json({ message: 'ID de boutique invalide' });
       }
       
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * @route   GET /api/boutiques/:id
+   * @desc    Obtenir une boutique par ID (Public)
+   * @access  Public
+   * @param   id - ID de la boutique
+   * @return  { boutique }
+   */
+  async getBoutiqueByIdPublic(req, res) {
+    const timestamp = new Date().toISOString();
+    console.log(`🏪 [${timestamp}] Récupération boutique par ID (Public)`);
+    console.log(`   🏪 Boutique ID: ${req.params.id}`);
+    
+    try {
+      const { id } = req.params;
+      
+      const Boutique = require('../models/Boutique');
+      const boutique = await Boutique.findOne({ 
+        _id: id,
+        statutBoutique: 'Actif' // Seulement les boutiques actives
+      })
+        .populate('commercant', 'nom prenoms email')
+        .populate('categorie', 'categorie')
+        .populate('espace', 'code etage');
+      
+      if (!boutique) {
+        console.log(`❌ Boutique non trouvée ou inactive: ${id}`);
+        return res.status(404).json({ message: 'Boutique non trouvée' });
+      }
+
+      console.log(`✅ Boutique récupérée: ${boutique.nom}`);
+      
+      res.json({
+        boutique: {
+          _id: boutique._id,
+          nom: boutique.nom,
+          description: boutique.description,
+          categorie: boutique.categorie,
+          photo: boutique.photo,
+          horairesHebdo: boutique.horairesHebdo,
+          espace: boutique.espace,
+          commercant: boutique.commercant,
+          dateCreation: boutique.dateCreation
+        }
+      });
+
+    } catch (error) {
+      console.error(`❌ Erreur récupération boutique:`, error.message);
       res.status(500).json({ message: 'Erreur serveur' });
     }
   }
