@@ -13,6 +13,7 @@ import { InscriptionChoice } from './components/auth/inscription-choice/inscript
 import { Inscription } from './components/auth/inscription/inscription';
 import { MesBoutiques } from './pages/commercant/mes-boutiques/mes-boutiques';
 import { AllBoutiques } from './pages/acheteur/all-boutiques/all-boutiques';
+import { BoutiqueDetail } from './pages/acheteur/boutique-detail/boutique-detail';
 import { TemplateLayout } from './pages/shared/layout/template-layout/template-layout';
 import { UserProfil } from './pages/shared/user-profil/user-profil';
 import { Notifications } from './pages/shared/notifications/notifications';
@@ -94,7 +95,7 @@ export const routes: Routes = [
     data: { roles: [UserRole.Acheteur] },
     children: [
       { path: 'all-boutiques', component: AllBoutiques },
-
+      { path: 'boutique/:id', component: BoutiqueDetail },
 
       { path: 'user-profil', component: UserProfil },
       { path: 'notifications', component: Notifications },
