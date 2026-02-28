@@ -641,7 +641,7 @@ exports.obtenirAchatsCommercantEnCours = async (req, res) => {
     const commercantId = req.user._id;
 
     // Pagination (valeurs par défaut sécurisées)
-    const { page = 1, limit = 10, boutiqueId, etatsAchat } = req.query;
+    const { page = 1, limit = 10, boutiqueId, etatsAchat, typesAchat } = req.query;
     const skip = (page - 1) * limit;
 
     const Boutique = require('../models/Boutique');
@@ -701,10 +701,20 @@ exports.obtenirAchatsCommercantEnCours = async (req, res) => {
       etats = [EtatAchatEnum.EnAttente, EtatAchatEnum.EnPreparation];
     }
 
+    let types;
+    if (typesAchat) {
+      types = Array.isArray(typesAchat)
+        ? typesAchat
+        : [typesAchat];
+    } else {
+      types = [TypeAchatEnum.Livrer, TypeAchatEnum.Recuperer];
+    }
+
     // Query de base
     const query = {
       produit: { $in: produitIds },
-      etat: { $in: etats }
+      etat: { $in: etats },
+      typeAchat: { $in: types }
     };
 
     // Total AVANT pagination
