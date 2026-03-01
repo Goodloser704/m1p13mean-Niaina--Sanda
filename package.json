@@ -1,0 +1,13 @@
+{
+  "name": "mall-app-tests",
+  "version": "1.0.0",
+  "description": "Tests complets pour Mall App",
+  "main": "test-fonctionnalites-complet.js",
+  "scripts": {
+    "test": "node test-fonctionnalites-complet.js"
+  },
+  "dependencies": {
+    "mongoose": "^8.0.0",
+    "axios": "^1.6.0"
+  }
+}
