@@ -11,43 +11,44 @@
   </div>
 
   <div class="row">
-    <!-- Colonne gauche: Liste des boutiques (fixe) -->
-    <div class="col-md-3">
-      <div class="card sticky-sidebar">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0"><i class="bi bi-shop me-2"></i>Mes Boutiques</h5>
-          <div class="btn-group btn-group-sm">
-            <button class="btn btn-outline-primary" (click)="selectionnerToutesBoutiques()" title="Tout sélectionner"><i class="bi bi-check-all"></i></button>
-            <button class="btn btn-outline-secondary" (click)="deselectionnerToutesBoutiques()" title="Tout désélectionner"><i class="bi bi-x"></i></button>
+    <!-- Colonne gauche: Liste des boutiques (fixe) - Cachée si une seule boutique -->
+    @if (boutiques().length > 1) {
+      <div class="col-md-3">
+        <div class="card sticky-sidebar">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-shop me-2"></i>Mes Boutiques</h5>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-primary" (click)="selectionnerToutesBoutiques()" title="Tout sélectionner"><i class="bi bi-check-all"></i></button>
+              <button class="btn btn-outline-secondary" (click)="deselectionnerToutesBoutiques()" title="Tout désélectionner"><i class="bi bi-x"></i></button>
+            </div>
           </div>
-        </div>
-        <div class="card-body p-0">
-          @if (boutiques().length === 0) {
-            <div class="empty-state"><i class="bi bi-shop"></i><p>Aucune boutique avec espace</p></div>
-          } @else {
-            <div class="boutiques-sidebar-list">
-              @for (boutique of boutiques(); track boutique._id) {
-                <div class="boutique-sidebar-item" [ngClass]="{ 'selected': boutiquesSelectionnees().has(boutique._id) }" (click)="toggleBoutique(boutique._id)">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" [checked]="boutiquesSelectionnees().has(boutique._id)" (click)="$event.stopPropagation()">
-                    <label class="form-check-label">
-                      <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                          <strong>{{ boutique.nom }}</strong><br>
-                          <small class="text-muted">{{ boutique.espace?.code }} - Étage {{ boutique.espace?.etage?.numero }}</small><br>
-                          <span class="badge bg-primary mt-1">{{ boutique.espace?.loyer | currency:'EUR':'symbol':'1.2-2' }}/mois</span>
-                        </div>
-                        @if (moisSelectionnes().size === 1) {
-                          <div class="statut-paiement-badge">
-                            @for (periode of Array.from(moisSelectionnes()); track periode) {
-                              @if (estPayePourBoutique(boutique._id, periode)) {
-                                <i class="bi bi-check-circle-fill text-success" title="Payé pour ce mois"></i>
-                              } @else {
-                                <i class="bi bi-exclamation-circle-fill text-warning" title="Non payé pour ce mois"></i>
-                              }
-                            }
+          <div class="card-body p-0">
+            @if (boutiques().length === 0) {
+              <div class="empty-state"><i class="bi bi-shop"></i><p>Aucune boutique avec espace</p></div>
+            } @else {
+              <div class="boutiques-sidebar-list">
+                @for (boutique of boutiques(); track boutique._id) {
+                  <div class="boutique-sidebar-item" [ngClass]="{ 'selected': boutiquesSelectionnees().has(boutique._id) }" (click)="toggleBoutique(boutique._id)">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" [checked]="boutiquesSelectionnees().has(boutique._id)" (click)="$event.stopPropagation()">
+                      <label class="form-check-label">
+                        <div class="d-flex justify-content-between align-items-start">
+                          <div class="flex-grow-1">
+                            <strong>{{ boutique.nom }}</strong><br>
+                            <small class="text-muted">{{ boutique.espace?.code }} - Étage {{ boutique.espace?.etage?.numero }}</small><br>
+                            <span class="badge bg-primary mt-1">{{ boutique.espace?.loyer | currency:'EUR':'symbol':'1.2-2' }}/mois</span>
                           </div>
-                        }
+                          @if (moisSelectionnes().size === 1) {
+                            <div class="statut-paiement-badge">
+                              @for (periode of Array.from(moisSelectionnes()); track periode) {
+                                @if (estPayePourBoutique(boutique._id, periode)) {
+                                  <i class="bi bi-check-circle-fill text-success" title="Payé pour ce mois"></i>
+                                } @else {
+                                  <i class="bi bi-exclamation-circle-fill text-warning" title="Non payé pour ce mois"></i>
+                                }
+                              }
+                            </div>
+                          }
                       </div>
                     </label>
                   </div>
@@ -58,9 +59,20 @@
         </div>
       </div>
     </div>
+    }
 
-    <!-- Colonne droite: Calendrier -->
-    <div class="col-md-9">
+    <!-- Colonne droite: Calendrier - Pleine largeur si une seule boutique -->
+    <div [ngClass]="boutiques().length > 1 ? 'col-md-9' : 'col-12'">
+      <!-- Info boutique si une seule -->
+      @if (boutiques().length === 1) {
+        <div class="alert alert-info mb-3">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Boutique:</strong> {{ boutiques()[0].nom }} 
+          <span class="ms-3"><strong>Espace:</strong> {{ boutiques()[0].espace?.code }}</span>
+          <span class="ms-3"><strong>Loyer:</strong> {{ boutiques()[0].espace?.loyer | currency:'EUR':'symbol':'1.2-2' }}/mois</span>
+        </div>
+      }
+      
       <div class="card">
         <div class="card-header">
           <h5 class="mb-0"><i class="bi bi-calendar3 me-2"></i>Calendrier des Paiements</h5>
@@ -72,7 +84,9 @@
             <span class="badge badge-warning me-2"><i class="bi bi-clock"></i> Mois courant</span>
             <span class="badge badge-danger me-2"><i class="bi bi-exclamation-triangle"></i> Impayé</span>
             <span class="badge badge-secondary me-2"><i class="bi bi-calendar-plus"></i> À venir</span>
-            <span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> Déjà payé (toutes boutiques sélectionnées)</span>
+            @if (boutiques().length > 1) {
+              <span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> Déjà payé (toutes boutiques sélectionnées)</span>
+            }
           </div>
 
           <div class="calendrier">

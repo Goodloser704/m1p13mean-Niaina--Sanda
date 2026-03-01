@@ -55,6 +55,69 @@ export class BoutiqueDetail implements OnInit {
     return this.cart().reduce((total, item) => total + item.quantite, 0);
   });
 
+  // Statut d'ouverture de la boutique
+  boutiqueStatus = computed(() => {
+    const b = this.boutique();
+    if (!b) return { estOuverte: false, raison: 'Chargement...' };
+    
+    // NE PAS vérifier statutBoutique pour l'acheteur
+    // On se base uniquement sur les horaires d'ouverture
+    
+    // Si pas d'horaires, considérer comme ouverte
+    if (!b.horairesHebdo || b.horairesHebdo.length === 0) {
+      return { estOuverte: true, raison: 'Horaires non définis' };
+    }
+
+    // Obtenir le jour actuel
+    const now = new Date();
+    const joursSemaine = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const jourActuel = joursSemaine[now.getDay()];
+
+    // Chercher l'horaire pour ce jour
+    const horaireJour = b.horairesHebdo.find((h: any) => h.jour === jourActuel);
+
+    if (!horaireJour) {
+      return { estOuverte: false, raison: `Fermé le ${jourActuel}` };
+    }
+
+    // Vérifier l'heure actuelle
+    const heureActuelle = now.getHours() * 100 + now.getMinutes();
+    
+    // Convertir les heures au format HHMM (ex: "09:30" -> 930, "14:00" -> 1400)
+    const [heureDebutH, heureDebutM] = horaireJour.debut.split(':').map(Number);
+    const [heureFinH, heureFinM] = horaireJour.fin.split(':').map(Number);
+    const heureDebut = heureDebutH * 100 + heureDebutM;
+    const heureFin = heureFinH * 100 + heureFinM;
+
+    if (heureActuelle < heureDebut) {
+      return { estOuverte: false, raison: `Ouvre à ${horaireJour.debut}` };
+    }
+
+    if (heureActuelle >= heureFin) {
+      return { estOuverte: false, raison: `Fermé (fermeture à ${horaireJour.fin})` };
+    }
+
+    return { estOuverte: true, raison: `Ouvert jusqu'à ${horaireJour.fin}` };
+  });
+
+  // Horaires formatés pour affichage
+  horairesFormattes = computed(() => {
+    const b = this.boutique();
+    if (!b || !b.horairesHebdo || b.horairesHebdo.length === 0) {
+      return [];
+    }
+
+    const joursSemaine = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+    
+    return joursSemaine.map(jour => {
+      const horaire = b.horairesHebdo.find((h: any) => h.jour === jour);
+      return {
+        jour,
+        horaire: horaire ? `${horaire.debut} - ${horaire.fin}` : 'Fermé'
+      };
+    });
+  });
+
   ngOnInit(): void {
     this.boutiqueId.set(this.route.snapshot.paramMap.get('id') || '');
     if (this.boutiqueId()) {
@@ -132,6 +195,12 @@ export class BoutiqueDetail implements OnInit {
   checkout() {
     if (this.cart().length === 0) {
       alert('Votre panier est vide');
+      return;
+    }
+
+    // Vérifier si la boutique est ouverte
+    if (!this.boutiqueStatus().estOuverte) {
+      alert(`Impossible d'acheter : ${this.boutiqueStatus().raison}`);
       return;
     }
 

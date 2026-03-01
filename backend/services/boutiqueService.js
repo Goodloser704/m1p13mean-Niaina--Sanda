@@ -311,7 +311,7 @@ class BoutiqueService {
       
       const boutique = await Boutique.findOne(query)
         .populate('categorie', 'nom description')
-        .populate('espace', 'code surface');
+        .populate('espace', 'code surface loyer'); // Ajout de 'loyer'
       return boutique;
     } catch (error) {
       console.error('❌ Erreur récupération boutique utilisateur:', error.message);

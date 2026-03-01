@@ -5,6 +5,7 @@ const PorteFeuille = require('../models/PorteFeuille');
 const PFTransaction = require('../models/PFTransaction');
 const { validationResult } = require('express-validator');
 const { EtatAchatEnum, TypeAchatEnum, TypeTransactionEnum } = require('../utils/enums');
+const { estBoutiqueOuverte } = require('../utils/boutique-utils');
 const mongoose = require('mongoose');
 
 /**
@@ -56,11 +57,17 @@ exports.validerPanier = async (req, res) => {
     for (const [index, item] of achatsData.entries()) {
 
       const produit = await Produit.findById(item.produit)
-        .populate('boutique', 'nom')
+        .populate('boutique', 'nom horairesHebdo statutBoutique')
         .session(session);
 
       if (!produit)
         throw new Error(`Produit ${item.produit} non trouvé`);
+
+      // Vérifier si la boutique est ouverte
+      const { estOuverte, raison } = estBoutiqueOuverte(produit.boutique);
+      if (!estOuverte) {
+        throw new Error(`La boutique "${produit.boutique.nom}" est fermée. ${raison}`);
+      }
 
       if (produit.stock.nombreDispo < item.quantite)
         throw new Error(`Stock insuffisant pour ${produit.nom}`);

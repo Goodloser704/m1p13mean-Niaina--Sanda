@@ -11,6 +11,27 @@
         @if (boutique().description) {
           <p class="description">{{ boutique().description }}</p>
         }
+        
+        <!-- Statut d'ouverture -->
+        <div class="boutique-status" [ngClass]="{'status-open': boutiqueStatus().estOuverte, 'status-closed': !boutiqueStatus().estOuverte}">
+          <span class="status-icon">{{ boutiqueStatus().estOuverte ? '🟢' : '🔴' }}</span>
+          <span class="status-text">{{ boutiqueStatus().raison }}</span>
+        </div>
+
+        <!-- Horaires d'ouverture -->
+        @if (horairesFormattes().length > 0) {
+          <details class="horaires-details">
+            <summary>Voir les horaires</summary>
+            <div class="horaires-list">
+              @for (h of horairesFormattes(); track h.jour) {
+                <div class="horaire-item">
+                  <span class="jour">{{ h.jour }}</span>
+                  <span class="heures">{{ h.horaire }}</span>
+                </div>
+              }
+            </div>
+          </details>
+        }
       </div>
     }
 
@@ -58,9 +79,13 @@
                   </span>
                 </div>
                 
-                @if (produit.stock.nombreDispo > 0) {
+                @if (produit.stock.nombreDispo > 0 && boutiqueStatus().estOuverte) {
                   <button class="btn-add-cart" (click)="addToCart(produit)">
                     Ajouter au panier
+                  </button>
+                } @else if (!boutiqueStatus().estOuverte) {
+                  <button class="btn-add-cart" disabled title="Boutique fermée">
+                    Boutique fermée
                   </button>
                 } @else {
                   <button class="btn-add-cart" disabled>

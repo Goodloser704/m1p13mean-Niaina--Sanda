@@ -3,19 +3,28 @@ import { Router } from "@angular/router";
 import { AuthService } from '../../../core/services/auth.service';
 import { PorteFeuille as PF, PFTransaction } from '../../../core/models/porte-feuille.model';
 import { PorteFeuilleService } from '../../../core/services/porte-feuille.service';
-import { CurrencyPipe, DatePipe } from "@angular/common";
+import { CurrencyPipe, DatePipe, NgClass } from "@angular/common";
 import { LoaderService } from '../../../core/services/loader.service';
 import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-porte-feuille',
-  imports: [CurrencyPipe, DatePipe],
+  imports: [CurrencyPipe, DatePipe, NgClass],
   templateUrl: './porte-feuille.html',
   styleUrl: './porte-feuille.scss',
 })
 export class PorteFeuille implements OnInit {
   porteFeuille = signal<PF | null>(null);
   transactions = signal<PFTransaction[]>([]);
+  stats = signal<any>(null);
+  
+  // Pagination
+  page = signal(1);
+  limit = 10;
+  total = signal(0);
+  
+  // Filtres
+  typeFilter = signal<string>('');
 
   today: string = new Date().toISOString();
   loaderService = inject(LoaderService);
@@ -27,26 +36,72 @@ export class PorteFeuille implements OnInit {
 
   ngOnInit() {
     this.loadPorteFeuille();
+    this.loadTransactions();
+    this.loadStats();
   }
 
   loadPorteFeuille() {
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) return;
+
+    this.porteFeuilleService.obtenirMonPorteFeuille(userId)
+      .subscribe({
+        next: (res) => {
+          console.log(`My wallet: ${JSON.stringify(res.wallet)}`);
+          this.porteFeuille.set(res.wallet);
+        },
+        error: console.error
+      });
+  }
+
+  loadTransactions() {
     this.loaderService.show();
 
-    const userId = this.authService.getCurrentUserId();
-    if (userId) {
-      this.porteFeuilleService.obtenirMonPorteFeuille(userId)
-        .pipe(finalize(() => this.loaderService.hide()))
-        .subscribe({
-          next: (res) => {
-            console.log(`My wallet: ${JSON.stringify(res.wallet)}`);
+    const params: any = {
+      page: this.page(),
+      limit: this.limit
+    };
 
-            this.porteFeuille.set(res.wallet);
-            this.transactions.set(res.transactions);
-          },
-          error: console.error
-        })
-    } else {
-      this.loaderService.hide();
+    if (this.typeFilter()) {
+      params.type = this.typeFilter();
+    }
+
+    this.porteFeuilleService.obtenirMesTransactions(params)
+      .pipe(finalize(() => this.loaderService.hide()))
+      .subscribe({
+        next: (res) => {
+          this.transactions.set(res.transactions || []);
+          this.total.set(res.pagination?.total || 0);
+        },
+        error: console.error
+      });
+  }
+
+  loadStats() {
+    this.porteFeuilleService.obtenirStatistiques()
+      .subscribe({
+        next: (res) => {
+          this.stats.set(res.statistiques);
+        },
+        error: console.error
+      });
+  }
+
+  filterByType(type: string) {
+    this.typeFilter.set(type);
+    this.page.set(1);
+    this.loadTransactions();
+  }
+
+  nextPage() {
+    this.page.update(v => v + 1);
+    this.loadTransactions();
+  }
+
+  prevPage() {
+    if (this.page() > 1) {
+      this.page.update(v => v - 1);
+      this.loadTransactions();
     }
   }
 

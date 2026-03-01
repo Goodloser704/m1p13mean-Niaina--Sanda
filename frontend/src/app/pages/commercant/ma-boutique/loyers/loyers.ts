@@ -55,14 +55,21 @@ export class Loyers implements OnInit {
     const selectedIds = this.boutiquesSelectionnees();
     const selectedMois = this.moisSelectionnes();
     
+    console.log('💰 Calcul montant total:');
+    console.log('   Boutiques:', boutiques.length);
+    console.log('   Boutiques sélectionnées:', selectedIds.size);
+    console.log('   Mois sélectionnés:', selectedMois.size);
+    
     let total = 0;
     boutiques.forEach(b => {
       if (selectedIds.has(b._id)) {
         const loyer = b.espace?.loyer || 0;
+        console.log(`   ${b.nom}: ${loyer}€ × ${selectedMois.size} mois = ${loyer * selectedMois.size}€`);
         total += loyer * selectedMois.size;
       }
     });
     
+    console.log('   TOTAL:', total, '€');
     return total;
   });
 
@@ -73,25 +80,48 @@ export class Loyers implements OnInit {
   chargerDonnees() {
     this.loaderService.show();
     
-    // Charger les boutiques
-    this.boutiqueService.getMyBoutiques().subscribe({
+    // Récupérer la boutique en cours depuis le service
+    const boutiqueEnCours = this.boutiqueService.maBoutique();
+    
+    if (!boutiqueEnCours) {
+      alert('Aucune boutique sélectionnée');
+      this.loaderService.hide();
+      return;
+    }
+    
+    // Charger uniquement la boutique en cours avec ses détails complets
+    this.boutiqueService.getMyBoutique(boutiqueEnCours._id).subscribe({
       next: (res: any) => {
-        const boutiquesAvecEspace = (res.boutiques || []).filter(
-          (b: any) => b.espace && b.statutBoutique === 'Actif'
-        );
-        this.boutiques.set(boutiquesAvecEspace);
+        const boutique = res.boutique;
         
-        // Sélectionner toutes les boutiques par défaut
-        const ids = new Set<string>(boutiquesAvecEspace.map((b: any) => b._id));
-        this.boutiquesSelectionnees.set(ids);
+        // Vérifier que la boutique a un espace et est active
+        if (boutique && boutique.espace) {
+          this.boutiques.set([boutique]);
+          
+          // Sélectionner automatiquement cette boutique
+          this.boutiquesSelectionnees.set(new Set([boutique._id]));
+          
+          console.log('✅ Boutique chargée:', boutique.nom, 'Loyer:', boutique.espace?.loyer);
+          
+          // Charger le reste des données APRÈS avoir chargé la boutique
+          this.chargerSoldeEtHistorique();
+        } else {
+          this.boutiques.set([]);
+          alert('Cette boutique n\'a pas d\'espace loué');
+          this.loaderService.hide();
+        }
       },
-      error: (err: any) => console.error('Erreur chargement boutiques:', err)
+      error: (err: any) => {
+        console.error('Erreur chargement boutique:', err);
+        this.loaderService.hide();
+      }
     });
-
+  }
+  
+  chargerSoldeEtHistorique() {
     // Charger le solde
     this.portefeuilleService.obtenirSolde().subscribe({
       next: (res: any) => {
-        // Le backend retourne { portefeuille: { balance: ... } } ou directement { balance: ... }
         const balance = res.portefeuille?.balance ?? res.balance ?? 0;
         this.soldePortefeuille.set(balance);
       },
@@ -102,6 +132,7 @@ export class Loyers implements OnInit {
     this.loyerService.obtenirHistorique({ limit: 50 }).subscribe({
       next: (res) => {
         this.historiquePaiements.set(res.loyers || []);
+        console.log('📋 Historique chargé:', res.loyers?.length, 'paiements');
         this.genererCalendrier();
       },
       error: (err) => console.error('Erreur chargement historique:', err),
@@ -117,6 +148,10 @@ export class Loyers implements OnInit {
     const calendrier: MoisCalendrier[] = [];
     const historique = this.historiquePaiements();
     const boutiques = this.boutiques();
+    
+    console.log('🗓️ Génération calendrier...');
+    console.log('   Boutiques:', boutiques.length, boutiques.map(b => b.nom));
+    console.log('   Historique:', historique.length, 'paiements');
     
     // Créer une Map des paiements par boutique (nom) et période
     const paiementsMap = new Map<string, boolean>();
@@ -141,12 +176,15 @@ export class Loyers implements OnInit {
           if (boutique) {
             const key = `${boutique._id}-${periode}`;
             paiementsMap.set(key, true);
-            console.log(`✅ Paiement détecté: ${nomBoutique} (${boutique._id}) pour ${periode}`);
+            console.log(`   ✅ Paiement: ${nomBoutique} pour ${periode}`);
+          } else {
+            console.log(`   ⚠️ Boutique "${nomBoutique}" non trouvée dans la liste`);
           }
         }
       }
     });
     
+    console.log('   Total paiements détectés:', paiementsMap.size);
     this.statutsPaiements.set(paiementsMap);
     
     // Générer 6 mois passés + mois courant + 12 mois futurs
@@ -169,11 +207,8 @@ export class Loyers implements OnInit {
     
     this.moisCalendrier.set(calendrier);
     
-    // Sélectionner le mois courant par défaut
-    const moisCourant = calendrier.find(m => m.estCourant);
-    if (moisCourant) {
-      this.moisSelectionnes.set(new Set([moisCourant.periode]));
-    }
+    // NE PAS sélectionner le mois courant par défaut
+    // L'utilisateur doit choisir manuellement
   }
 
   toggleBoutique(boutiqueId: string) {

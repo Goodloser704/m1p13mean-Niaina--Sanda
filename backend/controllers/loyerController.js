@@ -124,12 +124,23 @@ class LoyerController {
       }
 
       // Récupérer le portefeuille admin (destinataire des loyers)
-      const adminUser = await require('../models/User').findOne({ role: 'Admin' });
+      // Utiliser admin@mall.com comme compte principal pour les loyers
+      let adminUser = await require('../models/User').findOne({ 
+        email: 'admin@mall.com' 
+      });
       if (!adminUser) {
-        console.log(`❌ Compte admin non trouvé`);
-        return res.status(500).json({ 
-          message: 'Erreur système: compte administrateur non trouvé' 
-        });
+        console.log(`❌ Compte admin principal (admin@mall.com) non trouvé`);
+        // Fallback sur n'importe quel admin
+        adminUser = await require('../models/User').findOne({ role: 'Admin' });
+        if (!adminUser) {
+          console.log(`❌ Aucun compte admin trouvé`);
+          return res.status(500).json({ 
+            message: 'Erreur système: compte administrateur non trouvé' 
+          });
+        }
+        console.log(`⚠️  Utilisation de ${adminUser.email} comme admin de secours`);
+      } else {
+        console.log(`✅ Utilisation de admin@mall.com pour recevoir le loyer`);
       }
 
       const portefeuilleAdmin = await PorteFeuille.obtenirParUtilisateur(adminUser._id);
@@ -229,7 +240,7 @@ class LoyerController {
           numeroTransaction: transaction.numeroTransaction,
           createdAt: transaction.createdAt
         },
-        nouveauSolde: portefeuilleCommercant.balance - montantLoyer
+        nouveauSolde: portefeuilleCommercant.balance // ✅ Déjà soustrait
       });
 
     } catch (error) {

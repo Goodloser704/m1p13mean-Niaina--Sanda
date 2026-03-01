@@ -51,9 +51,12 @@
                 }
               </div>
 
-              @if (!notification.isRead) {
-                <i class="mark-as-read bi bi-check" role="button" (click)="markAsRead(notification)"></i>
-              }
+              <div class="notification-actions">
+                @if (!notification.isRead) {
+                  <i class="mark-as-read bi bi-check" role="button" (click)="markAsRead(notification)" title="Marquer comme lu"></i>
+                }
+                <i class="archive-notification bi bi-archive" role="button" (click)="archiveNotification(notification)" title="Archiver"></i>
+              </div>
             </div>
           </div>
         </div>

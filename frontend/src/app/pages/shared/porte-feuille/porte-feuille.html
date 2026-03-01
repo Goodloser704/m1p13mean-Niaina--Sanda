@@ -1,86 +1,143 @@
 <section id="hero" class="hero section">
-  @if (porteFeuille(); as pf) {
-    <div class="container px-4 px-sm-0 px-lg-3">
-      <div class="mb-4">
-        <button type="button" class="btn btn-outline-primary" (click)="back()">
-          <i class="bi bi-arrow-left"></i>
-        </button>
-      </div>
+  <div class="container px-4 px-sm-0 px-lg-3">
+    <div class="mb-4">
+      <button type="button" class="btn btn-outline-primary" (click)="back()">
+        <i class="bi bi-arrow-left"></i> Retour
+      </button>
+    </div>
 
-      <div class="row" data-aos="fade-down" data-aos-delay="300">
-        <div class="col-sm-6">
-          <div class="balance">
-            <h2>Balance: <span>{{ pf.balance | currency:'MGA':'Ar ':'1.2-2' }}</span></h2>
-          </div>
-          <hr>
-        </div>
-
-        <div class="col-sm-6">
-          <div class="d-flex justify-content-end align-items-center">
-            <p class="text-secondary">{{ today | date: 'dd MMM yyyy, HH:mm' }}</p>
+    <!-- Solde et Statistiques -->
+    @if (porteFeuille(); as pf) {
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card stats-card balance-card">
+            <div class="card-body">
+              <h6 class="text-muted">Solde actuel</h6>
+              <h2 class="mb-0">{{ pf.balance | currency:'EUR':'symbol':'1.2-2' }}</h2>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="row mt-3 features-cards">
-        <div class="col-12 mb-2">
-          <h3 data-aos="fade-down" data-aos-delay="300">Liste des transactions: ({{ transactions().length }})</h3>
-          <hr>
-        </div>
-
-        <div class="col-12 d-flex flex-column gap-3">
-          @for (transaction of transactions(); track transaction._id) {
-            @if (transaction.amount > 0) {
-              <div class="feature-box green align-self-end" data-aos="fade-left" data-aos-delay="300">
-                <div class="d-flex align-items-center gap-3">
-                  <i class="bi bi-arrow-down"></i>
-                  <h4>{{ transaction.amount | currency: 'MGA':'Ar ':'1.2-2' }}</h4>
-                </div>
-                <p>Type: <b>{{ transaction.type }}</b>, Description: {{ transaction.description }}</p>
-                <p>Venant de: <b>{{ getTransactionerNames(transaction.fromWallet) }}</b></p>
+        @if (stats(); as st) {
+          <div class="col-md-4">
+            <div class="card stats-card">
+              <div class="card-body">
+                <h6 class="text-muted">Total reçu</h6>
+                <h3 class="text-success mb-0">+{{ st.totalRecus | currency:'EUR':'symbol':'1.2-2' }}</h3>
+                <small>{{ st.nombreRecus }} transaction(s)</small>
               </div>
-            } @else if (transaction.amount < 0) {
-              <div class="feature-box red" data-aos="fade-right" data-aos-delay="300">
-                <div class="d-flex align-items-center gap-3">
-                  <i class="bi bi-arrow-up"></i>
-                  <h4>{{ transaction.amount | currency: 'MGA':'Ar ':'1.2-2' }}</h4>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card stats-card">
+              <div class="card-body">
+                <h6 class="text-muted">Total envoyé</h6>
+                <h3 class="text-danger mb-0">-{{ st.totalEnvoyes | currency:'EUR':'symbol':'1.2-2' }}</h3>
+                <small>{{ st.nombreEnvoyes }} transaction(s)</small>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Filtres -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="mb-3"><i class="bi bi-filter me-2"></i>Filtrer les transactions</h5>
+        <div class="btn-group" role="group">
+          <button type="button" class="btn" [ngClass]="typeFilter() === '' ? 'btn-primary' : 'btn-outline-primary'" (click)="filterByType('')">
+            Toutes
+          </button>
+          <button type="button" class="btn" [ngClass]="typeFilter() === 'Achat' ? 'btn-primary' : 'btn-outline-primary'" (click)="filterByType('Achat')">
+            Achats
+          </button>
+          <button type="button" class="btn" [ngClass]="typeFilter() === 'Loyer' ? 'btn-primary' : 'btn-outline-primary'" (click)="filterByType('Loyer')">
+            Loyers
+          </button>
+          <button type="button" class="btn" [ngClass]="typeFilter() === 'Recharge' ? 'btn-primary' : 'btn-outline-primary'" (click)="filterByType('Recharge')">
+            Recharges
+          </button>
+          <button type="button" class="btn" [ngClass]="typeFilter() === 'Commission' ? 'btn-primary' : 'btn-outline-primary'" (click)="filterByType('Commission')">
+            Commissions
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des transactions -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Historique des transactions ({{ total() }})</h5>
+      </div>
+      <div class="card-body">
+        @if (transactions().length === 0) {
+          <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>Aucune transaction</p>
+          </div>
+        } @else {
+          <div class="transactions-list">
+            @for (transaction of transactions(); track transaction._id) {
+              <div class="transaction-item" [ngClass]="transaction.amount > 0 ? 'credit' : 'debit'">
+                <div class="transaction-icon">
+                  @if (transaction.amount > 0) {
+                    <i class="bi bi-arrow-down-circle text-success"></i>
+                  } @else {
+                    <i class="bi bi-arrow-up-circle text-danger"></i>
+                  }
                 </div>
-                <p>Type: <b>{{ transaction.type }}</b>, Description: {{ transaction.description }}</p>
-                <p>Vers: <b>{{ getTransactionerNames(transaction.toWallet) }}</b></p>
+                <div class="transaction-details">
+                  <div class="transaction-header">
+                    <strong>{{ transaction.type }}</strong>
+                    <span class="badge" [ngClass]="transaction.statut === 'Completee' ? 'bg-success' : 'bg-warning'">
+                      {{ transaction.statut }}
+                    </span>
+                  </div>
+                  <p class="transaction-description">{{ transaction.description }}</p>
+                  <div class="transaction-meta">
+                    @if (transaction.amount > 0) {
+                      <small class="text-muted">De: {{ getTransactionerNames(transaction.fromWallet) }}</small>
+                    } @else {
+                      <small class="text-muted">Vers: {{ getTransactionerNames(transaction.toWallet) }}</small>
+                    }
+                    <small class="text-muted">{{ transaction.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                  </div>
+                </div>
+                <div class="transaction-amount" [ngClass]="transaction.amount > 0 ? 'text-success' : 'text-danger'">
+                  {{ transaction.amount > 0 ? '+' : '' }}{{ transaction.amount | currency:'EUR':'symbol':'1.2-2' }}
+                </div>
               </div>
             }
-          }
-        </div>  
+          </div>
+
+          <!-- Pagination -->
+          <div class="d-flex justify-content-between align-items-center mt-4">
+            <div>
+              <small class="text-muted">
+                Page {{ page() }} - {{ transactions().length }} transaction(s) sur {{ total() }}
+              </small>
+            </div>
+            <div class="btn-group">
+              <button 
+                class="btn btn-outline-secondary"
+                (click)="prevPage()"
+                [disabled]="page() === 1"
+              >
+                <i class="bi bi-chevron-left"></i> Précédent
+              </button>
+              <button 
+                class="btn btn-outline-secondary"
+                (click)="nextPage()"
+                [disabled]="transactions().length < limit"
+              >
+                Suivant <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        }
       </div>
-
-      <!-- <div class="row mt-3 features-cards">
-        <div class="col-12 mb-2">
-          <h3 data-aos="fade-down" data-aos-delay="300">Liste des transactions:</h3>
-          <hr>
-        </div>
-        <div class="col-12 d-flex flex-column gap-3">
-          <div class="feature-box green align-self-end" data-aos="fade-left" data-aos-delay="300">
-            <div class="d-flex align-items-center gap-3">
-              <i class="bi bi-arrow-down"></i>
-              <h4>10 000 Ar</h4>
-            </div>
-            <p>Type: <b>Achat</b>, Description: achat client</p>
-            <p>Venant de: <b>Jean Paul</b></p>
-          </div>
-
-          <div class="feature-box red" data-aos="fade-right" data-aos-delay="300">
-            <div class="d-flex align-items-center gap-3">
-              <i class="bi bi-arrow-up"></i>
-              <h4>5 000 Ar</h4>
-            </div>
-            <p>Type: <b>Paiement</b>, Description: paiement loyer</p>
-            <p>Vers: <b>Jean Jacques</b></p>
-          </div>
-        </div>  
-      </div> -->
     </div>
-  } @else {
-    <p>Vide</p>
-  }
+  </div>
 </section>
-

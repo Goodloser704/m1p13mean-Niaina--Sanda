@@ -102,6 +102,31 @@ export class Notifications implements OnInit, AfterViewInit {
       });
   }
 
+  archiveNotification(notification: Notification) {
+    if (!confirm('Archiver cette notification ?')) return;
+
+    this.notificationsService
+      .archiveNotification(notification._id)
+      .subscribe({
+        next: () => {
+          // Retirer la notification de la liste
+          this.notifications.update((notifications) => 
+            notifications.filter(n => n._id !== notification._id)
+          );
+          
+          this.total.update(v => v - 1);
+          
+          if (!notification.isRead) {
+            this.unreadCount.update(v => v - 1);
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Erreur lors de l\'archivage');
+        }
+      });
+  }
+
   nextPage() {
     this.page.update(v => v + 1);
     this.loadNotifications();
