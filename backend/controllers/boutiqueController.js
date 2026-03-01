@@ -30,20 +30,34 @@ class BoutiqueController {
 
       // Recherche dans nom, description et catégorie
       const searchRegex = new RegExp(keyword.trim(), 'i');
+
+      const CategorieBoutique = require('../models/CategorieBoutique');
+      const categories = await CategorieBoutique.find({
+        nom: searchRegex,
+        isActive: true
+      }).select('_id');
+      const categorieIds = categories.map(c => c._id);
       
       const query = {
         statutBoutique: 'Actif',
         $or: [
           { nom: searchRegex },
-          { description: searchRegex }
+          { description: searchRegex },
+          { categorie: { $in: categorieIds } }
         ]
       };
 
       const boutiques = await require('../models/Boutique')
         .find(query)
-        .populate('commercant', 'nom prenoms email')
-        .populate('categorie', 'nom')
-        .populate('espace', 'code etage')
+        .populate([
+          { path: 'commercant', select: 'nom prenoms email' },
+          { path: 'categorie', select: 'nom' },
+          { 
+            path: 'espace', 
+            select: 'code',
+            populate: { path: 'etage', select: 'nom niveau' } 
+          },
+        ])
         .sort({ nom: 1 })
         .limit(parseInt(limit))
         .skip((parseInt(page) - 1) * parseInt(limit));
@@ -60,6 +74,7 @@ class BoutiqueController {
           categorie: b.categorie,
           photo: b.photo,
           horairesHebdo: b.horairesHebdo,
+          commercant: b.commercant,
           espace: b.espace,
           dateCreation: b.dateCreation
         })),
