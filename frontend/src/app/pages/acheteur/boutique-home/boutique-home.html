@@ -1,0 +1,71 @@
+@let ouverte = isOuverte();
+
+<section #childSection id="hero" class="hero section">
+  <div class="container px-4 px-sm-0 px-lg-3" data-aos="fade-up" data-aos-delay="100">
+    <div class="row">
+      <div class="col-12 p-0">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h2>Boutique: {{ currentBoutique().nom }}</h2>
+          <button class="btn-glass-secondary" (click)="back()">
+            <i class="bi bi-arrow-left bi-bolder"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row liquid-glass">
+      <div class="boutique-hero">
+        <img 
+          [src]="currentBoutique().photo ? currentBoutique().photo : 'assets/img/story-set/boutique-default.png'" 
+          class="boutique-cover"
+        />
+
+        <div class="boutique-hero-overlay"></div>
+
+        <div class="boutique-hero-content">
+          <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
+            <div>
+              <h1 class="boutique-name">{{ currentBoutique().nom | titlecase }}</h1>
+              @if (currentBoutique().description) {
+                <p class="boutique-description">{{ currentBoutique().description }}</p>
+              }
+            </div>
+
+            <div class="d-flex justify-content-center align-items-center statut-badge border border-2 py-1 border-warning text-warning">
+              {{ categorieLabel() }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-100 d-flex justify-content-end mt-2 px-0">
+        <div class="dropdown">
+          <span
+            class="badge rounded-pill px-3 py-3 dropdown-toggle cursor-pointer"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            [ngClass]="ouverte ? 'bg-success' : 'bg-danger'"
+          >
+            {{ ouverte ? 'Actuellement Ouvert' : 'Actuellement Fermé' }}
+          </span>
+
+          <div 
+            class="dropdown-menu dropdown-menu-end p-3 shadow" 
+            style="min-width: 300px; max-width: 400px; width: auto;"
+          >
+            <h6 class="fw-bold mb-3">Horaires d'ouverture</h6>
+
+            @for (horaire of currentBoutique().horairesHebdo; track horaire.jour) {
+              <div class="d-flex justify-content-between small mb-2">
+                <span class="fw-medium">{{ horaire.jour }}</span>
+                <span>{{ horaire.debut }} - {{ horaire.fin }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

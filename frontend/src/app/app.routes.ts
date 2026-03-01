@@ -28,6 +28,7 @@ import { GestionAchats } from './pages/commercant/ma-boutique/gestion-achats/ges
 import { LocationEspace } from './pages/commercant/ma-boutique/location-espace/location-espace';
 import { Loyers } from './pages/commercant/ma-boutique/loyers/loyers';
 import { Infos } from './pages/commercant/ma-boutique/infos/infos';
+import { BoutiqueHome } from './pages/acheteur/boutique-home/boutique-home';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -94,7 +95,7 @@ export const routes: Routes = [
     data: { roles: [UserRole.Acheteur] },
     children: [
       { path: 'all-boutiques', component: AllBoutiques },
-
+      { path: 'boutique-home', component: BoutiqueHome },
 
       { path: 'user-profil', component: UserProfil },
       { path: 'notifications', component: Notifications },

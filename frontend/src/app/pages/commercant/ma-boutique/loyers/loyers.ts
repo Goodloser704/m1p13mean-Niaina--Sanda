@@ -15,18 +15,19 @@ import { NgxMaskDirective } from "ngx-mask";
 import { logSafe } from '../../../../core/functions/console-function';
 import { DialogService } from '../../../../core/services/dialog.service';
 import { Dialog } from '../../../../components/shared/dialog/dialog';
+import { PaginationComponent } from "../../../../components/shared/pagination-component/pagination-component";
 
 (pdfMake as any).vfs = pdfFonts['vfs'];
 
 @Component({
   selector: 'app-loyers',
-  imports: [ReactiveFormsModule, DatePipe, CurrencyPipe, NgClass, NgxMaskDirective],
+  imports: [ReactiveFormsModule, DatePipe, CurrencyPipe, NgClass, NgxMaskDirective, PaginationComponent],
   templateUrl: './loyers.html',
   styleUrl: './loyers.scss',
 })
 export class Loyers implements OnInit {
   boutiqueService = inject(BoutiqueService);
-  maBoutique = computed(() => this.boutiqueService.maBoutique()!);
+  maBoutique = computed(() => this.boutiqueService.currentBoutique()!);
 
   historiques = signal<PFTransaction[]>([]);
   historiquePagination = createPagination(10);
@@ -81,7 +82,7 @@ export class Loyers implements OnInit {
   ngOnInit(): void {}
 
   payerLoyer() {
-    if (!this.loyerForm.valid) return;
+    if (this.loyerForm.invalid) return;
 
     const form = this.loyerForm.value;
     const periode = `${form.annee}-${form.mois}`;

@@ -5,7 +5,17 @@ import {
   getEspaceEtageNiveau,
   getEtage
 } from "./../../../core/models/admin/espaces.model";
-import { AfterViewChecked, AfterViewInit, Component, effect, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import {
+  AfterViewChecked,
+  AfterViewInit,
+  Component,
+  effect,
+  ElementRef,
+  inject,
+  OnInit,
+  signal,
+  ViewChild
+} from "@angular/core";
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Espace, Etage } from '../../../core/models/admin/espaces.model';
 import { filter, finalize, switchMap, tap } from 'rxjs';
@@ -19,10 +29,11 @@ import Aos from "aos";
 import { RouterLink } from "@angular/router";
 import { LoaderService } from "../../../core/services/loader.service";
 import { DialogService } from "../../../core/services/dialog.service";
+import { PaginationComponent } from "../../../components/shared/pagination-component/pagination-component";
 
 @Component({
   selector: 'app-espaces',
-  imports: [ReactiveFormsModule, TitleCasePipe, UpperCasePipe, CurrencyPipe, NgClass, EmptyRowList, EmptyGridList, RouterLink],
+  imports: [ReactiveFormsModule, TitleCasePipe, UpperCasePipe, CurrencyPipe, NgClass, EmptyRowList, EmptyGridList, RouterLink, PaginationComponent],
   templateUrl: './espaces.html',
   styleUrl: './espaces.scss',
 })

@@ -30,7 +30,7 @@ export class Infos implements OnInit {
   loaderService = inject(LoaderService);
 
   boutiqueService = inject(BoutiqueService);
-  maBoutique = computed(() => this.boutiqueService.maBoutique()!);
+  maBoutique = computed(() => this.boutiqueService.currentBoutique()!);
 
   boutiqueEditMode = signal(false);
   boutiqueForm: any;
@@ -196,7 +196,7 @@ export class Infos implements OnInit {
               createdAt: res.boutique.createdAt,
               updatedAt: res.boutique.updatedAt
             }
-            this.boutiqueService.setMaBoutique(newBoutique);
+            this.boutiqueService.setCurrentBoutique(newBoutique);
             this.discardEditBoutique();
           } catch (err) {
             console.error(err);

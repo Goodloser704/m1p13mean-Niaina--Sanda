@@ -9,10 +9,12 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { filter, finalize, of, switchMap, tap } from 'rxjs';
 import { DurationDialog } from '../../../../components/shared/duration-dialog/duration-dialog';
 import { AchatCard } from "../../../../components/commercant/achat-card/achat-card";
+import { EmptyGridList } from "../../../../components/shared/empty-grid-list/empty-grid-list";
+import { PaginationComponent } from "../../../../components/shared/pagination-component/pagination-component";
 
 @Component({
   selector: 'app-gestion-achats',
-  imports: [AchatCard],
+  imports: [AchatCard, EmptyGridList, PaginationComponent],
   templateUrl: './gestion-achats.html',
   styleUrl: './gestion-achats.scss',
 })
@@ -29,8 +31,9 @@ export class GestionAchats {
   historiquePagination = createPagination(10);
 
   boutiqueService = inject(BoutiqueService);
-  maBoutique = computed(() => this.boutiqueService.maBoutique()!);
+  maBoutique = computed(() => this.boutiqueService.currentBoutique()!);
 
+  TypeAchat = TypeAchat;
   typeAchats = Object.values(TypeAchat);
   filtreTypesAchats = signal<TypeAchat | undefined>(undefined);
 
@@ -106,6 +109,8 @@ export class GestionAchats {
   }
 
   validerLivraison(idAchat: string) {
+    console.log(`Id achat: ${idAchat}`);
+
     this.dialogService.open(DurationDialog, {
       data: { message: 'Veuillez saisir la durée de livraison (hh:mm)' }
     })

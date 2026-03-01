@@ -210,41 +210,8 @@
   </div>
 
   <div class="col-12 d-flex justify-content-end align-items-center">
-    <nav aria-label="Pagination produits">
-      <ul class="pagination">
-        <li class="page-item">
-          <button
-            type="button"
-            class="page-link"
-            aria-label="Previous"
-            (click)="productPagination.previous()"
-          >
-            <span aria-hidden="true">&laquo;</span>
-          </button>
-        </li>
-
-        @for(page of productPagination.pagesArray(); track page) {
-          <li
-            class="page-item"
-            [ngClass]="page == productPagination.currentPage() ? 'active' : ''"
-          >
-            <button type="button" class="page-link" (click)="productPagination.goTo(page)">
-              {{ page }}
-            </button>
-          </li>
-        }
-
-        <li class="page-item">
-          <button
-            type="button"
-            class="page-link"
-            aria-label="Next"
-            (click)="productPagination.next()"
-          >
-            <span aria-hidden="true">&raquo;</span>
-          </button>
-        </li>
-      </ul>
-    </nav>
+    <app-pagination-component
+      [pagination]="productPagination"
+    ></app-pagination-component>
   </div>
 </div>

@@ -16,7 +16,7 @@ export class MaBoutique implements AfterViewInit {
 
   boutiqueService = inject(BoutiqueService);
   maBoutique = computed(() => {
-    const value = this.boutiqueService.maBoutique();
+    const value = this.boutiqueService.currentBoutique();
     if (!value) {
       this.back();
       console.error('Boutique introuvable');
@@ -25,7 +25,7 @@ export class MaBoutique implements AfterViewInit {
   });
 
   constructor() {
-    if (!this.boutiqueService.maBoutique()) {
+    if (!this.boutiqueService.currentBoutique()) {
       this.back();
     } else {
       console.log(`Boutique: ${this.maBoutique().nom}`);
@@ -37,7 +37,7 @@ export class MaBoutique implements AfterViewInit {
   }
 
   quitterMaBoutique(route: string) {
-    this.boutiqueService.quitterMaBoutique(route);
+    this.boutiqueService.quitterBoutique(route);
   }
 
   back() {

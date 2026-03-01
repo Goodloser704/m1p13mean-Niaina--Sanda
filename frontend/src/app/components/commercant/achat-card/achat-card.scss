@@ -4,3 +4,22 @@
   cursor: pointer;
   box-shadow: 0 3px 10px 0 rgba(v.$heading-color, 0.5);
 }
+
+.top-right {
+  border: 1px solid transparent;
+  width: fit-content !important;
+
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  gap: 0.5rem;
+}
+
+.achat-img {
+  border: 1px solid;
+  border-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  width: 75px;
+  aspect-ratio: 1;
+  object-fit: cover;
+}

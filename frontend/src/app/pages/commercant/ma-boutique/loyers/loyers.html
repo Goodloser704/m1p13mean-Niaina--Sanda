@@ -87,26 +87,9 @@
 
     <!-- PAGINATION -->
     <div class="d-flex justify-content-end">
-      <nav aria-label="Pagination historique">
-        <ul class="pagination">
-          <li class="page-item">
-            <button class="page-link" (click)="historiquePagination.previous()">&laquo;</button>
-          </li>
-
-          @for (page of historiquePagination.pagesArray(); track page) {
-            <li 
-              class="page-item"
-              [ngClass]="page === historiquePagination.currentPage() ? 'active' : ''"
-            >
-              <button class="page-link" (click)="historiquePagination.goTo(page)">{{ page }}</button>
-            </li>
-          }
-          
-          <li class="page-item">
-            <button class="page-link" (click)="historiquePagination.next()">&raquo;</button>
-          </li>
-        </ul>
-      </nav>
+      <app-pagination-component
+        [pagination]="historiquePagination"
+      ></app-pagination-component>
     </div>
   </div>
 </div>

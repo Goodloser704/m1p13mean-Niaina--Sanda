@@ -20,16 +20,17 @@ import { EspacesService } from '../../../../core/services/admin/espaces.service'
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DemandesLocationService } from '../../../../core/services/admin/demandes-location.service';
 import { DemandeLocation, EtatDemandeLocation } from '../../../../core/models/admin/demande-location.model';
+import { PaginationComponent } from "../../../../components/shared/pagination-component/pagination-component";
 
 @Component({
   selector: 'app-location-espace',
-  imports: [EmptyGridList, UpperCasePipe, NgClass, CurrencyPipe, ReactiveFormsModule, DatePipe],
+  imports: [EmptyGridList, UpperCasePipe, NgClass, CurrencyPipe, ReactiveFormsModule, DatePipe, PaginationComponent],
   templateUrl: './location-espace.html',
   styleUrl: './location-espace.scss',
 })
 export class LocationEspace implements OnInit {
   boutiqueService = inject(BoutiqueService);
-  maBoutique = computed(() => this.boutiqueService.maBoutique()!);
+  maBoutique = computed(() => this.boutiqueService.currentBoutique()!);
   espaceActuel = computed(() => 
     getBoutiqueEspace(this.maBoutique())
   );

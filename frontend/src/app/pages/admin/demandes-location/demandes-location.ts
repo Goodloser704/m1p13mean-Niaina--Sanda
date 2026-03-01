@@ -11,10 +11,11 @@ import { getEtage } from '../../../core/models/admin/espaces.model';
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
 import { DialogService } from '../../../core/services/dialog.service';
 import { Dialog } from '../../../components/shared/dialog/dialog';
+import { PaginationComponent } from "../../../components/shared/pagination-component/pagination-component";
 
 @Component({
   selector: 'app-demandes-location',
-  imports: [NgClass, RouterLink, CurrencyPipe, DatePipe, EmptyGridList],
+  imports: [NgClass, RouterLink, CurrencyPipe, DatePipe, EmptyGridList, PaginationComponent],
   templateUrl: './demandes-location.html',
   styleUrl: './demandes-location.scss',
 })

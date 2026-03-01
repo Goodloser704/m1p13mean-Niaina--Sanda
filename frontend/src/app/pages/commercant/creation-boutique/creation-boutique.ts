@@ -150,7 +150,7 @@ export class CreationBoutique implements OnInit {
             console.log(res.message);
             console.log(`Ma boutique: ${JSON.stringify(res.boutique)}`);
             
-            this.boutiqueService.allerVersMaBoutique(res.boutique);
+            this.boutiqueService.allerVersBoutique(res.boutique);
           } catch (err) {
             console.error(err);
           }

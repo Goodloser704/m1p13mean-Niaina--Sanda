@@ -191,42 +191,9 @@
     }
 
     <div class="col-12 d-flex justify-content-end align-items-center">
-      <nav aria-label="Page navigation">
-        <ul class="pagination">
-          <li class="page-item">
-            <button 
-              type="button" 
-              class="page-link"  
-              aria-label="Previous" 
-              (click)="espacesDispoPagination.previous()"
-            >
-              <span aria-hidden="true">&laquo;</span>
-            </button>
-          </li>
-          
-          @for(page of espacesDispoPagination.pagesArray(); track page) {
-            <li 
-              class="page-item" 
-              [ngClass]="page == espacesDispoPagination.currentPage() ? 'active' : ''"
-            >
-              <button type="button" class="page-link" (click)="espacesDispoPagination.goTo(page)">
-                {{ page }}
-              </button>
-            </li>
-          }
-
-          <li class="page-item">
-            <button
-              type="button"
-              class="page-link"
-              aria-label="Next"
-              (click)="espacesDispoPagination.next()"
-            >
-              <span aria-hidden="true">&raquo;</span>
-            </button>
-          </li>
-        </ul>
-      </nav>
+      <app-pagination-component
+        [pagination]="espacesDispoPagination"
+      ></app-pagination-component>
     </div>
   </div>
 
@@ -291,42 +258,9 @@
         }
 
         <div class="col-12 d-flex justify-content-end align-items-center">
-          <nav aria-label="Page navigation">
-            <ul class="pagination">
-              <li class="page-item">
-                <button 
-                  type="button" 
-                  class="page-link"  
-                  aria-label="Previous" 
-                  (click)="demandesPaginations.previous()"
-                >
-                  <span aria-hidden="true">&laquo;</span>
-                </button>
-              </li>
-              
-              @for(page of demandesPaginations.pagesArray(); track page) {
-                <li 
-                  class="page-item" 
-                  [ngClass]="page == demandesPaginations.currentPage() ? 'active' : ''"
-                >
-                  <button type="button" class="page-link" (click)="demandesPaginations.goTo(page)">
-                    {{ page }}
-                  </button>
-                </li>
-              }
-
-              <li class="page-item">
-                <button
-                  type="button"
-                  class="page-link"
-                  aria-label="Next"
-                  (click)="demandesPaginations.next()"
-                >
-                  <span aria-hidden="true">&raquo;</span>
-                </button>
-              </li>
-            </ul>
-          </nav>
+          <app-pagination-component
+            [pagination]="demandesPaginations"
+          ></app-pagination-component>
         </div>
       </div>
     </div>

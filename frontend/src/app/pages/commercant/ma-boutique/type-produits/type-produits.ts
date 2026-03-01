@@ -29,7 +29,7 @@ export class TypeProduits implements OnInit, AfterViewInit {
   editingTypeId = signal<string | null>(null);
 
   boutiqueService = inject(BoutiqueService);
-  maBoutique = computed(() => this.boutiqueService.maBoutique()!);
+  maBoutique = computed(() => this.boutiqueService.currentBoutique()!);
 
   ICONES_TYPE_PRODUIT = [
     { label: 'Nourriture', value: 'bi-cup-hot' },

@@ -13,10 +13,11 @@ import { finalize } from 'rxjs';
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
 import { RouterLink } from "@angular/router";
 import { LoaderService } from "../../../core/services/loader.service";
+import { BoutiqueCard } from "../../../components/commercant/boutique-card/boutique-card";
 
 @Component({
   selector: 'app-mes-boutiques',
-  imports: [TitleCasePipe, EmptyGridList, RouterLink, NgClass],
+  imports: [TitleCasePipe, EmptyGridList, RouterLink, NgClass, BoutiqueCard],
   templateUrl: './mes-boutiques.html',
   styleUrl: './mes-boutiques.scss',
 })
@@ -59,7 +60,7 @@ export class MesBoutiques implements OnInit, AfterViewInit {
   }
 
   allerVersMaBoutique(maBoutique: Boutique) {
-    this.boutiqueService.allerVersMaBoutique(maBoutique);
+    this.boutiqueService.allerVersBoutique(maBoutique);
   }
 
   getBoutiqueCategorieLabel = getBoutiqueCategorieLabel;

@@ -142,43 +142,10 @@
           }
 
           <div class="col-12 d-flex justify-content-end align-items-center">
-            <nav aria-label="Pagination boutiques actives">
-              <ul class="pagination">
-                <li class="page-item">
-                  <button
-                    type="button"
-                    class="page-link"
-                    aria-label="Previous"
-                    (click)="activeBoutiquesPagination.previous()"
-                  >
-                    <span aria-hidden="true">&laquo;</span>
-                  </button>
-                </li>
-
-                @for(page of activeBoutiquesPagination.pagesArray(); track page) {
-                  <li
-                    class="page-item"
-                    [ngClass]="page == activeBoutiquesPagination.currentPage() ? 'active' : ''"
-                  >
-                    <button type="button" class="page-link" (click)="activeBoutiquesPagination.goTo(page)">
-                      {{ page }}
-                    </button>
-                  </li>
-                }
-
-                <li class="page-item">
-                  <button
-                    type="button"
-                    class="page-link"
-                    aria-label="Next"
-                    (click)="activeBoutiquesPagination.next()"
-                  >
-                    <span aria-hidden="true">&raquo;</span>
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          </div>
+            <app-pagination-component
+                [pagination]="activeBoutiquesPagination"
+              ></app-pagination-component>
+            </div>
         </div>
       </div>
     </div>
@@ -241,42 +208,9 @@
           }
 
           <div class="col-12 d-flex justify-content-end align-items-center">
-            <nav aria-label="Pagination boutiques inactives">
-              <ul class="pagination">
-                <li class="page-item">
-                  <button
-                    type="button"
-                    class="page-link"
-                    aria-label="Previous"
-                    (click)="inactiveBoutiquesPagination.previous()"
-                  >
-                    <span aria-hidden="true">&laquo;</span>
-                  </button>
-                </li>
-
-                @for(page of inactiveBoutiquesPagination.pagesArray(); track page) {
-                  <li
-                    class="page-item"
-                    [ngClass]="page == inactiveBoutiquesPagination.currentPage() ? 'active' : ''"
-                  >
-                    <button type="button" class="page-link" (click)="inactiveBoutiquesPagination.goTo(page)">
-                      {{ page }}
-                    </button>
-                  </li>
-                }
-
-                <li class="page-item">
-                  <button
-                    type="button"
-                    class="page-link"
-                    aria-label="Next"
-                    (click)="inactiveBoutiquesPagination.next()"
-                  >
-                    <span aria-hidden="true">&raquo;</span>
-                  </button>
-                </li>
-              </ul>
-            </nav>
+            <app-pagination-component
+              [pagination]="inactiveBoutiquesPagination"
+            ></app-pagination-component>
           </div>
         </div>
       </div>

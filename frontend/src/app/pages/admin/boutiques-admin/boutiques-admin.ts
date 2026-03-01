@@ -21,10 +21,11 @@ import Aos from 'aos';
 import { RouterLink } from "@angular/router";
 import { LoaderService } from '../../../core/services/loader.service';
 import { DialogService } from '../../../core/services/dialog.service';
+import { PaginationComponent } from "../../../components/shared/pagination-component/pagination-component";
 
 @Component({
   selector: 'app-boutiques-admin',
-  imports: [ReactiveFormsModule, TitleCasePipe, EmptyRowList, EmptyGridList, NgClass, RouterLink],
+  imports: [ReactiveFormsModule, TitleCasePipe, EmptyRowList, EmptyGridList, NgClass, RouterLink, PaginationComponent],
   templateUrl: './boutiques-admin.html',
   styleUrl: './boutiques-admin.scss',
 })

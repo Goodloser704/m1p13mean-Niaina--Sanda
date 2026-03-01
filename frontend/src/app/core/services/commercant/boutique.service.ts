@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { Boutique, BoutiqueStatsResponse, StatutBoutique } from '../../models/commercant/boutique.model';
+import { Boutique, BoutiqueStatsResponse, JourSemaine, StatutBoutique } from '../../models/commercant/boutique.model';
 import { Pagination } from '../../models/pagination.model';
 import { Produit } from '../../models/commercant/produit.model';
 import { map, Observable } from 'rxjs';
@@ -13,9 +13,9 @@ import { Router } from '@angular/router';
 export class BoutiqueService {
   apiUrl = environment.apiUrl;
 
-  readonly BOUTIQUE_KEY = "ma_boutique";
-  private _maBoutique = signal<Boutique | null>(null);
-  readonly maBoutique = this._maBoutique.asReadonly();
+  readonly BOUTIQUE_KEY = "current_boutique";
+  private _currentBoutique = signal<Boutique | null>(null);
+  readonly currentBoutique = this._currentBoutique.asReadonly();
   
   constructor(
     private http: HttpClient,
@@ -23,29 +23,138 @@ export class BoutiqueService {
   ) {
     const stored = localStorage.getItem(this.BOUTIQUE_KEY);
     if (stored) {
-      this._maBoutique.set(JSON.parse(stored));
+      this._currentBoutique.set(JSON.parse(stored));
     }
   }
 
-  setMaBoutique(maBoutique: Boutique) {
-    this._maBoutique.set(maBoutique);
-    localStorage.setItem(this.BOUTIQUE_KEY, JSON.stringify(maBoutique));
+  setCurrentBoutique(currentBoutique: Boutique) {
+    this._currentBoutique.set(currentBoutique);
+    localStorage.setItem(this.BOUTIQUE_KEY, JSON.stringify(currentBoutique));
   }
 
-  freeMaBoutique() {
-    this._maBoutique.set(null);
+  freeCurrentBoutique() {
+    this._currentBoutique.set(null);
     localStorage.removeItem(this.BOUTIQUE_KEY);
   }
 
-  allerVersMaBoutique(maBoutique: Boutique) {
-    this.setMaBoutique(maBoutique);
-    this.router.navigate(['/commercant/ma-boutique']);
+  allerVersBoutique(boutique: Boutique, componentPath?: string) {
+    this.setCurrentBoutique(boutique);
+
+    let path = '/commercant/ma-boutique';
+    if (componentPath !== undefined) path = componentPath;
+    this.router.navigate([path]);
   }
 
-  quitterMaBoutique(route: string) {
-    this.freeMaBoutique();
+  quitterBoutique(route: string) {
+    this.freeCurrentBoutique();
     this.router.navigate([route]);
   }
+
+  isBoutiqueOuverte = computed(() => {
+    const boutique = this.currentBoutique();
+
+    if (!boutique || !boutique.horairesHebdo?.length) {
+      return false;
+    }
+
+    const now = new Date();
+
+    const joursMap: Record<number, JourSemaine> = {
+      1: JourSemaine.Lundi,
+      2: JourSemaine.Mardi,
+      3: JourSemaine.Mercredi,
+      4: JourSemaine.Jeudi,
+      5: JourSemaine.Vendredi,
+      6: JourSemaine.Samedi,
+      0: JourSemaine.Dimanche,
+    };
+
+    const jourActuel = joursMap[now.getDay()];
+
+    const horaireDuJour = boutique.horairesHebdo.find(
+      h => h.jour === jourActuel
+    );
+
+    if (!horaireDuJour) return false;
+
+    const heureActuelle = now.getHours() * 60 + now.getMinutes();
+
+    const [debutH, debutM] = horaireDuJour.debut.split(':').map(Number);
+    const [finH, finM] = horaireDuJour.fin.split(':').map(Number);
+
+    const debutMinutes = debutH * 60 + debutM;
+    const finMinutes = finH * 60 + finM;
+
+    return heureActuelle >= debutMinutes && heureActuelle <= finMinutes;
+  });
+
+  isBoutiqueOuverteFlexible = computed(() => {
+    const boutique = this.currentBoutique();
+    if (!boutique?.horairesHebdo?.length) return false;
+
+    const now = new Date();
+
+    const joursMap: Record<number, JourSemaine> = {
+      1: JourSemaine.Lundi,
+      2: JourSemaine.Mardi,
+      3: JourSemaine.Mercredi,
+      4: JourSemaine.Jeudi,
+      5: JourSemaine.Vendredi,
+      6: JourSemaine.Samedi,
+      0: JourSemaine.Dimanche,
+    };
+
+    const jourActuel = joursMap[now.getDay()];
+    const jourPrecedent = joursMap[(now.getDay() + 6) % 7];
+
+    const heureActuelle = now.getHours() * 60 + now.getMinutes();
+
+    const horaires = boutique.horairesHebdo;
+
+    const plagesDuJour = horaires.filter(h => h.jour === jourActuel);
+    const plagesJourPrecedent = horaires.filter(h => h.jour === jourPrecedent);
+
+    const estDansPlage = (debut: string, fin: string): boolean => {
+      const [debutH, debutM] = debut.split(':').map(Number);
+      const [finH, finM] = fin.split(':').map(Number);
+
+      const debutMin = debutH * 60 + debutM;
+      const finMin = finH * 60 + finM;
+
+      if (debutMin <= finMin) {
+        // Cas normal
+        return heureActuelle >= debutMin && heureActuelle <= finMin;
+      } else {
+        // Cas traverse minuit
+        return heureActuelle >= debutMin || heureActuelle <= finMin;
+      }
+    };
+
+    // 1️⃣ Vérifie plages normales du jour
+    for (const plage of plagesDuJour) {
+      if (estDansPlage(plage.debut, plage.fin)) {
+        return true;
+      }
+    }
+
+    // 2️⃣ Vérifie plages du jour précédent qui traversent minuit
+    for (const plage of plagesJourPrecedent) {
+      const [debutH, debutM] = plage.debut.split(':').map(Number);
+      const [finH, finM] = plage.fin.split(':').map(Number);
+
+      const debutMin = debutH * 60 + debutM;
+      const finMin = finH * 60 + finM;
+
+      if (debutMin > finMin) {
+        // traverse minuit
+        if (heureActuelle <= finMin) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  });
 
   // ---- API ----
 

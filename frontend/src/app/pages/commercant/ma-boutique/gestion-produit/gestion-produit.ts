@@ -16,10 +16,11 @@ import { DialogService } from '../../../../core/services/dialog.service';
 import { Dialog } from '../../../../components/shared/dialog/dialog';
 import { logSafe } from '../../../../core/functions/console-function';
 import { RowProduct } from "../../../../components/commercant/row-product/row-product";
+import { PaginationComponent } from "../../../../components/shared/pagination-component/pagination-component";
 
 @Component({
   selector: 'app-gestion-produit',
-  imports: [EmptyGridList, NgClass, ReactiveFormsModule, RowProduct],
+  imports: [EmptyGridList, NgClass, ReactiveFormsModule, RowProduct, PaginationComponent],
   templateUrl: './gestion-produit.html',
   styleUrl: './gestion-produit.scss',
 })
@@ -29,7 +30,7 @@ export class GestionProduit implements OnInit {
   boutiqueService = inject(BoutiqueService);
   loaderService = inject(LoaderService);
 
-  maBoutique = computed(() => this.boutiqueService.maBoutique()!);
+  maBoutique = computed(() => this.boutiqueService.currentBoutique()!);
   
   products = signal<Produit[]>([]);
 
