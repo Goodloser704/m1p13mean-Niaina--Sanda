@@ -171,6 +171,20 @@ export class BoutiqueService {
     return this.http.get<BoutiqueStatsResponse>(`${this.apiUrl}/api/boutique/admin/stats`);
   }
 
+  approveBoutique(boutiqueId: string) {
+    return this.http.put<{ message: string, boutique: Boutique }>(
+      `${this.apiUrl}/api/boutique/${boutiqueId}/approve`,
+      {}
+    );
+  }
+
+  rejectBoutique(boutiqueId: string) {
+    return this.http.put<{ message: string, boutique: Boutique }>(
+      `${this.apiUrl}/api/boutique/${boutiqueId}/reject`,
+      {}
+    );
+  }
+
   // -- End API --
 
 }

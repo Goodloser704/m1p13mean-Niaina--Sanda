@@ -7,7 +7,7 @@ import {
 } from "./../../../core/models/commercant/boutique.model";
 import { BoutiqueService } from './../../../core/services/commercant/boutique.service';
 import { AfterViewInit, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { TitleCasePipe } from "@angular/common";
+import { NgClass, TitleCasePipe } from "@angular/common";
 import { Boutique } from '../../../core/models/commercant/boutique.model';
 import { finalize } from 'rxjs';
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
@@ -16,7 +16,7 @@ import { LoaderService } from "../../../core/services/loader.service";
 
 @Component({
   selector: 'app-mes-boutiques',
-  imports: [TitleCasePipe, EmptyGridList, RouterLink],
+  imports: [NgClass, TitleCasePipe, EmptyGridList, RouterLink],
   templateUrl: './mes-boutiques.html',
   styleUrl: './mes-boutiques.scss',
 })
@@ -59,6 +59,13 @@ export class MesBoutiques implements OnInit, AfterViewInit {
   }
 
   allerVersMaBoutique(maBoutique: Boutique) {
+    // Empêcher l'accès aux boutiques inactives
+    if (maBoutique.statutBoutique === StatutBoutique.Inactif) {
+      console.warn('⚠️ Impossible d\'accéder à une boutique inactive');
+      alert('Cette boutique est inactive. Veuillez attendre l\'approbation de l\'administrateur.');
+      return;
+    }
+    
     this.boutiqueService.allerVersMaBoutique(maBoutique);
   }
 

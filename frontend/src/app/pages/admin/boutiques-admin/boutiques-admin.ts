@@ -72,6 +72,7 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
 
   categorieForm: any;
   categories = signal<CategorieBoutique[]>([]);
+  categoriesPagination = createPagination(5);
 
   categorieEditMode = signal(false);
   editingCategorieId = signal<string | null>(null);
@@ -84,9 +85,16 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
       .subscribe({
         next: (res) => {
           this.categories.set(res.categories);
+          this.categoriesPagination.setTotal(Math.ceil(res.categories.length / this.categoriesPagination.limit));
         },
         error: console.error
       });
+  }
+
+  get paginatedCategories() {
+    const start = (this.categoriesPagination.currentPage() - 1) * this.categoriesPagination.limit;
+    const end = start + this.categoriesPagination.limit;
+    return this.categories().slice(start, end);
   }
 
   setCategorieForm() {
@@ -111,6 +119,7 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
       .subscribe({
         next: (res) => {
           this.categories.update(c =>  [res.categorie, ...c]);
+          this.categoriesPagination.setTotal(Math.ceil(this.categories().length / this.categoriesPagination.limit));
           this.categorieForm.reset();
         },
         error: console.error
@@ -184,6 +193,7 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
           this.categories.update(current => 
             current.filter(e => e._id != idCategorie)
           );
+          this.categoriesPagination.setTotal(Math.ceil(this.categories().length / this.categoriesPagination.limit));
         },
         error: console.error
       });
@@ -243,6 +253,58 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
   }
 
   // -- End Liste des boutiques --
+
+  // ---- Actions boutiques inactives ----
+
+  approveBoutique(boutiqueId: string) {
+    this.dialogService
+      .open(Dialog, {
+        data: { message: "Confirmer l'activation de cette boutique ?" }
+      })
+      .pipe(
+        filter(result => result === true),
+        tap(() => this.loaderService.show()),
+        switchMap(() => this.boutiqueService.approveBoutique(boutiqueId)),
+        finalize(() => this.loaderService.hide())
+      )
+      .subscribe({
+        next: (res) => {
+          // Retirer de la liste des inactives
+          this.inactiveBoutiques.update(current => 
+            current.filter(b => b._id !== boutiqueId)
+          );
+          // Rafraîchir les boutiques actives
+          this.getBoutiquesActives(this.activeBoutiquesPagination.currentPage());
+          console.log('✅ Boutique activée:', res.message);
+        },
+        error: console.error
+      });
+  }
+
+  rejectBoutique(boutiqueId: string) {
+    this.dialogService
+      .open(Dialog, {
+        data: { message: "Confirmer le rejet de cette boutique ?" }
+      })
+      .pipe(
+        filter(result => result === true),
+        tap(() => this.loaderService.show()),
+        switchMap(() => this.boutiqueService.rejectBoutique(boutiqueId)),
+        finalize(() => this.loaderService.hide())
+      )
+      .subscribe({
+        next: (res) => {
+          // Retirer de la liste des inactives
+          this.inactiveBoutiques.update(current => 
+            current.filter(b => b._id !== boutiqueId)
+          );
+          console.log('✅ Boutique rejetée:', res.message);
+        },
+        error: console.error
+      });
+  }
+
+  // -- End Actions boutiques inactives --
 
   private startLoading() {
     this.pendingRequests += 1;

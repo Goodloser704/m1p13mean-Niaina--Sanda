@@ -68,7 +68,7 @@
           <app-empty-row-list [label]="'Aucune categorie'" />
         }
 
-        @for (categorie of categories(); track categorie._id; let i = $index) {
+        @for (categorie of paginatedCategories; track categorie._id; let i = $index) {
           <div class="glass row-list-item mb-2" data-aos="fade-up" [attr.data-aos-delay]="(i+1)*100">
             <p>{{ categorie.nom | titlecase }}</p>
             <div class="d-flex flex-row align-items-center gap-2">
@@ -79,6 +79,49 @@
                 <i class="bi bi-trash"></i>
               </button>
             </div>
+          </div>
+        }
+
+        @if (categories().length > categoriesPagination.limit) {
+          <div class="d-flex justify-content-end align-items-center mt-3">
+            <nav aria-label="Pagination categories">
+              <ul class="pagination pagination-sm">
+                <li class="page-item">
+                  <button
+                    type="button"
+                    class="page-link"
+                    aria-label="Previous"
+                    (click)="categoriesPagination.previous()"
+                    [disabled]="categoriesPagination.currentPage() === 1"
+                  >
+                    <span aria-hidden="true">&laquo;</span>
+                  </button>
+                </li>
+
+                @for(page of categoriesPagination.pagesArray(); track page) {
+                  <li
+                    class="page-item"
+                    [ngClass]="page == categoriesPagination.currentPage() ? 'active' : ''"
+                  >
+                    <button type="button" class="page-link" (click)="categoriesPagination.goTo(page)">
+                      {{ page }}
+                    </button>
+                  </li>
+                }
+
+                <li class="page-item">
+                  <button
+                    type="button"
+                    class="page-link"
+                    aria-label="Next"
+                    (click)="categoriesPagination.next()"
+                    [disabled]="categoriesPagination.currentPage() === categoriesPagination.totalPages()"
+                  >
+                    <span aria-hidden="true">&raquo;</span>
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </div>
         }
       </div>
@@ -271,6 +314,23 @@
                       </p>
                     }
                   }
+
+                  <div class="d-flex gap-2 mt-3">
+                    <button 
+                      class="btn btn-success btn-sm flex-fill"
+                      (click)="approveBoutique(boutique._id)"
+                      [disabled]="loaderService.isLoading()"
+                    >
+                      <i class="bi bi-check-circle"></i> Activer
+                    </button>
+                    <button 
+                      class="btn btn-danger btn-sm flex-fill"
+                      (click)="rejectBoutique(boutique._id)"
+                      [disabled]="loaderService.isLoading()"
+                    >
+                      <i class="bi bi-x-circle"></i> Rejeter
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

@@ -80,9 +80,8 @@ export class TypeProduits implements OnInit, AfterViewInit {
     this.typeForm = this.fb.group({
       type: ['', [Validators.required]],
       description: [''],
-      icone: [null as string | null],
-      couleur: [null as string | null],
-      isActive: [true]
+      icone: [''],
+      couleur: ['']
     });
   }
 
@@ -104,19 +103,29 @@ export class TypeProduits implements OnInit, AfterViewInit {
     if (this.typeForm.invalid) return;
     this.loaderService.show();
 
-    const newType: TypeProduit = { 
-      ...this.typeForm.getRawValue(),
-      boutique: this.maBoutique()._id
-    } as TypeProduit;
+    const formValue = this.typeForm.getRawValue();
+    
+    const newType: Partial<TypeProduit> = { 
+      type: formValue.type,
+      boutique: this.maBoutique()._id,
+      description: formValue.description || undefined,
+      icone: formValue.icone || undefined,
+      couleur: formValue.couleur || undefined
+    };
 
-    this.typeProduitService.creerTypeProduit(newType)
+    this.typeProduitService.creerTypeProduit(newType as TypeProduit)
       .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
           this.types.update(c =>  [res.typeProduit, ...c]);
           this.typeForm.reset();
         },
-        error: console.error
+        error: (err) => {
+          console.error('Erreur création type:', err);
+          if (err.error?.message) {
+            alert(err.error.message);
+          }
+        }
       });
   }
 
@@ -128,8 +137,7 @@ export class TypeProduits implements OnInit, AfterViewInit {
       type: type.type,
       description: type.description,
       icone: type.icone,
-      couleur: type.couleur,
-      isActive: type.isActive
+      couleur: type.couleur
     });
 
     this.typeFormSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -145,13 +153,18 @@ export class TypeProduits implements OnInit, AfterViewInit {
     if (this.typeForm.invalid || !this.editingTypeId()) return;
     this.loaderService.show();
     
-    const updatedType: TypeProduit = { 
-      ...this.typeForm.getRawValue(),
+    const formValue = this.typeForm.getRawValue();
+    
+    const updatedType: Partial<TypeProduit> = { 
       _id: this.editingTypeId()!,
-      boutique: this.maBoutique()._id
-    } as TypeProduit;
+      type: formValue.type,
+      boutique: this.maBoutique()._id,
+      description: formValue.description || undefined,
+      icone: formValue.icone || undefined,
+      couleur: formValue.couleur || undefined
+    };
 
-    this.typeProduitService.modifierTypeProduit(updatedType)
+    this.typeProduitService.modifierTypeProduit(updatedType as TypeProduit)
       .pipe(finalize(() => this.loaderService.hide()))
       .subscribe({
         next: (res) => {
@@ -163,7 +176,12 @@ export class TypeProduits implements OnInit, AfterViewInit {
 
           this.discardEditType();
         },
-        error: console.error
+        error: (err) => {
+          console.error('Erreur modification type:', err);
+          if (err.error?.message) {
+            alert(err.error.message);
+          }
+        }
       });
   }
 
