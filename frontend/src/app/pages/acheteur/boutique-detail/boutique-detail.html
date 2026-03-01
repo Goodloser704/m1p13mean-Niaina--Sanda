@@ -1,0 +1,172 @@
+<div class="boutique-detail-container">
+  <!-- Header avec info boutique -->
+  <div class="boutique-header">
+    <button class="btn-retour" (click)="retour()">
+      ← Retour aux boutiques
+    </button>
+    
+    @if (boutique()) {
+      <div class="boutique-info">
+        <h1>{{ boutique().nom }}</h1>
+        @if (boutique().description) {
+          <p class="description">{{ boutique().description }}</p>
+        }
+        
+        <!-- Statut d'ouverture -->
+        <div class="boutique-status" [ngClass]="{'status-open': boutiqueStatus().estOuverte, 'status-closed': !boutiqueStatus().estOuverte}">
+          <span class="status-icon">{{ boutiqueStatus().estOuverte ? '🟢' : '🔴' }}</span>
+          <span class="status-text">{{ boutiqueStatus().raison }}</span>
+        </div>
+
+        <!-- Horaires d'ouverture -->
+        @if (horairesFormattes().length > 0) {
+          <details class="horaires-details">
+            <summary>Voir les horaires</summary>
+            <div class="horaires-list">
+              @for (h of horairesFormattes(); track h.jour) {
+                <div class="horaire-item">
+                  <span class="jour">{{ h.jour }}</span>
+                  <span class="heures">{{ h.horaire }}</span>
+                </div>
+              }
+            </div>
+          </details>
+        }
+      </div>
+    }
+
+    <!-- Affichage du portefeuille -->
+    @if (portefeuille()) {
+      <div class="wallet-display">
+        <span class="wallet-label">Mon solde:</span>
+        <span class="wallet-amount">{{ portefeuille().balance | currency:'EUR':'symbol':'1.2-2' }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="content-wrapper">
+    <!-- Liste des produits -->
+    <div class="produits-section">
+      <h2>Produits disponibles</h2>
+      
+      @if (produits().length === 0) {
+        <div class="empty-state">
+          <p>Aucun produit disponible pour le moment</p>
+        </div>
+      } @else {
+        <div class="produits-grid">
+          @for (produit of produits(); track produit._id) {
+            <div class="produit-card" [ngClass]="{'out-of-stock': produit.stock.nombreDispo === 0}">
+              @if (produit.photo) {
+                <img [src]="produit.photo" [alt]="produit.nom" class="produit-image">
+              } @else {
+                <div class="produit-image-placeholder">
+                  <span>📦</span>
+                </div>
+              }
+              
+              <div class="produit-info">
+                <h3 class="produit-nom">{{ produit.nom }}</h3>
+                
+                @if (produit.description) {
+                  <p class="produit-description">{{ produit.description }}</p>
+                }
+                
+                <div class="produit-details">
+                  <span class="produit-prix">{{ produit.prix | currency:'EUR':'symbol':'1.2-2' }}</span>
+                  <span class="produit-stock" [ngClass]="{'low-stock': produit.stock.nombreDispo < 5}">
+                    Stock: {{ produit.stock.nombreDispo }}
+                  </span>
+                </div>
+                
+                @if (produit.stock.nombreDispo > 0 && boutiqueStatus().estOuverte) {
+                  <button class="btn-add-cart" (click)="addToCart(produit)">
+                    Ajouter au panier
+                  </button>
+                } @else if (!boutiqueStatus().estOuverte) {
+                  <button class="btn-add-cart" disabled title="Boutique fermée">
+                    Boutique fermée
+                  </button>
+                } @else {
+                  <button class="btn-add-cart" disabled>
+                    Rupture de stock
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Panier (sidebar) -->
+    <div class="cart-sidebar" [ngClass]="{'cart-open': cart().length > 0}">
+      <div class="cart-header">
+        <h2>Mon Panier</h2>
+        <span class="cart-count">{{ cartItemCount() }} article(s)</span>
+      </div>
+
+      @if (cart().length === 0) {
+        <div class="cart-empty">
+          <p>Votre panier est vide</p>
+          <span class="cart-icon">🛒</span>
+        </div>
+      } @else {
+        <div class="cart-items">
+          @for (item of cart(); track item.produit._id) {
+            <div class="cart-item">
+              <div class="cart-item-info">
+                <h4>{{ item.produit.nom }}</h4>
+                <p class="cart-item-price">{{ item.produit.prix | currency:'EUR':'symbol':'1.2-2' }}</p>
+              </div>
+              
+              <div class="cart-item-controls">
+                <div class="quantity-controls">
+                  <button (click)="updateQuantity(item.produit._id, item.quantite - 1)">-</button>
+                  <input 
+                    type="number" 
+                    [value]="item.quantite" 
+                    (change)="updateQuantity(item.produit._id, +$any($event.target).value)"
+                    min="1"
+                    [max]="item.produit.stock.nombreDispo"
+                  >
+                  <button (click)="updateQuantity(item.produit._id, item.quantite + 1)" 
+                          [disabled]="item.quantite >= item.produit.stock.nombreDispo">+</button>
+                </div>
+                
+                <button class="btn-remove" (click)="removeFromCart(item.produit._id)">
+                  🗑️
+                </button>
+              </div>
+              
+              <div class="cart-item-total">
+                Total: {{ (item.produit.prix * item.quantite) | currency:'EUR':'symbol':'1.2-2' }}
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="cart-footer">
+          <div class="cart-total">
+            <span>Total:</span>
+            <span class="total-amount">{{ cartTotal() | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          
+          @if (portefeuille() && portefeuille().balance < cartTotal()) {
+            <div class="insufficient-balance">
+              ⚠️ Solde insuffisant
+            </div>
+          }
+          
+          <button 
+            class="btn-checkout" 
+            (click)="checkout()"
+            [disabled]="portefeuille() && portefeuille().balance < cartTotal()"
+          >
+            Valider l'achat
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

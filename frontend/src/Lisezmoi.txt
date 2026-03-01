@@ -1,0 +1,11 @@
+Dossier:
+	environments contient ce qui est variable globale
+	Dans app:
+		components contient ce qui est Component independant
+	core contient les fonctionnements et ce qui est metier
+	pages contient les Components equivalent a des pages/écrans
+	shared contient les Components partagé comme les layouts, header, footer
+	styles contient les stylesheet (variable, mixins, class, id)
+Fichier: 
+	app.routes pour les routes vers les Components qui s'afficheront dans les <router-outlet>
+

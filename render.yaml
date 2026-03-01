@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: mall-app-backend
+    env: node
+    branch: niaina-dev
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        value: mongodb+srv://faustresilient_db_user:RD3471h5QWuSxZtV@cluster0.ojuacgh.mongodb.net/mall_db?retryWrites=true&w=majority&appName=Cluster0
+      - key: JWT_SECRET
+        value: super_secret_jwt_key_for_mall_app_2024_production_render
+    healthCheckPath: /

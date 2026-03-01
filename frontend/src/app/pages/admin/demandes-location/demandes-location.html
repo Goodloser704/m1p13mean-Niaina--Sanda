@@ -1,0 +1,222 @@
+<section #childSection id="hero" class="hero section">
+  <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Demandes de location</h2>
+      <button class="btn-glass-secondary" routerLink="Location.back()">
+        <i class="bi bi-arrow-left bi-bolder"></i>
+      </button>
+    </div>
+
+    <div class="row liquid-glass">
+      <div class="col-md-12">
+        <h4>List des demandes de locations:</h4>
+        <hr>
+      </div>
+
+      @if (demandesEnCours().length === 0) {
+        <app-empty-grid-list [label]="'Aucune demande'"></app-empty-grid-list>
+      }
+
+      @for (demande of demandesWithDetails(); track demande._id) {
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+          <div class="card h-100 glass">
+            <div class="card-body d-flex flex-column">
+
+              <!-- Infos principales -->
+              <div class="d-flex justify-content-between align-items-start mb-1 small">
+                <p>Demandeur:</p>
+                <div class="d-flex flex-column align-items-end text-end">
+                  <b>{{ demande.boutique.nom }}</b>
+                  <b>({{ demande.commercantNames }})</b>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-start mb-1 small">
+                <p>Local:</p>
+                <div class="d-flex flex-column align-items-end text-end">
+                  <b>{{ demande.espace.code }}</b>
+                  <b>{{ demande.espaceEtageNom }}</b>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-start mb-1 small">
+                <p>Details:</p>
+                <div class="d-flex flex-column align-items-end text-end">
+                  <b>{{ demande.espace.surface }} m²</b>
+                  <b>{{ demande.espace.loyer | currency:'MGA':'Ar':'1.0-0' }}/mois</b>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-end mt-2">
+                <p class="text-primary small">{{ demande.createdAt | date: 'd MMM yyyy, HH:mm' }}</p>
+
+                <!-- Actions -->
+                <div class="mt-auto d-flex justify-content-end gap-2">
+
+                  <button 
+                    type="button"
+                    class="btn btn-sm btn-success rounded-2"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Accepter"
+                    (click)="accepter(demande._id)"
+                  >
+                    <i class="bi bi-check"></i>
+                  </button>
+
+                  <button 
+                    type="button"
+                    class="btn btn-sm btn-danger rounded-2"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Refuser"
+                    (click)="refuser(demande._id)"
+                  >
+                    <i class="bi bi-x"></i>
+                  </button>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      }
+
+      <div class="col-12 d-flex justify-content-end align-items-center">
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            <li class="page-item">
+              <button 
+                type="button" 
+                class="page-link"  
+                aria-label="Previous" 
+                (click)="demandePagination.previous()"
+              >
+                <span aria-hidden="true">&laquo;</span>
+              </button>
+            </li>
+            
+            @for(page of demandePagination.pagesArray(); track page) {
+              <li 
+                class="page-item" 
+                [ngClass]="page == demandePagination.currentPage() ? 'active' : ''"
+              >
+                <button type="button" class="page-link" (click)="demandePagination.goTo(page)">
+                  {{ page }}
+                </button>
+              </li>
+            }
+
+            <li class="page-item">
+              <button
+                type="button"
+                class="page-link"
+                aria-label="Next"
+                (click)="demandePagination.next()"
+              >
+                <span aria-hidden="true">&raquo;</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      
+    </div>
+
+    <div class="row liquid-glass mt-4">
+      <div class="col-md-12">
+        <h4>Demande acceptées:</h4>
+        <hr>
+      </div>
+
+      @if (ancienDemandes().length === 0) {
+        <app-empty-grid-list [label]="'Aucune demande'"></app-empty-grid-list>
+      }
+
+      @for (demande of ancienDemandesWithDetails(); track demande._id) {
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+          <div class="card h-100 glass">
+            <div class="card-body d-flex flex-column">
+
+              <!-- Infos principales -->
+              <div class="d-flex justify-content-between align-items-start mb-1 small">
+                <p>Demandeur:</p>
+                <div class="d-flex flex-column align-items-end text-end">
+                  <b>{{ demande.boutique.nom }}</b>
+                  <b>({{ demande.commercantNames }})</b>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-start mb-1 small">
+                <p>Local:</p>
+                <div class="d-flex flex-column align-items-end text-end">
+                  <b>{{ demande.espace.code }}</b>
+                  <b>{{ demande.espaceEtageNom }}</b>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-start mb-1 small">
+                <p>Details:</p>
+                <div class="d-flex flex-column align-items-end text-end">
+                  <b>{{ demande.espace.surface }}</b>
+                  <b>{{ demande.espace.loyer | currency:'MGA':'Ar':'1.0-0' }}/mois</b>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-start mb-1 small">
+                <p>Acceptée le:</p>
+                <div class="d-flex flex-column align-items-end text-end">
+                  <b>{{ demande.updatedAt | date: 'dd MMM yyyy, HH:mm' }}</b>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      }
+
+      <div class="col-12 d-flex justify-content-end align-items-center">
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            <li class="page-item">
+              <button 
+                type="button" 
+                class="page-link"  
+                aria-label="Previous" 
+                (click)="demandePagination.previous()"
+              >
+                <span aria-hidden="true">&laquo;</span>
+              </button>
+            </li>
+            
+            @for(page of demandePagination.pagesArray(); track page) {
+              <li 
+                class="page-item" 
+                [ngClass]="page == demandePagination.currentPage() ? 'active' : ''"
+              >
+                <button type="button" class="page-link" (click)="demandePagination.goTo(page)">
+                  {{ page }}
+                </button>
+              </li>
+            }
+
+            <li class="page-item">
+              <button
+                type="button"
+                class="page-link"
+                aria-label="Next"
+                (click)="demandePagination.next()"
+              >
+                <span aria-hidden="true">&raquo;</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      
+    </div>
+  </div>
+</section>

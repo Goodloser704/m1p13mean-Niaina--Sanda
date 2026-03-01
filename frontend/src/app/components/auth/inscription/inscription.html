@@ -1,0 +1,159 @@
+<!-- floating overlay -->
+<div class="floating-container">
+  <div class="floating-card">
+    <div class="contact section">
+      <div class="contact-form p-2 p-md-5 p-sm-4" data-aos="fade-left" data-aos-delay="300">
+        <div class="position-absolute top-0 start-0 w-100 d-flex justify-content-end pt-2 pe-3">
+          <a (click)="location.back()">
+            <i class="bi bi-arrow-left fs-3"></i>
+          </a>
+        </div>
+
+        <h3>Nouveau(lle) <b>{{ registrationRole }}</b></h3>
+        <p>Veuillez remplir les champs ci-dessous</p>
+        <p class="mb-4">(*): champs sont obligatoires</p>
+        
+        <form
+          class="php-email-form"
+          [formGroup]="form"
+          (ngSubmit)="register()"
+          data-aos="fade-up"
+          data-aos-delay="200"
+        >      
+          <div class="row gy-3">
+            <div class="col-md-6">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Nom (*)"
+                formControlName="nom"
+              >
+            </div>
+
+            <div class="col-md-6">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Prénoms (*)"
+                formControlName="prenoms"
+              >
+            </div>
+
+            <div class="col-md-6">
+              <input
+                type="email"
+                class="form-control"
+                placeholder="Email (*)"
+                formControlName="email"
+              >
+            </div>
+
+            <div class="col-md-6">
+              <input
+                type="tel"
+                class="form-control"
+                placeholder="Téléphone"
+                formControlName="telephone"
+              >
+            </div>
+
+            <div class="col-md-6">
+              <select
+                class="form-control"
+                formControlName="genre"
+              >
+                <option value="" disabled selected>
+                  Genre (*)
+                </option>
+                @for (g of genres; track g) {
+                  <option [value]="g">
+                    {{ g }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="col-md-6">
+
+            </div>
+
+
+            <div class="col-md-6">
+              <label 
+                for="formFile" 
+                class="form-label text-secondary"
+              >
+                Photo (optionnel, max: 2mo)
+              </label>
+              <input
+                type="file" 
+                #fileInput
+                id="formFile"
+                class="form-control"
+                (change)="onPhotoSelected($event)"
+                accept="image/*"
+              >
+              @if (photoSizeError()) {
+                <p class="text-danger mt-2">Taille du fichier maximum (2MB)</p>
+              }
+            </div>
+
+            <div class="col-md-6">
+              @if (photoPreview()) {
+                <div class="d-flex align-items-center">
+                  <img [src]="photoPreview()" class="photo-preview me-3">
+                  <button type="button" class="btn-sm btn-secondary" (click)="clearPhoto()">Effacer</button>
+                </div>
+              }
+            </div>
+
+            <div class="col-md-6">
+              <input
+                type="password"
+                class="form-control"
+                placeholder="Mot de passe (*)"
+                formControlName="mdp"
+              >
+              @if (mdpIncorrect()) {
+                <p class="text-danger mt-2">6 caracteres minimum</p>
+              }
+            </div>
+
+            <div class="col-md-6">
+              <input
+                type="password"
+                class="form-control"
+                placeholder="Confirmation du mot de passe (*)"
+                formControlName="confirmation"
+              >
+              @if (!confirmedMdp()) {
+                <p class="text-danger mt-2">Confirmation incorrecte</p>
+              }
+            </div>
+
+            @if (error()) {
+              <div class="col-12 text-danger text-center">
+                {{ error() }}
+              </div>
+            }
+
+            <div class="col-12 my-3 text-center">
+              <button
+                type="submit"
+                class="btn"
+                [disabled]="loaderService.isLoading() || form.invalid"
+              >
+                Valider
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="w-100 text-center">
+          <p>Déjà inscrit ? <a class="s-inscrire" routerLink="/login">Se connecter</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

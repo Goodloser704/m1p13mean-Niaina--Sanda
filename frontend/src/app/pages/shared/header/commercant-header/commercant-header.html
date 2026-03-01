@@ -1,0 +1,94 @@
+<header id="header" class="header d-flex align-items-center fixed-top">
+  <div 
+    class="
+      header-container
+      container-fluid 
+      container-xl
+      position-relative 
+      d-flex 
+      align-items-center 
+      justify-content-between 
+      p-0
+    "
+  >
+    <nav class="navbar w-100 navbar-expand-md">
+      <div class="container-fluid">
+        <button
+          class="navbar-toggler" 
+          type="button" 
+          data-bs-toggle="collapse" 
+          data-bs-target="#navbarTogglerDemo01" 
+          aria-controls="navbarTogglerDemo01" 
+          aria-expanded="false" 
+          aria-label="Toggle navigation"
+        >
+          <span class="bi bi-list"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+          <div class="d-block d-md-none p-2"></div>
+          <div style="width: fit-content; max-width: 100%; height: fit-content;">
+            <a class="d-none d-sm-block navbar-brand brand-title" href="#">
+              {{ centre().nom | titlecase }}
+            </a>
+            <a class="d-block d-sm-none navbar-brand brand-title text-wrap" href="#">
+              {{ centre().nom | titlecase }}
+            </a>
+          </div>
+
+          <ul class="navbar-nav ms-md-auto mb-2 mb-md-0 d-flex align-items-md-center gap-0 gap-md-2">
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page" [routerLink]="['/commercant/mes-boutiques']">Boutiques</a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link position-relative notification-link" [routerLink]="['/commercant/notifications']">
+                <i class="bi bi-bell bi-bolder notification-icon"></i>
+                <!-- <span class="notification-dot"></span> -->
+              </a>
+            </li>
+
+            @if (currentUser(); as user) {
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle d-flex align-items-center"
+                  href="#"
+                  id="userDropdown"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <img
+                    [src]="user.photo ? user.photo : 'assets/img/user.png'"
+                    alt="Avatar"
+                    class="rounded-circle"
+                    width="30"
+                    height="30"
+                  />
+                </a>
+                <ul 
+                  class="dropdown-menu dropdown-menu-end p-2" 
+                  aria-labelledby="userDropdown" 
+                  style="width: fit-content; min-width: 200px;"
+                >
+                  <li class="px-2 py-1" style="cursor: pointer;" [routerLink]="['/commercant/user-profil']">
+                    <strong>{{ user.prenoms }} {{ user.nom }}</strong>
+                  </li>
+                  <li class="px-2 py-1 text-black-50">{{ user.email }}</li>
+                  <li class="px-2 py-1 text-muted">{{ user.role }}</li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li class="px-2 py-1 text-lg-center text-start">
+                    <button class="btn btn-sm btn-danger w-100" (click)="logOut()">
+                      <i class="bi bi-home"></i>
+                      Log out
+                    </button>
+                  </li>
+                </ul>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
