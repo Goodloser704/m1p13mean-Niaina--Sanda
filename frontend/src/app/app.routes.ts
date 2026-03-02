@@ -107,11 +107,6 @@ export const routes: Routes = [
       { path: '', redirectTo: 'all-boutiques', pathMatch: 'full' }
     ]
   },
-  // Juste pour voir l'adaptation du template sur angular
-  {
-    path: 'template',
-    component: TemplateLayout
-  },
   // Wildcard URL Inconnu (TOUJOURS A LA FIN)
   { path: '**', redirectTo: 'login' }
 ];

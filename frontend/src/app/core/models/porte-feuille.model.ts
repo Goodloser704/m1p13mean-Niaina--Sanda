@@ -42,3 +42,15 @@ export interface UserPorteFeuille {
   wallet: PorteFeuille,
   transactions: PFTransaction[]
 }
+
+export interface PorteFeuilleStatistique {
+  periode: string,
+  totalEntrees: number,
+  totalSorties: number,
+  nombreTransactions: number,
+  transactionsParType: {
+    type: PFTransactionType,
+    nombre: number,
+    montant: number
+  }[]
+}

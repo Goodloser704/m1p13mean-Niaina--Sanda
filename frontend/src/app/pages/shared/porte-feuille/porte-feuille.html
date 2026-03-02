@@ -7,77 +7,135 @@
         </button>
       </div>
 
-      <div class="row" data-aos="fade-down" data-aos-delay="300">
-        <div class="col-sm-6">
-          <div class="balance">
-            <h2>Balance: <span>{{ pf.balance | currency:'MGA':'Ar ':'1.2-2' }}</span></h2>
-          </div>
-          <hr>
-        </div>
-
-        <div class="col-sm-6">
-          <div class="d-flex justify-content-end align-items-center">
-            <p class="text-secondary">{{ today | date: 'dd MMM yyyy, HH:mm' }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="row mt-3 features-cards">
-        <div class="col-12 mb-2">
-          <h3 data-aos="fade-down" data-aos-delay="300">Liste des transactions: ({{ transactions().length }})</h3>
-          <hr>
-        </div>
-
-        <div class="col-12 d-flex flex-column gap-3 transactions">
-          @for (transaction of transactions(); track transaction._id) {
-            @if (transaction.typeForUser === TypeForUser.Entree) {
-              <div class="feature-box green align-self-end" data-aos="fade-left" data-aos-delay="300">
-                <div class="d-flex align-items-center gap-3">
-                  <i class="bi bi-arrow-down"></i>
-                  <h4>{{ transaction.amount | currency: 'MGA':'Ar ':'1.2-2' }}</h4>
-                </div>
-                <p>Type: <b>{{ transaction.type }}</b>, Description: {{ transaction.description }}</p>
-                <p>Venant de: <b>{{ getTransactionerNames(transaction.fromWallet) }}</b></p>
+      <!-- Solde et Statistiques -->
+      @if (porteFeuille(); as pf) {
+        <div class="row mb-4 gy-3">
+          <div class="col-12 col-md-4">
+            <div class="card h-100 stats-card balance-card glass">
+              <div class="card-body">
+                <h6 class="text-muted">Solde actuel</h6>
+                <h2 class="mb-0">{{ pf.balance | currency:'MGA':'Ar ':'1.2-2' }}</h2>
               </div>
-            } @else if (transaction.typeForUser === TypeForUser.Sortie) {
-              <div class="feature-box red" data-aos="fade-right" data-aos-delay="300">
-                <div class="d-flex align-items-center gap-3">
-                  <i class="bi bi-arrow-up"></i>
-                  <h4>{{ transaction.amount | currency: 'MGA':'Ar ':'1.2-2' }}</h4>
+            </div>
+          </div>
+
+          @if (stats(); as stat) {
+            <div class="col-12 col-sm-6 col-md-4">
+              <div class="card h-100 stats-card">
+                <div class="card-body">
+                  <h6 class="text-muted">Total reçu</h6>
+                  <h3 class="text-success mb-0">+{{ stat.totalEntrees | currency:'MGA':'Ar ':'1.2-2' }}</h3>
+                  <!-- <small>{{ stat.totalEntrees }} transaction(s)</small> -->
                 </div>
-                <p>Type: <b>{{ transaction.type }}</b>, Description: {{ transaction.description }}</p>
-                <p>Vers: <b>{{ getTransactionerNames(transaction.toWallet) }}</b></p>
               </div>
-            }
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4">
+              <div class="card h-100 stats-card">
+                <div class="card-body">
+                  <h6 class="text-muted">Total envoyé</h6>
+                  <h3 class="text-danger mb-0">-{{ stat.totalSorties | currency:'MGA':'Ar ':'1.2-2' }}</h3>
+                  <!-- <small>{{ stat.totalSorties }} transaction(s)</small> -->
+                </div>
+              </div>
+            </div>
           }
-        </div>  
+        </div>
+      }
+
+      <!-- Filtres -->
+       <div #filtreSection class="card mb-4">
+        <div class="card-body">
+          <h5 class="mb-3"><i class="bi bi-filter me-2"></i>Filtrer les transactions</h5>
+          
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn" 
+                    [ngClass]="typeFilter() == undefined ? 'btn-glass' : 'btn-glass-secondary-outline'" 
+                    (click)="filterByType(undefined)">
+              Toutes
+            </button>
+            <button type="button"
+                    [ngClass]="typeFilter() === 'Achat' ? 'btn-glass' : 'btn-glass-secondary-outline'" 
+                    (click)="filterByType('Achat')">
+              Achats
+            </button>
+            <button type="button"
+                    [ngClass]="typeFilter() === 'Loyer' ? 'btn-glass' : 'btn-glass-secondary-outline'" 
+                    (click)="filterByType('Loyer')">
+              Loyers
+            </button>
+            <button type="button"
+                    [ngClass]="typeFilter() === 'Recharge' ? 'btn-glass' : 'btn-glass-secondary-outline'" 
+                    (click)="filterByType('Recharge')">
+              Recharges
+            </button>
+            <button type="button"
+                    [ngClass]="typeFilter() === 'Commission' ? 'btn-glass' : 'btn-glass-secondary-outline'" 
+                    (click)="filterByType('Commission')">
+              Commissions
+            </button>
+          </div>
+        </div>
       </div>
 
-      <!-- <div class="row mt-3 features-cards">
-        <div class="col-12 mb-2">
-          <h3 data-aos="fade-down" data-aos-delay="300">Liste des transactions:</h3>
-          <hr>
+      <!-- Liste des transactions -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Historique des transactions ({{ pagination.totalItems() }})</h5>
         </div>
-        <div class="col-12 d-flex flex-column gap-3">
-          <div class="feature-box green align-self-end" data-aos="fade-left" data-aos-delay="300">
-            <div class="d-flex align-items-center gap-3">
-              <i class="bi bi-arrow-down"></i>
-              <h4>10 000 Ar</h4>
+        <div class="card-body">
+          @if (transactions().length === 0) {
+            <div class="empty-state">
+              <i class="bi bi-inbox"></i>
+              <p>Aucune transaction</p>
             </div>
-            <p>Type: <b>Achat</b>, Description: achat client</p>
-            <p>Venant de: <b>Jean Paul</b></p>
-          </div>
+          } @else {
+            <div class="transactions-list">
+              @for (transaction of transactions(); track transaction._id) {
+                <div class="transaction-item" [ngClass]="transaction.typeForUser === TypeForUser.Entree ? 'credit' : 'debit'">
+                  <div class="transaction-icon">
+                    @if (transaction.typeForUser === TypeForUser.Entree) {
+                      <i class="bi bi-arrow-down-circle text-success"></i>
+                    } @else {
+                      <i class="bi bi-arrow-up-circle text-danger"></i>
+                    }
+                  </div>
 
-          <div class="feature-box red" data-aos="fade-right" data-aos-delay="300">
-            <div class="d-flex align-items-center gap-3">
-              <i class="bi bi-arrow-up"></i>
-              <h4>5 000 Ar</h4>
+                  <div class="transaction-details">
+                    <div class="transaction-header">
+                      <strong>{{ transaction.type }}</strong>
+                      <!-- <span class="badge" [ngClass]="transaction.statut === 'Completee' ? 'bg-success' : 'bg-warning'">
+                        {{ transaction.statut }}
+                      </span> -->
+                    </div>
+                    <p class="transaction-description">{{ transaction.description }}</p>
+
+                    <div class="transaction-meta">
+                      @if (transaction.typeForUser === TypeForUser.Entree) {
+                        <small class="text-muted">De: {{ transaction.fromWallet.owner.nom }} {{ transaction.fromWallet.owner.prenoms }}</small>
+                      } @else {
+                        <small class="text-muted">Vers: {{ transaction.toWallet.owner.nom }} {{ transaction.toWallet.owner.prenoms }}</small>
+                      }
+                      <small class="text-muted">{{ transaction.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                    </div>
+                  </div>
+
+                  <div class="transaction-amount" [ngClass]="transaction.typeForUser === TypeForUser.Entree ? 'text-success' : 'text-danger'">
+                    {{ transaction.typeForUser === TypeForUser.Entree ? '+' : '' }}{{ transaction.amount | currency:'EUR':'symbol':'1.2-2' }}
+                  </div>
+                </div>
+              }
             </div>
-            <p>Type: <b>Paiement</b>, Description: paiement loyer</p>
-            <p>Vers: <b>Jean Jacques</b></p>
-          </div>
-        </div>  
-      </div> -->
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-end align-items-center mt-4">
+              <app-pagination-component 
+                [pagination]="pagination"
+              ></app-pagination-component>
+            </div>
+          }
+        </div>
+      </div>
     </div>
   } @else {
     <!-- <p>Vide</p> -->

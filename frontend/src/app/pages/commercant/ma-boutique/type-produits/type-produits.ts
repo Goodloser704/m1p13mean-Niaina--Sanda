@@ -40,7 +40,10 @@ export class TypeProduits implements OnInit, AfterViewInit {
     { label: 'Panier', value: 'bi-cart' },
     { label: 'Promo', value: 'bi-tag' },
     { label: 'Montres', value: 'bi-watch' },
-    { label: 'Informatique', value: 'bi-laptop' }
+    { label: 'Informatique', value: 'bi-laptop' },
+    { label: 'Sport', value: 'bi-trophy' },
+    { label: 'Cosmétique', value: 'bi-brush' },
+    { label: 'Librairie', value: 'bi-book' },
   ];
 
   constructor(

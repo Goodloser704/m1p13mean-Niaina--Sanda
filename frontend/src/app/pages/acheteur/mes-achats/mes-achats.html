@@ -7,7 +7,7 @@
         <h4>Achat en attente de validation: {{ achatsEnAttentePagination.totalItems() }}</h4>
         <hr>
 
-        <div class="row gy-3">
+        <div class="row gy-2">
           @if (achatsEnAttente().length === 0) {
             <app-empty-grid-list [label]="'Aucun achat en attente'" />
           }
@@ -35,7 +35,7 @@
         <h4>Historique d'achat: {{ historiquePagination.totalItems() }}</h4>
         <hr>
 
-        <div class="row gy-3">
+        <div class="row gy-2">
           @if (historiqueAchats().length === 0) {
             <app-empty-grid-list [label]="'Aucun achat'" />
           }
