@@ -98,10 +98,14 @@ exports.obtenirPortefeuilleUtilisateur = async (req, res) => {
         _id: transaction._id,
         type: transaction.type,
         amount: transaction.amount,
+        fromWallet: transaction.fromWallet,
+        toWallet: transaction.toWallet,
         description: transaction.description,
         statut: transaction.statut,
         createdAt: transaction.createdAt,
-        typeForUser: transaction.fromWallet && transaction.fromWallet.toString() === portefeuille._id.toString() ? 'Sortie' : 'Entree'
+        typeForUser: transaction.fromWallet.owner._id.toString() === portefeuille.owner._id.toString() 
+          ? 'Sortie' 
+          : 'Entree'
       }))
     });
   } catch (error) {
