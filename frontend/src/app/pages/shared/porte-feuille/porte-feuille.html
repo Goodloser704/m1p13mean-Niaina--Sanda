@@ -30,7 +30,7 @@
 
         <div class="col-12 d-flex flex-column gap-3 transactions">
           @for (transaction of transactions(); track transaction._id) {
-            @if (transaction.amount > 0) {
+            @if (transaction.typeForUser === TypeForUser.Entree) {
               <div class="feature-box green align-self-end" data-aos="fade-left" data-aos-delay="300">
                 <div class="d-flex align-items-center gap-3">
                   <i class="bi bi-arrow-down"></i>
@@ -39,7 +39,7 @@
                 <p>Type: <b>{{ transaction.type }}</b>, Description: {{ transaction.description }}</p>
                 <p>Venant de: <b>{{ getTransactionerNames(transaction.fromWallet) }}</b></p>
               </div>
-            } @else if (transaction.amount < 0) {
+            } @else if (transaction.typeForUser === TypeForUser.Sortie) {
               <div class="feature-box red" data-aos="fade-right" data-aos-delay="300">
                 <div class="d-flex align-items-center gap-3">
                   <i class="bi bi-arrow-up"></i>

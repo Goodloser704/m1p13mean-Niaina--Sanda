@@ -2,7 +2,7 @@ import { User } from "./user.model";
 
 export interface PorteFeuille {
   _id: string;
-  owner: User | string,
+  owner: User,
   balance: number,
   createdAt: string,
   updatedAt: string
@@ -21,15 +21,21 @@ export enum PFTransactionStatut {
   Annulee = "Annulee"
 }
 
+export enum TypeForUser {
+  Entree = "Entree",
+  Sortie = "Sortie"
+}
+
 export interface PFTransaction {
   _id: string;
-  fromWallet: PorteFeuille | string;
-  toWallet: PorteFeuille | string;
+  fromWallet: PorteFeuille;
+  toWallet: PorteFeuille;
   type: PFTransactionType,
   amount: number,
   description: string,
   statut: string,
-  createdAt: string
+  createdAt: string,
+  typeForUser: TypeForUser
 }
 
 export interface UserPorteFeuille {

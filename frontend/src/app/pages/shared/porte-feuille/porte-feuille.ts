@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from "@angular/router";
 import { AuthService } from '../../../core/services/auth.service';
-import { PorteFeuille as PF, PFTransaction } from '../../../core/models/porte-feuille.model';
+import { PorteFeuille as PF, PFTransaction, TypeForUser } from '../../../core/models/porte-feuille.model';
 import { PorteFeuilleService } from '../../../core/services/porte-feuille.service';
 import { CurrencyPipe, DatePipe } from "@angular/common";
 import { LoaderService } from '../../../core/services/loader.service';
@@ -19,6 +19,8 @@ export class PorteFeuille implements OnInit {
 
   today: string = new Date().toISOString();
   loaderService = inject(LoaderService);
+
+  TypeForUser = TypeForUser;
 
   constructor(
     private authService: AuthService, 
