@@ -77,30 +77,40 @@ achatSchema.index({ etat: 1, 'typeAchat.type': 1 });
 // Middleware pre-save pour calculer la dateFin selon le type d'achat
 achatSchema.pre('save', async function(next) {
   try {
-    // Calculer la dateFin selon le type d'achat
-    if (this.isNew || this.isModified('typeAchat')) {
+
+    // Ne recalculer que si document nouveau
+    // OU si typeAchat.type a changé
+    if (this.isNew || this.isModified('typeAchat.type')) {
+
       if (this.typeAchat.type === TypeAchatEnum.Recuperer) {
-        // Pour récupération: dateFin = dateDebut + tempsPreparation
+
         const Produit = mongoose.model('Produit');
         const produit = await Produit.findById(this.produit);
-        
-        if (produit && produit.tempsPreparation && produit.tempsPreparation !== null) {
-          // Convertir tempsPreparation (hh:mm:ss) en millisecondes
+
+        if (produit && produit.tempsPreparation) {
           const [heures, minutes, secondes] = produit.tempsPreparation.split(':').map(Number);
           const tempsMs = (heures * 3600 + minutes * 60 + secondes) * 1000;
-          this.typeAchat.dateFin = new Date(this.typeAchat.dateDebut.getTime() + tempsMs);
+
+          this.typeAchat.dateFin = new Date(
+            this.typeAchat.dateDebut.getTime() + tempsMs
+          );
         } else {
-          // Disponible de suite si tempsPreparation = null
           this.typeAchat.dateFin = this.typeAchat.dateDebut;
         }
       } else if (this.typeAchat.type === TypeAchatEnum.Livrer) {
-        // Pour livraison: dateFin sera calculée quand le commerçant saisit la durée
-        // En attendant, on met la même date que dateDebut
-        this.typeAchat.dateFin = this.typeAchat.dateDebut;
+        // Ne pas écraser si déjà définie (cas validerLivraison)
+        if (!this.typeAchat.dateFin) {
+          this.typeAchat.dateFin = this.typeAchat.dateDebut;
+        }
+
+        if (this.isNew) {
+          this.etat = EtatAchatEnum.EnAttente;
+        }
       }
     }
-    
+
     next();
+
   } catch (error) {
     next(error);
   }
