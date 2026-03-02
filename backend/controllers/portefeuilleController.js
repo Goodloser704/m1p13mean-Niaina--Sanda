@@ -138,20 +138,25 @@ exports.obtenirMesTransactions = async (req, res) => {
     });
     
     // Enrichir les transactions avec le type pour l'utilisateur
-    const transactionsEnrichies = transactions.map(transaction => ({
-      ...transaction.toObject(),
-      typeForUser: transaction.getTypeForWallet(portefeuille._id),
-      montant: transaction.fromWallet && transaction.fromWallet.toString() === portefeuille._id.toString() 
-        ? -transaction.amount 
-        : transaction.amount
-    }));
+    const transactionsEnrichies = transactions.map(transaction => {
+      const fromWalletId = transaction.fromWallet._id.toString();
+      const montant = fromWalletId === portefeuille._id.toString()
+        ? -transaction.amount
+        : transaction.amount;
+
+      return {
+        ...transaction.toObject(),
+        typeForUser: transaction.getTypeForWallet(portefeuille._id),
+        montant
+      };
+    });
     
     const total = await PFTransaction.countDocuments({
       $or: [
         { fromWallet: portefeuille._id },
         { toWallet: portefeuille._id }
       ],
-      statut: 'Completee',
+      // statut: 'Completee',
       ...(type && { type })
     });
     
@@ -253,7 +258,7 @@ exports.obtenirStatistiques = async (req, res) => {
         {
           $match: {
             toWallet: portefeuille._id,
-            statut: 'Completee',
+            // statut: 'Completee',
             createdAt: { $gte: dateLimite }
           }
         },
@@ -270,7 +275,7 @@ exports.obtenirStatistiques = async (req, res) => {
         {
           $match: {
             fromWallet: portefeuille._id,
-            statut: 'Completee',
+            // statut: 'Completee',
             createdAt: { $gte: dateLimite }
           }
         },
@@ -288,7 +293,7 @@ exports.obtenirStatistiques = async (req, res) => {
           { fromWallet: portefeuille._id },
           { toWallet: portefeuille._id }
         ],
-        statut: 'Completee',
+        // statut: 'Completee',
         createdAt: { $gte: dateLimite }
       }),
       
@@ -300,7 +305,7 @@ exports.obtenirStatistiques = async (req, res) => {
               { fromWallet: portefeuille._id },
               { toWallet: portefeuille._id }
             ],
-            statut: 'Completee',
+            // statut: 'Completee',
             createdAt: { $gte: dateLimite }
           }
         },

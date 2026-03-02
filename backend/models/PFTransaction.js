@@ -152,7 +152,8 @@ pfTransactionSchema.statics.obtenirHistorique = function(walletId, options = {})
       { fromWallet: walletId },
       { toWallet: walletId }
     ],
-    statut: 'Completee'
+    // Ne pas encore ajouter de statut pour l'instant
+    // statut: 'Completee'
   };
   
   if (type) {
@@ -160,10 +161,18 @@ pfTransactionSchema.statics.obtenirHistorique = function(walletId, options = {})
   }
   
   return this.find(query)
-    .populate('fromWallet', 'owner')
-    .populate('toWallet', 'owner')
-    .populate('fromWallet.owner', 'nom prenoms email')
-    .populate('toWallet.owner', 'nom prenoms email')
+    .populate([
+      { 
+        path: 'fromWallet', 
+        select: 'owner',
+        populate: { path: 'owner', select: 'nom prenoms email' }
+      },
+      { 
+        path: 'toWallet', 
+        select: 'owner',
+        populate: { path: 'owner', select: 'nom prenoms email' }
+      }
+    ])
     .sort({ createdAt: -1 })
     .limit(limit)
     .skip((page - 1) * limit);
