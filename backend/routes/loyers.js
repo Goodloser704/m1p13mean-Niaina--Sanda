@@ -27,7 +27,7 @@ router.post('/pay', [
   // body('montant')
   //   .optional()
   //   .isFloat({ min: 1, max: 10000 })
-  //   .withMessage('Le montant doit être entre 1€ et 10,000€'),
+  //   .withMessage('Le montant doit être entre 1Ar et 10,000Ar'),
   body('periode')
     .optional()
     .matches(/^\d{4}-\d{2}$/)

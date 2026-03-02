@@ -42,7 +42,7 @@ router.get('/transactions', portefeuilleController.obtenirMesTransactions);
 router.post('/recharge', [
   body('montant')
     .isFloat({ min: 0.01, max: 10000 })
-    .withMessage('Le montant doit être entre 0.01€ et 10,000€'),
+    .withMessage('Le montant doit être entre 0.01Ar et 10,000Ar'),
   body('modePaiement')
     .optional()
     .isIn(['Carte', 'Virement', 'PayPal'])

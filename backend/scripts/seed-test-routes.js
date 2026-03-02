@@ -70,7 +70,7 @@ async function seedTestData() {
         balance: 1000
       });
       await pfAcheteur.save();
-      console.log('✅ Portefeuille acheteur créé (balance: 1000€)');
+      console.log('✅ Portefeuille acheteur créé (balance: 1000Ar)');
     }
 
     // 2. Vérifier/Créer un commercant de test
@@ -100,7 +100,7 @@ async function seedTestData() {
         balance: 500
       });
       await pfCommercant.save();
-      console.log('✅ Portefeuille commercant créé (balance: 500€)');
+      console.log('✅ Portefeuille commercant créé (balance: 500Ar)');
     }
 
     // 3. Créer Centre Commercial
@@ -448,21 +448,21 @@ async function seedTestData() {
       { balance: 5000 },
       { upsert: true }
     );
-    console.log('✅ Portefeuille admin: 5000€');
+    console.log('✅ Portefeuille admin: 5000Ar');
     
     await PorteFeuille.findOneAndUpdate(
       { owner: acheteur._id },
       { balance: 1000 },
       { upsert: true }
     );
-    console.log('✅ Portefeuille acheteur: 1000€');
+    console.log('✅ Portefeuille acheteur: 1000Ar');
     
     await PorteFeuille.findOneAndUpdate(
       { owner: commercant._id },
       { balance: 500 },
       { upsert: true }
     );
-    console.log('✅ Portefeuille commercant: 500€');
+    console.log('✅ Portefeuille commercant: 500Ar');
 
     // Résumé final
     console.log('\n✅ Données de test COMPLÈTES créées avec succès!');
@@ -478,9 +478,9 @@ async function seedTestData() {
     console.log(`   - Notifications admin: ${await Notification.countDocuments({ receveur: testData.adminId })}`);
     console.log(`   - Notifications acheteur: ${await Notification.countDocuments({ receveur: acheteur._id })}`);
     console.log(`   - Demandes location: ${await DemandeLocation.countDocuments({})}`);
-    console.log(`   - Portefeuille admin: ${(await PorteFeuille.findOne({ owner: testData.adminId }))?.balance || 0}€`);
-    console.log(`   - Portefeuille acheteur: ${pfAcheteur.balance}€`);
-    console.log(`   - Portefeuille commercant: ${pfCommercant.balance}€`);
+    console.log(`   - Portefeuille admin: ${(await PorteFeuille.findOne({ owner: testData.adminId }))?.balance || 0}Ar`);
+    console.log(`   - Portefeuille acheteur: ${pfAcheteur.balance}Ar`);
+    console.log(`   - Portefeuille commercant: ${pfCommercant.balance}Ar`);
     
     await mongoose.connection.close();
     console.log('\n🔌 Connexion fermée');

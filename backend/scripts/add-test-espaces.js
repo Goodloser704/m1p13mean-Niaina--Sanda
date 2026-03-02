@@ -76,7 +76,7 @@ async function addTestEspaces() {
         code,
         etage: etage._id,
         surface: 40 + (i * 5), // 45m², 50m², 55m², etc.
-        loyerMensuel: 1000 + (i * 100), // 1100€, 1200€, 1300€, etc.
+        loyerMensuel: 1000 + (i * 100), // 1100Ar, 1200Ar, 1300Ar, etc.
         statut: 'Disponible',
         description: `Espace de test ${i} pour les tests de demandes de location`,
         isActive: true
@@ -88,7 +88,7 @@ async function addTestEspaces() {
     log(`✅ ${espacesCreated.length} espaces créés avec succès`, 'green');
     
     espacesCreated.forEach((espace, index) => {
-      log(`   ${index + 1}. ${espace.code} - ${espace.surface}m² - ${espace.loyerMensuel}€/mois`, 'blue');
+      log(`   ${index + 1}. ${espace.code} - ${espace.surface}m² - ${espace.loyerMensuel}Ar/mois`, 'blue');
     });
 
     // Mettre à jour les statistiques de l'étage

@@ -115,12 +115,12 @@ async function seedPortefeuilles() {
           balance: pfData.balance
         });
         await portefeuille.save();
-        console.log(`✅ Portefeuille créé pour ${pfData.user.prenoms} ${pfData.user.nom}: ${pfData.balance}€`);
+        console.log(`✅ Portefeuille créé pour ${pfData.user.prenoms} ${pfData.user.nom}: ${pfData.balance}Ar`);
       } else {
         // Mettre à jour le solde
         portefeuille.balance = pfData.balance;
         await portefeuille.save();
-        console.log(`⏭️  Portefeuille mis à jour pour ${pfData.user.prenoms} ${pfData.user.nom}: ${pfData.balance}€`);
+        console.log(`⏭️  Portefeuille mis à jour pour ${pfData.user.prenoms} ${pfData.user.nom}: ${pfData.balance}Ar`);
       }
       
       createdPortefeuilles.push(portefeuille);
@@ -276,9 +276,9 @@ async function seedPortefeuilles() {
         const transaction = new PFTransaction(txData);
         await transaction.save();
         transactionCount++;
-        console.log(`✅ Transaction créée: ${txData.type} - ${txData.amount}€ (${txData.statut})`);
+        console.log(`✅ Transaction créée: ${txData.type} - ${txData.amount}Ar (${txData.statut})`);
       } else {
-        console.log(`⏭️  Transaction existe: ${txData.type} - ${txData.amount}€`);
+        console.log(`⏭️  Transaction existe: ${txData.type} - ${txData.amount}Ar`);
       }
     }
 

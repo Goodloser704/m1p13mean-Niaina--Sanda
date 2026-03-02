@@ -32,13 +32,13 @@ async function crediterPortefeuille() {
       console.log('📝 Portefeuille créé');
     }
 
-    console.log(`💵 Solde actuel: ${portefeuille.balance}€`);
+    console.log(`💵 Solde actuel: ${portefeuille.balance}Ar`);
 
-    // Créditer 10000€
+    // Créditer 10000Ar
     portefeuille.balance += 10000;
     await portefeuille.save();
 
-    console.log(`✅ Solde après crédit: ${portefeuille.balance}€`);
+    console.log(`✅ Solde après crédit: ${portefeuille.balance}Ar`);
     console.log('\n✅ Crédit effectué avec succès!');
 
     await mongoose.disconnect();

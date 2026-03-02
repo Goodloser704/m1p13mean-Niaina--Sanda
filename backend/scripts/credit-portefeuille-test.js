@@ -31,22 +31,22 @@ async function creditPortefeuille() {
           balance: 5000
         });
         console.log(`💰 ${commercant.email}`);
-        console.log(`   Portefeuille créé avec 5000€`);
+        console.log(`   Portefeuille créé avec 5000Ar`);
         created++;
       } else {
         const oldBalance = portefeuille.balance;
-        portefeuille.balance = 5000; // Créditer 5000€
+        portefeuille.balance = 5000; // Créditer 5000Ar
         await portefeuille.save();
         
         console.log(`💰 ${commercant.email}`);
-        console.log(`   Ancien solde: ${oldBalance}€`);
-        console.log(`   Nouveau solde: ${portefeuille.balance}€`);
+        console.log(`   Ancien solde: ${oldBalance}Ar`);
+        console.log(`   Nouveau solde: ${portefeuille.balance}Ar`);
         credited++;
       }
     }
 
-    console.log(`\n✅ ${credited} portefeuilles crédités avec 5000€`);
-    console.log(`✅ ${created} portefeuilles créés avec 5000€`);
+    console.log(`\n✅ ${credited} portefeuilles crédités avec 5000Ar`);
+    console.log(`✅ ${created} portefeuilles créés avec 5000Ar`);
     
     await mongoose.connection.close();
     console.log('🔌 Connexion fermée');

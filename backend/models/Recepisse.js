@@ -188,7 +188,7 @@ recepisseSchema.methods.toJSON = function() {
   
   // Formater les montants
   if (obj.montant) {
-    obj.montantFormate = `${obj.montant.toFixed(2)}€`;
+    obj.montantFormate = `${obj.montant.toFixed(2)}Ar`;
   }
   
   // Formater les dates
@@ -217,7 +217,7 @@ recepisseSchema.pre('validate', function(next) {
 
 // Logging
 recepisseSchema.post('save', function(doc) {
-  console.log(`📄 Reçu créé: ${doc.numeroRecepisse} - ${doc.montant}€ (${doc.type})`);
+  console.log(`📄 Reçu créé: ${doc.numeroRecepisse} - ${doc.montant}Ar (${doc.type})`);
 });
 
 recepisseSchema.post('findOneAndUpdate', function(doc) {

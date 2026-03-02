@@ -62,11 +62,11 @@ async function seedData() {
         owner: client._id,
         balance: 10000 // Solde initial pour les tests
       });
-      log('✅ Portefeuille client créé avec 10000€', 'green');
+      log('✅ Portefeuille client créé avec 10000Ar', 'green');
     } else {
       portefeuilleClient.balance = Math.max(portefeuilleClient.balance, 10000);
       await portefeuilleClient.save();
-      log(`✅ Portefeuille client: ${portefeuilleClient.balance}€`, 'green');
+      log(`✅ Portefeuille client: ${portefeuilleClient.balance}Ar`, 'green');
     }
 
     let portefeuilleCommercant = await PorteFeuille.findOne({ owner: commercant._id });
@@ -77,7 +77,7 @@ async function seedData() {
       });
       log('✅ Portefeuille commercant créé', 'green');
     } else {
-      log(`✅ Portefeuille commercant: ${portefeuilleCommercant.balance}€`, 'green');
+      log(`✅ Portefeuille commercant: ${portefeuilleCommercant.balance}Ar`, 'green');
     }
 
     // 3. Créer catégorie
@@ -172,7 +172,7 @@ async function seedData() {
           },
           isActive: true
         });
-        log(`✅ Produit créé: ${produit.nom} (${produit.prix}€)`, 'green');
+        log(`✅ Produit créé: ${produit.nom} (${produit.prix}Ar)`, 'green');
       } else {
         // Mettre à jour le stock
         produit.stock.nombreDispo = produitData.stock;
@@ -286,7 +286,7 @@ async function seedData() {
       });
       
       achatsCreated++;
-      log(`✅ Achat créé: ${achatData.quantite}x produit (${montantTotal}€)`, 'green');
+      log(`✅ Achat créé: ${achatData.quantite}x produit (${montantTotal}Ar)`, 'green');
     }
 
     // 9. Résumé
@@ -297,7 +297,7 @@ async function seedData() {
     log(`Notifications créées: ${notificationsCreated}`, 'blue');
     log(`Achats créés: ${achatsCreated}`, 'blue');
     log(`Facture: ${facture._id}`, 'blue');
-    log(`Portefeuille client: ${portefeuilleClient.balance}€`, 'blue');
+    log(`Portefeuille client: ${portefeuilleClient.balance}Ar`, 'blue');
     
     log('\n✅ Données de test créées avec succès!', 'green');
     log('='.repeat(70), 'cyan');

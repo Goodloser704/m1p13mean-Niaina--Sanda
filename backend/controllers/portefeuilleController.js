@@ -194,7 +194,7 @@ exports.rechargerPortefeuille = async (req, res) => {
     
     if (montant <= 0 || montant > 10000) {
       return res.status(400).json({
-        message: 'Le montant doit être entre 0.01€ et 10,000€'
+        message: 'Le montant doit être entre 0.01Ar et 10,000Ar'
       });
     }
     

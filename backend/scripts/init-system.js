@@ -144,16 +144,16 @@ async function creerPortefeuillesPourUtilisateursExistants() {
         // Balance initiale selon le rôle
         let balanceInitiale = 0;
         if (utilisateur.role === RoleEnum.Admin) {
-          balanceInitiale = 10000; // 10,000€ pour l'admin
+          balanceInitiale = 10000; // 10,000Ar pour l'admin
         } else if (utilisateur.role === RoleEnum.Acheteur) {
-          balanceInitiale = 500; // 500€ pour les acheteurs
+          balanceInitiale = 500; // 500Ar pour les acheteurs
         } else if (utilisateur.role === RoleEnum.Commercant) {
-          balanceInitiale = 1000; // 1,000€ pour les commerçants
+          balanceInitiale = 1000; // 1,000Ar pour les commerçants
         }
         
         await PorteFeuille.creerPourUtilisateur(utilisateur._id, balanceInitiale);
         portefeuillesCrees++;
-        console.log(`   ✅ Portefeuille créé pour ${utilisateur.email} (${utilisateur.role}) - Balance: ${balanceInitiale}€`);
+        console.log(`   ✅ Portefeuille créé pour ${utilisateur.email} (${utilisateur.role}) - Balance: ${balanceInitiale}Ar`);
       }
     }
     

@@ -58,7 +58,7 @@ async function cleanPortefeuilles() {
       const portefeuille = await PorteFeuille.findOne({ owner: user._id });
       
       if (portefeuille) {
-        console.log(`  → Portefeuille trouvé: ${portefeuille.balance}€`);
+        console.log(`  → Portefeuille trouvé: ${portefeuille.balance}Ar`);
         
         // Supprimer les transactions liées
         const txResult = await PFTransaction.deleteMany({

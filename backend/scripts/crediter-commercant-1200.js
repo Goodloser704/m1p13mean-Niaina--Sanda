@@ -37,22 +37,22 @@ async function crediterCommercant() {
       process.exit(1);
     }
 
-    console.log(`\n💰 Solde actuel: ${portefeuille.balance}€`);
+    console.log(`\n💰 Solde actuel: ${portefeuille.balance}Ar`);
 
-    // Ajouter 1200€
+    // Ajouter 1200Ar
     const montantAjoute = 1200;
     portefeuille.balance += montantAjoute;
     await portefeuille.save();
 
-    console.log(`✅ Ajout de ${montantAjoute}€`);
-    console.log(`💰 Nouveau solde: ${portefeuille.balance}€`);
+    console.log(`✅ Ajout de ${montantAjoute}Ar`);
+    console.log(`💰 Nouveau solde: ${portefeuille.balance}Ar`);
 
     // Créer une transaction pour traçabilité
     const transaction = await PFTransaction.create({
       toWallet: portefeuille._id,
       type: 'Recharge',
       amount: montantAjoute,
-      description: 'Crédit manuel pour tests - Ajout de 1200€',
+      description: 'Crédit manuel pour tests - Ajout de 1200Ar',
       statut: 'Completee',
       numeroTransaction: `CREDIT-${Date.now()}`
     });

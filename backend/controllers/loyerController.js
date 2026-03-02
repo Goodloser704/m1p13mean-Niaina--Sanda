@@ -81,7 +81,7 @@ class LoyerController {
       const montantLoyer = montant || boutique.espace.prixLocation || 500; // Montant par défaut
       const periodeLoyer = periode || new Date().toISOString().slice(0, 7); // YYYY-MM
 
-      console.log(`💰 Montant loyer: ${montantLoyer}€ pour la période ${periodeLoyer}`);
+      console.log(`💰 Montant loyer: ${montantLoyer}Ar pour la période ${periodeLoyer}`);
 
       // Vérifier si le loyer n'a pas déjà été payé pour cette période
       // Chercher dans les reçus (plus fiable que les transactions)
@@ -115,7 +115,7 @@ class LoyerController {
 
       // Vérifier le solde
       if (portefeuilleCommercant.balance < montantLoyer) {
-        console.log(`❌ Solde insuffisant: ${portefeuilleCommercant.balance}€ < ${montantLoyer}€`);
+        console.log(`❌ Solde insuffisant: ${portefeuilleCommercant.balance}Ar < ${montantLoyer}Ar`);
         return res.status(400).json({ 
           message: 'Solde insuffisant pour payer le loyer',
           soldeActuel: portefeuilleCommercant.balance,
@@ -199,7 +199,7 @@ class LoyerController {
       await notificationService.createNotification({
         type: 'Paiement',
         title: 'Paiement de loyer effectué',
-        message: `Votre loyer de ${montantLoyer}€ pour la période ${periodeLoyer} a été payé avec succès.`,
+        message: `Votre loyer de ${montantLoyer}Ar pour la période ${periodeLoyer} a été payé avec succès.`,
         receveur: req.user._id,
         urlRoute: `/mes-boutiques/${boutique._id}`
       });
@@ -208,7 +208,7 @@ class LoyerController {
       await notificationService.createNotification({
         type: 'Paiement',
         title: 'Nouveau paiement de loyer',
-        message: `${req.user.nom} ${req.user.prenoms} a payé le loyer de ${montantLoyer}€ pour ${boutique.nom}.`,
+        message: `${req.user.nom} ${req.user.prenoms} a payé le loyer de ${montantLoyer}Ar pour ${boutique.nom}.`,
         receveur: adminUser._id,
         urlRoute: `/admin/dashboard`
       });

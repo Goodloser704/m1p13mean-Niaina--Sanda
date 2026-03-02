@@ -91,17 +91,17 @@ async function cleanAchatsTest() {
     if (acheteur) {
       const portefeuilleAcheteur = await PorteFeuille.findOne({ owner: acheteur._id });
       if (portefeuilleAcheteur) {
-        portefeuilleAcheteur.balance = 1000; // Réinitialiser à 1000€
+        portefeuilleAcheteur.balance = 1000; // Réinitialiser à 1000Ar
         await portefeuilleAcheteur.save();
-        console.log(`✅ Portefeuille acheteur réinitialisé à 1000€`);
+        console.log(`✅ Portefeuille acheteur réinitialisé à 1000Ar`);
       }
     }
 
     const portefeuilleCommercant = await PorteFeuille.findOne({ owner: commercant._id });
     if (portefeuilleCommercant) {
-      portefeuilleCommercant.balance = 0; // Réinitialiser à 0€
+      portefeuilleCommercant.balance = 0; // Réinitialiser à 0Ar
       await portefeuilleCommercant.save();
-      console.log(`✅ Portefeuille commerçant réinitialisé à 0€`);
+      console.log(`✅ Portefeuille commerçant réinitialisé à 0Ar`);
     }
 
     console.log('\n📊 État après nettoyage:');

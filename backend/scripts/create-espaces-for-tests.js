@@ -57,7 +57,7 @@ async function createEspaces() {
         centreCommercial: centreCommercialId,
         etage: etageId,
         surface: 40 + (i * 5), // 45m², 50m², 55m², etc.
-        loyer: 1000 + (i * 100), // 1100€, 1200€, 1300€, etc.
+        loyer: 1000 + (i * 100), // 1100Ar, 1200Ar, 1300Ar, etc.
         statut: 'Disponible',
         description: `Espace de test ${i} pour les tests de demandes de location`,
         isActive: true
@@ -69,7 +69,7 @@ async function createEspaces() {
     log(`✅ ${espacesCreated.length} espaces créés avec succès`, 'green');
     
     espacesCreated.forEach((espace, index) => {
-      log(`   ${index + 1}. ${espace.code} - ${espace.surface}m² - ${espace.loyer}€/mois`, 'blue');
+      log(`   ${index + 1}. ${espace.code} - ${espace.surface}m² - ${espace.loyer}Ar/mois`, 'blue');
     });
 
     // Mettre à jour les statistiques de l'étage

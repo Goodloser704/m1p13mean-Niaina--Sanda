@@ -35,10 +35,10 @@ async function testPortefeuilleAdmin() {
       });
       
       console.log(`✅ Portefeuille admin créé: ${portefeuilleAdmin._id}`);
-      console.log(`   Solde initial: ${portefeuilleAdmin.balance}€`);
+      console.log(`   Solde initial: ${portefeuilleAdmin.balance}Ar`);
     } else {
       console.log(`\n💰 Portefeuille admin: ${portefeuilleAdmin._id}`);
-      console.log(`   Solde: ${portefeuilleAdmin.balance}€`);
+      console.log(`   Solde: ${portefeuilleAdmin.balance}Ar`);
     }
 
     // 3. Vérifier les transactions de type Loyer
@@ -57,9 +57,9 @@ async function testPortefeuilleAdmin() {
       console.log('\nDernières transactions:');
       transactionsLoyer.forEach((t, i) => {
         console.log(`\n${i + 1}. Transaction ${t._id}`);
-        console.log(`   Montant: ${t.amount}€`);
-        console.log(`   De: ${t.fromWallet?._id} (solde: ${t.fromWallet?.balance}€)`);
-        console.log(`   Vers: ${t.toWallet?._id} (solde: ${t.toWallet?.balance}€)`);
+        console.log(`   Montant: ${t.amount}Ar`);
+        console.log(`   De: ${t.fromWallet?._id} (solde: ${t.fromWallet?.balance}Ar)`);
+        console.log(`   Vers: ${t.toWallet?._id} (solde: ${t.toWallet?.balance}Ar)`);
         console.log(`   Description: ${t.description}`);
         console.log(`   Date: ${t.createdAt}`);
         console.log(`   Statut: ${t.statut}`);
@@ -77,15 +77,15 @@ async function testPortefeuilleAdmin() {
     if (transactionsVersAdmin.length > 0) {
       console.log('\nDétails:');
       transactionsVersAdmin.forEach((t, i) => {
-        console.log(`${i + 1}. ${t.type}: ${t.amount}€ - ${t.description} (${t.createdAt})`);
+        console.log(`${i + 1}. ${t.type}: ${t.amount}Ar - ${t.description} (${t.createdAt})`);
       });
       
       const totalRecu = transactionsVersAdmin.reduce((sum, t) => sum + t.amount, 0);
-      console.log(`\n💰 Total reçu (selon transactions): ${totalRecu}€`);
-      console.log(`💰 Solde actuel portefeuille: ${portefeuilleAdmin.balance}€`);
+      console.log(`\n💰 Total reçu (selon transactions): ${totalRecu}Ar`);
+      console.log(`💰 Solde actuel portefeuille: ${portefeuilleAdmin.balance}Ar`);
       
       if (Math.abs(totalRecu - portefeuilleAdmin.balance) > 0.01) {
-        console.log(`⚠️  ATTENTION: Différence de ${Math.abs(totalRecu - portefeuilleAdmin.balance)}€!`);
+        console.log(`⚠️  ATTENTION: Différence de ${Math.abs(totalRecu - portefeuilleAdmin.balance)}Ar!`);
       } else {
         console.log(`✅ Solde cohérent avec les transactions`);
       }
@@ -109,9 +109,9 @@ async function testPortefeuilleAdmin() {
         if (transactionsLoyers.length > 0) {
           console.log(`\n   ${commercant.email}:`);
           console.log(`   - Portefeuille: ${portefeuilleCommercant._id}`);
-          console.log(`   - Solde: ${portefeuilleCommercant.balance}€`);
+          console.log(`   - Solde: ${portefeuilleCommercant.balance}Ar`);
           console.log(`   - Loyers payés: ${transactionsLoyers.length}`);
-          console.log(`   - Total payé: ${transactionsLoyers.reduce((sum, t) => sum + t.amount, 0)}€`);
+          console.log(`   - Total payé: ${transactionsLoyers.reduce((sum, t) => sum + t.amount, 0)}Ar`);
           
           // Vérifier si ces transactions pointent vers l'admin
           const versAdmin = transactionsLoyers.filter(t => 

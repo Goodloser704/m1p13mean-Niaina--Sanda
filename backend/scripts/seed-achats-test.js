@@ -151,7 +151,7 @@ async function seedAchatsTest() {
         });
         await produit.save();
         produitsCreees++;
-        console.log(`✅ Produit créé: ${produit.nom} - ${produit.prix}€ (Stock: ${produit.stock.nombreDispo})`);
+        console.log(`✅ Produit créé: ${produit.nom} - ${produit.prix}Ar (Stock: ${produit.stock.nombreDispo})`);
       } else {
         console.log(`⏭️  Produit existe: ${produit.nom}`);
       }
@@ -179,18 +179,18 @@ async function seedAchatsTest() {
       if (!portefeuilleAcheteur) {
         portefeuilleAcheteur = new PorteFeuille({
           owner: acheteur._id,
-          balance: 1000 // Donner 1000€ pour les tests
+          balance: 1000 // Donner 1000Ar pour les tests
         });
         await portefeuilleAcheteur.save();
-        console.log('✅ Portefeuille acheteur créé avec 1000€');
+        console.log('✅ Portefeuille acheteur créé avec 1000Ar');
       } else {
         // Ajouter du solde si nécessaire
         if (portefeuilleAcheteur.balance < 500) {
           portefeuilleAcheteur.balance = 1000;
           await portefeuilleAcheteur.save();
-          console.log('✅ Portefeuille acheteur rechargé à 1000€');
+          console.log('✅ Portefeuille acheteur rechargé à 1000Ar');
         } else {
-          console.log(`⏭️  Portefeuille acheteur existe: ${portefeuilleAcheteur.balance}€`);
+          console.log(`⏭️  Portefeuille acheteur existe: ${portefeuilleAcheteur.balance}Ar`);
         }
       }
     }

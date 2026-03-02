@@ -22,7 +22,7 @@ async function listEspaces() {
       console.log(`${index + 1}. Espace ${espace.code}`);
       console.log(`   ID: ${espace._id}`);
       console.log(`   Surface: ${espace.surface}m²`);
-      console.log(`   Loyer: ${espace.loyer}€`);
+      console.log(`   Loyer: ${espace.loyer}Ar`);
       console.log(`   Statut: ${espace.statut}`);
       console.log(`   Étage: ${espace.etage ? `${espace.etage.nom} (niveau ${espace.etage.niveau})` : 'NON DÉFINI'}`);
       console.log('');

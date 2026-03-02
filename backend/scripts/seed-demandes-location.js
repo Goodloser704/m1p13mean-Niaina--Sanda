@@ -81,7 +81,7 @@ async function seedDemandesLocation() {
           statut: 'Disponible',
           description: `Espace commercial ${espaceData.code} - ${espaceData.surface}m²`
         });
-        console.log(`   ✅ Espace ${espaceData.code} créé (${espaceData.surface}m², ${espaceData.loyer}€/mois)`);
+        console.log(`   ✅ Espace ${espaceData.code} créé (${espaceData.surface}m², ${espaceData.loyer}Ar/mois)`);
       } else {
         // Remettre disponible si occupé
         if (espace.statut === 'Occupee') {

@@ -27,8 +27,8 @@ async function creditAdmin() {
       process.exit(1);
     }
 
-    console.log(`💰 Solde actuel: ${pf.balance}€\n`);
-    console.log('💳 Ajout d\'une transaction de test de 100€...\n');
+    console.log(`💰 Solde actuel: ${pf.balance}Ar\n`);
+    console.log('💳 Ajout d\'une transaction de test de 100Ar...\n');
 
     // Créer une transaction de recharge
     const transaction = await PFTransaction.create({
@@ -45,7 +45,7 @@ async function creditAdmin() {
     await pf.save();
 
     console.log(`✅ Transaction créée: ${transaction._id}`);
-    console.log(`💰 Nouveau solde: ${pf.balance}€\n`);
+    console.log(`💰 Nouveau solde: ${pf.balance}Ar\n`);
 
     // Vérifier les transactions
     const txs = await PFTransaction.find({
@@ -55,7 +55,7 @@ async function creditAdmin() {
 
     console.log(`📊 Dernières transactions (${txs.length}):`);
     txs.forEach((t, i) => {
-      console.log(`${i + 1}. ${t.type}: ${t.amount}€ - ${t.description}`);
+      console.log(`${i + 1}. ${t.type}: ${t.amount}Ar - ${t.description}`);
     });
 
     console.log('\n✅ Terminé');

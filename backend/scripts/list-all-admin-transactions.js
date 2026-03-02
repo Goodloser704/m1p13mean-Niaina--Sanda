@@ -23,13 +23,13 @@ async function listAllTransactions() {
     let total = 0;
     txs.forEach((t, i) => {
       console.log(`${i+1}. ${t.createdAt.toISOString().slice(0,16).replace('T', ' ')}`);
-      console.log(`   ${t.type}: ${t.amount}€`);
+      console.log(`   ${t.type}: ${t.amount}Ar`);
       console.log(`   ${t.description}\n`);
       total += t.amount;
     });
     
-    console.log(`💰 Total reçu: ${total}€`);
-    console.log(`💰 Solde portefeuille: ${pf.balance}€\n`);
+    console.log(`💰 Total reçu: ${total}Ar`);
+    console.log(`💰 Solde portefeuille: ${pf.balance}Ar\n`);
     
     process.exit(0);
   } catch (error) {

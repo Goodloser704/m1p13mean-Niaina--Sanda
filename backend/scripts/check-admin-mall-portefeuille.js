@@ -34,10 +34,10 @@ async function checkAdminMallPortefeuille() {
       });
       
       console.log(`✅ Portefeuille créé: ${portefeuille._id}`);
-      console.log(`   Solde: ${portefeuille.balance}€\n`);
+      console.log(`   Solde: ${portefeuille.balance}Ar\n`);
     } else {
       console.log(`💰 Portefeuille: ${portefeuille._id}`);
-      console.log(`   Solde: ${portefeuille.balance}€\n`);
+      console.log(`   Solde: ${portefeuille.balance}Ar\n`);
     }
 
     // 3. Vérifier les transactions
@@ -55,7 +55,7 @@ async function checkAdminMallPortefeuille() {
       console.log('Dernières transactions:');
       transactions.forEach((t, i) => {
         const direction = t.toWallet?.toString() === portefeuille._id.toString() ? '📥' : '📤';
-        console.log(`${i + 1}. ${direction} ${t.type}: ${t.amount}€`);
+        console.log(`${i + 1}. ${direction} ${t.type}: ${t.amount}Ar`);
         console.log(`   ${t.description}`);
         console.log(`   ${t.createdAt}\n`);
       });
@@ -86,7 +86,7 @@ async function checkAdminMallPortefeuille() {
     if (stats.length > 0) {
       console.log('📈 Statistiques par type:');
       stats.forEach(s => {
-        console.log(`   ${s._id}: ${s.count} transactions, ${s.total}€`);
+        console.log(`   ${s._id}: ${s.count} transactions, ${s.total}Ar`);
       });
     }
 

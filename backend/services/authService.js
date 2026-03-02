@@ -70,11 +70,11 @@ class AuthService {
       const PorteFeuille = require('../models/PorteFeuille');
       
       // Donner un solde initial pour les tests
-      // Commerçants: 5000€ pour payer les loyers
-      // Acheteurs: 10000€ pour acheter des produits
+      // Commerçants: 5000Ar pour payer les loyers
+      // Acheteurs: 10000Ar pour acheter des produits
       const soldeInitial = role === 'Commercant' ? 5000 : (role === 'Acheteur' ? 10000 : 0);
       const portefeuille = await PorteFeuille.creerPourUtilisateur(user._id, soldeInitial);
-      console.log(`✅ [SERVICE] PorteFeuille créé avec succès - ID: ${portefeuille._id}, Solde: ${soldeInitial}€`);
+      console.log(`✅ [SERVICE] PorteFeuille créé avec succès - ID: ${portefeuille._id}, Solde: ${soldeInitial}Ar`);
 
       // Générer le token
       const token = this.generateToken(user._id);

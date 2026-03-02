@@ -56,12 +56,12 @@ async function seedData() {
         owner: commercant._id,
         balance: 5000 // Solde initial pour les tests
       });
-      log('✅ Portefeuille commercant créé avec 5000€', 'green');
+      log('✅ Portefeuille commercant créé avec 5000Ar', 'green');
     } else {
       // Créditer le portefeuille pour les tests
       portefeuilleCommercant.balance = Math.max(portefeuilleCommercant.balance, 5000);
       await portefeuilleCommercant.save();
-      log(`✅ Portefeuille commercant: ${portefeuilleCommercant.balance}€`, 'green');
+      log(`✅ Portefeuille commercant: ${portefeuilleCommercant.balance}Ar`, 'green');
     }
 
     let portefeuilleAdmin = await PorteFeuille.findOne({ owner: admin._id });
@@ -72,7 +72,7 @@ async function seedData() {
       });
       log('✅ Portefeuille admin créé', 'green');
     } else {
-      log(`✅ Portefeuille admin: ${portefeuilleAdmin.balance}€`, 'green');
+      log(`✅ Portefeuille admin: ${portefeuilleAdmin.balance}Ar`, 'green');
     }
 
     // 3. Récupérer un étage existant
@@ -112,7 +112,7 @@ async function seedData() {
           centreCommercial: centreCommercial._id,
           statut: 'Disponible'
         });
-        log(`✅ Espace créé: ${espace.code} (${espace.loyer}€/mois)`, 'green');
+        log(`✅ Espace créé: ${espace.code} (${espace.loyer}Ar/mois)`, 'green');
       } else {
         log(`✅ Espace existant: ${espace.code}`, 'green');
       }
@@ -176,7 +176,7 @@ async function seedData() {
     log(`Étage: ${etage.nom}`, 'blue');
     log(`Espaces créés: ${espaces.length}`, 'blue');
     log(`Boutiques actives: ${boutiquesCreated > 0 ? boutiquesCreated : 'existantes'}`, 'blue');
-    log(`Portefeuille commercant: ${portefeuilleCommercant.balance}€`, 'blue');
+    log(`Portefeuille commercant: ${portefeuilleCommercant.balance}Ar`, 'blue');
     
     log('\n✅ Données de test créées avec succès!', 'green');
     log('='.repeat(60), 'cyan');

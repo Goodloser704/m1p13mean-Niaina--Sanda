@@ -58,7 +58,7 @@ async function createAdminAccount() {
       // Vérifier le portefeuille
       const wallet = await PorteFeuille.findOne({ owner: existingAdmin._id });
       if (wallet) {
-        console.log(`   Portefeuille: ${wallet._id} (Balance: ${wallet.balance}€)`);
+        console.log(`   Portefeuille: ${wallet._id} (Balance: ${wallet.balance}Ar)`);
       } else {
         console.log('   ⚠️  Portefeuille manquant, création...');
         const newWallet = new PorteFeuille({
@@ -105,7 +105,7 @@ async function createAdminAccount() {
     await wallet.save();
     console.log('✅ Portefeuille créé avec succès!');
     console.log(`   ID: ${wallet._id}`);
-    console.log(`   Balance: ${wallet.balance}€`);
+    console.log(`   Balance: ${wallet.balance}Ar`);
 
     console.log('\n🎉 COMPTE ADMIN CRÉÉ AVEC SUCCÈS!');
     console.log('\n📋 Identifiants de connexion:');
