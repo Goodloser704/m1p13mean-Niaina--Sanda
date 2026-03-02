@@ -188,7 +188,7 @@ exports.obtenirMesAchatsEnCours = async (req, res) => {
   try {
     const acheteurId = req.user._id;
 
-    const { page = 1, limit = 15, etatsAchat } = req.query;
+    const { page = 1, limit = 15, etatsAchat, typesAchat } = req.query;
     const skip = (page - 1) * limit;
 
     let etats;
@@ -201,9 +201,19 @@ exports.obtenirMesAchatsEnCours = async (req, res) => {
       etats = [EtatAchatEnum.EnAttente, EtatAchatEnum.Validee];
     }
 
+    let types;
+    if (typesAchat) {
+      types = Array.isArray(typesAchat)
+        ? typesAchat
+        : [typesAchat];
+    } else {
+      types = [TypeAchatEnum.Livrer, TypeAchatEnum.Recuperer];
+    }
+
     const filter = {
       acheteur: acheteurId,
-      etat: { $in: etats }
+      etat: { $in: etats },
+      typeAchat: { $in: types }
     };
 
     const total = await Achat.countDocuments(filter);
