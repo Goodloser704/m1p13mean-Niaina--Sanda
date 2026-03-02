@@ -197,7 +197,6 @@ exports.obtenirMesAchatsEnCours = async (req, res) => {
         ? etatsAchat
         : [etatsAchat];
     } else {
-      // Inclure Validee pour afficher les achats récents
       etats = [EtatAchatEnum.EnAttente, EtatAchatEnum.Validee];
     }
 
@@ -213,7 +212,7 @@ exports.obtenirMesAchatsEnCours = async (req, res) => {
     const filter = {
       acheteur: acheteurId,
       etat: { $in: etats },
-      typeAchat: { $in: types }
+      'typeAchat.type': { $in: types }
     };
 
     const total = await Achat.countDocuments(filter);
@@ -227,7 +226,7 @@ exports.obtenirMesAchatsEnCours = async (req, res) => {
         select: 'nom',
         populate: {
           path: 'commercant',
-          select: 'nom prenom'
+          select: 'nom prenoms'
         }
       }
     })
@@ -290,7 +289,7 @@ exports.obtenirMonHistoriqueAchats = async (req, res) => {
           select: 'nom',
           populate: {
             path: 'commercant',
-            select: 'nom prenom'
+            select: 'nom prenoms'
           }
         }
       })
@@ -336,7 +335,7 @@ exports.obtenirAchatParId = async (req, res) => {
           select: 'nom description contact',
           populate: {
             path: 'commercant',
-            select: 'nom prenom email telephone'
+            select: 'nom prenoms email telephone'
           }
         }
       })
@@ -474,7 +473,7 @@ exports.obtenirMesFactures = async (req, res) => {
     const total = await Facture.countDocuments(criteres);
 
     const factures = await Facture.find(criteres)
-      .populate('acheteur', 'nom prenom email')
+      .populate('acheteur', 'nom prenoms email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -522,7 +521,7 @@ exports.obtenirFactureParId = async (req, res) => {
     const acheteurId = req.user._id;
 
     const facture = await Facture.findOne({ _id: id, acheteur: acheteurId })
-      .populate('acheteur', 'nom prenom email');
+      .populate('acheteur', 'nom prenoms email');
 
     if (!facture) {
       return res.status(404).json({
@@ -540,7 +539,7 @@ exports.obtenirFactureParId = async (req, res) => {
           select: 'nom',
           populate: {
             path: 'commercant',
-            select: 'nom prenom'
+            select: 'nom prenoms'
           }
         }
       });
