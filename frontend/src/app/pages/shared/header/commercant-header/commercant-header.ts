@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from "@angular/common";
 import { User } from '../../../../core/models/user.model';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -7,6 +7,7 @@ import { CentreCommercialService } from '../../../../core/services/admin/centre-
 import { RouterLink } from "@angular/router";
 import { DialogService } from '../../../../core/services/dialog.service';
 import { filter } from 'rxjs';
+import { NotificationsService } from '../../../../core/services/notifications.service';
 
 @Component({
   selector: 'app-commercant-header',
@@ -14,12 +15,15 @@ import { filter } from 'rxjs';
   templateUrl: './commercant-header.html',
   styleUrl: './commercant-header.scss',
 })
-export class CommercantHeader {
+export class CommercantHeader implements OnInit {
   centre = computed(() =>
     this.centreCommercialService.centreCommercial()
       ?? this.centreCommercialService.getDefault()
   );
   currentUser = signal<User | null>(null);
+
+  notificationService = inject(NotificationsService);
+  unreadCount = computed(() => this.notificationService.unreadCount());
 
   constructor(
     private authService: AuthService,
@@ -27,6 +31,20 @@ export class CommercantHeader {
     private dialogService: DialogService
   ) {
     this.currentUser.set(this.authService.currentUser());
+  }
+
+  ngOnInit(): void {
+    this.notificationService.getUnreadCount()
+      .subscribe({
+        next: (res) => {
+          try {
+            this.notificationService.unreadCount.set(res.unreadCount);
+          } catch (err) {
+            console.error(err);
+          }
+        },
+        error: console.error
+      });
   }
 
   logOut() {

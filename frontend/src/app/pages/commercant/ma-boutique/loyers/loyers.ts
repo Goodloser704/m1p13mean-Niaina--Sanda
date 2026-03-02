@@ -9,19 +9,18 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angula
 import { DatePipe, CurrencyPipe, NgClass } from "@angular/common";
 import { LoyerPaiement } from '../../../../core/models/commercant/commercant.model';
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { NgxMaskDirective } from "ngx-mask";
-import { logSafe } from '../../../../core/functions/console-function';
 import { DialogService } from '../../../../core/services/dialog.service';
 import { Dialog } from '../../../../components/shared/dialog/dialog';
 import { PaginationComponent } from "../../../../components/shared/pagination-component/pagination-component";
 
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 (pdfMake as any).vfs = pdfFonts['vfs'];
 
 @Component({
   selector: 'app-loyers',
-  imports: [ReactiveFormsModule, DatePipe, CurrencyPipe, NgClass, NgxMaskDirective, PaginationComponent],
+  imports: [ReactiveFormsModule, DatePipe, CurrencyPipe, NgxMaskDirective, PaginationComponent],
   templateUrl: './loyers.html',
   styleUrl: './loyers.scss',
 })

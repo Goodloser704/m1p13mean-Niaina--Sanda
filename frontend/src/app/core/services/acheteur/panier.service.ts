@@ -3,6 +3,17 @@ import { Panier, PanierValidationPayload } from '../../models/acheteur/panier.mo
 import { Produit } from '../../models/commercant/produit.model';
 import { TypeAchat } from '../../models/acheteur/achat.model';
 
+export interface PanierDeleteData {
+  idProduit: string,
+  typeAchat: TypeAchat
+}
+
+export interface PanierAjoutData {
+  produit: Produit,
+  quantite: number,
+  typeAchat: TypeAchat
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -75,35 +86,36 @@ export class PanierService {
 
   // ---- Functions ----
 
-  ajouterProduit(produit: Produit, quantite: number, typeAchat: TypeAchat) {
+  ajouterProduit(data: PanierAjoutData) {
     const panier = this._panier();
+
     const existant = panier.achats.find(
-      a => a.produitId === produit._id && a.typeAchat === typeAchat
+      a => a.produitId === data.produit._id && a.typeAchat === data.typeAchat
     );
 
     if (existant) {
-      existant.quantite += quantite;
+      existant.quantite += data.quantite;
       existant.montantLigne = existant.quantite * existant.prixUnitaire;
     } else {
       panier.achats.push({
-        produitId: produit._id,
-        nom: produit.nom,
-        photo: produit.photo,
-        prixUnitaire: produit.prix,
-        quantite,
-        typeAchat,
-        montantLigne: produit.prix * quantite
+        produitId: data.produit._id,
+        nom: data.produit.nom,
+        photo: data.produit.photo,
+        prixUnitaire: data.produit.prix,
+        quantite: data.quantite,
+        typeAchat: data.typeAchat,
+        montantLigne: data.produit.prix * data.quantite
       });
     }
 
     this.recalculer();
   }
 
-  supprimerItem(produitId: string, typeAchat: TypeAchat) {
+  supprimerItem(data: PanierDeleteData) {
     const panier = this._panier();
 
     panier.achats = panier.achats.filter(
-      a => !(a.produitId === produitId && a.typeAchat === typeAchat)
+      a => !(a.produitId === data.idProduit && a.typeAchat === data.typeAchat)
     );
 
     this.recalculer();
@@ -133,6 +145,19 @@ export class PanierService {
       })),
       montantTotal: panier.montantTotal
     };
+  }
+
+  getQuantiteDansPanier(produitId: string): number {
+    return this._panier().achats
+      .filter(item => item.produitId === produitId)
+      .reduce((total, item) => total + item.quantite, 0);
+  }
+
+  getDisponibleReel(produit: Produit): number {
+    const dejaDansPanier = this.getQuantiteDansPanier(produit._id);
+    const disponible = produit.stock.nombreDispo - dejaDansPanier;
+
+    return Math.max(0, disponible);
   }
 
   // -- End Functions --

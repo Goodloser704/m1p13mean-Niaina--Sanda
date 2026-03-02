@@ -14,8 +14,11 @@ export class RowProduct implements OnInit {
   @Input() product!: Produit;
   typeProduit = signal<TypeProduit | null>(null);
 
+  @Input() commercant = false;
+
   @Output() edit = new EventEmitter<Produit>();
   @Output() delete = new EventEmitter<string>();
+  @Output() addToCart = new EventEmitter<Produit>();
 
   ngOnInit(): void {
     this.typeProduit.set(getTypeProduit(this.product));
@@ -27,5 +30,9 @@ export class RowProduct implements OnInit {
 
   deleteProduct(idProduct: string) {
     this.delete.emit(idProduct);
+  }
+
+  onAddToCart(product: Produit) {
+    this.addToCart.emit(product);
   }
 }

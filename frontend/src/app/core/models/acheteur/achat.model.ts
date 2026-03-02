@@ -12,7 +12,7 @@ export enum TypeAchat {
 export function typeAchatLabel(typeAchat: TypeAchat): string {
   switch (typeAchat) {
     case TypeAchat.Livrer:
-      return "Livraison";
+      return "A livrer";
     case TypeAchat.Recuperer:
       return "A récupérer";
   }

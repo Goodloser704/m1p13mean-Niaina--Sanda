@@ -29,6 +29,8 @@ import { LocationEspace } from './pages/commercant/ma-boutique/location-espace/l
 import { Loyers } from './pages/commercant/ma-boutique/loyers/loyers';
 import { Infos } from './pages/commercant/ma-boutique/infos/infos';
 import { BoutiqueHome } from './pages/acheteur/boutique-home/boutique-home';
+import { MesAchats } from './pages/acheteur/mes-achats/mes-achats';
+import { MonPanier } from './pages/acheteur/mon-panier/mon-panier';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -96,6 +98,8 @@ export const routes: Routes = [
     children: [
       { path: 'all-boutiques', component: AllBoutiques },
       { path: 'boutique-home', component: BoutiqueHome },
+      { path: 'mes-achats', component: MesAchats },
+      { path: 'mon-panier', component: MonPanier },
 
       { path: 'user-profil', component: UserProfil },
       { path: 'notifications', component: Notifications },

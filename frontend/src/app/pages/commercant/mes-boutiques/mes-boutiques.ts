@@ -14,6 +14,7 @@ import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-
 import { RouterLink } from "@angular/router";
 import { LoaderService } from "../../../core/services/loader.service";
 import { BoutiqueCard } from "../../../components/commercant/boutique-card/boutique-card";
+import { NotificationsService } from "../../../core/services/notifications.service";
 
 @Component({
   selector: 'app-mes-boutiques',
@@ -23,18 +24,30 @@ import { BoutiqueCard } from "../../../components/commercant/boutique-card/bouti
 })
 export class MesBoutiques implements OnInit, AfterViewInit {
   @ViewChild('childSection') childSection!: ElementRef;
-  
-  loaderService = inject(LoaderService);
 
   mesBoutiques = signal<Boutique[]>([]);
   StatutBoutique = StatutBoutique;
 
-  constructor(private boutiqueService: BoutiqueService) {
-
-  }
+  constructor(
+    private boutiqueService: BoutiqueService,
+    private notificationService: NotificationsService,
+    private loaderService: LoaderService
+  ) {}
 
   ngOnInit(): void {
     this.loadMyBoutiques();
+
+    this.notificationService.getUnreadCount()
+      .subscribe({
+        next: (res) => {
+          try {
+            this.notificationService.unreadCount.set(res.unreadCount);
+          } catch (err) {
+            console.error(err);
+          }
+        },
+        error: console.error
+      });
   }
 
   ngAfterViewInit() {

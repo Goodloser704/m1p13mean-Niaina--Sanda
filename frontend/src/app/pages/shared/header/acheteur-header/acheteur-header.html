@@ -11,7 +11,7 @@
       p-0
     "
   >
-    <nav class="navbar w-100 navbar-expand-md">
+    <nav class="navbar w-100 navbar-expand-md py-1">
       <div class="container-fluid">
         <button
           class="navbar-toggler" 
@@ -36,17 +36,56 @@
             </a>
           </div>
 
-          <ul class="navbar-nav ms-md-auto mb-2 mb-md-0 d-flex align-items-md-center gap-0 gap-md-2">
+          <ul class="navbar-nav ms-md-auto mb-2 mb-md-0 d-flex align-items-md-center gap-0 gap-md-1">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" [routerLink]="['/acheteur/all-boutiques']">Home</a>
+              <a 
+                class="nav-link" 
+                [class.active]="isActiveRoute('all-boutiques')"
+                aria-current="page" 
+                [routerLink]="['/acheteur/all-boutiques']"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="Accueil"
+              >
+                <i class="bi bi-house bi-bolder acheteur-header-icon"></i>
+              </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
+              <a 
+                class="nav-link" 
+                [class.active]="isActiveRoute('mon-panier')"
+                aria-current="page" 
+                [routerLink]="['/acheteur/mon-panier']"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="Panier"
+              >
+                <i class="bi bi-cart bi-bolder acheteur-header-icon"></i>
+              </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link position-relative notification-link" [routerLink]="['/acheteur/notifications']">
-                <i class="bi bi-bell bi-bolder notification-icon"></i>
-                <!-- <span class="notification-dot"></span> -->
+              <a 
+                class="nav-link" 
+                [class.active]="isActiveRoute('mes-achats')"
+                aria-current="page" 
+                [routerLink]="['/acheteur/mes-achats']"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="Achats"
+              >
+                <i class="bi bi-card-list bi-bolder acheteur-header-icon"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a 
+                class="nav-link position-relative notification-link"
+                [class.active]="isActiveRoute('notifications')" 
+                [routerLink]="['/acheteur/notifications']"
+              >
+                <i class="bi bi-bell bi-bolder acheteur-header-icon"></i>
+                @if (unreadCount()) {
+                  <span class="notification-dot"></span>
+                }
               </a>
             </li>
 

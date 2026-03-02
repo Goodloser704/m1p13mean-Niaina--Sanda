@@ -1,0 +1,5 @@
+@use "../../../../styles/shared/variables" as v;
+
+.active {
+  color: v.$heading-color !important;
+}

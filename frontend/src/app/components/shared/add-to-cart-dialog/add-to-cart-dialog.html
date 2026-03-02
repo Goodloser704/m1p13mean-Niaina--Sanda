@@ -1,0 +1,101 @@
+<div class="floating-container-darker">
+  <div class="dialog-card glass p-3">
+    @if (message) {
+      <h5 class="dialog-title mb-3">{{ message }}</h5>
+    }
+
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex align-items-center gap-3 mb-3 p-2 rounded-3 bg-light">
+          <img
+            [src]="produit.photo ? produit.photo : 'assets/img/story-set/shopping-bag.png'"
+            width="70"
+            height="70"
+            class="rounded-2 object-fit-cover"
+          />
+
+          <div class="flex-grow-1">
+            <div class="fw-semibold">
+              {{ produit.nom }}
+            </div>
+
+            <div class="small text-muted">
+              {{ produit.prix | currency:'MGA':'Ar ':'1.2-2' }}
+            </div>
+
+            <div class="small"
+              [ngClass]="{
+                'text-success': disponible > 0,
+                'text-danger': disponible === 0
+              }">
+
+              Stock disponible : {{ disponible }}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="form" class="php-email-form">
+      <div class="row gx-3 gy-3">
+        <div class="col-6">
+          <input 
+            type="number"
+            min="1"
+            [max]="disponible"
+            placeholder="Quantité"
+            formControlName="quantite"
+            class="form-control"
+          />
+
+          @if (quantiteControl.touched && quantiteControl.errors) {
+            <div class="text-danger small mt-1">
+              @if (quantiteControl.errors['required']) {
+                Quantité requise
+              }
+              @if (quantiteControl.errors['min']) {
+                Minimum 1 article
+              }
+              @if (quantiteControl.errors['max']) {
+                Stock insuffisant (max {{ disponible }})
+              }
+            </div>
+          }
+        </div>
+
+        <div class="col-6">
+          <select class="form-control" formControlName="typeAchat">
+            @for (typeAchat of typesAchat; track typeAchat.type) {
+              <option [value]="typeAchat.type">{{ typeAchat.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12">
+          <div class="text-end mb-2 fw-bold text-warning">
+            Total : {{ montantPreview() | currency:'MGA':'Ar ':'1.2-2' }}
+          </div>
+          <div class="d-flex justify-content-end">
+            <button
+              type="submit"
+              class="btn-glass me-2"
+              (click)="submit()"
+              [disabled]="form.invalid || disponible === 0"
+            >
+              Ajouter
+            </button>
+
+            <button
+              type="button"
+              class="btn-glass-secondary" 
+              (click)="close(null)"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

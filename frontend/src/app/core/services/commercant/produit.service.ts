@@ -13,18 +13,25 @@ export class ProduitService {
 
   constructor(private http: HttpClient) {}
 
-  obtenirProduits(
-    search?: string,
-    idBoutique?: string,
-    idType?: string,
+  obtenirProduits({
+    search,
+    idBoutique,
+    idType,
     stockMin = 0,
     page = 1, 
     limit = 10
-  ) {
+  }: {
+    search?: string,
+    idBoutique?: string,
+    idType?: string,
+    stockMin?: number,
+    page?: number, 
+    limit?: number
+  }) {
     let params = new HttpParams()
       .set('stockMin', stockMin.toString())
-      .set('page', page.toString())
-      .set('limit', limit.toString());
+      .set('page', page)
+      .set('limit', limit);
 
     if (search !== undefined) params = params.set('search', search);
     if (idBoutique !== undefined) params = params.set('boutiqueId', idBoutique);

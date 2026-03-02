@@ -95,7 +95,7 @@
   padding: 0.6rem 1.5rem;
   color: v.$contrast-color;
   border: 2px solid rgba(255, 255, 255, 0.8);
-  background: rgba(v.$heading-color, 0.7);
+  background: rgba(v.$heading-color, 0.9);
   border-radius: 0.75rem;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -104,7 +104,7 @@
 }
 
 .btn-glass-tertiary:hover {
-  background: rgba(v.$heading-color, 0.7);
+  background: rgba(v.$heading-color, 1);
   transform: scale(1.05);
 }
 

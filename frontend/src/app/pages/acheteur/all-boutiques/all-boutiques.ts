@@ -10,6 +10,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
 import { BoutiqueCard } from "../../../components/commercant/boutique-card/boutique-card";
 import { PaginationComponent } from "../../../components/shared/pagination-component/pagination-component";
+import { NotificationsService } from '../../../core/services/notifications.service';
 
 @Component({
   selector: 'app-all-boutiques',
@@ -35,6 +36,7 @@ export class AllBoutiques implements OnInit, AfterViewInit {
   constructor(
     private boutiqueService: BoutiqueService,
     private achatService: AchatService,
+    private notificationService: NotificationsService,
     private loaderService: LoaderService
   ) {
     effect(() => {
@@ -51,7 +53,17 @@ export class AllBoutiques implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    
+    this.notificationService.getUnreadCount()
+      .subscribe({
+        next: (res) => {
+          try {
+            this.notificationService.unreadCount.set(res.unreadCount);
+          } catch (err) {
+            console.error(err);
+          }
+        },
+        error: console.error
+      });
   }
 
   ngAfterViewInit(): void {

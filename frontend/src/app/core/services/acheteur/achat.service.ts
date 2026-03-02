@@ -85,12 +85,37 @@ export class AchatService {
     )
   }
 
-  getMesAchatsEnCours() {
+  getMesAchats({
+    page,
+    limit,
+    typesAchat,
+    etatsAchat
+  }: {
+    page?: number,
+    limit?: number,
+    typesAchat?: TypeAchat[],
+    etatsAchat?: EtatAchat[]
+  }) {
+    let params = new HttpParams()
+    if (page !== undefined) params = params.set('page', page);
+    if (limit !== undefined) params = params.set('limit', limit);
+    if (typesAchat && typesAchat.length > 0) {
+      typesAchat.forEach(type => {
+        params = params.append('typesAchat', type);
+      })
+    }
+    if (etatsAchat && etatsAchat.length > 0) {
+      etatsAchat.forEach(etat => {
+        params = params.append('etatsAchat', etat);
+      })
+    }
+
     return this.http.get<{
       achats: Achat[],
-      count: number
+      pagination: Pagination
     }>(
-      `${this.apiAchat}/en-cours`
+      `${this.apiAchat}/en-cours`,
+      { params }
     );
   }
 
@@ -117,8 +142,8 @@ export class AchatService {
   }: {
     page: number,
     limit: number,
-    dateDebut: string | undefined,
-    dateFin: string | undefined
+    dateDebut?: string,
+    dateFin?: string
   }) {
     let params = new HttpParams()
       .set('page', page)

@@ -190,7 +190,7 @@ h1, h2 {
 .card-img-top {
   border: 1px solid transparent;
   width: 100%;
-  aspect-ratio: 1.5;
+  aspect-ratio: 1.7;
   object-fit: cover;
   display: block; // supprime l'espace blanc sous l'image
   padding: 0.2rem;
@@ -240,9 +240,15 @@ h1, h2 {
   justify-content: center;
 }
 
-.notification-icon {
+.header-icon {
   font-weight: 400;
   font-size: 1.1rem; /* icône légèrement plus épaisse */
+}
+
+.acheteur-header-icon {
+  font-weight: 400;
+  font-size: 1.5rem;
+  // border: 1px solid red;
 }
 
 .notification-dot {

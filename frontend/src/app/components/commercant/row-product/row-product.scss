@@ -4,3 +4,24 @@
   cursor: pointer;
   box-shadow: 0 3px 10px 0 rgba(v.$heading-color, 0.5);
 }
+
+.product-description {
+  color: v.$accent-color;
+  font-size: 0.8rem;
+}
+
+.disponibilite {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 0.7rem;
+}
+
+.bottom-badge {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 10px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+}

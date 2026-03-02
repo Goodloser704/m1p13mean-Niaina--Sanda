@@ -43,8 +43,10 @@
 
             <li class="nav-item">
               <a class="nav-link position-relative notification-link" [routerLink]="['/commercant/notifications']">
-                <i class="bi bi-bell bi-bolder notification-icon"></i>
-                <!-- <span class="notification-dot"></span> -->
+                <i class="bi bi-bell bi-bolder header-icon"></i>
+                @if (unreadCount()) {
+                  <span class="notification-dot"></span>
+                }
               </a>
             </li>
 

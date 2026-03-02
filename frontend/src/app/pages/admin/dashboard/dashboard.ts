@@ -11,6 +11,7 @@ import { EspacesService } from '../../../core/services/admin/espaces.service';
 import { BoutiqueService } from '../../../core/services/commercant/boutique.service';
 import { LoyerService } from '../../../core/services/admin/loyer.service';
 import { LoaderService } from '../../../core/services/loader.service';
+import { NotificationsService } from '../../../core/services/notifications.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -138,6 +139,7 @@ export class Dashboard implements OnInit, AfterViewInit {
   constructor(
     private espacesService: EspacesService,
     private boutiqueService: BoutiqueService,
+    private notificationService: NotificationsService,
     private loyerService: LoyerService
   ) {}
 
@@ -150,6 +152,18 @@ export class Dashboard implements OnInit, AfterViewInit {
     this.selectedMonth.set(selectedMonth);
     this.selectedYear.set(selectedYear);
     this.loadDashboard();
+
+    this.notificationService.getUnreadCount()
+      .subscribe({
+        next: (res) => {
+          try {
+            this.notificationService.unreadCount.set(res.unreadCount);
+          } catch (err) {
+            console.error(err);
+          }
+        },
+        error: console.error
+      });
   }
 
   ngAfterViewInit() {
