@@ -188,10 +188,27 @@ exports.obtenirMesAchatsEnCours = async (req, res) => {
   try {
     const acheteurId = req.user._id;
 
-    const achats = await Achat.find({
+    const { page = 1, limit = 15, etatsAchat } = req.query;
+    const skip = (page - 1) * limit;
+
+    let etats;
+    if (etatsAchat) {
+      etats = Array.isArray(etatsAchat)
+        ? etatsAchat
+        : [etatsAchat];
+    } else {
+      // Inclure Validee pour afficher les achats récents
+      etats = [EtatAchatEnum.EnAttente, EtatAchatEnum.Validee];
+    }
+
+    const filter = {
       acheteur: acheteurId,
-      etat: { $in: [EtatAchatEnum.EnAttente, EtatAchatEnum.Validee] }
-    })
+      etat: { $in: etats }
+    };
+
+    const total = await Achat.countDocuments(filter);
+
+    const achats = await Achat.find(filter)
     .populate('produit', 'nom prix tempsPreparation')
     .populate({
       path: 'produit',
@@ -205,11 +222,20 @@ exports.obtenirMesAchatsEnCours = async (req, res) => {
       }
     })
     .populate('facture', 'description createdAt')
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+    const totalPages = Math.ceil(total / limit);
 
     res.json({
       achats,
-      count: achats.length
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages
+      }
     });
 
   } catch (error) {
