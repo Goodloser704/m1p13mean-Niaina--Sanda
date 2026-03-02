@@ -53,16 +53,25 @@
       }
     </div>
 
-    <div
-      class="small fw-semibold"
-      [ngClass]="{
-        'text-success': getDisponibiliteLabel() === 'Disponible',
-        'text-warning': getDisponibiliteLabel().includes('min'),
-        'text-muted': !getDisponibiliteLabel().includes('min') && getDisponibiliteLabel() !== 'Disponible'
-      }"
-    >
-      {{ getDisponibiliteLabel() }}
-    </div>
+    @if (!commercant) {
+      <div
+        class="small fw-semibold"
+        [ngClass]="{
+          'text-success': getDisponibiliteLabel() === 'Disponible',
+          'text-warning': getDisponibiliteLabel().includes('min'),
+          'text-muted': !getDisponibiliteLabel().includes('min') && getDisponibiliteLabel() !== 'Disponible'
+        }"
+      >
+        {{ getDisponibiliteLabel() }}
+      </div>
+    } @else {
+      <div
+        class="small fw-semibold"
+        [ngClass]="getLivraisonClass()"
+      >
+        {{ getLivraisonLabel() }}
+      </div>
+    }
 
   </div>
 </div>
