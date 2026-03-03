@@ -31,7 +31,6 @@ export class MesAchats implements OnInit, AfterViewInit {
   facturesPagination = createPagination(12);
 
   TypeAchat = TypeAchat;
-  typeAchats = Object.values(TypeAchat);
   filtreTypesAchats = signal<TypeAchat | undefined>(undefined);
 
   @ViewChild('childSection') childSection!: ElementRef;
@@ -42,10 +41,10 @@ export class MesAchats implements OnInit, AfterViewInit {
   ) {
     effect(() => {
       const page = this.achatsEnAttentePagination.currentPage();
-      
+
       this.getAchatsEnAttente(page, [TypeAchat.Livrer, TypeAchat.Recuperer]);
     });
-    
+
     effect(() => {
       const page = this.historiquePagination.currentPage();
       const typesAchat = this.filtreTypesAchats();
@@ -84,7 +83,7 @@ export class MesAchats implements OnInit, AfterViewInit {
         next: (res) => {
           try {
             console.log(`${JSON.stringify(res)}`);
-            
+
             this.achatsEnAttente.set(res.achats);
             this.achatsEnAttentePagination.setTotalPages(res.pagination.totalPages);
             this.achatsEnAttentePagination.setTotalItems(res.pagination.total);
@@ -117,7 +116,7 @@ export class MesAchats implements OnInit, AfterViewInit {
           } catch (err) {
             console.error(err);
           }
-        }, 
+        },
         error: console.error
       });
   }

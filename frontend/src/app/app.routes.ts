@@ -13,7 +13,6 @@ import { InscriptionChoice } from './components/auth/inscription-choice/inscript
 import { Inscription } from './components/auth/inscription/inscription';
 import { MesBoutiques } from './pages/commercant/mes-boutiques/mes-boutiques';
 import { AllBoutiques } from './pages/acheteur/all-boutiques/all-boutiques';
-import { TemplateLayout } from './pages/shared/layout/template-layout/template-layout';
 import { UserProfil } from './pages/shared/user-profil/user-profil';
 import { Notifications } from './pages/shared/notifications/notifications';
 import { PorteFeuille } from './pages/shared/porte-feuille/porte-feuille';
@@ -35,7 +34,7 @@ import { MonPanier } from './pages/acheteur/mon-panier/mon-panier';
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
-    path: '', 
+    path: '',
     component: AuthLayout,
     canActivate: [noAuthGuard],
     children: [
@@ -66,12 +65,12 @@ export const routes: Routes = [
     path: 'commercant',
     component: CommercantLayout,
     canActivate: [authGuard, roleGuard],
-    data: { roles: [UserRole.Commercant] }, 
+    data: { roles: [UserRole.Commercant] },
     children: [
       { path: 'mes-boutiques', component: MesBoutiques },
       { path: 'creation-boutique', component: CreationBoutique },
-      { 
-        path: 'ma-boutique', 
+      {
+        path: 'ma-boutique',
         component: MaBoutique,
         children: [
           { path: 'type-produits', component: TypeProduits },
