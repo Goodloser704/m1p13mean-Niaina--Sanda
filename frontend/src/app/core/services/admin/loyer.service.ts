@@ -62,6 +62,19 @@ export class LoyerService {
     )
   }
 
+  obtenirHistorique(params?: { page?: number; limit?: number }) {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    return this.http.get<{
+      loyers: Recepisse[],
+      pagination: Pagination
+    }>(
+      `${this.apiUrl}/api/commercant/loyers/historique?${queryParams.toString()}`
+    );
+  }
+
   // Admin
   getStatutPaimentsMoisCourant() {
     return this.http.get<PaiementsMoisCourantResponse>(

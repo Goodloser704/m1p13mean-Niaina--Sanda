@@ -34,4 +34,15 @@ export class PorteFeuilleService {
   obtenirStatistiques() {
     return this.http.get<{ statistiques: PorteFeuilleStatistique }>(`${this.apiUrl}/api/portefeuille/stats`);
   }
+
+  // -------------------------------------
+
+  // Obtenir le solde
+  obtenirSolde() {
+    return this.http.get<{ balance: number }>(
+      `${this.apiUrl}/api/portefeuille/me`
+    );
+  }
+
+
 }
