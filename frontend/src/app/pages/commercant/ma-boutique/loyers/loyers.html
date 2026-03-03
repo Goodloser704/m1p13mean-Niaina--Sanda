@@ -140,14 +140,14 @@
 
       @if (boutiquesSelectionnees().size > 0 && moisSelectionnes().size > 0) {
         <div #paiementSection class="row px-2 py-3 mt-3 payment-summary glass" style="scroll-margin-top: 5rem;">
-          <div class="col-sm-7 text-center text-sm-start">
+          <div class="col-sm-7 text-center text-sm-start p-2">
             <h3 class="mb-2">Résumé du paiement</h3>
             <p class="mb-1"><strong>{{ boutiquesSelectionnees().size }}</strong> boutique(s) × <strong>{{ moisSelectionnes().size }}</strong> mois</p>
             <p class="mb-0">Solde après paiement: <strong>{{ soldePortefeuille() - montantTotal() | currency:'MGA':'Ar ':'1.2-2' }}</strong></p>
           </div>
-          <div class="col-sm-5 text-center text-sm-end">
+          <div class="col-sm-5 text-center text-sm-end p-2">
             <div class="montant-total mb-2">
-              <small class="mb-2">Montant total</small>
+              <p class="mb-2 label">Montant total</p>
               <h3 class="mb-0 text-primary">{{ montantTotal() | currency:'MGA':'Ar ':'1.2-2' }}</h3>
             </div>
             <button class="btn-glass" (click)="payerLoyers()" [disabled]="montantTotal() > soldePortefeuille()">

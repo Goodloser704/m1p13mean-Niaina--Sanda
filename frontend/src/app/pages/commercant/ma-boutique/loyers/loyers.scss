@@ -305,8 +305,9 @@
     }
 
     .montant-total {
-      small {
-        color: rgba(255, 255, 255, 0.9);
+      .label {
+        color: v.$default-color;
+        font-weight: bold;
         display: block;
       }
 

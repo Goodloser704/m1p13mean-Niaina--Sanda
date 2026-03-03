@@ -121,37 +121,39 @@
     <h4>Types actuels:</h4>
     <hr>
 
-    @if (types().length === 0) {
-      <app-empty-row-list [label]="'Aucun type de produit'" />
-    }
+    <div class="scrollable-item">
+      @if (types().length === 0) {
+        <app-empty-row-list [label]="'Aucun type de produit'" />
+      }
 
-    @for (type of types(); track type._id; let i = $index) {
-      <div class="glass row-list-item mb-2" data-aos="fade-up" [attr.data-aos-delay]="(i+1)*100">
-        <div class="d-flex justify-content-center align-items-center">
-          <p 
-            class="mb-0"
-            [style.color]="type.couleur || '#333'"
-          >
-            {{ type.type| titlecase }}
-          </p>
-          @if (type.icone) {
-            <i
-              class="ms-2 bi fs-4"
-              [ngClass]="type.icone"
+      @for (type of types(); track type._id; let i = $index) {
+        <div class="glass row-list-item mb-2" data-aos="fade-up" [attr.data-aos-delay]="(i+1)*100">
+          <div class="d-flex justify-content-center align-items-center">
+            <p 
+              class="mb-0"
               [style.color]="type.couleur || '#333'"
-            ></i>
-          }
+            >
+              {{ type.type| titlecase }}
+            </p>
+            @if (type.icone) {
+              <i
+                class="ms-2 bi fs-4"
+                [ngClass]="type.icone"
+                [style.color]="type.couleur || '#333'"
+              ></i>
+            }
+          </div>
+          
+          <div class="d-flex flex-row align-items-center gap-2">
+            <button class="btn btn-outline-primary px-2 py-1" (click)="editType(type)">
+              <i class="bi bi-pen-fill"></i>
+            </button>
+            <button class="btn btn-secondary px-2 py-1" (click)="deleteType(type._id)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
         </div>
-        
-        <div class="d-flex flex-row align-items-center gap-2">
-          <button class="btn btn-outline-primary px-2 py-1" (click)="editType(type)">
-            <i class="bi bi-pen-fill"></i>
-          </button>
-          <button class="btn btn-secondary px-2 py-1" (click)="deleteType(type._id)">
-            <i class="bi bi-trash"></i>
-          </button>
-        </div>
-      </div>
-    }
+      }
+    </div>
   </div>
 </div>

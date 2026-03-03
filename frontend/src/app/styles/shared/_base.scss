@@ -223,6 +223,15 @@ h1, h2 {
   row-gap: 10px;
 }
 
+.scrollable-item {
+  // border: 1px solid red;
+  border-radius: 13px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem 0.3rem;
+  @include m.thin-scrollbar;
+}
+
 .scroll-margin-top {
   scroll-margin-top: 6rem;
 }
