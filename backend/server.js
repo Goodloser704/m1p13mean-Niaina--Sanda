@@ -39,16 +39,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware CORS avec logging
+// Middleware CORS avec logging - Configuration permissive pour production
 app.use(cors({
   origin: function(origin, callback) {
     console.log(`🔐 CORS Check - Origin: ${origin || 'No Origin'}`);
     
+    // En production, accepter toutes les origines Vercel et localhost
+    // Cela évite les problèmes avec les déploiements de preview
     const allowedOrigins = [
       'http://localhost:4200',
       'https://localhost:4200',
       'https://m1p13mean-niaina-1.onrender.com',
-      'https://m1p13mean-niaina-xjl4.vercel.app', // Frontend Vercel
       process.env.FRONTEND_URL
     ].filter(Boolean);
     
@@ -58,18 +59,38 @@ app.use(cors({
       return callback(null, true);
     }
     
+    // Vérifier les origines exactes
     if (allowedOrigins.includes(origin)) {
-      console.log(`✅ CORS: Origin ${origin} is allowed`);
-      callback(null, true);
-    } else {
-      console.log(`❌ CORS: Origin ${origin} is NOT allowed`);
-      console.log(`   Allowed origins:`, allowedOrigins);
-      callback(new Error('Not allowed by CORS'));
+      console.log(`✅ CORS: Origin ${origin} is allowed (exact match)`);
+      return callback(null, true);
     }
+    
+    // Vérifier les patterns Vercel (accepter TOUS les déploiements Vercel)
+    if (origin.includes('.vercel.app')) {
+      console.log(`✅ CORS: Vercel deployment ${origin} is allowed`);
+      return callback(null, true);
+    }
+    
+    // Vérifier les patterns Render
+    if (origin.includes('.onrender.com')) {
+      console.log(`✅ CORS: Render deployment ${origin} is allowed`);
+      return callback(null, true);
+    }
+    
+    // Localhost avec n'importe quel port
+    if (origin.startsWith('http://localhost:') || origin.startsWith('https://localhost:')) {
+      console.log(`✅ CORS: Localhost ${origin} is allowed`);
+      return callback(null, true);
+    }
+    
+    console.log(`❌ CORS: Origin ${origin} is NOT allowed`);
+    console.log(`   Allowed patterns: *.vercel.app, *.onrender.com, localhost:*`);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Length', 'X-Request-Id']
 }));
 
 app.use(express.json({ limit: '10mb' }));
@@ -77,12 +98,115 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes avec logging
 console.log('🛣️  Initialisation des routes...');
+
+// Routes d'authentification
+console.log('🛣️  Chargement route auth...');
 app.use('/api/auth', require('./routes/auth'));
+
+// Routes utilisateurs (conformes aux spécifications)
+console.log('🛣️  Chargement routes utilisateurs...');
+app.use('/api', require('./routes/auth')); // Pour /api/users/*
+app.use('/api/users', require('./routes/users')); // Routes utilisateurs supplémentaires
+
+// Routes de notifications
+console.log('🛣️  Chargement route notifications...');
+app.use('/api/notifications', require('./routes/notifications'));
+
+// Routes utilisateurs notifications (conformes aux spécifications)
+console.log('🛣️  Chargement routes notifications utilisateurs...');
+app.use('/api', require('./routes/notifications')); // Pour /api/users/:userId/notifications
+
+// Routes d'administration
+console.log('🛣️  Chargement route admin...');
 app.use('/api/admin', require('./routes/admin'));
+// Routes admin pour boutiques
+console.log('🛣️  Chargement routes admin/boutiques...');
+app.use('/api/admin/boutiques', require('./routes/boutique'));
+// Routes admin pour demandes de location
+console.log('🛣️  Chargement routes admin/demandes-location...');
+app.use('/api/admin/demandes-location', require('./routes/demandes-location'));
+
+// Routes de boutiques
+console.log('🛣️  Chargement route boutique...');
 app.use('/api/boutique', require('./routes/boutique'));
+// Routes publiques boutiques avec pluriel (conformes aux spécifications)
+console.log('🛣️  Chargement routes boutiques (pluriel)...');
+app.use('/api/boutiques', require('./routes/boutique'));
+
+// Routes client
+console.log('🛣️  Chargement route client...');
 app.use('/api/client', require('./routes/client'));
-app.use('/api/products', require('./routes/products'));
+
+// Routes de produits
+console.log('🛣️  Chargement route produits...');
+app.use('/api/produits', require('./routes/produits'));
+
+// Routes de commandes
+console.log('🛣️  Chargement route orders...');
 app.use('/api/orders', require('./routes/orders'));
+
+// Routes d'infrastructure
+console.log('🛣️  Chargement route etages...');
+app.use('/api/etages', require('./routes/etages'));
+app.use('/api/admin/etages', require('./routes/etages')); // Routes admin pour étages
+console.log('🛣️  Chargement route espaces...');
+app.use('/api/espaces', require('./routes/espaces'));
+app.use('/api/admin/espaces', require('./routes/espaces')); // Routes admin pour espaces
+console.log('🛣️  Chargement route centre-commercial...');
+app.use('/api/centre-commercial', require('./routes/centre-commercial'));
+
+// Routes de gestion financière
+console.log('🛣️  Chargement route portefeuille...');
+app.use('/api/portefeuille', require('./routes/portefeuille'));
+
+// Routes de catégories (AVANT les routes génériques /api)
+console.log('🛣️  Chargement route types-produit...');
+app.use('/api/types-produit', require('./routes/types-produit'));
+console.log('🛣️  Chargement route categories-boutique...');
+app.use('/api/categories-boutique', require('./routes/categories-boutique'));
+
+// Routes utilisateurs portefeuille (conformes aux spécifications)
+console.log('🛣️  Chargement routes portefeuille utilisateurs...');
+app.use('/api', require('./routes/portefeuille')); // Pour /api/users/:id/wallet
+
+console.log('🛣️  Chargement route achats...');
+app.use('/api/achats', require('./routes/achats'));
+
+// Routes acheteur (conformes aux spécifications)
+console.log('🛣️  Chargement routes acheteur...');
+app.use('/api/acheteur', require('./routes/acheteur'));
+// Routes acheteur pour factures
+console.log('🛣️  Chargement routes acheteur/factures...');
+app.use('/api/acheteur', require('./routes/factures'));
+
+// Routes commercant
+console.log('🛣️  Chargement route commercant...');
+app.use('/api/commercant', require('./routes/commercant'));
+// Routes commercant pour boutiques (conformes aux spécifications)
+console.log('🛣️  Chargement routes commercant/boutiques...');
+app.use('/api/commercant/boutiques', require('./routes/boutique'));
+// Routes commercant pour produits
+console.log('🛣️  Chargement routes commercant/produits...');
+app.use('/api/commercant/produits', require('./routes/produits'));
+// Note: Les routes commercant/achats sont gérées dans routes/commercant.js
+
+// Routes de loyers (nouvelles)
+console.log('🛣️  Chargement route loyers...');
+app.use('/api/commercant/loyers', require('./routes/loyers'));
+app.use('/api/admin/loyers', require('./routes/loyers')); // Routes admin pour historique
+
+// Routes de factures (nouvelles)
+console.log('🛣️  Chargement route factures...');
+app.use('/api/factures', require('./routes/factures'));
+
+// Routes de demandes
+console.log('🛣️  Chargement route demandes-location...');
+app.use('/api/demandes-location', require('./routes/demandes-location'));
+
+// 🧪 Routes de test (pour développement)
+console.log('🛣️  Chargement route test-items...');
+app.use('/api/test-items', require('./routes/test-items'));
+
 console.log('✅ Routes initialisées avec succès');
 
 // 🗄️ Connexion MongoDB avec logs détaillés
@@ -180,23 +304,40 @@ app.use((err, req, res, next) => {
   console.error(`   📱 Origin: ${req.get('Origin') || 'Direct'}`);
   console.error(`   🔍 Stack:`, err.stack);
   
+  // S'assurer que la réponse est toujours en JSON
   res.status(500).json({ 
     message: 'Erreur serveur interne',
+    code: 'INTERNAL_SERVER_ERROR',
     timestamp,
     path: req.url
   });
 });
 
-// Route 404 avec logging
+// Route 404 avec logging - TOUJOURS retourner du JSON
 app.use('*', (req, res) => {
   const timestamp = new Date().toISOString();
   console.warn(`⚠️  [${timestamp}] Route non trouvée: ${req.method} ${req.originalUrl}`);
   console.warn(`   📱 Origin: ${req.get('Origin') || 'Direct'}`);
+  console.warn(`   🎫 Authorization: ${req.get('Authorization') ? 'Présent' : 'Absent'}`);
   
+  // IMPORTANT: Toujours retourner du JSON, jamais du HTML
   res.status(404).json({ 
     message: 'Route non trouvée',
+    code: 'ROUTE_NOT_FOUND',
     path: req.originalUrl,
-    timestamp
+    method: req.method,
+    timestamp,
+    availableRoutes: [
+      'GET /',
+      'GET /health',
+      'POST /api/auth/login',
+      'POST /api/auth/register',
+      'GET /api/etages/test',
+      'GET /api/etages',
+      'GET /api/espaces',
+      'GET /api/boutique',
+      'GET /api/notifications'
+    ]
   });
 });
 

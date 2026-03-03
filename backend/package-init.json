@@ -1,0 +1,16 @@
+{
+  "name": "mall-app-init",
+  "version": "1.0.0",
+  "description": "Script d'initialisation pour Mall-App",
+  "main": "scripts/init-system.js",
+  "scripts": {
+    "init": "node scripts/init-system.js",
+    "init-dev": "NODE_ENV=development node scripts/init-system.js",
+    "init-prod": "NODE_ENV=production node scripts/init-system.js"
+  },
+  "dependencies": {
+    "mongoose": "^7.0.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.0.0"
+  }
+}

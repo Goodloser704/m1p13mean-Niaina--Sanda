@@ -1,0 +1,96 @@
+<div class="card h-100 glass product-card">
+  <img
+    [src]="product.photo ? product.photo : 'assets/img/story-set/shopping-bag.png'"
+    class="card-img-top"
+    loading="lazy"
+    [alt]="product.nom"
+  >
+
+  @if (commercant) {
+    <div class="position-absolute w-100 top-0 p-2 d-flex justify-content-end align-items-end gap-2">
+      <button 
+        type="button"
+        class="btn btn-sm btn-light rounded-2"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title="Modifier"
+        (click)="editProduct(product)"
+      >
+        <i class="bi bi-pen"></i>
+      </button>
+
+      <button 
+        type="button"
+        class="btn btn-sm btn-danger rounded-2"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title="Effacer"
+        (click)="deleteProduct(product._id)"
+      >
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  }
+
+  <div class="card-body px-2 py-2 d-flex flex-column">
+    <div class="d-flex justify-content-between align-items-start mb-1">
+      <h5 class="mb-0 fw-bold">{{ product.nom | titlecase }}</h5>
+      
+      <span class="badge" [ngClass]="product.stock.nombreDispo == 0 ? 'bg-danger' : 'bg-success'">
+        {{ product.stock.nombreDispo }} <i class="bi bi-box-seam"></i>
+      </span>
+    </div>
+
+    @if (product.description) {
+      <p class="mb-1 product-description">{{ product.description }}</p>
+    }
+
+    <div class="flex-grow-1"></div>
+
+    <div class="d-flex align-items-center mb-1 small gap-2">
+      @if (!product.tempsPreparation && product.stock.nombreDispo > 0) {
+        <p class="disponibilite">Disponible de suite</p>
+      } @else if (product.tempsPreparation && product.stock.nombreDispo > 0) {
+        <p class="disponibilite">Disponible dans {{ product.tempsPreparation | timeDuration }}</p>
+      } @else {
+        <p class="disponibilite">Non disponible</p>
+      }
+    </div>
+
+    <div class="row px-2 gy-1">
+      @if (typeProduit(); as typeProduit) {
+        <div class="col-12 col-lg-6 px-1">
+          <div class="bottom-badge border border-1"
+            [style.borderColor]="`${typeProduit.couleur} !important` || 'lightgrey !important'"
+          >
+            <p [style.color]="typeProduit.couleur || '#333'">
+              {{ typeProduit.type }}
+            </p>
+
+            @if (typeProduit.icone) {
+              <i
+                class="ms-1 bi"
+                [ngClass]="typeProduit.icone"
+                [style.color]="typeProduit.couleur || '#333'"
+              ></i>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="col-12 col-lg-6 px-1">
+        <div class="bottom-badge border border-1 border-warning bg-warning">
+          <b>{{ product.prix | currency:'MGA':'Ar ':'1.2-2' }}</b>
+        </div>
+      </div>
+    </div>
+
+    @if (!commercant && product.stock.nombreDispo > 0) {
+      <div class="w-100 d-flex justify-content-center align-items-center mt-1">
+        <button type="button" class="btn-glass-tertiary small py-1 w-100" (click)="onAddToCart(product)">
+          Ajouter au panier <i class="bi bi-cart"></i>
+        </button>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,7 @@
+@use "../../../styles/shared/mixins" as m;
+
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+  @include m.thin-scrollbar;
+}

@@ -1,0 +1,16 @@
+<header class="header">
+  <div class="container">
+    <div class="logo">
+    <h1>{{ title }}</h1>
+    </div>
+    <nav class="nav">
+    <button class="btn-primary" (click)="onShowLogin()">
+      {{ showLogin() ? 'Fermer' : 'Se connecter' }}
+    </button>
+    </nav>
+  </div>
+</header>
+
+@if (showLogin()) {
+  <app-login-modal (closeEvent)="onCloseLogin($event)" />
+}

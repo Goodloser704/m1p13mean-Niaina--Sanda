@@ -1,0 +1,218 @@
+<div #childSection class="mb-4 scroll-margin-top">
+  <!-- <h3>Type de produit</h3> -->
+  <p class="text-primary text-wrap">Gérer vos produits</p>
+</div>
+
+@if (!newProduct()) {
+  <div class="row mb-4" data-aos="fade-left" data-aos-delay="200">
+    <div class="col-12">
+      <button 
+        type="button" 
+        class="btn-glass-tertiary fs-4" 
+        (click)="toggleNewProduct()"
+      >
+        Créer <i class="bi bi-plus"></i>
+      </button>
+    </div>
+  </div>
+}
+
+<!--------- Formulaire ---------->
+
+@if (newProduct() || editProductMode()) {
+  <div #formSection class="row liquid-glass mb-4">
+    <div class="col-12">
+      <h4>Produit:</h4>
+      <hr>
+
+      <form
+        class="php-email-form"
+        [formGroup]="productForm"
+        (ngSubmit)="onSubmitProduct()"
+        data-aos="fade-up"
+        data-aos-delay="200"
+      >
+        <div class="row gy-3">
+
+          <div class="col-sm-6">
+            <label class="form-label" for="nom">Nom du produit</label>
+            <input
+              type="text"
+              id="nom"
+              class="form-control"
+              placeholder="Nom"
+              formControlName="nom"
+            >
+          </div>
+
+          <div class="col-sm-6">
+            <label class="form-label" for="prix">Prix unitaire</label>
+            <input
+              type="number"
+              id="prix"
+              class="form-control"
+              placeholder="Prix"
+              formControlName="prix"
+            >
+          </div>
+
+          <div class="col-sm-6">
+            <label class="form-label" for="type">Type de produit</label>
+            <select id="type" class="form-control" formControlName="typeProduit">
+              <option value="" disabled selected>- Type -</option>
+              @for (type of typesProduit(); track type._id) {
+                <option [value]="type._id">{{ type.type }}</option>
+              } 
+            </select>
+          </div>
+
+          <div class="col-sm-6">
+            <label class="form-label" for="stock">Stock disponible</label>
+            <input
+              type="number"
+              id="stock"
+              class="form-control"
+              placeholder="Nombre"
+              formControlName="stock"
+            >
+          </div>
+
+          <div class="col-sm-6">
+            <div class="bg-white rounded-2 border border-1 p-2">
+              <p>Temps de préparation</p>
+              <div class="row">
+                <div class="col-6 col-md-5 col-lg-3">
+                  <label class="form-label text-muted small">Heure</label>
+                  <input class="form-control" type="number" formControlName="heure" />
+                  @if (productForm.get('heure')?.invalid && productForm.get('heure')?.touched) {
+                    <div class="text-danger small mt-1">
+                      0 à 23 uniquement
+                    </div>
+                  }
+                </div>
+
+                <div class="col-6 col-md-5 col-lg-3">
+                  <label class="form-label text-muted small">Minute</label>
+                  <input class="form-control" type="number" formControlName="minute" />
+                  @if (productForm.get('minute')?.invalid && productForm.get('minute')?.touched) {
+                    <div class="text-danger small mt-1">
+                      0 à 59 uniquement
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <textarea
+              class="form-control h-100"
+              placeholder="Description"
+              formControlName="description"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <div class="col-sm-6">
+            <label 
+              for="formFile" 
+              class="form-label text-secondary"
+            >
+              Photo (optionnel, max: 2mo)
+            </label>
+            <input
+              type="file" 
+              #photoInput
+              id="formFile"
+              class="form-control"
+              (change)="onPhotoSelected($event)"
+              accept="image/*"
+            >
+            @if (photoSizeError()) {
+              <p class="text-danger mt-2">Taille du fichier maximum (2MB)</p>
+            }
+          </div>
+
+          @if (photoPreview()) {
+            <div class="col-sm-6">
+              <div class="d-flex align-items-center">
+                <img [src]="photoPreview()" class="photo-preview me-3">
+                <button type="button" class="btn-sm btn-secondary" (click)="clearPhoto()">Effacer</button>
+              </div>
+            </div>
+          }
+
+          <div class="col-12 mt-4 text-center">
+            @if (!editProductMode()) {
+              <div class="w-100 d-flex flex-row flex-wrap justify-content-center align-items-center gap-2">
+                <button
+                  type="submit"
+                  class="btn-glass"
+                  [disabled]="loaderService.isLoading() || productForm.invalid"
+                >
+                  Ajouter
+                </button>
+                <button
+                    type="button"
+                    class="btn-glass-secondary"
+                    (click)="discardNewProduct()"
+                  >
+                    Annuler
+                  </button>
+              </div>
+            } @else {
+              <div class="w-100 d-flex flex-row flex-wrap justify-content-center align-items-center gap-2">
+                <button
+                  type="submit"
+                  class="btn-glass"
+                  [disabled]="loaderService.isLoading() || productForm.invalid"
+                >
+                  Valider
+                </button>
+                <button
+                  type="button"
+                  class="btn-glass-secondary"
+                  (click)="discardEditProduct()"
+                >
+                  Annuler
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!--------- Liste Produits ---------->
+
+<div class="row liquid-glass mb-4">
+  <div class="col-12">
+    <h4>Vos produits:</h4>
+    <hr>
+
+    <div class="row">
+      @if (products().length === 0) {
+        <app-empty-grid-list [label]="'Aucun produit'" />
+      }
+
+      @for (product of products(); track product._id; let i = $index) {
+        <div class="col-12 col-sm-4 col-lg-3 mb-4" data-aos="fade-left" [attr.data-aos-delay]="(i+1)*100">
+          <app-row-product
+            [product]="product"
+            [commercant]="true"
+            (edit)="editProduct($event)"
+            (delete)="deleteProduct($event)"
+          ></app-row-product>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="col-12 d-flex justify-content-end align-items-center">
+    <app-pagination-component
+      [pagination]="productPagination"
+    ></app-pagination-component>
+  </div>
+</div>

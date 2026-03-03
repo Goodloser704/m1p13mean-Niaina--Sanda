@@ -1,6 +1,0 @@
-{
-  "name": "mall-backend-scripts",
-  "scripts": {
-    "init-db": "node init-db.js"
-  }
-}

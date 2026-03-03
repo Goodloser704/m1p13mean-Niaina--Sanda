@@ -1,0 +1,6 @@
+@use "../../../styles/shared/variables" as v;
+
+.label {
+  color: rgba(v.$default-color, 0.6);
+  font-style: italic;
+}

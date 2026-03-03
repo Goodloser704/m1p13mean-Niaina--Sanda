@@ -1,0 +1,221 @@
+<section #childSection id="hero" class="hero section">
+  <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Gestion des Categories de Boutiques</h2>
+      <button class="btn-glass-secondary" routerLink="Location.back()">
+        <i class="bi bi-arrow-left bi-bolder"></i>
+      </button>
+    </div>
+    
+    <div class="row liquid-glass mb-4">
+      <div class="col-md-6">
+        <h4>Nouvelle categorie:</h4>
+        <hr>
+
+        <form
+          class="php-email-form"
+          [formGroup]="categorieForm"
+          (ngSubmit)="onSubmitCategorie()"
+          data-aos="fade-up"
+          data-aos-delay="200"
+        >
+          <div class="row gy-3">
+            <div class="col-12">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Categorie"
+                formControlName="nom"
+              >
+            </div>
+
+            <div class="col-12 my-3 text-center">
+              @if (!categorieEditMode()) {
+                <button
+                  type="submit"
+                  class="btn-sm btn-primary"
+                  [disabled]="loaderService.isLoading() || categorieForm.invalid"
+                >
+                  Ajouter
+                </button>
+              } @else {
+                <div class="w-100 d-flex flex-row flex-wrap justify-content-center align-items-center gap-2">
+                  <button
+                    type="submit"
+                    class="btn-sm btn-primary"
+                  >
+                    Valider
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary rounded-5"
+                    (click)="discardEditCategorie()"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-md-6">
+        <h4>Categories actuelles:</h4>
+        <hr>
+
+        @if (categories().length === 0) {
+          <app-empty-row-list [label]="'Aucune categorie'" />
+        }
+
+        @for (categorie of categories(); track categorie._id; let i = $index) {
+          <div class="glass row-list-item mb-2" data-aos="fade-up" [attr.data-aos-delay]="(i+1)*100">
+            <p>{{ categorie.nom | titlecase }}</p>
+            <div class="d-flex flex-row align-items-center gap-2">
+              <button class="btn btn-outline-primary px-2 py-1" (click)="editCategorie(categorie)">
+                <i class="bi bi-pen-fill"></i>
+              </button>
+              <button class="btn btn-secondary px-2 py-1" (click)="deleteCategorie(categorie._id)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <h2 class="mb-4">List des boutiques actives</h2>
+    <div class="row liquid-glass mb-4">
+      <div class="col-12">
+        <h4>Boutiques actives:</h4>
+        <hr>
+
+        <div class="row">
+          @if (activeBoutiques().length === 0) {
+            <app-empty-grid-list [label]="'Aucune boutique active'" />
+          }
+
+          @for (boutique of activeBoutiques(); track boutique._id; let i = $index) {
+            <div class="col-12 col-sm-6 col-lg-4 mb-4" data-aos="fade-left" [attr.data-aos-delay]="(i+1)*100">
+              <div class="card h-100 glass">
+                <img
+                  [src]="boutique.photo ? boutique.photo : 'assets/img/story-set/boutique-default.png'"
+                  class="card-img-top"
+                  loading="lazy"
+                  [alt]="boutique.nom"
+                >
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0 fw-bold">{{ boutique.nom | titlecase }}</h5>
+                    <span class="badge bg-success">{{ StatutBoutique.Actif }}</span>
+                  </div>
+
+                  @if (boutique.description) {
+                    <p class="small mb-2 text-primary">{{ boutique.description }}</p>
+                  }
+
+                  <div class="d-flex justify-content-between align-items-center mb-1 small">
+                    <p>Categorie:</p>
+                    <b>{{ getBoutiqueCategorieLabel(boutique) }}</b>
+                  </div>
+
+                  <div class="d-flex justify-content-between align-items-center mb-1 small gap-2">
+                    <p>Commercant:</p>
+                    <b class="text-end">{{ getBoutiqueCommercantLabel(boutique) }}</b>
+                  </div>
+
+                  @if (boutique.espace) {
+                    <div class="d-flex justify-content-between align-items-center mt-2 small">
+                      <p>Espace:</p>
+                      <b>{{ getBoutiqueEspaceCode(boutique) }}</b>
+                    </div>
+
+                    @if (getBoutiqueEspaceEtageNiveau(boutique) > -111) {
+                      <p class="text-primary small mb-0 text-end">
+                        Etage {{ getBoutiqueEspaceEtageNiveau(boutique) }}
+                      </p>
+                    }
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="col-12 d-flex justify-content-end align-items-center">
+            <app-pagination-component
+                [pagination]="activeBoutiquesPagination"
+              ></app-pagination-component>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="mb-4">List des boutiques inactives</h2>
+    <div class="row liquid-glass mt-4">
+      <div class="col-12">
+        <h4>Boutiques inactives:</h4>
+        <hr>
+
+        <div class="row">
+          @if (inactiveBoutiques().length === 0) {
+            <app-empty-grid-list [label]="'Aucune boutique inactive'" />
+          }
+
+          @for (boutique of inactiveBoutiques(); track boutique._id; let i = $index) {
+            <div class="col-12 col-sm-6 col-lg-4 mb-4" data-aos="fade-left" [attr.data-aos-delay]="(i+1)*100">
+              <div class="card h-100 glass">
+                <img
+                  [src]="boutique.photo ? boutique.photo : 'assets/img/story-set/boutique-default.png'"
+                  class="card-img-top"
+                  loading="lazy"
+                  [alt]="boutique.nom"
+                >
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0 fw-bold">{{ boutique.nom | titlecase }}</h5>
+                    <span class="badge bg-danger">{{ StatutBoutique.Inactif }}</span>
+                  </div>
+
+                  @if (boutique.description) {
+                    <p class="small mb-2">{{ boutique.description }}</p>
+                  }
+
+                  <div class="d-flex justify-content-between align-items-center mb-1 small">
+                    <p>Categorie:</p>
+                    <b>{{ getBoutiqueCategorieLabel(boutique) }}</b>
+                  </div>
+
+                  <div class="d-flex justify-content-between align-items-center mb-1 small gap-2">
+                    <p>Commercant:</p>
+                    <b class="text-end">{{ getBoutiqueCommercantLabel(boutique) }}</b>
+                  </div>
+
+                  @if (boutique.espace) {
+                    <div class="d-flex justify-content-between align-items-center mt-2 small">
+                      <p>Espace:</p>
+                      <b>{{ getBoutiqueEspaceCode(boutique) }}</b>
+                    </div>
+
+                    @if (getBoutiqueEspaceEtageNiveau(boutique) > -111) {
+                      <p class="text-primary small mb-0 text-end">
+                        Etage {{ getBoutiqueEspaceEtageNiveau(boutique) }}
+                      </p>
+                    }
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="col-12 d-flex justify-content-end align-items-center">
+            <app-pagination-component
+              [pagination]="inactiveBoutiquesPagination"
+            ></app-pagination-component>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+

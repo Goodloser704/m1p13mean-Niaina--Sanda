@@ -1,0 +1,36 @@
+<nav aria-label="Pagination">
+  <ul class="pagination">
+    <li class="page-item">
+      <button
+        type="button"
+        class="page-link"
+        aria-label="Previous"
+        (click)="pagination.previous()"
+      >
+        <span aria-hidden="true">&laquo;</span>
+      </button>
+    </li>
+
+    @for(page of pagination.pagesArray(); track page) {
+      <li
+        class="page-item"
+        [ngClass]="page == pagination.currentPage() ? 'active' : ''"
+      >
+        <button type="button" class="page-link" (click)="pagination.goTo(page)">
+          {{ page }}
+        </button>
+      </li>
+    }
+
+    <li class="page-item">
+      <button
+        type="button"
+        class="page-link"
+        aria-label="Next"
+        (click)="pagination.next()"
+      >
+        <span aria-hidden="true">&raquo;</span>
+      </button>
+    </li>
+  </ul>
+</nav>

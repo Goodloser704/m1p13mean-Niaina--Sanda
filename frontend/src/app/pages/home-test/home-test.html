@@ -1,0 +1,81 @@
+<main class="main-content">
+    <div class="container">
+      
+    <section class="hero">
+      <h2>Bienvenue dans votre Centre Commercial</h2>
+      <p>Découvrez nos boutiques et produits</p>
+      <div class="api-info">
+        <p><strong>API Backend:</strong> {{ backendUrl }}</p>
+        <p><strong>Status:</strong> {{ backendStatus }}</p>
+        <div class="monitoring-buttons">
+          <button class="btn-small" (click)="testApi()">🧪 Test API</button>
+          <button class="btn-small" (click)="refreshConnection()">🔄 Refresh</button>
+          <button class="btn-small" (click)="clearLogs()">🗑️ Clear Logs</button>
+        </div>
+      </div>
+    </section>
+
+    
+    @if (connectionLogs.length > 0) {
+      <section class="monitoring">
+        <h2>📊 Logs de Connexion</h2>
+        <div class="logs-container">
+          @for (log of connectionLogs; track log) {
+            <div class="log-entry">
+              {{ log }}
+            </div>
+          }
+        </div>
+      </section>
+    }
+    
+
+    
+    <section class="categories">
+      <h2>Catégories</h2>
+      <div class="categories-grid">
+        @for (category of categories; track category) {
+          <div class="category-card">
+            <div class="category-icon">{{ category.icon }}</div>
+            <h3>{{ category.name }}</h3>
+            <p>{{ category.count }} boutiques</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    
+    <section class="features">
+      <h2>Fonctionnalités</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>👨‍💼 Interface Admin</h3>
+          <ul>
+            <li>Dashboard avec statistiques</li>
+            <li>Gestion des boutiques</li>
+            <li>Validation des comptes</li>
+            <li>Rapports et analytics</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <h3>🏪 Interface Boutique</h3>
+          <ul>
+            <li>Gestion des produits</li>
+            <li>Suivi des commandes</li>
+            <li>Dashboard de vente</li>
+            <li>Profil boutique</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <h3>🛍️ Interface Client</h3>
+          <ul>
+            <li>Catalogue des produits</li>
+            <li>Recherche et filtres</li>
+            <li>Panier et commandes</li>
+            <li>Profil utilisateur</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>

@@ -1,0 +1,34 @@
+<div class="login-modal" [class.show]="true">
+  <div class="modal-content">
+    <button class="close-btn" (click)="onClose()">✕</button>
+    
+    <h2>Connexion</h2>
+    <form (ngSubmit)="login()">
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input 
+          type="email" 
+          id="email" 
+          [(ngModel)]="email" 
+          placeholder="admin@mall.com"
+          required>
+      </div>
+      <div class="form-group">
+        <label for="password">Mot de passe:</label>
+        <input 
+          type="password" 
+          id="password" 
+          [(ngModel)]="password" 
+          placeholder="admin123"
+          required>
+      </div>
+      <button type="submit" class="btn-primary">Se connecter</button>
+    </form>
+    <div class="test-accounts">
+      <h3>Comptes de test:</h3>
+      <p><strong>Admin:</strong> admin@mall.com / admin123</p>
+      <p><strong>Boutique:</strong> fashion@mall.com / boutique123</p>
+      <p><strong>Client:</strong> client1@test.com / client123</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,34 @@
+@use "../../../../styles/shared/variables" as v;
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero {
+  flex: 1; // prend tout l’espace disponible
+  display: flex;
+  align-items: center;
+  padding: 0; // IMPORTANT pour éviter le scroll
+}
+
+.bienvenu {
+  color: v.$default-color;
+  font-size: 1.2rem;
+  
+  b {
+    color: v.$contrast-color;
+    text-shadow: 0 3px 5px rgba(v.$accent-color, 1);
+  }
+}
+
+.copyright {
+  color: v.$contrast-color;
+  text-shadow: 0 3px 5px rgba(v.$accent-color, 1);
+}

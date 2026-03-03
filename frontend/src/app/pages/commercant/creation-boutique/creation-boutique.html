@@ -1,0 +1,100 @@
+<section id="hero" class="hero section">
+  <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Création d'une boutique</h2>
+      <button class="btn-glass-secondary" routerLink="Location.back()">
+        <i class="bi bi-arrow-left bi-bolder"></i>
+      </button>
+    </div>
+
+    <div class="row liquid-glass mt-4">
+      <div class="col-lg-12">
+        <form
+          class="php-email-form"
+          [formGroup]="boutiqueForm"
+          (ngSubmit)="creerBoutique()"
+          data-aos="fade-up"
+          data-aos-delay="200"
+        >      
+          <div class="row gy-3">
+            <div class="col-sm-6">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Nom"
+                formControlName="nom"
+              >
+            </div>
+
+            <div class="col-sm-6">
+              <select class="form-control" formControlName="categorie">
+                <option value="" disabled selected>Categorie</option>
+                @for (categorie of categories(); track categorie._id) {
+                  <option [value]="categorie._id">{{ categorie.nom }}</option>
+                } 
+              </select>
+            </div>
+
+            <div class="col-sm-6">
+              <label 
+                for="formFile" 
+                class="form-label text-secondary"
+              >
+                Photo (optionnel, max: 2mo)
+              </label>
+              <input
+                type="file" 
+                #photoInput
+                id="formFile"
+                class="form-control"
+                (change)="onPhotoSelected($event)"
+                accept="image/*"
+              >
+              @if (photoSizeError()) {
+                <p class="text-danger mt-2">Taille du fichier maximum (2MB)</p>
+              }
+            </div>
+
+            <div class="col-sm-6">
+              <textarea
+                class="form-control h-100"
+                placeholder="Description"
+                formControlName="description"
+                rows="2"
+              ></textarea>
+            </div>
+
+            @if (photoPreview()) {
+              <div class="col-sm-6">
+                <div class="d-flex align-items-center">
+                  <img [src]="photoPreview()" class="photo-preview me-3">
+                  <button type="button" class="btn-sm btn-secondary" (click)="clearPhoto()">Effacer</button>
+                </div>
+              </div>
+            }
+
+            <div class="col-12">
+              <app-horaires-form
+                [title]="'Horaires d\'ouverture'"
+                [class]="'bg-white p-3 pb-2 rounded-2'"
+                (horairesChange)="onHorairesChange($event)"
+              >
+              </app-horaires-form>
+            </div>
+
+            <div class="col-12 my-3 text-center">
+              <button
+                type="submit"
+                class="btn-sm btn-primary"
+                [disabled]="loaderService.isLoading() || boutiqueForm.invalid"
+              >
+                Créer
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+

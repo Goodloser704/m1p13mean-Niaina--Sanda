@@ -1,0 +1,41 @@
+<section #childSection id="hero" class="hero section">
+  <div class="container px-4 px-sm-0 px-lg-3" data-aos="fade-up" data-aos-delay="100">
+    <h2 class="mb-4">Boutiques</h2>
+
+    <div class="row mb-4" data-aos="fade-left" data-aos-delay="200">
+      <div class="col-12">
+        <button 
+          type="button" 
+          class="btn-glass-tertiary fs-3" 
+          [routerLink]="['/commercant/creation-boutique']"
+        >
+          Créer <i class="bi bi-plus"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="row liquid-glass mb-4">
+      <div class="col-12">
+        <h4>Mes Boutiques:</h4>
+        <hr>
+
+        <div class="row">
+          @if (mesBoutiques().length === 0) {
+            <app-empty-grid-list [label]="'Aucune boutique'" />
+          }
+
+          @for (boutique of mesBoutiques(); track boutique._id; let i = $index) {
+            <div class="col-12 col-sm-6 col-lg-4 mb-4" data-aos="fade-left" [attr.data-aos-delay]="(i+1)*100">
+              <app-boutique-card
+                [boutique]="boutique"
+                [commercant]="true"
+                (click)="allerVersMaBoutique(boutique)"
+              ></app-boutique-card>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

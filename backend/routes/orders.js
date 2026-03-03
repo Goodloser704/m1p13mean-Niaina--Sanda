@@ -1,14 +1,15 @@
 const express = require('express');
 const { auth, authorize } = require('../middleware/auth');
 const Order = require('../models/Order');
-const Product = require('../models/Product');
+const Produit = require('../models/Produit');
+const { RoleEnum } = require('../utils/enums');
 
 const router = express.Router();
 
 // @route   POST /api/orders
 // @desc    Créer une commande
-// @access  Private (Client)
-router.post('/', auth, authorize('client'), async (req, res) => {
+// @access  Private (Acheteur)
+router.post('/', auth, authorize(RoleEnum.Acheteur), async (req, res) => {
   try {
     const { produits, modePaiement, adresseLivraison, notes } = req.body;
 
@@ -21,7 +22,7 @@ router.post('/', auth, authorize('client'), async (req, res) => {
     const produitsValides = [];
 
     for (const item of produits) {
-      const produit = await Product.findById(item.produit);
+      const produit = await Produit.findById(item.produit);
       
       if (!produit || !produit.isActive) {
         return res.status(400).json({ 
@@ -54,7 +55,7 @@ router.post('/', auth, authorize('client'), async (req, res) => {
     const commandesParBoutique = {};
     
     for (const item of produitsValides) {
-      const produit = await Product.findById(item.produit);
+      const produit = await Produit.findById(item.produit);
       const boutiqueId = produit.boutique.toString();
       
       if (!commandesParBoutique[boutiqueId]) {
@@ -106,8 +107,8 @@ router.post('/', auth, authorize('client'), async (req, res) => {
 
 // @route   GET /api/orders/me
 // @desc    Mes commandes
-// @access  Private (Client)
-router.get('/me', auth, authorize('client'), async (req, res) => {
+// @access  Private (Acheteur)
+router.get('/me', auth, authorize(RoleEnum.Acheteur), async (req, res) => {
   try {
     const { page = 1, limit = 10, statut } = req.query;
     const filter = { client: req.user._id };
@@ -171,8 +172,8 @@ router.get('/:id', auth, async (req, res) => {
 
 // @route   PUT /api/orders/:id/cancel
 // @desc    Annuler une commande
-// @access  Private (Client)
-router.put('/:id/cancel', auth, authorize('client'), async (req, res) => {
+// @access  Private (Acheteur)
+router.put('/:id/cancel', auth, authorize(RoleEnum.Acheteur), async (req, res) => {
   try {
     const order = await Order.findOne({
       _id: req.params.id,
@@ -191,7 +192,7 @@ router.put('/:id/cancel', auth, authorize('client'), async (req, res) => {
 
     // Remettre les produits en stock
     for (const item of order.produits) {
-      const produit = await Product.findById(item.produit);
+      const produit = await Produit.findById(item.produit);
       if (produit) {
         produit.stock.quantite += item.quantite;
         await produit.save();

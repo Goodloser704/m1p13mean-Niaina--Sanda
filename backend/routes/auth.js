@@ -1,178 +1,147 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const { body, validationResult } = require('express-validator');
-const User = require('../models/User');
-const { auth } = require('../middleware/auth');
+const { body } = require('express-validator');
+const { auth, adminAuth } = require('../middleware/auth');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
 
-// Générer un token JWT
-const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET || 'secret', {
-    expiresIn: '7d'
-  });
-};
+/**
+ * 🔐 Routes d'Authentification
+ * Gestion de l'inscription, connexion et profils utilisateurs
+ * Architecture: Route → Controller → Service
+ */
 
 // @route   POST /api/auth/register
-// @desc    Inscription utilisateur
+// @desc    Inscription utilisateur (Commercant ou Acheteur)
 // @access  Public
+// @body    { email, mdp, nom, prenoms, role, telephone, photo?, genre? }
+// @return  { message, token, user, portefeuille }
 router.post('/register', [
   body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 6 }),
+  body('mdp').isLength({ min: 6 }), // Utiliser 'mdp' selon les spécifications
   body('nom').notEmpty().trim(),
-  body('prenom').notEmpty().trim(),
-  body('role').isIn(['boutique', 'client'])
-], async (req, res) => {
-  const timestamp = new Date().toISOString();
-  console.log(`🔐 [${timestamp}] Tentative d'inscription`);
-  console.log(`   📧 Email: ${req.body.email}`);
-  console.log(`   👤 Rôle: ${req.body.role}`);
-  
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.log(`❌ Validation échouée:`, errors.array());
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { email, password, nom, prenom, role, telephone, adresse } = req.body;
-
-    // Vérifier si l'utilisateur existe déjà
-    console.log(`🔍 Vérification existence utilisateur: ${email}`);
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      console.log(`⚠️  Utilisateur existe déjà: ${email}`);
-      return res.status(400).json({ message: 'Cet email est déjà utilisé' });
-    }
-
-    // Créer nouvel utilisateur
-    console.log(`➕ Création nouvel utilisateur: ${email}`);
-    const user = new User({
-      email,
-      password,
-      nom,
-      prenom,
-      role,
-      telephone,
-      adresse
-    });
-
-    await user.save();
-    console.log(`✅ Utilisateur créé avec succès: ${user._id}`);
-
-    // Générer token
-    const token = generateToken(user._id);
-    console.log(`🎫 Token généré pour: ${user._id}`);
-
-    res.status(201).json({
-      message: 'Inscription réussie',
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        nom: user.nom,
-        prenom: user.prenom,
-        role: user.role
-      }
-    });
-  } catch (error) {
-    console.error(`❌ Erreur inscription:`, error.message);
-    res.status(500).json({ message: 'Erreur serveur' });
-  }
-});
+  body('prenoms').notEmpty().trim(), // Utiliser 'prenoms' selon les spécifications
+  body('role').isIn(['Admin', 'Commercant', 'Acheteur']), // Enums selon spécifications
+  body('photo').optional({ nullable: true, checkFalsy: false }).isString().trim(), // Photo optionnelle
+  body('genre').optional({ nullable: true, checkFalsy: false }).isIn(['Masculin', 'Feminin']) // Genre optionnel
+], authController.register);
 
 // @route   POST /api/auth/login
-// @desc    Connexion utilisateur
+// @desc    Connexion utilisateur (Admin, Commercant ou Acheteur)
 // @access  Public
+// @body    { email, mdp }
+// @return  { message, token, user }
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
-  body('password').exists()
-], async (req, res) => {
-  const timestamp = new Date().toISOString();
-  console.log(`🔐 [${timestamp}] Tentative de connexion`);
-  console.log(`   📧 Email: ${req.body.email}`);
-  
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.log(`❌ Validation échouée:`, errors.array());
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { email, password } = req.body;
-
-    // Vérifier si l'utilisateur existe
-    console.log(`🔍 Recherche utilisateur: ${email}`);
-    const user = await User.findOne({ email });
-    if (!user) {
-      console.log(`⚠️  Utilisateur non trouvé: ${email}`);
-      return res.status(400).json({ message: 'Identifiants invalides' });
-    }
-
-    console.log(`👤 Utilisateur trouvé: ${user._id} (${user.role})`);
-
-    // Vérifier le mot de passe
-    console.log(`🔑 Vérification mot de passe...`);
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      console.log(`❌ Mot de passe incorrect pour: ${email}`);
-      return res.status(400).json({ message: 'Identifiants invalides' });
-    }
-
-    // Vérifier si le compte est actif
-    if (!user.isActive) {
-      console.log(`⚠️  Compte désactivé: ${email}`);
-      return res.status(400).json({ message: 'Compte désactivé' });
-    }
-
-    // Générer token
-    const token = generateToken(user._id);
-    console.log(`✅ Connexion réussie: ${user._id} (${user.role})`);
-    console.log(`🎫 Token généré et envoyé`);
-
-    res.json({
-      message: 'Connexion réussie',
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        nom: user.nom,
-        prenom: user.prenom,
-        role: user.role
-      }
-    });
-  } catch (error) {
-    console.error(`❌ Erreur connexion:`, error.message);
-    res.status(500).json({ message: 'Erreur serveur' });
-  }
-});
+  body('mdp').exists() // Utiliser 'mdp' selon les spécifications
+], authController.login);
 
 // @route   GET /api/auth/me
 // @desc    Obtenir les infos de l'utilisateur connecté
 // @access  Private
-router.get('/me', auth, async (req, res) => {
-  const timestamp = new Date().toISOString();
-  console.log(`👤 [${timestamp}] Demande profil utilisateur`);
-  console.log(`   🎫 User ID: ${req.user._id}`);
-  console.log(`   👤 Rôle: ${req.user.role}`);
+// @return  { user }
+router.get('/me', auth, authController.getProfile);
+
+// @route   GET /api/users/:id/me (conforme aux spécifications)
+// @desc    Obtenir le profil de l'utilisateur connecté
+// @access  Private
+// @return  { user }
+router.get('/users/:id/me', auth, authController.getProfile);
+
+// @route   GET /api/auth/profile (alias pour /me)
+// @desc    Obtenir les infos de l'utilisateur connecté (alias)
+// @access  Private
+// @return  { user }
+router.get('/profile', auth, authController.getProfile);
+
+// @route   PUT /api/users/me (conforme aux spécifications)
+// @desc    Mettre à jour le profil utilisateur
+// @access  Private
+// @body    { nom, prenoms, email, telephone, photo, genre }
+// @return  { message, user }
+router.put('/users/me', [
+  // Champs obligatoires seulement s'ils sont présents
+  body('nom').optional({ nullable: true, checkFalsy: true }).isLength({ min: 1 }).trim(),
+  body('prenom').optional({ nullable: true, checkFalsy: true }).isLength({ min: 1 }).trim(),
+  body('email').optional({ nullable: true, checkFalsy: true }).isEmail().normalizeEmail(),
   
-  try {
-    res.json({
-      user: {
-        id: req.user._id,
-        email: req.user.email,
-        nom: req.user.nom,
-        prenom: req.user.prenom,
-        role: req.user.role,
-        telephone: req.user.telephone,
-        adresse: req.user.adresse
-      }
-    });
-    console.log(`✅ Profil envoyé pour: ${req.user._id}`);
-  } catch (error) {
-    console.error(`❌ Erreur récupération profil:`, error.message);
-    res.status(500).json({ message: 'Erreur serveur' });
-  }
-});
+  // Champs complètement optionnels
+  body('telephone').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('dateNaissance').optional({ nullable: true, checkFalsy: false }),
+  body('genre').optional({ nullable: true, checkFalsy: false }).isIn(['Masculin', 'Feminin']),
+  body('adresse').optional({ nullable: true, checkFalsy: false }).trim(),
+  
+  // Champs boutique optionnels
+  body('nomBoutique').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('descriptionBoutique').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('categorieActivite').optional({ nullable: true, checkFalsy: false }).isIn(['mode', 'electronique', 'maison', 'beaute', 'sport', 'alimentation', 'autre']),
+  body('numeroSiret').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('adresseBoutique').optional({ nullable: true, checkFalsy: false }).trim()
+], auth, authController.updateProfile);
+
+// @route   PUT /api/auth/profile (maintenir la compatibilité)
+// @desc    Mettre à jour le profil utilisateur
+// @access  Private
+// @body    { nom, prenoms, email, telephone, photo }
+// @return  { message, user }
+router.put('/profile', [
+  // Champs obligatoires seulement s'ils sont présents
+  body('nom').optional({ nullable: true, checkFalsy: true }).isLength({ min: 1 }).trim(),
+  body('prenom').optional({ nullable: true, checkFalsy: true }).isLength({ min: 1 }).trim(),
+  body('email').optional({ nullable: true, checkFalsy: true }).isEmail().normalizeEmail(),
+  
+  // Champs complètement optionnels
+  body('telephone').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('dateNaissance').optional({ nullable: true, checkFalsy: false }),
+  body('genre').optional({ nullable: true, checkFalsy: false }).isIn(['Masculin', 'Feminin']),
+  body('adresse').optional({ nullable: true, checkFalsy: false }).trim(),
+  
+  // Champs boutique optionnels
+  body('nomBoutique').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('descriptionBoutique').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('categorieActivite').optional({ nullable: true, checkFalsy: false }).isIn(['mode', 'electronique', 'maison', 'beaute', 'sport', 'alimentation', 'autre']),
+  body('numeroSiret').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('adresseBoutique').optional({ nullable: true, checkFalsy: false }).trim()
+], auth, authController.updateProfile);
+
+// @route   PUT /api/auth/change-password
+// @desc    Changer le mot de passe
+// @access  Private
+router.put('/change-password', [
+  body('currentPassword').notEmpty(),
+  body('newPassword').isLength({ min: 6 })
+], auth, authController.changePassword);
+
+// @route   DELETE /api/auth/account
+// @desc    Supprimer le compte utilisateur
+// @access  Private
+router.delete('/account', auth, authController.deleteAccount);
+
+// @route   GET /api/auth/users/search
+// @desc    Rechercher des utilisateurs (Admin seulement)
+// @access  Private (Admin)
+router.get('/users/search', adminAuth, authController.searchUsers);
+
+// @route   PUT /api/auth/users/:userId/status
+// @desc    Mettre à jour le statut d'un utilisateur (Admin seulement)
+// @access  Private (Admin)
+router.put('/users/:userId/status', adminAuth, authController.updateUserStatus);
+
+// @route   GET /api/auth/boutiques/pending
+// @desc    Obtenir les boutiques en attente de validation (Admin seulement)
+// @access  Private (Admin)
+router.get('/boutiques/pending', adminAuth, authController.getPendingBoutiques);
+
+// @route   PUT /api/auth/boutiques/:boutiqueId/approve
+// @desc    Approuver une boutique (Admin seulement)
+// @access  Private (Admin)
+router.put('/boutiques/:boutiqueId/approve', adminAuth, authController.approveBoutique);
+
+// @route   PUT /api/auth/boutiques/:boutiqueId/reject
+// @desc    Rejeter une boutique (Admin seulement)
+// @access  Private (Admin)
+router.put('/boutiques/:boutiqueId/reject', [
+  body('reason').optional().isLength({ max: 500 })
+], adminAuth, authController.rejectBoutique);
 
 module.exports = router;

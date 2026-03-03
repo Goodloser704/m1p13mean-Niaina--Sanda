@@ -1,0 +1,46 @@
+<div [ngClass]="class">
+  @if (title) {
+    <p class="text-secondary">{{ title }}</p>
+    <hr class="mt-1">
+  }
+
+  @for (horaire of formGroups; let i = $index; track i) {
+    <div class="row mb-2" [formGroup]="horaire">
+      <div class="col-2">
+        <div class="h-100 d-flex align-items-center overflow-x-hidden">
+          <input
+            type="checkbox"
+            formControlName="ouvert"
+            (change)="toggleJour(i)"
+            class="me-2"
+          >
+          <p style="font-size: 0.8rem;">{{ horaire.get('jour')?.value }}</p>
+        </div>
+      </div>
+
+      <div class="col-5">
+        <input
+          type="time"
+          class="form-control"
+          formControlName="debut"
+        >
+      </div>
+
+      <div class="col-5">
+        <input
+          type="time"
+          class="form-control"
+          formControlName="fin"
+        >
+      </div>
+
+      @if (horaire.errors?.['horaireInvalide']) {
+        <div class="col-12 text-danger small pt-2">
+          <div class="d-flex justify-content-center align-content-center">
+            L'heure de fin doit être après l'heure de début
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
