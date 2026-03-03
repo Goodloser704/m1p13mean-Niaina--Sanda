@@ -60,21 +60,14 @@ export class Loyers implements OnInit {
   Array = Array;
   
   montantTotal = computed(() => {
-    const boutiques = this.boutiques();
     const selectedIds = this.boutiquesSelectionnees();
-    const selectedMois = this.moisSelectionnes();
-    
-    let total = 0;
-    boutiques.forEach(b => {
-      if (selectedIds.has(b._id)) {
-        const loyer = b.espace?.loyer || 0;
-        console.log(`   ${b.nom}: ${loyer}€ × ${selectedMois.size} mois = ${loyer * selectedMois.size}€`);
-        total += loyer * selectedMois.size;
-      }
-    });
-    
-    console.log('   TOTAL:', total, '€');
-    return total;
+    const selectedMoisCount = this.moisSelectionnes().size;
+
+    if (!selectedIds.size || !selectedMoisCount) return 0;
+
+    return this.boutiques()
+      .filter(b => selectedIds.has(b._id))
+      .reduce((total, b) => total + (b.espace?.loyer ?? 0) * selectedMoisCount, 0);
   });
 
   @ViewChild('historiqueSection') historiqueSection!: ElementRef;
@@ -145,24 +138,16 @@ export class Loyers implements OnInit {
   }
 
   getHistoriques(page: number) {
-    this.loyerService.obtenirHistorique({ 
-      page: page, 
+    this.loyerService.obtenirHistorique({
+      page,
       limit: this.historiquePagination.limit
     }).subscribe({
       next: (res) => {
-        try {
-          this.historiquePaiements.set(res.loyers);
-          this.historiquePagination.setTotalPages(res.pagination.totalPages);
-          this.historiquePagination.setTotalItems(res.pagination.total);
+        this.historiquePaiements.set(res.loyers);
+        this.historiquePagination.setTotalPages(res.pagination.totalPages);
+        this.historiquePagination.setTotalItems(res.pagination.total);
 
-          this.genererCalendrier();
-
-          setTimeout(() => {
-            this.historiqueSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          });
-        } catch (err) {
-          console.error(err)
-        }
+        this.genererCalendrier();
       },
       error: (err) => console.error('Erreur chargement historique:', err),
       complete: () => this.loaderService.hide()
@@ -170,112 +155,81 @@ export class Loyers implements OnInit {
   }
 
   genererCalendrier() {
-    const maintenant = new Date();
-    const moisActuel = maintenant.getMonth();
-    const anneeActuelle = maintenant.getFullYear();
-    
-    const calendrier: MoisCalendrier[] = [];
-    const historique = this.historiquePaiements();
-    const boutiques = this.boutiques();
-    
-    console.log('🗓️ Génération calendrier...');
-    console.log('   Boutiques:', boutiques.length, boutiques.map(b => b.nom));
-    console.log('   Historique:', historique.length, 'paiements');
-    
-    // Créer une Map des paiements par boutique (nom) et période
+    const now = new Date();
+    const moisActuel = now.getMonth();
+    const anneeActuelle = now.getFullYear();
+
     const paiementsMap = new Map<string, boolean>();
-    
-    historique.forEach(h => {
-      // Extraire la période de la description
+
+    for (const h of this.historiquePaiements()) {
       const matchPeriode = h.description?.match(/Période (\d{4}-\d{2})/);
-      
-      if (matchPeriode) {
-        const periode = matchPeriode[1];
-        
-        // Extraire le nom de la boutique de la description
-        // Format: "Loyer boutique [NOM] - Période [PERIODE] - Espace [CODE]"
-        const matchBoutique = h.description?.match(/Loyer boutique (.+?) - Période/);
-        
-        if (matchBoutique) {
-          const nomBoutique = matchBoutique[1].trim();
-          
-          // Trouver la boutique correspondante par nom
-          const boutique = boutiques.find(b => b.nom === nomBoutique);
-          
-          if (boutique) {
-            const key = `${boutique._id}-${periode}`;
-            paiementsMap.set(key, true);
-            console.log(`   ✅ Paiement: ${nomBoutique} pour ${periode}`);
-          } else {
-            console.log(`   ⚠️ Boutique "${nomBoutique}" non trouvée dans la liste`);
-          }
-        }
-      }
-    });
-    
-    console.log('   Total paiements détectés:', paiementsMap.size);
+      const matchBoutique = h.description?.match(/Loyer boutique (.+?) - Période/);
+
+      if (!matchPeriode || !matchBoutique) continue;
+
+      const periode = matchPeriode[1];
+      const nomBoutique = matchBoutique[1].trim();
+
+      const boutique = this.boutiques().find(b => b.nom === nomBoutique);
+      if (!boutique) continue;
+
+      paiementsMap.set(`${boutique._id}-${periode}`, true);
+    }
+
     this.statutsPaiements.set(paiementsMap);
-    
-    // Générer 6 mois passés + mois courant + 12 mois futurs
+
+    const calendrier: MoisCalendrier[] = [];
+
     for (let i = -6; i <= 12; i++) {
       const date = new Date(anneeActuelle, moisActuel + i, 1);
-      const annee = date.getFullYear();
-      const mois = date.getMonth();
-      const periode = `${annee}-${String(mois + 1).padStart(2, '0')}`;
-      
+
       calendrier.push({
-        annee,
-        mois: mois + 1,
+        annee: date.getFullYear(),
+        mois: date.getMonth() + 1,
+        periode: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
         label: date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
-        periode,
         estPasse: i < 0,
         estCourant: i === 0,
         estFutur: i > 0
       });
     }
-    
+
     this.moisCalendrier.set(calendrier);
-    
-    // NE PAS sélectionner le mois courant par défaut
-    // L'utilisateur doit choisir manuellement
   }
 
   toggleBoutique(boutiqueId: string) {
     const selected = new Set(this.boutiquesSelectionnees());
-    if (selected.has(boutiqueId)) {
-      selected.delete(boutiqueId);
-    } else {
-      selected.add(boutiqueId);
-    }
+    selected.has(boutiqueId)
+      ? selected.delete(boutiqueId)
+      : selected.add(boutiqueId);
+
     this.boutiquesSelectionnees.set(selected);
   }
 
   toggleMois(periode: string) {
-    // Vérifier si au moins une boutique sélectionnée n'a pas encore payé ce mois
-    const boutiquesSelectionnees = Array.from(this.boutiquesSelectionnees());
-    const auMoinsUneImpayee = boutiquesSelectionnees.some(
-      boutiqueId => !this.estPayePourBoutique(boutiqueId, periode)
-    );
-    
-    // Si toutes les boutiques sélectionnées ont déjà payé, ne pas permettre la sélection
-    if (boutiquesSelectionnees.length > 0 && !auMoinsUneImpayee) {
+    const boutiquesIds = Array.from(this.boutiquesSelectionnees());
+
+    if (
+      boutiquesIds.length &&
+      boutiquesIds.every(id => this.estPayePourBoutique(id, periode))
+    ) {
       alert(`Toutes les boutiques sélectionnées ont déjà payé pour cette période.`);
       return;
     }
-    
+
     const selected = new Set(this.moisSelectionnes());
-    if (selected.has(periode)) {
-      selected.delete(periode);
-    } else {
-      selected.add(periode);
-    }
+    selected.has(periode)
+      ? selected.delete(periode)
+      : selected.add(periode);
+
     this.moisSelectionnes.set(selected);
 
-    setTimeout(() => {
-      if (this.paiementSection) {
-        this.paiementSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });  
-      }
-    }, 500);
+    // setTimeout(() => {
+    //   this.paiementSection?.nativeElement.scrollIntoView({
+    //     behavior: 'smooth',
+    //     block: 'start'
+    //   });
+    // }, 300);
   }
   
   selectionnerMoisPourBoutique(boutiqueId: string, periode: string) {
@@ -321,86 +275,69 @@ export class Loyers implements OnInit {
   payerLoyers() {
     const boutiquesIds = Array.from(this.boutiquesSelectionnees());
     const periodes = Array.from(this.moisSelectionnes());
-    
-    if (boutiquesIds.length === 0) {
+
+    if (!boutiquesIds.length) {
       alert('Veuillez sélectionner au moins une boutique');
       return;
     }
-    
-    if (periodes.length === 0) {
+
+    if (!periodes.length) {
       alert('Veuillez sélectionner au moins un mois');
       return;
     }
-    
-    // Filtrer les paiements déjà effectués
-    const paiementsAEffectuer: Array<{boutiqueId: string, periode: string, montant: number}> = [];
-    
-    boutiquesIds.forEach(boutiqueId => {
-      periodes.forEach(periode => {
-        if (!this.estPayePourBoutique(boutiqueId, periode)) {
+
+    const paiements = boutiquesIds.flatMap(boutiqueId =>
+      periodes
+        .filter(p => !this.estPayePourBoutique(boutiqueId, p))
+        .map(periode => {
           const boutique = this.boutiques().find(b => b._id === boutiqueId);
-          const montantLoyer = boutique?.espace?.loyer || 0;
-          paiementsAEffectuer.push({ boutiqueId, periode, montant: montantLoyer });
-        }
-      });
-    });
-    
-    if (paiementsAEffectuer.length === 0) {
-      alert('Tous les loyers sélectionnés ont déjà été payés. Aucun paiement à effectuer.');
+          return {
+            boutiqueId,
+            periode,
+            montant: boutique?.espace?.loyer ?? 0
+          };
+        })
+    );
+
+    if (!paiements.length) {
+      alert('Tous les loyers sélectionnés ont déjà été payés.');
       return;
     }
-    
-    const montantTotal = paiementsAEffectuer.reduce((sum, p) => sum + p.montant, 0);
+
+    const montantTotal = paiements.reduce((sum, p) => sum + p.montant, 0);
     const solde = this.soldePortefeuille();
-    
+
     if (montantTotal > solde) {
-      alert(`Solde insuffisant.\n\nVous avez : ${solde.toFixed(2)}€\nMontant requis : ${montantTotal.toFixed(2)}€\nManquant : ${(montantTotal - solde).toFixed(2)}€`);
+      alert(`Solde insuffisant.
+        Vous avez : ${solde.toFixed(2)}Ar
+         Montant requis : ${montantTotal.toFixed(2)}Ar
+      `);
       return;
     }
-    
-    const dejaPaye = (boutiquesIds.length * periodes.length) - paiementsAEffectuer.length;
-    let message = `Confirmer le paiement de ${montantTotal.toFixed(2)}€ pour ${paiementsAEffectuer.length} loyer(s) ?\n\n`;
-    message += `Détails :\n`;
-    message += `- ${boutiquesIds.length} boutique(s) × ${periodes.length} mois\n`;
-    message += `- ${paiementsAEffectuer.length} paiement(s) à effectuer\n`;
-    if (dejaPaye > 0) {
-      message += `- ${dejaPaye} loyer(s) déjà payé(s) (ignorés)\n`;
-    }
-    message += `\nNouveau solde : ${(solde - montantTotal).toFixed(2)}€`;
-    
-    if (!confirm(message)) {
-      return;
-    }
-    
+
+    if (!confirm(`Confirmer le paiement de ${montantTotal.toFixed(2)}Ar ?`)) return;
+
     this.loaderService.show();
-    
-    let paiementsEffectues = 0;
-    const totalPaiements = paiementsAEffectuer.length;
-    
-    paiementsAEffectuer.forEach(({ boutiqueId, periode, montant }) => {
-      this.loyerService.payerLoyer({
-        boutiqueId,
-        montant,
-        periode
-      }).subscribe({
-        next: (res) => {
-          paiementsEffectues++;
-          console.log(`✅ Paiement ${paiementsEffectues}/${totalPaiements} effectué`);
-          
-          if (paiementsEffectues === totalPaiements) {
+
+    let completed = 0;
+
+    for (const paiement of paiements) {
+      this.loyerService.payerLoyer(paiement).subscribe({
+        next: () => {
+          completed++;
+          if (completed === paiements.length) {
             this.loaderService.hide();
-            alert(`Tous les paiements ont été effectués avec succès!\n${totalPaiements} loyer(s) payé(s)`);
+            alert(`${completed} loyer(s) payé(s) avec succès.`);
             this.chargerDonnees();
             this.moisSelectionnes.set(new Set());
           }
         },
         error: (err) => {
           this.loaderService.hide();
-          console.error('Erreur paiement:', err);
           alert(err.error?.message || 'Erreur lors du paiement');
         }
       });
-    });
+    }
   }
 
   getBadgeClass(mois: MoisCalendrier): string {
