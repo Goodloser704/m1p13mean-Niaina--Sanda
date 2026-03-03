@@ -2,6 +2,12 @@
   "framework": "angular",
   "buildCommand": "npm run build",
   "outputDirectory": "dist/frontend/browser",
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "niaina-dev": true
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
