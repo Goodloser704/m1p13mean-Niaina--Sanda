@@ -1,0 +1,3 @@
+Base Mongodb Atlas:mongodb+srv://faustresilient_db_user:RD3471h5QWuSxZtV@cluster0.ojuacgh.mongodb.net/?appName=Cluster0
+Backend Render:
+Frontend 
