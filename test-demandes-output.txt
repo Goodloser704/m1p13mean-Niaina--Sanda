@@ -1,0 +1,150 @@
+﻿[35m
+ÔòöÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòù
+Ôòæ                                                           Ôòæ
+Ôòæ   ­ƒÅ¬ TESTS COMMERCANT & DEMANDES-LOCATION - LOCAL ­ƒÅ¬     Ôòæ
+Ôòæ                                                           Ôòæ
+ÔòÜÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòØ
+[0m
+
+[36m============================================================[0m
+[36m­ƒº╣ NETTOYAGE DE LA BASE DE DONN├ëES[0m
+[36m============================================================[0m
+
+   Ex├®cution du script de nettoyage...
+[32m   Ô£ô Base de donn├®es nettoy├®e[0m
+
+[36m============================================================[0m
+[36m­ƒöÉ AUTHENTIFICATION DES UTILISATEURS[0m
+[36m============================================================[0m
+
+[32mÔ£ô[0m Connexion Admin
+  [33mÔåÆ[0m ID: 699481f3db365f29720ac95b
+[32mÔ£ô[0m Connexion Commer├ºant
+  [33mÔåÆ[0m ID: 69858b782168a4c4f4e9419a
+[32mÔ£ô[0m Connexion Client
+  [33mÔåÆ[0m ID: 69858b772168a4c4f4e94195
+
+[36m============================================================[0m
+[36m­ƒôª PR├ëPARATION DES DONN├ëES DE TEST[0m
+[36m============================================================[0m
+
+[32mÔ£ô[0m Boutique trouv├®e
+  [33mÔåÆ[0m ID: 69a13d221de5270c027b1c4b, Nom: Boutique Test 1772174626251
+[32mÔ£ô[0m Espace disponible trouv├®
+  [33mÔåÆ[0m ID: 69a038d94eb3d62f250475d3, Code: A1
+
+[36m============================================================[0m
+[36m­ƒÅ¬ TEST 1: Cr├®er une demande de location[0m
+[36m============================================================[0m
+
+[32mÔ£ô[0m POST /api/demandes-location
+  [33mÔåÆ[0m Demande cr├®├®e: 69a1432c1de5270c027b2bd3, ├ëtat: EnAttente
+[32mÔ£ô[0m Cr├®er demande (Sans boutique)
+  [33mÔåÆ[0m Validation ├®chou├®e comme attendu
+[32mÔ£ô[0m Cr├®er demande (Sans espace)
+  [33mÔåÆ[0m Validation ├®chou├®e comme attendu
+[32mÔ£ô[0m Cr├®er demande (Client)
+  [33mÔåÆ[0m Acc├¿s refus├® comme attendu
+
+[36m============================================================[0m
+[36m­ƒôï TEST 2: Obtenir mes demandes (Commer├ºant)[0m
+[36m============================================================[0m
+
+[32mÔ£ô[0m GET /api/demandes-location/me
+  [33mÔåÆ[0m 9 demandes, Total: 9
+[32mÔ£ô[0m GET /api/demandes-location/me (Pagination)
+  [33mÔåÆ[0m Page 1, Limite: 5, Re├ºu: 5
+[32mÔ£ô[0m GET /api/demandes-location/me (Filtre ├®tat)
+  [33mÔåÆ[0m 5 demandes en attente
+[32mÔ£ô[0m GET /api/demandes-location/me (Admin)
+  [33mÔåÆ[0m Acc├¿s refus├® comme attendu
+
+[36m============================================================[0m
+[36m­ƒæ¿ÔÇì­ƒÆ╝ TEST 3: Obtenir toutes les demandes (Admin)[0m
+[36m============================================================[0m
+
+[32mÔ£ô[0m GET /api/demandes-location
+  [33mÔåÆ[0m 9 demandes, Total: 9
+[32mÔ£ô[0m GET /api/demandes-location (Pagination)
+  [33mÔåÆ[0m Page 1, Limite: 5, Re├ºu: 5
+[32mÔ£ô[0m GET /api/demandes-location (Filtre ├®tat)
+  [33mÔåÆ[0m 5 demandes en attente
+[32mÔ£ô[0m GET /api/demandes-location (Commer├ºant)
+  [33mÔåÆ[0m Acc├¿s refus├® comme attendu
+
+[36m============================================================[0m
+[36m­ƒôè TEST 4: Obtenir les demandes par ├®tat (Admin)[0m
+[36m============================================================[0m
+
+[32mÔ£ô[0m GET /api/demandes-location/etat/EnAttente
+  [33mÔåÆ[0m 5 demandes en attente
+[32mÔ£ô[0m GET /api/demandes-location/etat/Acceptee
+  [33mÔåÆ[0m 4 demandes accept├®es
+[32mÔ£ô[0m GET /api/demandes-location/etat/Refusee
+  [33mÔåÆ[0m 0 demandes refus├®es
+[32mÔ£ô[0m GET /api/demandes-location/etat/:etat (Invalide)
+  [33mÔåÆ[0m ├ëtat invalide rejet├® comme attendu
+[32mÔ£ô[0m GET /api/demandes-location/etat/:etat (Commer├ºant)
+  [33mÔåÆ[0m Acc├¿s refus├® comme attendu
+
+[36m============================================================[0m
+[36m­ƒöì TEST 5: Obtenir une demande par ID[0m
+[36m============================================================[0m
+
+[32mÔ£ô[0m GET /api/demandes-location/:id (Commer├ºant)
+  [33mÔåÆ[0m Demande: 69a1432c1de5270c027b2bd3, ├ëtat: EnAttente
+[32mÔ£ô[0m GET /api/demandes-location/:id (Admin)
+  [33mÔåÆ[0m Demande: 69a1432c1de5270c027b2bd3
+[32mÔ£ô[0m GET /api/demandes-location/:id (Client)
+  [33mÔåÆ[0m Acc├¿s refus├® comme attendu
+[32mÔ£ô[0m GET /api/demandes-location/:id (Inexistant)
+  [33mÔåÆ[0m Non trouv├® comme attendu
+
+[36m============================================================[0m
+[36mÔ£à TEST 6: Accepter une demande (Admin)[0m
+[36m============================================================[0m
+
+[31mÔ£ù[0m PUT /api/demandes-location/:id/accepter
+  [33mÔåÆ[0m Erreur serveur lors de l'acceptation de la demande
+
+[36m============================================================[0m
+[36mÔØî TEST 7: Refuser une demande (Admin)[0m
+[36m============================================================[0m
+
+[31mÔ£ù[0m PUT /api/demandes-location/:id/refuser
+  [33mÔåÆ[0m Erreur serveur lors du refus de la demande
+
+[36m============================================================[0m
+[36m­ƒöä TEST 8: Mettre ├á jour l'├®tat d'une demande (Admin)[0m
+[36m============================================================[0m
+
+[32mÔ£ô[0m PUT /api/demandes-location/:id
+  [33mÔåÆ[0m ├ëtat mis ├á jour: Acceptee
+[32mÔ£ô[0m Mettre ├á jour ├®tat (Invalide)
+  [33mÔåÆ[0m ├ëtat invalide rejet├® comme attendu
+[32mÔ£ô[0m Mettre ├á jour ├®tat (Commer├ºant)
+  [33mÔåÆ[0m Acc├¿s refus├® comme attendu
+
+[36m============================================================[0m
+[36m­ƒùæ´©Å TEST 9: Annuler une demande (Commer├ºant)[0m
+[36m============================================================[0m
+
+[32mÔ£ô[0m DELETE /api/demandes-location/:id
+  [33mÔåÆ[0m Demande annul├®e avec succ├¿s
+[32mÔ£ô[0m Annuler demande (Inexistante)
+  [33mÔåÆ[0m Non trouv├®e comme attendu
+[32mÔ£ô[0m Annuler demande (Client)
+  [33mÔåÆ[0m Acc├¿s refus├® comme attendu
+
+[36m============================================================[0m
+[36mR├ëSUM├ë DES TESTS[0m
+[36m============================================================[0m
+
+Total de tests: 34
+[32mÔ£ô Tests r├®ussis: 32[0m
+[31mÔ£ù Tests ├®chou├®s: 2[0m
+
+Taux de r├®ussite: 94.12%
+
+[33mÔÜá´©Å  Certains tests ont ├®chou├®. V├®rifiez les d├®tails ci-dessus.[0m
+
