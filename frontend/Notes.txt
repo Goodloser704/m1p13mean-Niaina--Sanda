@@ -24,3 +24,31 @@ npm install --save-dev eslint ou Globale: npm install -g eslint
 Commande pour test local:
 ng serve (utilisera environment.ts)
 ng serve --configuration production (utilisera environment.prod.ts)
+
+-------------------------------------------------------------------
+Installation dependencies:
+_ Vendors du template iLanding Bootstrap:
+npm install bootstrap bootstrap-icons aos glightbox swiper
+npm install --save-dev @types/bootstrap
+npm install ngx-mask
+
+_ Configuration dans angular.json:
+"styles": [
+  "node_modules/bootstrap/dist/css/bootstrap.min.css",
+  "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+  "node_modules/aos/dist/aos.css",
+  "node_modules/glightbox/dist/css/glightbox.min.css",
+  "node_modules/swiper/swiper-bundle.min.css",
+  "src/styles.scss"
+],
+"scripts": [
+  "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
+  "node_modules/aos/dist/aos.js",
+  "node_modules/glightbox/dist/js/glightbox.min.js",
+  "node_modules/swiper/swiper-bundle.min.js"
+]
+
+Pdf: npm install pdfmake jspdf
+--------------------------------------------------------------------
+
+Activer Mongo Replica Set pour utiliser les transactions

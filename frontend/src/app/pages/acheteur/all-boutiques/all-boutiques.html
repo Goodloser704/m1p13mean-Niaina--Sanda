@@ -1,0 +1,86 @@
+<section #childSection id="hero" class="hero section">
+  <div class="container px-4 px-sm-0 px-lg-3" data-aos="fade-up" data-aos-delay="100">
+    <h2 class="mb-4">Boutiques</h2>
+
+    <div class="row mb-4" data-aos="fade-left" data-aos-delay="200">
+      <div class="col-12">
+        <form [formGroup]="searchForm" (ngSubmit)="searchBoutique(1)" class="php-email-form">
+          <div class="row gx-2 gy-2">
+            <div class="col-7 col-sm-5 col-lg-3">
+              <input
+                type="text"
+                placeholder="Recherche..."
+                formControlName="keyword"
+                class="form-control h-100"
+              />
+            </div>
+
+            <div class="col-4 col-sm-3 d-flex align-items-center gap-2">
+              <button type="submit" class="btn-glass">
+                <i class="bi bi-search"></i>
+              </button>
+              
+              @if (searchedKeyword()) {
+                <button type="button" class="btn-glass-secondary" (click)="resetSearch()">
+                  <i class="bi bi-x bi-bolder"></i>
+                </button>
+              }
+            </div>
+          </div> 
+        </form>
+      </div>
+    </div>
+
+    @if (searchedKeyword() !== null) {
+      <div #searchResultSection class="row liquid-glass mb-4">
+        <div class="col-12">
+          <h4>Resultats: {{ searchResultsPagination.totalItems() }}</h4>
+          <hr>
+
+          <div class="row">
+            @if (searchResults().length === 0) {
+              <app-empty-grid-list [label]="'Aucune boutique trouvé'" />
+            }
+
+            @for (boutique of searchResults(); track boutique._id; let i = $index) {
+              <div class="col-12 col-sm-6 col-lg-4 mb-4" data-aos="fade-left" [attr.data-aos-delay]="(i+1)*100">
+                <app-boutique-card
+                  [boutique]="boutique"
+                  (click)="allerVersBoutique(boutique)"
+                ></app-boutique-card>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="col-12 d-flex justify-content-end align-items-center">
+          <app-pagination-component
+            [pagination]="searchResultsPagination"
+          ></app-pagination-component>
+        </div>
+      </div>
+    } 
+
+    <div #boutiquesSection class="row liquid-glass mb-4">
+      @if (boutiques().length === 0) {
+        <app-empty-grid-list [label]="'Aucune boutique'" />
+      }
+
+      @for (boutique of boutiques(); track boutique._id; let i = $index) {
+        <div class="col-12 col-sm-6 col-lg-4 mb-4" data-aos="fade-left" [attr.data-aos-delay]="(i+1)*100">
+          <app-boutique-card
+            [boutique]="boutique"
+            (click)="allerVersBoutique(boutique)"
+          ></app-boutique-card>
+        </div>
+      }
+
+      <div class="col-12 d-flex justify-content-end align-items-center">
+        <app-pagination-component
+          [pagination]="boutiquePagination"
+        ></app-pagination-component>
+      </div>
+    </div>
+  </div>
+</section>
+

@@ -1,264 +1,402 @@
+@use "sass:color";
 @use "variables" as v;
 @use "mixins" as m;
 
-// 🎨 Base Styles
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+// ----- Default -----
+
+p {
+  margin-bottom: 0;
 }
 
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.6;
-  color: #333;
+a {
+  cursor: pointer;
 }
 
-.mall-app {
-  min-height: 100vh;
+h1, h2 {
+  font-weight: bold;
+  color: v.$accent-color;
+}
+
+// -------------------
+
+.border-red {
+  border: 1px solid red;
+}
+
+.border-blue {
+  border: 1px solid blue;
+}
+
+.border-green {
+  border: 1px solid green;
+}
+
+.header {
+  // background-color: rgba(0, 0, 0, 0.05);
+}
+
+.navbar {
+  font-family: v.$nav-font;
+}
+
+.brand-title {
+  color: v.$accent-color;
+  font-weight: bold;
+  font-family: v.$nav-font;
+}
+
+// --- Pour nos cartes flottante ---
+
+/* Overlay plein écran */
+.floating-container {
+  position: fixed;
+  inset: 0; // top:0 right:0 bottom:0 left:0
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; // laisse passer les events
+  z-index: 1000;
+}
+
+.floating-container-darker { // capable d'intercepter les clicks
+  position: fixed;
+  inset: 0; // top:0 right:0 bottom:0 left:0
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto; // laisse passer les events
+  z-index: 1;
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile */
+@media (max-width: 991px) {
+  .floating-card {
+    max-height: 90vh;
+    padding: 1rem;
+  }
+}
+
+// --- End carte flottante ---
+
+// ---- Forms ----
+
+.contact {
+  // border: 1px solid blue;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.s-inscrire {
+  color: v.$heading-color;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+// tsy mandeha
+.error-message {
+  color: red;
+}
+
+// -- End Forms --
+
+// ---- Button ----
+
+.btn-sm {
+  height: fit-content;
+  padding: 0.2rem 0.6rem;
+  border: none;
+  border-radius: 10px;
+  font-size: small;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.2);
 }
 
 .btn-primary {
-  @include m.button-style;
+  background-color: v.$accent-color;
+  border-color: v.$accent-color;
+  color: v.$contrast-color;
+
+  &:hover {
+    background-color: color.scale(v.$accent-color, $lightness: -10%);
+    border-color: color.scale(v.$accent-color, $lightness: -10%);
+  }
+}
+
+.btn-outline-primary {
+  background-color: v.$contrast-color;
+  border-width: 2px;
+  border-color: v.$accent-color;
+  color: v.$accent-color;
+
+  &:hover {
+    background-color: color.scale(v.$contrast-color, $lightness: -10%);
+    color: color.scale(v.$accent-color, $lightness: -10%);
+    border-color: color.scale(v.$accent-color, $lightness: -10%);
+  }
+}
+
+.btn-secondary {
+  background-color: v.$heading-color;
+  border-color: v.$heading-color;
+  color: v.$contrast-color;
+
+  &:hover {
+    background-color: color.scale(v.$heading-color, $lightness: -10%);
+    border-color: color.scale(v.$heading-color, $lightness: -10%);
+  }
+}
+
+.btn-outline-secondary {
+  background-color: v.$contrast-color;
+  border-width: 2px;
+  border-color: v.$heading-color;
+  color: v.$heading-color;
+
+  &:hover {
+    background-color: color.scale(v.$contrast-color, $lightness: -10%);
+    color: color.scale(v.$heading-color, $lightness: -10%);
+    border-color: color.scale(v.$heading-color, $lightness: -10%);
+  }
+}
+
+// -- End Button --
+
+// --- Image section ---
+
+.photo-preview {
+  border: 1px solid lightgray;
+  border-radius: 13px;
+  width: 120px;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.navbar-nav .nav-item img {
+  object-fit: cover;
+  border: 2px solid #fff; // optionnel, contour blanc
+  cursor: pointer;
+}
+
+.profile-image {
+  width: 90%;
+  aspect-ratio: 1;
+}
+
+.card-img-top {
+  border: 1px solid transparent;
   width: 100%;
-  font-size: 1rem;
+  aspect-ratio: 1.7;
+  object-fit: cover;
+  display: block; // supprime l'espace blanc sous l'image
+  padding: 0.2rem;
+  border-radius: 13px 13px 0 0;
 }
 
-.test-accounts {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 5px;
-  font-size: 0.9rem;
+// - End Image section -
 
-  h3 {
-    margin-bottom: 0.5rem;
-    color: #333;
-  }
+// ---- Template ----
 
-  p {
-    margin-bottom: 0.25rem;
-    color: #666;
-  }
-}
-
-// 🎨 Main Content
-.main-content {
-  flex: 1;
-  padding: 2rem 0;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-// 🎨 Hero Section
 .hero {
-  text-align: center;
-  margin-bottom: 3rem;
-  padding: 2rem;
-  background: v.$secondary-gradient;
-  border-radius: v.$border-radius;
-
-  h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: #333;
-  }
-
-  p {
-    font-size: 1.2rem;
-    color: #666;
-    margin-bottom: 1.5rem;
-  }
+  height: fit-content;
+  min-height: 100vh;
+  padding-bottom: 5rem;
 }
 
-.api-info {
-  background: rgba(255,255,255,0.8);
-  padding: 1rem;
-  border-radius: 5px;
-  display: inline-block;
+// -- End Template --
 
-  p {
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    font-family: 'Courier New', monospace;
-  }
-}
+// ---- Surface ----
 
-.monitoring-buttons {
-  margin-top: 0.5rem;
+.row-list-item {
+  padding: 0.7rem;
+  width: 100%;
+  height: fit-content;
+
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  row-gap: 10px;
+}
+
+.scroll-margin-top {
+  scroll-margin-top: 6rem;
+}
+
+// -- End Surface --
+
+// ---- Notifications ----
+
+.notification-link {
+  border: 1px solid transparent;
+  width: fit-content;
+  min-width: 2.2rem;
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
 
-.btn-small {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
-  background: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-
-  &:hover {
-    background: #5a6268;
-  }
+.header-icon {
+  font-weight: 400;
+  font-size: 1.1rem; /* icône légèrement plus épaisse */
 }
 
-// 🎨 Monitoring Section
-.monitoring {
-  margin: 2rem 0;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid #007bff;
-
-  h2 {
-    margin-bottom: 1rem;
-    color: #333;
-  }
+.acheteur-header-icon {
+  font-weight: 400;
+  font-size: 1.5rem;
+  // border: 1px solid red;
 }
 
-.logs-container {
-  max-height: 300px;
-  overflow-y: auto;
-  background: #000;
-  color: #00ff00;
-  padding: 1rem;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-  font-size: 0.85rem;
+.notification-dot {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background: #dc3545;
+  border-radius: 50%;
+  border: 1px solid white;
 }
 
-.log-entry {
-  margin-bottom: 0.25rem;
-  word-break: break-all;
-}
-
-// 🎨 Categories Section
-.categories {
-  margin-bottom: 3rem;
-
-  h2 {
-    text-align: center;
-    margin-bottom: 2rem;
-    font-size: 2rem;
-    color: #333;
-  }
-}
-
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-.category-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: v.$border-radius;
-  text-align: center;
-  box-shadow: v.$shadow-light;
-  cursor: pointer;
-  @include m.card-hover;
-
-  .category-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
-
-  h3 {
-    margin-bottom: 0.5rem;
-    color: #333;
-  }
+.notification-items {
+  border: 1px solid transparent;
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  justify-content: space-between;
 
   p {
-    color: #666;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 }
 
-// 🎨 Features Section
-.features {
-  margin-bottom: 3rem;
+.unread-dot {
+  width: 10px;
+  aspect-ratio: 1;
+  background-color: #dc3545;
+  border-radius: 50%;
+}
 
-  h2 {
-    text-align: center;
-    margin-bottom: 2rem;
-    font-size: 2rem;
-    color: #333;
+.dot {
+  width: 13px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.mark-as-read {
+  font-size: 1.5rem;
+  cursor: pointer;
+
+  &:hover {
+    color: v.$heading-color;
   }
 }
 
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
+.mark-all-as-read {
+  color: v.$heading-color;
+  font-size: 2.5rem;
+  cursor: pointer;
 
-.feature-card {
-  background: white;
-  padding: 2rem;
-  border-radius: v.$border-radius;
-  box-shadow: v.$shadow-light;
-
-  h3 {
-    margin-bottom: 1rem;
-    color: #333;
-    font-size: 1.3rem;
-  }
-
-  ul {
-    list-style: none;
-  }
-
-  li {
-    padding: 0.5rem 0;
-    color: #666;
-    position: relative;
-    padding-left: 1.5rem;
-
-    &:before {
-      content: '✓';
-      position: absolute;
-      left: 0;
-      color: #28a745;
-      font-weight: bold;
-    }
+  &:hover {
+    color: color.scale($color: v.$heading-color, $lightness: -20%);
   }
 }
 
+// -- End Notifications --
 
+// ---- Bootstrap ----
 
-// 🎨 Responsive Design
-@media (max-width: 768px) {
-  .header .container {
-    flex-direction: column;
-    gap: 1rem;
-  }
+.nav-item {
+  border: 1px solid transparent;
+}
 
-  .hero h2 {
-    font-size: 2rem;
-  }
+.nav-link {
+  color: v.$default-color;
+}
 
-  .categories-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-  }
+.bi-bolder {
+  -webkit-text-stroke-width: 1px; /* Adjust the pixel value for desired thickness */
+  /* For compatibility, though it's a non-standard property */
+  text-stroke-width: 1px;
+}
 
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
+.text-primary {
+  color: v.$accent-color !important;
+}
 
-  .monitoring-buttons {
-    justify-content: center;
+.text-secondary {
+  color: v.$heading-color !important;
+}
+
+.pagination .active {
+  .page-link {
+    font-weight: bold;
+    border-color: rgba(v.$accent-color, 0.12);
+    background-color: rgba(v.$accent-color, 0.12);
   }
 }
+
+.page-link {
+  color: v.$accent-color !important;
+}
+
+// -- End Bootstrap --
+
+.info-label {
+  color: color-mix(in srgb, var(--default-color), transparent 30%);
+}
+
+.info-value {
+  color: v.$accent-color;
+  font-weight: 700;
+}
+
+// ---- Navbar ----
+
+.custom-dropdown {
+  width: 99%;
+  min-width: 200px;
+  max-width: 400px;
+  height: fit-content;
+  max-height: 230px;
+  padding: 0.5rem;
+  border-radius: 12px;
+  overflow-y: auto;
+  @include m.thin-scrollbar;
+}
+
+.dropdown-menu-item {
+  border: 1px solid transparent;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.dropdown-menu-item i {
+  font-size: 1.2rem;
+  color: v.$accent-color;
+}
+
+.dropdown-menu-item:hover {
+  color: color.scale($color: v.$accent-color, $lightness: -20%);
+  background-color: #f1f3f5;
+  transform: translateX(3px);
+}
+
+.item-title {
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+// -- End Navbar --

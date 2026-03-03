@@ -1,0 +1,85 @@
+<section #childSection id="hero" class="hero section">
+  <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center m-0">
+          <h2>
+            Notifications
+            @if (unreadCount() == 0) {
+              <span class="badge bg-danger">
+                {{ unreadCount() }}
+              </span>
+            }
+          </h2>
+          <i class="mark-all-as-read bi bi-check" role="button" (click)="markAllAsRead()"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- <div class="row mt-3 gy-2">
+      <div class="col-12 shadow-sm rounded-3 py-2">
+        <div class="notification-items">
+          <div class="d-flex flex-column justify-content-between">
+            <p class="info-label">Type de la notification assez long</p>
+            <p class="info-value">description de la notification un peu long</p>
+          </div>
+          <div class="d-flex flex-column align-items-end">
+            <div class="ms-2 d-flex align-items-center">
+              <p class="created-at">il y a 1h</p>
+              <div class="unread-dot ms-2"></div>
+            </div>
+            <i class="mark-as-read bi bi-check" role="button"></i>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <div class="row mt-3 gy-2">
+      @for (notification of notifications(); track notification._id) {
+        <div class="col-12 shadow-sm rounded-3 py-2">
+          <div class="notification-items">
+            <div class="d-flex flex-column justify-content-between">
+              <p class="info-label">{{ notification.type }}</p>
+              <p class="info-value">{{ notification.message }}</p>
+            </div>
+            <div class="d-flex flex-column align-items-end">
+              <div class="ms-2 d-flex align-items-center">
+                <p>{{ timeAgo(notification.createdAt) }}</p>
+                
+                @if (!notification.isRead) {
+                  <div class="unread-dot ms-2"></div>
+                }
+              </div>
+
+              @if (!notification.isRead) {
+                <i class="mark-as-read bi bi-check" role="button" (click)="markAsRead(notification)"></i>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <hr>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-start mt-4 gap-2">
+      <button 
+        class="btn btn-outline-secondary"
+        (click)="prevPage()"
+        [disabled]="page() === 1"
+      >
+        Précédent
+      </button>
+
+      <button 
+        class="btn btn-outline-secondary"
+        (click)="nextPage()"
+        [disabled]="notifications().length < limit"
+      >
+        Suivant
+      </button>
+    </div>
+  </div>
+</section>

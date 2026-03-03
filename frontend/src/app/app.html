@@ -1,10 +1,5 @@
-<div class="mall-app">
-  <!-- Equivalent include header -->
-  <app-header />
+<router-outlet />
 
-  <!-- Zay Component liée @ route no affiché eto @ ity router-outlet ity -->
-  <router-outlet />
-
-  <!-- Equivalent include footer -->
-  <app-footer />
-</div>
+@if (loaderService.isLoading()) {
+  <app-loader />
+}

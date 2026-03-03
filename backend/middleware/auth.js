@@ -15,7 +15,11 @@ const auth = async (req, res, next) => {
     
     if (!token) {
       console.log(`❌ Token manquant`);
-      return res.status(401).json({ message: 'Token manquant, accès refusé' });
+      return res.status(401).json({ 
+        message: 'Token manquant, accès refusé',
+        code: 'NO_TOKEN',
+        timestamp: new Date().toISOString()
+      });
     }
 
     console.log(`🔍 Vérification token JWT...`);
@@ -26,12 +30,20 @@ const auth = async (req, res, next) => {
     
     if (!user) {
       console.log(`❌ Utilisateur non trouvé: ${decoded.id}`);
-      return res.status(401).json({ message: 'Token invalide' });
+      return res.status(401).json({ 
+        message: 'Token invalide - utilisateur non trouvé',
+        code: 'USER_NOT_FOUND',
+        timestamp: new Date().toISOString()
+      });
     }
 
     if (!user.isActive) {
       console.log(`⚠️  Compte désactivé: ${user._id}`);
-      return res.status(401).json({ message: 'Compte désactivé' });
+      return res.status(401).json({ 
+        message: 'Compte désactivé',
+        code: 'ACCOUNT_DISABLED',
+        timestamp: new Date().toISOString()
+      });
     }
 
     console.log(`✅ Authentification réussie: ${user._id} (${user.role})`);
@@ -39,11 +51,28 @@ const auth = async (req, res, next) => {
     next();
   } catch (error) {
     console.log(`❌ Erreur authentification: ${error.message}`);
-    res.status(401).json({ message: 'Token invalide' });
+    
+    // Gestion spécifique des erreurs JWT
+    let errorMessage = 'Token invalide';
+    let errorCode = 'INVALID_TOKEN';
+    
+    if (error.name === 'TokenExpiredError') {
+      errorMessage = 'Token expiré';
+      errorCode = 'TOKEN_EXPIRED';
+    } else if (error.name === 'JsonWebTokenError') {
+      errorMessage = 'Token malformé';
+      errorCode = 'MALFORMED_TOKEN';
+    }
+    
+    res.status(401).json({ 
+      message: errorMessage,
+      code: errorCode,
+      timestamp: new Date().toISOString()
+    });
   }
 };
 
-// Middleware pour vérifier le rôle
+// Middleware pour vérifier le rôle (insensible à la casse)
 const authorize = (...roles) => {
   return (req, res, next) => {
     const timestamp = new Date().toISOString();
@@ -51,10 +80,18 @@ const authorize = (...roles) => {
     console.log(`   👤 Utilisateur: ${req.user._id} (${req.user.role})`);
     console.log(`   🔑 Rôles requis: ${roles.join(', ')}`);
     
-    if (!roles.includes(req.user.role)) {
+    // Comparaison insensible à la casse
+    const userRoleLower = req.user.role.toLowerCase();
+    const rolesLower = roles.map(r => r.toLowerCase());
+    
+    if (!rolesLower.includes(userRoleLower)) {
       console.log(`❌ Accès refusé - Rôle insuffisant`);
       return res.status(403).json({ 
-        message: 'Accès refusé - Permissions insuffisantes' 
+        message: 'Accès refusé - Permissions insuffisantes',
+        code: 'INSUFFICIENT_PERMISSIONS',
+        requiredRoles: roles,
+        userRole: req.user.role,
+        timestamp: new Date().toISOString()
       });
     }
     
@@ -63,4 +100,10 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = { auth, authorize };
+// Middleware spécifique pour admin (accepte Admin, admin, ADMIN)
+const adminAuth = [auth, authorize('Admin')];
+
+// Middleware spécifique pour boutique (accepte toutes les casses)
+const boutiqueAuth = [auth, authorize('Commercant', 'Admin')];
+
+module.exports = { auth, authorize, adminAuth, boutiqueAuth };

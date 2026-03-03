@@ -1,0 +1,25 @@
+// .dialog-card {
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: center;
+//   align-items: center;
+
+//   padding: 1rem;
+
+//   pointer-events: auto; // réactive les clics
+//   background: rgba(255, 255, 255, 0.5);
+//   width: fit-content;
+//   min-width: 200px;
+//   max-width: 300px;
+//   height: auto;
+//   border-radius: 13px;
+//   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+// }
+
+.dialog-card {
+  padding: 1rem;
+  min-width: 250px;
+  background: rgba(255, 255, 255, 0.5);
+  // width: fit-content;
+  border-radius: 13px;
+}

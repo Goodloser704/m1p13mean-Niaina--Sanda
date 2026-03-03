@@ -1,15 +1,28 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { FormsModule } from "@angular/forms";
-import { Header } from "./shared/header/header";
-import { Footer } from "./shared/footer/footer";
+import AOS from 'aos';
+import { LoaderService } from './core/services/loader.service';
+import { Loader } from "./components/shared/loader/loader";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, FormsModule, Header, Footer],
+  imports: [RouterOutlet, FormsModule, Loader],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
+export class App implements AfterViewInit {
+  loaderService = inject(LoaderService);
+
+  constructor(private router: Router) {}
   
+  ngAfterViewInit(): void {
+    AOS.init({ once: true });
+
+    this.router.events.subscribe(event => {
+    if (event instanceof NavigationEnd) {
+      AOS.refresh();
+    }
+  });
+  }
 }

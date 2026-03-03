@@ -1,0 +1,72 @@
+<section #childSection id="hero" class="hero section">
+  <div class="container px-4 px-sm-0 px-lg-3 gy-3" data-aos="fade-up" data-aos-delay="100">
+    <div class="row">
+      <div class="col-12 p-0">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h2>Boutique: {{ maBoutique().nom }}</h2>
+          <button class="btn-glass-secondary" (click)="back()">
+            <i class="bi bi-arrow-left bi-bolder"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+
+    <div class="row">
+      <div class="col-12 p-0">
+        <div class="ma-boutique-nav">
+          <a
+            routerLink="type-produits"
+            routerLinkActive="active"
+            class="nav-item"
+          >
+            Types de produit
+          </a>
+
+          <a
+            routerLink="gestion-produit"
+            routerLinkActive="active"
+            class="nav-item"
+          >
+            Gestion des produits
+          </a>
+
+          <a
+            routerLink="location-espace"
+            routerLinkActive="active"
+            class="nav-item"
+          >
+            Location
+          </a>
+
+          <a
+            routerLink="loyers"
+            routerLinkActive="active"
+            class="nav-item"
+          >
+            Loyers
+          </a>
+
+          <a
+            routerLink="gestion-achats"
+            routerLinkActive="active"
+            class="nav-item"
+          >
+            Achats
+          </a>
+
+          <a
+            routerLink="infos"
+            routerLinkActive="active"
+            class="nav-item"
+          >
+            Info
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <router-outlet></router-outlet>
+  </div>
+</section>
+
