@@ -281,6 +281,12 @@ h1, h2 {
   border-radius: 50%;
 }
 
+.dot {
+  width: 13px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
 .mark-as-read {
   font-size: 1.5rem;
   cursor: pointer;
@@ -315,7 +321,7 @@ h1, h2 {
 .bi-bolder {
   -webkit-text-stroke-width: 1px; /* Adjust the pixel value for desired thickness */
   /* For compatibility, though it's a non-standard property */
-  text-stroke-width: 1px; 
+  text-stroke-width: 1px;
 }
 
 .text-primary {

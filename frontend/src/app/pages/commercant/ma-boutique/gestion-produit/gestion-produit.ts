@@ -7,7 +7,6 @@ import { Produit } from '../../../../core/models/commercant/produit.model';
 import { createPagination } from '../../../../core/functions/pagination-function';
 import { filter, finalize, switchMap, tap } from 'rxjs';
 import { EmptyGridList } from "../../../../components/shared/empty-grid-list/empty-grid-list";
-import { NgClass } from "@angular/common";
 import { TypeProduit } from '../../../../core/models/commercant/type-produit.model';
 import { TypeProduitService } from '../../../../core/services/commercant/type-produit.service';
 import { compressImage } from '../../../../core/functions/images-function';
@@ -20,7 +19,7 @@ import { PaginationComponent } from "../../../../components/shared/pagination-co
 
 @Component({
   selector: 'app-gestion-produit',
-  imports: [EmptyGridList, NgClass, ReactiveFormsModule, RowProduct, PaginationComponent],
+  imports: [EmptyGridList, ReactiveFormsModule, RowProduct, PaginationComponent],
   templateUrl: './gestion-produit.html',
   styleUrl: './gestion-produit.scss',
 })
@@ -31,7 +30,7 @@ export class GestionProduit implements OnInit {
   loaderService = inject(LoaderService);
 
   maBoutique = computed(() => this.boutiqueService.currentBoutique()!);
-  
+
   products = signal<Produit[]>([]);
 
   typesProduit = signal<TypeProduit[]>([]);
@@ -190,9 +189,9 @@ export class GestionProduit implements OnInit {
       seconde: productRaw.seconde
     })
     const duration = parseDuration(durationString);
-    const tempsPreparation: string | null = duration.isZero ? null : durationString 
+    const tempsPreparation: string | null = duration.isZero ? null : durationString
 
-    const product: Produit = { 
+    const product: Produit = {
       ...productRaw,
       boutique: this.maBoutique()._id,
       tempsPreparation: tempsPreparation,
@@ -274,7 +273,7 @@ export class GestionProduit implements OnInit {
     console.log(`EditingProductId: [${this.editingProductId()}]`);
 
     if (this.productForm.invalid || !this.editingProductId()) return;
-    
+
     this.loaderService.show();
 
     const productRaw = this.productForm.getRawValue();
@@ -306,9 +305,9 @@ export class GestionProduit implements OnInit {
         next: (res) => {
           console.log(res.message);
 
-          this.products.update(current => 
-            current.map(e => 
-              e._id == res.produit._id ? res.produit : e 
+          this.products.update(current =>
+            current.map(e =>
+              e._id == res.produit._id ? res.produit : e
             )
           );
 

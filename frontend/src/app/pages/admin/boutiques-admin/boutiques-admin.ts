@@ -3,7 +3,7 @@ import { CategorieBoutique } from '../../../core/models/admin/categorie-boutique
 import { CategorieBoutiqueService } from '../../../core/services/admin/categorie-boutique.service';
 import { filter, finalize, switchMap, tap } from 'rxjs';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Location, NgClass, TitleCasePipe } from "@angular/common";
+import { Location, TitleCasePipe } from "@angular/common";
 import { Dialog } from "../../../components/shared/dialog/dialog";
 import { EmptyRowList } from "../../../components/shared/empty-row-list/empty-row-list";
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
@@ -25,13 +25,13 @@ import { PaginationComponent } from "../../../components/shared/pagination-compo
 
 @Component({
   selector: 'app-boutiques-admin',
-  imports: [ReactiveFormsModule, TitleCasePipe, EmptyRowList, EmptyGridList, NgClass, RouterLink, PaginationComponent],
+  imports: [ReactiveFormsModule, TitleCasePipe, EmptyRowList, EmptyGridList, RouterLink, PaginationComponent],
   templateUrl: './boutiques-admin.html',
   styleUrl: './boutiques-admin.scss',
 })
 export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
   @ViewChild('childSection') childSection!: ElementRef;
-  
+
   loaderService = inject(LoaderService);
   private pendingRequests = 0;
 
@@ -100,7 +100,7 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
     if (this.categorieForm.invalid) return;
     this.startLoading();
 
-    const categorie: Partial<CategorieBoutique> = { 
+    const categorie: Partial<CategorieBoutique> = {
       ...this.categorieForm.getRawValue(),
       isActive: true
     };
@@ -136,8 +136,8 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
   saveEditedCategorie() {
     if (this.categorieForm.invalid || !this.editingCategorieId()) return;
     this.startLoading();
-    
-    const updatedCategorie: Partial<CategorieBoutique> = { 
+
+    const updatedCategorie: Partial<CategorieBoutique> = {
       ...this.categorieForm.getRawValue(),
       _id: this.editingCategorieId()!,
       isActive: true
@@ -149,9 +149,9 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
       )
       .subscribe({
         next: (res) => {
-          this.categories.update(current => 
-            current.map(e => 
-              e._id == res.categorie._id ? res.categorie : e 
+          this.categories.update(current =>
+            current.map(e =>
+              e._id == res.categorie._id ? res.categorie : e
             )
           );
 
@@ -182,7 +182,7 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
       )
       .subscribe({
         next: () => {
-          this.categories.update(current => 
+          this.categories.update(current =>
             current.filter(e => e._id != idCategorie)
           );
         },
@@ -211,8 +211,8 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
     this.startLoading();
 
     this.boutiqueService.getAllBoutiqueByStatut(
-      StatutBoutique.Actif, 
-      page, 
+      StatutBoutique.Actif,
+      page,
       this.activeBoutiquesPagination.limit
     )
       .pipe(finalize(() => this.stopLoading()))
@@ -230,7 +230,7 @@ export class BoutiquesAdmin implements OnInit, AfterViewInit, AfterViewChecked {
 
     this.boutiqueService.getAllBoutiqueByStatut(
       StatutBoutique.Inactif,
-      page, 
+      page,
       this.inactiveBoutiquesPagination.limit
     )
       .pipe(finalize(() => this.stopLoading()))

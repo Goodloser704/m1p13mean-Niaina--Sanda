@@ -1,25 +1,25 @@
 <header id="header" class="header d-flex align-items-center fixed-top">
-  <div 
+  <div
     class="
       header-container
-      container-fluid 
+      container-fluid
       container-xl
-      position-relative 
-      d-flex 
-      align-items-center 
-      justify-content-between 
+      position-relative
+      d-flex
+      align-items-center
+      justify-content-between
       p-0
     "
   >
     <nav class="navbar w-100 navbar-expand-md py-1">
       <div class="container-fluid">
         <button
-          class="navbar-toggler" 
-          type="button" 
-          data-bs-toggle="collapse" 
-          data-bs-target="#navbarTogglerDemo01" 
-          aria-controls="navbarTogglerDemo01" 
-          aria-expanded="false" 
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarTogglerDemo01"
+          aria-controls="navbarTogglerDemo01"
+          aria-expanded="false"
           aria-label="Toggle navigation"
         >
           <span class="bi bi-list"></span>
@@ -38,10 +38,10 @@
 
           <ul class="navbar-nav ms-md-auto mb-2 mb-md-0 d-flex align-items-md-center gap-0 gap-md-1">
             <li class="nav-item">
-              <a 
-                class="nav-link" 
+              <a
+                class="nav-link"
                 [class.active]="isActiveRoute('all-boutiques')"
-                aria-current="page" 
+                aria-current="page"
                 [routerLink]="['/acheteur/all-boutiques']"
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
@@ -51,23 +51,42 @@
               </a>
             </li>
             <li class="nav-item">
-              <a 
-                class="nav-link" 
+              <a
+                class="nav-link position-relative"
                 [class.active]="isActiveRoute('mon-panier')"
-                aria-current="page" 
+                aria-current="page"
                 [routerLink]="['/acheteur/mon-panier']"
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
                 title="Panier"
               >
                 <i class="bi bi-cart bi-bolder acheteur-header-icon"></i>
+                @if (totalAchats() > 0) {
+                  <span
+                    class="translate-middle badge rounded-circle bg-danger border border-light"
+                    style="
+                    position: absolute;
+                    top: 9px;
+                    left: 93%;
+                    width: 1rem;
+                    height: 1rem;
+                    padding: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.5rem;
+                  "
+                  >
+                    {{ totalAchats() }}
+                  </span>
+                }
               </a>
             </li>
             <li class="nav-item">
-              <a 
-                class="nav-link" 
+              <a
+                class="nav-link"
                 [class.active]="isActiveRoute('mes-achats')"
-                aria-current="page" 
+                aria-current="page"
                 [routerLink]="['/acheteur/mes-achats']"
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
@@ -77,9 +96,9 @@
               </a>
             </li>
             <li class="nav-item">
-              <a 
+              <a
                 class="nav-link position-relative notification-link"
-                [class.active]="isActiveRoute('notifications')" 
+                [class.active]="isActiveRoute('notifications')"
                 [routerLink]="['/acheteur/notifications']"
               >
                 <i class="bi bi-bell bi-bolder acheteur-header-icon"></i>
@@ -107,9 +126,9 @@
                     height="30"
                   />
                 </a>
-                <ul 
-                  class="dropdown-menu dropdown-menu-end p-2" 
-                  aria-labelledby="userDropdown" 
+                <ul
+                  class="dropdown-menu dropdown-menu-end p-2"
+                  aria-labelledby="userDropdown"
                   style="width: fit-content; min-width: 200px;"
                 >
                   <li class="px-2 py-1" style="cursor: pointer;" [routerLink]="['/acheteur/user-profil']">

@@ -1,13 +1,8 @@
 import {
-  getBoutiqueCategorieLabel,
-  getBoutiqueCommercantLabel,
-  getBoutiqueEspaceCode,
-  getBoutiqueEspaceEtageNiveau,
   StatutBoutique
-} from "./../../../core/models/commercant/boutique.model";
-import { BoutiqueService } from './../../../core/services/commercant/boutique.service';
-import { AfterViewInit, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { TitleCasePipe, NgClass } from "@angular/common";
+} from "../../../core/models/commercant/boutique.model";
+import { BoutiqueService } from '../../../core/services/commercant/boutique.service';
+import { AfterViewInit, Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
 import { Boutique } from '../../../core/models/commercant/boutique.model';
 import { finalize } from 'rxjs';
 import { EmptyGridList } from "../../../components/shared/empty-grid-list/empty-grid-list";
@@ -18,7 +13,7 @@ import { NotificationsService } from "../../../core/services/notifications.servi
 
 @Component({
   selector: 'app-mes-boutiques',
-  imports: [TitleCasePipe, EmptyGridList, RouterLink, NgClass, BoutiqueCard],
+  imports: [EmptyGridList, RouterLink, BoutiqueCard],
   templateUrl: './mes-boutiques.html',
   styleUrl: './mes-boutiques.scss',
 })
@@ -76,9 +71,4 @@ export class MesBoutiques implements OnInit, AfterViewInit {
     this.boutiqueService.allerVersBoutique(maBoutique);
   }
 
-  getBoutiqueCategorieLabel = getBoutiqueCategorieLabel;
-  getBoutiqueCommercantLabel = getBoutiqueCommercantLabel;
-  getBoutiqueEspaceCode = getBoutiqueEspaceCode;
-  getBoutiqueEspaceEtageNiveau = getBoutiqueEspaceEtageNiveau;
-  
 }

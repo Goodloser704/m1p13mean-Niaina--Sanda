@@ -9,6 +9,7 @@ import { Router, RouterLink } from "@angular/router";
 import { DialogService } from '../../../../core/services/dialog.service';
 import { filter, switchMap } from 'rxjs';
 import { NotificationsService } from '../../../../core/services/notifications.service';
+import { PanierService } from '../../../../core/services/acheteur/panier.service';
 
 @Component({
   selector: 'app-acheteur-header',
@@ -26,11 +27,14 @@ export class AcheteurHeader implements OnInit {
   notificationService = inject(NotificationsService);
   unreadCount = computed(() => this.notificationService.unreadCount());
 
+  panierService = inject(PanierService);
+  totalAchats = this.panierService.totalAchats;
+
   constructor(
     private router: Router,
     private authService: AuthService,
     private centreCommercialService: CentreCommercialService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
   ) {
     this.currentUser.set(this.authService.currentUser());
   }

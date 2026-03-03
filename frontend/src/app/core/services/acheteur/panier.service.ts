@@ -43,6 +43,10 @@ export class PanierService {
     )
   );
 
+  totalAchats = computed(() =>
+    this._panier().achats.length
+  )
+
   constructor() {
     this.loadFromStorage();
   }

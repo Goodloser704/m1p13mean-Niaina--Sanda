@@ -1,9 +1,9 @@
 import { filter, finalize, switchMap, tap } from 'rxjs';
 import { createPagination } from '../../../core/functions/pagination-function';
 import { DemandeLocation, EtatDemandeLocation } from '../../../core/models/admin/demande-location.model';
-import { DemandesLocationService } from './../../../core/services/admin/demandes-location.service';
-import { AfterViewInit, Component, computed, effect, ElementRef, inject, signal, ViewChild } from '@angular/core';
-import { Location, NgClass, CurrencyPipe, DatePipe } from "@angular/common";
+import { DemandesLocationService } from '../../../core/services/admin/demandes-location.service';
+import { AfterViewInit, Component, computed, effect, ElementRef, signal, ViewChild } from '@angular/core';
+import { Location, CurrencyPipe, DatePipe } from "@angular/common";
 import { RouterLink } from "@angular/router";
 import { LoaderService } from '../../../core/services/loader.service';
 import { getBoutiqueCommercantLabel } from '../../../core/models/commercant/boutique.model';
@@ -15,7 +15,7 @@ import { PaginationComponent } from "../../../components/shared/pagination-compo
 
 @Component({
   selector: 'app-demandes-location',
-  imports: [NgClass, RouterLink, CurrencyPipe, DatePipe, EmptyGridList, PaginationComponent],
+  imports: [RouterLink, CurrencyPipe, DatePipe, EmptyGridList, PaginationComponent],
   templateUrl: './demandes-location.html',
   styleUrl: './demandes-location.scss',
 })
@@ -26,7 +26,7 @@ export class DemandesLocation implements AfterViewInit {
   ancienDemandePagination = createPagination(10);
 
   demandesEnCours = signal<DemandeLocation[]>([]);
-  demandesWithDetails = computed(() => 
+  demandesWithDetails = computed(() =>
     this.demandesEnCours().map(demande => ({
       ...demande,
       commercantNames: getBoutiqueCommercantLabel(demande.boutique),
@@ -35,7 +35,7 @@ export class DemandesLocation implements AfterViewInit {
   );
 
   ancienDemandes = signal<DemandeLocation[]>([]);
-  ancienDemandesWithDetails = computed(() => 
+  ancienDemandesWithDetails = computed(() =>
     this.ancienDemandes().map(demande => ({
       ...demande,
       commercantNames: getBoutiqueCommercantLabel(demande.boutique),
